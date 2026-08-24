@@ -1,0 +1,69 @@
+<a href="#main-content-custom" class="skip-link">Aller au contenu principal</a>
+<header>
+    <div class="morph logo">
+        <a href="{{ home_url }}">
+            <img src="{{ url('image://logo.png') }}" width="230" height="230" alt="Le logo des Mégères de l'Humus réalisé par Noam"/>
+        </a>
+    </div>
+    <div class="e_titre">
+        <div class="titre tan" role="heading" aria-level="1">
+            <a href="{{ home_url }}">Les Mégères de l'Humus</a>
+        </div>
+        <p class="sous-titre">Compagnie éco-queer, féministe, arTiviste</p>
+    </div>
+
+    <button id="hamburger" class="menu-petit-ecran hamburger box" onclick="myBurger()" aria-label="Ouvrir le menu" aria-controls="nav-principal" aria-expanded="false">
+        <div class="container-lignes">
+            <div class="ligne"></div>
+            <div class="ligne"></div>
+            <div class="ligne"></div>
+        </div>
+    </button>
+</header>
+
+<nav id="nav-principal" class="navbar" role="navigation">
+    {# 1. Boucle sur les catégories principales du menu (Infos, Spectacles, Théâtre Forum, Prestations...) #}
+    {% for page in pages.children.visible %}
+        
+        {# SI LA PAGE A DES ENFANTS VISIBLES (Ex: Infos, Spectacles, etc.) #}
+        {% if page.children.visible.count > 0 %}
+            <div class="menu">
+                <button type="button" 
+                        class="menu-trigger tan" 
+                        aria-expanded="false" 
+                        aria-controls="submenu-{{ page.slug }}" 
+                        aria-haspopup="true">
+                    {{ page.menu }}
+                </button>
+                
+                <div id="submenu-{{ page.slug }}" class="niv1 coco">
+                    {# Sous-boucle pour afficher les pages enfants #}
+                    {% for child in page.children.visible %}
+                        {# Gestion de la classe 'cache' spécifique au règlement intérieur si besoin #}
+                        {% set class_cache = (child.slug == 'reglement-interieur') ? 'class="cache"' : '' %}
+                        
+                        <a href="{{ child.url }}" {{ class_cache }}>{{ child.menu }}</a>
+                    {% endfor %}
+                </div>
+            </div>
+            
+        {# SI C'EST UNE PAGE SIMPLE SANS ENFANTS (Ex: Contact) #}
+        {% else %}
+            <div class="menu-{{ page.slug }} menu">
+                <a href="{{ page.url }}" class="tan">{{ page.menu }}</a>
+            </div>
+        {% endif %}
+        
+    {% endfor %}
+  
+    {# 2. Liens Réseaux Sociaux et Mobile (statiques, car indépendants des pages Grav) #}
+    <div class="rs menu">
+        <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" aria-label="Accéder à notre page Facebook"><i class="fa-brands fa-facebook-f" aria-hidden="true"></i></a>
+        <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" aria-label="Accèder à notre page Instagram"><i class="fa-brands fa-instagram" aria-hidden="true"></i></a>
+    </div>
+  
+    <div class="menu mobile-only">
+        <button id="openHaOverlay-mobile" class="e_faire-un-don">&nbsp;Faire un don</button>
+    </div>
+</nav>
+

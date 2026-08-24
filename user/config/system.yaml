@@ -1,0 +1,42 @@
+timezone: Europe/Paris
+custom_base_url: null
+languages:
+  supported:
+    - fr
+  default_lang: fr
+  include_default_lang: false
+  enabled: true
+pages:
+  theme: quark2-child
+  dateformat:
+    short: 'd-m-y G:i'
+    long: 'l jS \of F g:i A'
+  markdown:
+    extra: true
+  append_url_extension: null
+  redirect_default_code: '302'
+  redirect_default_route: 1
+  media:
+    descriptions: true
+cache:
+  enabled: false
+  redis:
+    socket: null
+errors:
+  display: 1
+images:
+  adapter: imagick
+  cls:
+    retina_scale: '1'
+gpm:
+  verify_peer: true
+updates:
+  safe_upgrade: true
+  safe_upgrade_snapshot_limit: 5
+security:
+  xss_whitelist:
+    - a
+    - img
+    - div
+    - span
+    - section

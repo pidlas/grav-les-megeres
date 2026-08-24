@@ -1,0 +1,24 @@
+# Fichiers système et caches de Grav
+/cache/
+/logs/
+/tmp/
+/backup/
+/images/
+/assets/
+
+# Fichiers de configuration sensibles (à ne jamais publier sur GitHub !)
+user/config/security.yaml
+user/config/security-private.php
+user/config/api-private.php
+.htaccess
+
+# Fichiers du système d'exploitation
+.DS_Store
+Thumbs.db
+*.log
+
+# Fichiers lourds
+*.mp4
+*.mp3
+*.ogg
+*.webm

@@ -1,0 +1,151 @@
+/* Votre base Grid conservée et enrichie */
+.wrapper-audio {
+    align-items: center;
+    background: linear-gradient(45deg, #322744, #3c2e51);
+    border-radius: 3.125rem;
+    box-shadow:
+        1.25rem -1.25rem 3.75rem #302541,
+        -1.25rem 1.25rem 3.75rem #403157;
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: auto auto 1fr auto;
+    margin: var(--space-l) auto;
+    padding: 0.625rem;
+    width: 325px;
+    box-sizing: border-box;
+}
+
+/* Boutons audio */
+.audio-control-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 3px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.1s ease;
+}
+
+.audio-control-btn svg {
+    width: 18px;
+    height: 18px;
+    fill: #ffffff;
+    transition: fill 0.2s ease;
+}
+
+.audio-control-btn:hover svg {
+    fill: #f7ae56;
+}
+
+/* Gestion des icônes masquées/affichées en JS */
+.audio-control-btn .pause-icon { display: none; }
+.audio-control-btn.is-playing .play-icon { display: none; }
+.audio-control-btn.is-playing .pause-icon { display: inline; }
+
+.audio-control-btn .mute-icon { display: none; }
+.audio-control-btn.is-muted .sound-icon { display: none; }
+.audio-control-btn.is-muted .mute-icon { display: inline; }
+
+/* Compteur de temps compact pour petit lecteur (ex: 0:00/1:20 sans espaces) */
+.audio-time-display {
+    color: #ffffff;
+    font-size: 11px;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+
+    pointer-events: none !important; /* Le texte laisse passer les clics à travers lui */
+}
+
+/* Barre de progression principale (colonne 1fr) */
+#audioProgress {
+    -webkit-appearance: none !important;
+    appearance: none !important;
+    
+    /* Crucial pour CSS Grid : force l'élément à occuper tout l'espace de sa colonne 1fr */
+    display: block !important;
+    width: 100% !important; 
+    min-width: 0 !important; /* Empêche le range de casser la grille */
+    
+    height: 6px !important;
+    border-radius: 3px !important;
+    outline: none !important;
+    cursor: pointer !important;
+    border: none !important;
+    
+    /* Couleur de fond par défaut (avant que le JS ne charge le dégradé bicolore) */
+    background: #55446e !important; 
+    touch-action: none;
+
+    position: relative !important;
+    z-index: 10 !important;
+    pointer-events: auto !important;
+}
+
+
+#audioProgress::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #f7ae56;
+}
+
+#audioProgress::-moz-range-thumb {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #f7ae56;
+    border: none;
+}
+
+/* Zone Volume (Dernière colonne) */
+.audio-volume-zone {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+#audioVolumeSlider {
+    -webkit-appearance: none !important;
+    appearance: none !important;
+    display: none;
+    width: 45px !important; /* Réduit pour ne pas déborder des 325px */
+    height: 4px !important;
+    border-radius: 2px !important;
+    background: #55446e !important;
+    outline: none !important;
+    cursor: pointer !important;
+
+    position: relative !important;
+    z-index: 10 !important;
+    pointer-events: auto !important;
+}
+
+.audio-volume-zone:hover #audioVolumeSlider,
+.audio-volume-zone:focus-within #audioVolumeSlider {
+    display: block !important;
+}
+
+#audioVolumeSlider::-webkit-slider-thumb {
+    -webkit-appearance: none !important;
+    width: 10px !important;
+    height: 10px !important;
+    border-radius: 50% !important;
+    background-color: #f7ae56 !important;
+}
+
+#audioVolumeSlider::-moz-range-thumb {
+    width: 10px !important;
+    height: 10px !important;
+    border-radius: 50% !important;
+    background-color: #f7ae56 !important;
+}
+
+/* Mobile tactile : curseur de volume toujours affiché */
+@media (hover: none) {
+    #audioVolumeSlider {
+        display: block !important;
+        width: 35px !important;
+    }
+}

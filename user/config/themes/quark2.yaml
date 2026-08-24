@@ -1,0 +1,9 @@
+fontawesome:
+  local: true
+custom_logo:
+  user/themes/quark2-child/images/logo/logo.png:
+    name: logo.png
+    type: image/png
+    size: 156294
+    path: user/themes/quark2-child/images/logo/logo.png
+    url: /grav/user/themes/quark2-child/images/logo/logo.png

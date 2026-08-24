@@ -1,0 +1,20 @@
+state: enabled
+email: philippe.guerrini@tutanota.com
+fullname: 'Philippe Guerrini'
+title: Administrator
+access:
+  site:
+    login: true
+  api:
+    super: true
+hashed_password: $2y$12$AW76iJLhIbiGlg02GGpZZeOAJd5FhasGc4arFA52CznpMDL9uePK.
+created: 1784466297
+modified: 1784466297
+avatar: {  }
+twofa_enabled: false
+twofa_secret: ''
+admin_next:
+  preferences:
+    adminLanguage: fr-FR
+    editorMode: expert
+    colorMode: dark

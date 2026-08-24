@@ -1,0 +1,14 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "../lesmegeres"
+		},
+		{
+			"path": "../lesmegeres-app"
+		}
+	],
+	"settings": {}
+}

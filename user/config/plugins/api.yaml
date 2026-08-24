@@ -1,0 +1,5 @@
+popularity:
+  salt: 68fbc89ac76261b5058419aceb2ab737d7dc35e9a52f3e884a138bcad29693fc
+enabled: true
+pages:
+  allowed_attributes: ['data-type', 'target', 'rel', 'class', 'alt']

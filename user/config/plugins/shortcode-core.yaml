@@ -1,0 +1,4 @@
+admin_pages_only: false
+custom_shortcodes: /user/custom/shortcodes
+fontawesome:
+  load: false

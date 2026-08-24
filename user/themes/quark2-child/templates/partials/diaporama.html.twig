@@ -1,0 +1,31 @@
+{% if page.header.slides %}
+<fieldset class="visually-hidden">
+    <legend>Diaporama</legend>
+    <div class="button-container">
+        
+        {% for slide in page.header.slides %}
+            {# Génère l'ID automatique (c1, c2, c3...) #}
+            {% set slide_id = 'c' ~ loop.index %}
+            
+            <input type="radio" name="slide" id="{{ slide_id }}" {{ loop.first ? 'checked' : '' }}>
+            
+            {# Génère le chemin d'image directement lié au dossier images du thème enfant #}
+            {% set style_bg = '' %}
+            {% if slide.image %}
+                {% set style_bg = ' style="background-image: url(' ~ url('theme://images/' ~ slide.image) ~ ');"' %}
+            {% endif %}
+            
+            <label for="{{ slide_id }}" class="card"{{ style_bg | raw }}>
+                <div class="row">
+                    <div class="description">
+                        <a href="{{ base_url }}{{ slide.lien }}">
+                            <h3 class="radio-title">{{ slide.titre }}</h3>
+                        </a>
+                    </div>
+                </div>
+            </label>
+        {% endfor %}
+
+    </div>
+</fieldset>
+{% endif %}

@@ -1,0 +1,35 @@
+title: Accueil
+"@extends":
+  type: default
+  context: blueprints://pages
+
+form:
+  fields:
+    tabs:
+      type: tabs
+      active: container
+      fields:
+        diaporama_tab:
+          type: tab
+          title: Diaporama
+          fields:
+            header.slides:
+              type: list
+              label: Liste des diapositives (Cartes)
+              btnLabel: Ajouter une carte
+              fields:
+                .image:
+                  type: file
+                  label: Image de fond (CSS)
+                  destination: 'page://'
+                  multiple: false
+                  accept:
+                    - .jpg
+                    - .png
+                    - .webp
+                .titre:
+                  type: text
+                  label: Titre de la carte
+                .lien:
+                  type: text
+                  label: Lien de redirection (ex: /compagnie ou /cours)

@@ -1,0 +1,55 @@
+---
+title: 'cours'
+menu: 'cours'
+process:
+  markdown: true
+  twig: true
+---
+<div class="wrapper-audio">
+<audio id='audio' preload="metadata">
+<source src="{{ page.media['les-enfants-parlent.mp3'].url }}" type="audio/mpeg" />
+<source src="{{ page.media['les-enfants-parlent.ogg'].url }}" type="audio/ogg" />
+<a href="{{ page.media['les-enfants-parlent.mp3'].url }}"> Télécharger l'audio </a>
+</audio>
+<button id="audioPlayPauseBtn" class="audio-control-btn" aria-label="Lecture/Pause">
+<svg class="play-icon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+<svg class="pause-icon" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+</button>
+<span id="audioTime" class="audio-time-display">0:00 / 0:00</span>
+<input type="range" id="audioProgress" min="0" max="100" value="0" step="0.1">
+<div class="audio-volume-zone">
+<button id="audioMuteBtn" class="audio-control-btn" aria-label="Mute/Unmute">
+<svg class="sound-icon" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
+<svg class="mute-icon" viewBox="0 0 24 24"><path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.21.05-.42.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/></svg>
+</button>
+<input type="range" id="audioVolumeSlider" min="0" max="1" step="0.05" value="1" aria-label="Volume">
+</div>
+</div>
+
+<div>
+<p class="p_first">La compagnie organise des cours pour faire découvrir le théâtre aux curieuses et curieux. Dans 
+ces cours toutes les dimensions du travail de la scène sont abordées : le déplacement, la prise de parole, le 
+jeu seul et à plusieurs. Les professeur·e·s sont des professionnel·le·s du métier 
+et abordent les cours avec bienveillance et sérieux. Pour toutes informations complémentaires <a 
+href="{{ base_url_relative }}/contact">contactez-nous ici</a><span class="lien-i-seul"></span>.</span>
+</p>
+</div>
+
+<div class="image-au-centre">
+<picture>    
+<source srcset="{{ page.media['les-cours.webp'].url }}" type="image/webp">
+<img class="affiche-cours" alt="Le tarif des cours de théâtre" src="{{ page.media['les-cours.jpg'].url }}" loading="lazy">
+</picture>
+<picture>
+<source srcset="{{ page.media['photo-cours.webp'].url }}" type="image/webp">
+<img class="photo-cours" alt="Photo d'un cours de théâtre" src="{{ page.media['photo-cours.jpg'].url }}" loading="lazy">
+</picture> 
+</div>
+
+<div class="image-au-centre">
+<h2 class="display-title">Les objectifs pédagogiques</h1>
+<picture>    
+<source srcset="{{ page.media['objectifs-des-cours.webp'].url }}" type="image/webp">
+<img class="objectifs-pedagogiques" alt="Les objectifs pédagogiques du cours de théâtre" src="{{ page.media['objectifs-des-cours.jpg'].url }}" loading="lazy">
+</picture>
+</div>

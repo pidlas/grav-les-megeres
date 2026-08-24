@@ -1,0 +1,9 @@
+version: '1.2'
+timestamp: 1787149326
+count: 1
+index:
+  admin:
+    storage_key: admin
+    storage_timestamp: 1787149231
+    key: admin
+    email: philippe.guerrini@tutanota.com

@@ -1,0 +1,30 @@
+/*
+ * Quark 2 — user customizations
+ *
+ * This file is safe to edit. It is loaded last so anything here overrides
+ * theme.css without having to mark rules !important.
+ */
+.navbar-brand img {
+  width: 200px!important;
+  height: auto!important;
+ }
+/* Force le conteneur principal à s'adapter à la hauteur réelle du diaporama */
+.wrapper {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+/* Force le footer à se positionner tout en bas après le contenu */
+footer {
+    margin-top: auto;
+    clear: both; /* Annule l'effet d'éventuels float dans le diaporama */
+    position: relative;
+    z-index: 10; /* Assure qu'il reste accessible s'il passe sous un autre bloc */
+}
+
+/* Assure que le diaporama reste dans le flux normal */
+fieldset.visually-hidden {
+    position: relative;
+    display: block;
+}

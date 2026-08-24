@@ -1,0 +1,22 @@
+enabled: true
+header-fixed: true
+header-animated: true
+header-transparent: false
+sticky-footer: true
+theme-mode: auto
+accent-color: '#8428DF'
+blog-page: '/blog'
+fontawesome:
+  enabled: true
+  local: false
+custom_logo:
+  - name: 'logo.png'
+streams:
+  schemes:
+    theme:
+      type: ReadonlyStream
+      prefixes:
+        '':
+          - user/themes/quark2-child
+          - user/themes/quark2
+

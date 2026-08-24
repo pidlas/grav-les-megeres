@@ -1,0 +1,276 @@
+/* ==========================================================================
+   CONTRÔLES DU LECTEUR VIDÉO PERSONNALISÉ
+   ========================================================================== */
+
+/* Conteneur principal */
+.wrapper-video {
+    aspect-ratio: 16 / 9;
+    border-radius: 1rem;
+    box-shadow: -0.5rem 0.5rem 0.75rem rgba(0, 0, 0, 0.3);
+    margin-top: var(--space-l);
+    position: relative;
+    width: 80%;
+    max-width: 100%;
+    background: #000;
+    font-family: Arial, sans-serif;
+    overflow: hidden; /* Changement auto -> hidden pour éviter les scrollbars parasites */
+    display: flex;
+    flex-direction: column;
+}
+
+/* Élément vidéo */
+#video {
+    display: block;
+    width: 100% !important;
+    height: auto !important;
+    border: 0;
+}
+
+/* Barre de contrôles */
+.custom-video-controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: rgba(20, 20, 20, 0.95);
+    padding: 10px 15px;
+    color: #fff;
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    z-index: 10;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+}
+
+/* Boutons (Play, Mute, Fullscreen) */
+.control-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.1s ease;
+}
+
+/* Stylisation et couleur des nouvelles icônes SVG */
+.control-btn svg {
+    width: 20px;
+    height: 20px;
+    fill: #ffffff;
+    transition: fill 0.2s ease;
+}
+
+.control-btn:hover svg {
+    fill: #f7ae56; /* Harmonisation avec votre orange */
+}
+
+.control-btn:hover {
+    transform: scale(1.1);
+}
+
+/* --- GESTION DES ICÔNES AVEC LES CLASSES DYNAMIQUES (JS) --- */
+
+/* États Play / Pause */
+.control-btn .pause-icon { display: none; }
+.control-btn.is-playing .play-icon { display: none; }
+.control-btn.is-playing .pause-icon { display: inline; }
+
+/* États Mute / Unmute */
+.control-btn .mute-icon { display: none; }
+.control-btn.is-muted .sound-icon { display: none; }
+.control-btn.is-muted .mute-icon { display: inline; }
+
+/* États Mode Plein Écran */
+.control-btn .exit-fs-icon { display: none; }
+.control-btn.is-fullscreen .fs-icon { display: none; }
+.control-btn.is-fullscreen .exit-fs-icon { display: inline; }
+
+/* --- ZONE DE GESTION DU VOLUME (BLINDAGE VISUEL DIRECT) --- */
+.volume-control-zone {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+}
+
+#volumeSlider {
+    -webkit-appearance: none !important; /* On reprend la main sur le design */
+    appearance: none !important;
+    display: none; /* Cache la jauge par défaut */
+    
+    /* Forces des dimensions réelles et strictes */
+    width: 70px !important;
+    height: 6px !important; 
+    
+    /* Couleurs explicites de secours */
+    background: #444444 !important; /* Couleur de la jauge (gris foncé) */
+    border-radius: 3px !important;
+    border: none !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    box-shadow: none !important;
+    position: relative !important;
+    z-index: 999999 !important;
+    pointer-events: auto !important;
+}
+
+/* Force l'affichage du slider au survol du bloc complet */
+.volume-control-zone:hover #volumeSlider,
+.volume-control-zone:focus-within #volumeSlider {
+    display: block !important;
+}
+
+/* --- LE BOUTON CURSEUR CHROME, SAFARI, EDGE --- */
+#volumeSlider::-webkit-slider-thumb {
+    -webkit-appearance: none !important;
+    appearance: none !important;
+    width: 12px !important;
+    height: 12px !important;
+    border-radius: 50% !important;
+    background-color: #f7ae56 !important; /* Couleur du bouton (orange) */
+    border: none !important;
+    cursor: pointer !important;
+    display: block !important;
+    opacity: 1 !important;
+}
+
+/* --- LE BOUTON CURSEUR FIREFOX --- */
+#volumeSlider::-moz-range-thumb {
+    width: 12px !important;
+    height: 12px !important;
+    border-radius: 50% !important;
+    background-color: #f7ae56 !important; /* Couleur du bouton (orange) */
+    border: none !important;
+    cursor: pointer !important;
+    display: block !important;
+    opacity: 1 !important;
+}
+
+/* Sécurité Firefox pour la ligne */
+#volumeSlider::-moz-range-track {
+    height: 6px !important;
+    background: #444444 !important;
+    border-radius: 3px !important;
+    border: none !important;
+}
+
+
+/* Optionnel : Rendre la barre toujours visible sur les écrans tactiles */
+@media (hover: none) {
+    #volumeSlider {
+        width: 50px;
+        opacity: 1;
+    }
+}
+
+
+/* Affichage du compteur de temps */
+.time-display {
+    font-size: 13px;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    min-width: 85px;
+    text-align: center;
+}
+
+/* ==========================================================================
+   STYLISATION DE LA BARRE DE PROGRESSION (INPUT RANGE)
+   ========================================================================== */
+
+#progress {
+    -webkit-appearance: none;
+    appearance: none;
+    flex-grow: 1;
+    height: 10px; /* Légèrement épaissi pour une meilleure zone tactile ciblée */
+    border-radius: 5px;
+    outline: none;
+    cursor: pointer;
+    border: none;
+    background-color: #444 !important;
+    display: block !important;
+    visibility: visible !important;
+    position: relative !important;
+    z-index: 999999 !important;
+    pointer-events: auto !important;
+    touch-action: none; /* TRÈS IMPORTANT : Empêche l'écran du smartphone de défiler pendant le glissé */
+}
+
+/* Le curseur circulaire (Chrome, Safari, Edge) */
+#progress::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: #f7ae56;
+    border: none;
+    margin-top: -2px;
+    transition: transform 0.1s ease;
+}
+
+/* Le curseur circulaire (Firefox) */
+#progress::-moz-range-thumb {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: #f7ae56;
+    border: none;
+    transition: transform 0.1s ease;
+}
+
+#progress::-moz-range-track {
+    height: 10px;
+    background: transparent;
+    border: none;
+}
+
+#progress:hover::-webkit-slider-thumb { transform: scale(1.2); }
+#progress:hover::-moz-range-thumb { transform: scale(1.2); }
+
+/* ==========================================================================
+   MASQUAGE AUTOMATIQUE DES CONTRÔLES (INACTIVITÉ SOURIS)
+   ========================================================================== */
+
+.wrapper-video.hide-controls .custom-video-controls {
+    opacity: 0;
+    transform: translateY(100%);
+    pointer-events: none;
+    transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.wrapper-video.hide-controls {
+    cursor: none;
+}
+
+/* Élimine les boutons système résiduels générés par les navigateurs */
+video::-webkit-media-controls { display: none !important; }
+video::-moz-media-controls { display: none !important; }
+
+/* Conteneur principal en plein écran */
+.wrapper-video:fullscreen {
+    max-width: none !important;
+    width: 100% !important;
+    height: 100% !important;
+    background: #000 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: space-between !important;
+}
+
+.wrapper-video:fullscreen #video {
+    width: 100% !important;
+    height: calc(100% - 44px) !important;
+    object-fit: contain !important;
+}
+
+.wrapper-video:fullscreen .custom-video-controls {
+    width: 100% !important;
+    box-sizing: border-box !important;
+    background: rgba(15, 15, 15, 0.95) !important;
+}
+
+.wrapper-video #video { order: 1 !important; }
+.wrapper-video .custom-video-controls { order: 2 !important; }

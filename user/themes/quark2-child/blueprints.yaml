@@ -1,0 +1,29 @@
+name: Quark2 Child
+version: 1.0.0
+description: "Thème enfant de Quark2 pour Les Mégères de l'Humus"
+icon: rebel
+author:
+  name: Philippe Guerrini
+  email: philippe.guerrini@tutanota.com
+homepage: https://grav.lesmegeresdelhumus.fr/grav
+keywords: "quark, enfant, child, personnalisé"
+form:
+  fields:
+    tabs:
+      type: tabs
+      active: 1
+      fields:
+        theme:
+          type: tab
+          title: Thème
+          fields:
+            header.enabled:
+              type: toggle
+              label: Activer le thème
+              highlight: 1
+              default: 1
+              options:
+                1: Oui
+                0: Non
+              validate:
+                type: bool
