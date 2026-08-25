@@ -34,11 +34,15 @@ BACKUP_PATH="${BACKUP_PATH:-${REMOTE_BASE}.backup}"
 BACKUP_TIMESTAMPED="${BACKUP_TIMESTAMPED:-1}"
 
 RSYNC_EXCLUDES=(
+  "tmp/"
+  "**/tmp/"
   "*.old"
   "*.old.*"
   "*.bak"
   "*.bak.*"
   "*~"
+  "*.sans-twig"
+  "*.a.tester"
   ".DS_Store"
   "**/.DS_Store"
   "Thumbs.db"
@@ -47,18 +51,27 @@ RSYNC_EXCLUDES=(
   "**/desktop.ini"
   "._*"
   "**/._*"
-  "cache/"
-  "**/cache/"
-  "user/plugins/"
-  "**/user/plugins/"
-  "tmp/"
-  "**/tmp/"
   "logs/"
   "**/logs/"
   "backup/"
   "**/backup/"
   "*.log"
   "**/*.log"
+  "/data/"
+  "/user/accounts/"
+  "/user/plugins/"
+  "/themes/quark2/"
+  "system.yaml"
+  "security.yaml"
+  "security-private.php"
+  "api-private.php"
+  "/cache/"
+  "**/cache/"
+  "/images/"
+  "**/images/"
+  ".htaccess"
+  "/media/"
+  "config/themes/quark2.yaml"
 )
 
 usage() {
@@ -210,11 +223,13 @@ if [[ -n "$SSH_KEY_PATH" ]]; then
   RSYNC_SSH="$RSYNC_SSH -i $SSH_KEY_PATH"
 fi
 RSYNC_OPTS=(
-  --rz
-  --links
-  --checksum
+  -az
+  --modify-window=1
   --itemize-changes
   --human-readable
+  --no-perms
+  --no-owner
+  --no-group
   --omit-dir-times
   -e "$RSYNC_SSH"
 )
@@ -233,7 +248,10 @@ show_delete_summary() {
   tmp_file="$(mktemp)"
   trap 'rm -f "$tmp_file"' EXIT
 
-  rsync "${RSYNC_OPTS[@]}" --list-only "${DEPLOY_INCLUDE_PATHS[@]/#/$REPO_ROOT/}" "$TARGET:$REMOTE_BASE/" 2>/dev/null | awk '$1 ~ /^d/ {next} {print $5}' | sed '/^$/d' > "$tmp_file" || true
+  # rsync "${RSYNC_OPTS[@]}" --list-only "${DEPLOY_INCLUDE_PATHS[@]/#/$REPO_ROOT/}" "$TARGET:$REMOTE_BASE/" 2>/dev/null | awk '$1 ~ /^d/ {next} {print $5}' | sed '/^$/d' > "$tmp_file" || true
+  # Exécution du rsync en filtrant pour n'afficher que les vrais transferts
+  rsync "${RSYNC_OPTS[@]}" "${DEPLOY_INCLUDE_PATHS[@]/#/$REPO_ROOT/}" "$TARGET:$REMOTE_BASE/" | grep -E '^[^.]|\*deleting'
+
 
   if [[ ! -s "$tmp_file" ]]; then
     echo "==> No remote files would be deleted"
@@ -267,6 +285,28 @@ confirm_remote_delete() {
     exit 0
   fi
 }
+
+clear_remote_cache() {
+  if [[ $APPLY_CHANGES -eq 0 ]]; then
+    echo "==> Skipping cache clear (DRY-RUN mode)"
+    return
+  fi
+
+  echo "==> Clearing Grav cache via targeted folder removal"
+  
+  # Utilisation de sudo si l'utilisateur SSH n'est pas root
+  local sudo_cmd=""
+  if [[ "$SSH_USER" != "root" ]]; then sudo_cmd="sudo "; fi
+
+  # Suppression ciblée des caches de Twig, des fichiers compilés et de la configuration
+  # Grav recréera ces sous-dossiers proprement à la prochaine visite
+  ssh "${SSH_BASE_OPTS[@]}" "$TARGET" "
+    $sudo_cmd""rm -rf '$REMOTE_BASE'/cache/twig/*
+    $sudo_cmd""rm -rf '$REMOTE_BASE'/cache/compiled/*
+    $sudo_cmd""rm -rf '$REMOTE_BASE'/cache/grav/*
+  "
+}
+
 
 for pattern in "${RSYNC_EXCLUDES[@]}"; do
   RSYNC_OPTS+=(--exclude="$pattern")
@@ -319,6 +359,8 @@ if [[ $APPLY_CHANGES -eq 1 ]]; then
     chown -R '$REMOTE_OWNER_GROUP' '$REMOTE_BASE'
   "
 fi
+
+clear_remote_cache
 
 if [[ $RUN_CHECKS -eq 1 ]]; then
   echo "==> Running HTTP smoke tests"

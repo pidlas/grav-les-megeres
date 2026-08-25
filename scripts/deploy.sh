@@ -18,7 +18,7 @@ SSH_KEY_PATH="${SSH_KEY_PATH:-}"
 SSH_CONTROL_MASTER="${SSH_CONTROL_MASTER:-0}"
 REMOTE_BASE="${REMOTE_BASE:-/var/www/grav}"
 REMOTE_WEB_ROOT="${REMOTE_WEB_ROOT:-$REMOTE_BASE}"
-BASE_URL="${BASE_URL:-https://grav.lesmegeresdelhumus.fr/grav}"
+BASE_URL="${BASE_URL:-https://lesmegeresdelhumus.fr}"
 REMOTE_OWNER_GROUP="${REMOTE_OWNER_GROUP:-grav:www-data}"
 REMOTE_DIR_MODE="${REMOTE_DIR_MODE:-2750}"
 REMOTE_FILE_MODE="${REMOTE_FILE_MODE:-640}"
@@ -32,6 +32,9 @@ BACKUP_ENABLED="${BACKUP_ENABLED:-1}"
 DEFAULT_MODE="DRY-RUN"
 BACKUP_PATH="${BACKUP_PATH:-${REMOTE_BASE}.backup}"
 BACKUP_TIMESTAMPED="${BACKUP_TIMESTAMPED:-1}"
+
+# [2026-08-25] Ajout de DEPLOY_INCLUDE_PATHS par défaut s'il n'est pas défini dans deploy.conf
+DEPLOY_INCLUDE_PATHS=("${DEPLOY_INCLUDE_PATHS[@]:-user}")
 
 RSYNC_EXCLUDES=(
   "tmp/"
@@ -49,7 +52,7 @@ RSYNC_EXCLUDES=(
   "**/Thumbs.db"
   "desktop.ini"
   "**/desktop.ini"
-  "._*"
+  ".._*"
   "**/._*"
   "logs/"
   "**/logs/"
@@ -147,6 +150,7 @@ require_path() {
 
 require_cmd ssh
 require_cmd rsync
+require_cmd git
 require_cmd curl
 require_path "$REPO_ROOT/index.php"
 
@@ -222,11 +226,17 @@ fi
 if [[ -n "$SSH_KEY_PATH" ]]; then
   RSYNC_SSH="$RSYNC_SSH -i $SSH_KEY_PATH"
 fi
+
+# [2026-08-25] Configuration optimisée pour le stockage externe distant
 RSYNC_OPTS=(
   -az
   --modify-window=1
   --itemize-changes
   --human-readable
+  --no-perms          # Ignore les droits Linux incompatibles avec le stockage externe
+  --no-owner          # Ignore la synchronisation du propriétaire original
+  --no-group          # Ignore la synchronisation du groupe original
+  --omit-dir-times    # Évite l'acharnement sur l'ajustement temporel des dossiers (.d..t......)
   -e "$RSYNC_SSH"
 )
 
@@ -244,7 +254,13 @@ show_delete_summary() {
   tmp_file="$(mktemp)"
   trap 'rm -f "$tmp_file"' EXIT
 
-  rsync "${RSYNC_OPTS[@]}" --list-only "${DEPLOY_INCLUDE_PATHS[@]/#/$REPO_ROOT/}" "$TARGET:$REMOTE_BASE/" 2>/dev/null | awk '$1 ~ /^d/ {next} {print $5}' | sed '/^$/d' > "$tmp_file" || true
+  # [2026-08-25] Réparation de la simulation de suppression :
+  # En mode --list-only, rsync simule une lecture depuis la cible. Le flux est considéré entrant (<).
+  # On extrait proprement le chemin à partir de la colonne 5 tout en filtrant les fichiers supprimés.
+  rsync "${RSYNC_OPTS[@]}" --list-only "${DEPLOY_INCLUDE_PATHS[@]/#/$REPO_ROOT/}" "$TARGET:$REMOTE_BASE/" 2>/dev/null \
+    | grep -E '^[<+][a-z]' \
+    | awk '$1 ~ /^d/ {next} {print $5}' \
+    | sed '/^$/d' > "$tmp_file" || true
 
   if [[ ! -s "$tmp_file" ]]; then
     echo "==> No remote files would be deleted"
@@ -287,19 +303,15 @@ clear_remote_cache() {
 
   echo "==> Clearing Grav cache via targeted folder removal"
   
-  # Utilisation de sudo si l'utilisateur SSH n'est pas root
   local sudo_cmd=""
   if [[ "$SSH_USER" != "root" ]]; then sudo_cmd="sudo "; fi
 
-  # Suppression ciblée des caches de Twig, des fichiers compilés et de la configuration
-  # Grav recréera ces sous-dossiers proprement à la prochaine visite
   ssh "${SSH_BASE_OPTS[@]}" "$TARGET" "
     $sudo_cmd""rm -rf '$REMOTE_BASE'/cache/twig/*
     $sudo_cmd""rm -rf '$REMOTE_BASE'/cache/compiled/*
-    $sudo_cmd""rm -rf '$REMOTE_BASE'/cache/doctrine/*
+    $sudo_cmd""rm -rf '$REMOTE_BASE'/cache/grav/*
   "
 }
-
 
 for pattern in "${RSYNC_EXCLUDES[@]}"; do
   RSYNC_OPTS+=(--exclude="$pattern")
@@ -308,6 +320,40 @@ done
 if [[ $APPLY_CHANGES -eq 0 ]]; then
   RSYNC_OPTS+=(--dry-run)
 fi
+
+push_to_github() {
+  if [[ $APPLY_CHANGES -eq 0 ]]; then
+    echo "==> Skipping GitHub push (DRY-RUN mode)"
+    return
+  fi
+
+  echo "==> Checking Git repository status..."
+  
+  # [2026-08-25] Vérifie si le dossier local est un dépôt Git valide
+  if ! git -C "$REPO_ROOT" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+    echo "Warning: $REPO_ROOT is not a Git repository. Skipping GitHub push." >&2
+    return
+  fi
+
+  # [2026-08-25] Vérifie s'il y a des changements non commités en local
+  if ! git -C "$REPO_ROOT" diff-index --quiet HEAD --; then
+    echo "==> Local changes detected. Creating an automatic deployment commit..."
+    git -C "$REPO_ROOT" add .
+    git -C "$REPO_ROOT" commit -m "chore(deploy): automatic backup before deployment - $(date +'%Y-%m-%d %H:%M:%S')"
+  fi
+
+  # [2026-08-25] Récupère le nom de la branche courante (ex: main ou master)
+  local current_branch
+  current_branch="$(git -C "$REPO_ROOT" branch --show-current)"
+
+  echo "==> Pushing local history to GitHub (branch: $current_branch)..."
+  if git -C "$REPO_ROOT" push origin "$current_branch"; then
+    echo "==> GitHub repository successfully updated!"
+  else
+    echo "Error: Failed to push to GitHub. Please check your SSH keys or remote URL." >&2
+    exit 1
+  fi
+}
 
 echo "==> Target: $TARGET"
 echo "==> Remote base: $REMOTE_BASE"
@@ -337,11 +383,13 @@ if [[ $DELETE_REMOTE -eq 1 ]]; then
 fi
 
 echo "==> Syncing selected content"
+# [2026-08-25] Filtrage de l'affichage : une seule ligne par commande pour éviter les erreurs Bash
 if [[ ${#DEPLOY_INCLUDE_PATHS[@]} -gt 0 ]]; then
-  rsync "${RSYNC_OPTS[@]}" "${DEPLOY_INCLUDE_PATHS[@]/#/"$REPO_ROOT/"}" "$TARGET:$REMOTE_BASE/"
+  rsync "${RSYNC_OPTS[@]}" "${DEPLOY_INCLUDE_PATHS[@]/#/"$REPO_ROOT/"}" "$TARGET:$REMOTE_BASE/" | grep -E '^>[fd]|\*deleting' || echo "No files to transfer."
 else
-  rsync "${RSYNC_OPTS[@]}" "$REPO_ROOT/" "$TARGET:$REMOTE_BASE/"
+  rsync "${RSYNC_OPTS[@]}" "$REPO_ROOT/" "$TARGET:$REMOTE_BASE/" | grep -E '^>[fd]|\*deleting' || echo "No files to transfer."
 fi
+
 
 if [[ $APPLY_CHANGES -eq 1 ]]; then
   echo "==> Normalizing ownership and permissions"
@@ -353,7 +401,7 @@ if [[ $APPLY_CHANGES -eq 1 ]]; then
   "
 fi
 
-# clear_remote_cache
+clear_remote_cache
 
 if [[ $RUN_CHECKS -eq 1 ]]; then
   echo "==> Running HTTP smoke tests"
@@ -376,5 +424,8 @@ fi
 if [[ $RUN_POST_DEPLOY_CHECK -eq 1 ]]; then
   run_post_deploy_checks
 fi
+
+# [2026-08-25] Sauvegarde de l'historique sur GitHub après le succès du déploiement
+push_to_github
 
 echo "==> Deployment complete"
