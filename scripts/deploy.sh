@@ -230,7 +230,8 @@ fi
 # [2026-08-25] Configuration optimisée pour le stockage externe distant
 RSYNC_OPTS=(
   -az
-  --modify-window=1
+  --modify-window=2
+  --size-only
   --itemize-changes
   --human-readable
   --no-perms          # Ignore les droits Linux incompatibles avec le stockage externe
@@ -383,13 +384,15 @@ if [[ $DELETE_REMOTE -eq 1 ]]; then
 fi
 
 echo "==> Syncing selected content"
-# [2026-08-25] Filtrage de l'affichage : une seule ligne par commande pour éviter les erreurs Bash
+# [2026-08-26] Filtre de sécurité : accepte l'affichage des modifications dans les deux sens (< ou >) 
+# mais ignore rigoureusement toutes les lignes de vérifications techniques commençant par un point (.)
 if [[ ${#DEPLOY_INCLUDE_PATHS[@]} -gt 0 ]]; then
-  rsync "${RSYNC_OPTS[@]}" "${DEPLOY_INCLUDE_PATHS[@]/#/"$REPO_ROOT/"}" "$TARGET:$REMOTE_BASE/" | grep -E '^>[fd]|\*deleting' || echo "No files to transfer."
+  for path in "${DEPLOY_INCLUDE_PATHS[@]}"; do
+    rsync "${RSYNC_OPTS[@]}" "$REPO_ROOT/${path%/}/" "$TARGET:$REMOTE_BASE/${path%/}/" | grep -E '^[^.]' || true
+  done
 else
-  rsync "${RSYNC_OPTS[@]}" "$REPO_ROOT/" "$TARGET:$REMOTE_BASE/" | grep -E '^>[fd]|\*deleting' || echo "No files to transfer."
+  rsync "${RSYNC_OPTS[@]}" "$REPO_ROOT/" "$TARGET:$REMOTE_BASE/" | grep -E '^[^.]' || echo "No files to transfer."
 fi
-
 
 if [[ $APPLY_CHANGES -eq 1 ]]; then
   echo "==> Normalizing ownership and permissions"

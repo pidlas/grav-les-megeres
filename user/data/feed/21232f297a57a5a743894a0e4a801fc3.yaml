@@ -1,5 +1,10 @@
-last_checked: 1787645484
+last_checked: 1787728660
 data:
+  -
+    title: 'KahunaCart: A Real Store, Inside Your Grav Site'
+    url: 'https://getgrav.org/blog/kahunacart-coming-soon'
+    date: '2026-08-25T11:00:00+00:00'
+    summary: ''
   -
     title: 'Admin 2.1: Every String on Your Site, Editable'
     url: 'https://getgrav.org/blog/grav-2-admin-2-1'
@@ -44,9 +49,4 @@ data:
     title: 'macOS Golden Gate Web Development: Meet Reeve'
     url: 'https://getgrav.org/blog/macos-golden-gate-reeve'
     date: '2026-06-16T10:00:00+00:00'
-    summary: ''
-  -
-    title: 'Grav 2.0 Developer Guide: Admin Next Panels & Menu Bar'
-    url: 'https://getgrav.org/blog/grav-2-dev-admin-next-panels-menubar'
-    date: '2026-06-10T12:00:00+00:00'
     summary: ''

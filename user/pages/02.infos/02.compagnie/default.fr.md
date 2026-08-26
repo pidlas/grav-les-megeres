@@ -56,13 +56,13 @@ Delphine, Marie, Suzie & Sabine
 <div class="g_co-item7">
     <!-- Lien direct sans page.media -->
     <a target="_blank" rel="noopener noreferrer" href="{{ page.url }}/rapport-2024_compressed.pdf" title="Visualiser le rapport 2024">
-        <img src="{{ page.url }}/rapport2024.png" alt="Rapport d'activités 2024 de la compagnie Les Mégères de l'Humus">
+        <img src="{{ page.media['rapport2024.png'].url }}" alt="Rapport d'activités 2024 de la compagnie Les Mégères de l'Humus">
     </a>
 </div>
 <div class="g_co-item8">
     <!-- Lien direct sans page.media -->
     <a target="_blank" rel="noopener noreferrer" href="{{ page.url }}/rapport-2025_compressed.pdf" title="Visualiser le rapport 2025">
-        <img src="{{ page.url }}/rapport2025.png" alt="Rapport d'activités 2025 de la compagnie Les Mégères de l'Humus">
+        <img src="{{ page.media['rapport2025.png'].url }}" alt="Rapport d'activités 2025 de la compagnie Les Mégères de l'Humus">
     </a>
 </div>
 
