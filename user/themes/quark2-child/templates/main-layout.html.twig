@@ -11,6 +11,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     {# Injection automatique du SEO de Grav si disponible #}
     {% block meta %}{% endblock %}
+
+    {# --- AJOUT CYBLÉ SUR LA PAGE SPECTACLE --- #}
+    {% if page.slug == 'gresilhette-et-la-salimonde' %}
+    <style>
+        .encadre:before, 
+        .encadre-lenga:before, 
+        .encadre-extrait:before {
+            background-image: image-set(
+                url('{{ page.media["livre-blanc-fleur-remplie.webp"].url }}') type("image/webp"),
+                url('{{ page.media["livre-blanc-fleur-remplie.png"].url }}') type("image/png")
+            ) !important;
+        }
+    </style>
+    {% endif %}
 </head>
 <body>
     <div class="wrapper">

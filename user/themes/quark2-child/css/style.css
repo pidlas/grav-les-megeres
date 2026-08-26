@@ -1701,23 +1701,21 @@ section {
 }
 .encadre,
 .encadre-extrait,
-
 .encadre-lenga {
     margin-top: var(--space-m);
     position: relative;
 }
 .encadre-extrait:before,
 .encadre-lenga:before,
-
 .encadre:before {
-    background-image: -webkit-image-set(
+    /*background-image: -webkit-image-set(
         url(../images/livre-blanc-fleur-remplie.webp) type("image/webp"),
         url(../images/livre-blanc-fleur-remplie.png) type("image/png")
     );
     background-image: image-set(
         url(../images/livre-blanc-fleur-remplie.webp) type("image/webp"),
         url(../images/livre-blanc-fleur-remplie.png) type("image/png")
-    );
+    );*/
     background-position: 50%;
     background-repeat: no-repeat;
     background-size: 110% 150%;
@@ -1855,9 +1853,7 @@ section {
 .telephone {
     margin-top: 2rem;
 }
-.infos-contact:not(.fb),
-
-.infos-contact:not(.insta) {
+.infos-contact:not(.fb):not(.insta){
     margin-top: var(--space-l);
 }
 
@@ -2507,7 +2503,6 @@ th.sep {
     }
     .encadre,
     .encadre-extrait,
-
     .encadre-lenga {
         margin-top: var(--space-l);
     }
