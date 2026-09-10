@@ -1,9 +1,8 @@
 ---
 title: 'Mentions Légales'
 visible: false
-process:
-    twig: true
 ---
+
 <ul class="first-of-type">
 <li><span class="souligne">Nom</span> : Les Mégères de l'Humus</li>
 <li><span class="souligne">Adresse du siège</span> : 7 rue du 19 mars 1962 11170 Moussoulens</li>
@@ -16,7 +15,7 @@ process:
 <li><span class="souligne">Propriétaires</span> : M. Sabine Rance, M. Suzie Idlas</li>
 <li><span class="souligne">Responsables de publication</span> : M. Sabine Rance, M. Suzie Idlas</li>
 <li><span class="souligne">Conception et réalisation</span> : conçu par M. Sabine Rance et M. Suzie Idlas - réalisé par M. Philippe Guerrini Idlas dit Quiligus</li>
-<li><span class="souligne">Hébergement</span> : le site, propulsé par &nbsp;<a href="https://yunohost.org/#/">YunoHost<sup><i class="fa-solid fa-arrow-up-right-from-square fa-xs" style="color: #e4896a;"></i></sup></a>, est auto-hébergé sur du matériel libre la <a href="https://labriqueinter.net/" target="_blank" rel="noopener noreferrer">Brique Internet<sup><i class="fa-solid fa-arrow-up-right-from-square fa-xs" style="color: #e4896a;"></i></sup></a> et promeut les logiciels libres.</li>
+<li><span class="souligne">Hébergement</span> : le site, propulsé par <a href="https://yunohost.org/#/"> YunoHost<sup><i class="fa-solid fa-arrow-up-right-from-square fa-xs" style="color: #e4896a;"></i></sup></a>, est auto-hébergé sur du matériel libre la <a href="https://labriqueinter.net/" target="_blank" rel="noopener noreferrer">Brique Internet<sup><i class="fa-solid fa-arrow-up-right-from-square fa-xs" style="color: #e4896a;"></i></sup></a> et promeut les logiciels libres.</li>
 </ul>
 <h3 class="display-title">Conditions Générales d'Utilisation</h3>
 <h3>Article 1 : Accès au site</h3>
@@ -29,7 +28,7 @@ indirects consécutifs à l’accès au site. Le site est accessible gratuitemen
 <li>des informations générales sur la compagnie de théâtre</li>
 <li>des informations spécifiques sur la compagnie de théâtre</li>
 <li>des informations spécifiques sur les spectacles de la compagnie</li>
-<li>des témoignages de participant&middot;e&middot;s à des séances de travail autour de recueil de la parole de personnes âgées</li>
+<li>des témoignages de participant·e·s à des séances de travail autour de recueil de la parole de personnes âgées</li>
 <li>des informations spécifiques sur les cours et les stages donnés par la compagnie de théâtre</li>
 </ul>
 <h3>Article 2 : Collecte des données</h3>
@@ -40,13 +39,13 @@ donnée personnelle concernant les Utilisateurs.
 <h3>Article 3 : Propriété intellectuelle</h3>
 <p>
 Sauf mention contraire, tous les éléments accessibles sur le site (textes, images, graphismes, logo, icônes, sons, logiciels, etc.)
-restent la propriété exclusive de leurs auteur&middot;e&middot;s, en ce qui concerne les droits de propriété intellectuelle ou les
+restent la propriété exclusive de leurs auteur·e·s, en ce qui concerne les droits de propriété intellectuelle ou les
 droits d’usage. L'Utilisateur doit solliciter l'autorisation préalable du site pour toute reproduction, publication, copie des
 différents contenus. Il s'engage à une utilisation des contenus du site dans un cadre strictement privé, toute utilisation à des fins
 commerciales et publicitaires est strictement interdite. Toute représentation totale ou partielle de ce site par quelque procédé que
 ce soit, sans l’autorisation expresse de l’exploitant du site Internet, constituerait une contrefaçon sanctionnée par l’article L. 335-2
 et suivants du Code de la propriété intellectuelle. Il est rappelé conformément à l’article L.122-5 du Code de propriété intellectuelle
-que l’Utilisateur qui reproduit, copie ou publie le contenu protégé doit citer l’auteur&middot;e et sa source.
+que l’Utilisateur qui reproduit, copie ou publie le contenu protégé doit citer l’auteur·e et sa source.
 </p>
 <h3>Article 4 : Responsabilité</h3>
 <p>
@@ -64,7 +63,7 @@ du site ne peut être engagée en cas de force majeure ou du fait imprévisible 
 <em>Liens sortants</em> : Des liens hypertextes peuvent être présents sur le site. L’Utilisateur est informé qu’en cliquant sur ces liens, il sortira du site
 <em>https://lesmegeresdelhumus.fr</em>. Les liens sortants ouvrent une nouvelle fenêtre de navigation et sont indiqués par un petit
 icône caractéristique<span class="lien-e-seul"></span>. Les responsables du site n’ont pas de contrôle sur les pages web sur lesquelles aboutissent ces liens. Iels ne sauraient, en aucun cas,
-être tenu&middot;e&middot;s responsables de leur contenu.
+être tenu·e·s responsables de leur contenu.
 </p>
 <p>
 <em>Liens entrants</em> : Les propriétaires du site autorisent les liens hypertextes vers l’une des pages de ce site uniquement sur demande spécifique et à
@@ -114,11 +113,11 @@ l'éditeur aux coordonnées inscrites dans les mentions légales.
 <li>Article L.41 de la loi du 11 mars 1957</li>
 <li>Article L.226-13 du Code pénal et la Directive Européenne du 24 octobre 1995</li>
 <li>Articles L.335-2 et suivants du Code de Propriété Intellectuelle</li>
-<li>Loi n°&nbsp;78-87 du 6 janvier 1978, modifiée par la loi n°&nbsp;2004-801 du 6 août 2004, relative à l’informatique, aux fichiers
+<li>Loi n° 78-87 du 6 janvier 1978, modifiée par la loi n° 2004-801 du 6 août 2004, relative à l’informatique, aux fichiers
 et aux libertés</li>
 <li>Articles 38 et suivants de la loi L.78-17 du 6 janvier 1978 relative à l’informatique, aux fichiers et aux libertés</li>
 <li>Loi du 1<sup>er</sup> juillet 1998 transposant la directive 96/9 du 11 mars 1996 relative à la protection juridique des bases de
 données</li>
-<li>Loi n°&nbsp;2004-801 du 6 août 2004</li>
-<li>Article 6 de la loi n°&nbsp;2004-575 du 21 juin 2004 pour la confiance dans l’économie numérique</li>
+<li>Loi n° 2004-801 du 6 août 2004</li>
+<li>Article 6 de la loi n° 2004-575 du 21 juin 2004 pour la confiance dans l’économie numérique</li>
 </ul>

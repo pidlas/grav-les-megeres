@@ -34,6 +34,10 @@ ICU:
     TOGGLE_DARK_MODE: Toggle dark mode
     TOGGLE_MENU: Toggle menu
     UNSAVED_CHANGES: Unsaved changes
+    NOTICES:
+      HEADING: '{count, plural, one {Notice} other {Notices}}'
+      SHOW: Show notices
+      HIDE: Hide notices
     UNSAVED_CHANGES_DIALOG:
       LEAVE_MESSAGE: You have unsaved changes. Leave anyway?
       LEAVE: Leave
@@ -190,6 +194,7 @@ ICU:
         CONNECTING_TO_COLLAB: Connecting to collaboration session…
         RESET_TRANSLATION: Reset Translation
         PAGE_PREVIEW: Page Preview
+        PREVIEW_SHOWING_HOST_PAGE: shown in its parent page
         INVALID_YAML_FRONTMATTER: Invalid YAML frontmatter
         INVALID_YAML_FRONTMATTER_FIX_SYNTAX: Invalid YAML frontmatter — fix syntax before saving
         PAGE_SAVED_AND_MOVED: Page saved and moved
@@ -227,6 +232,7 @@ ICU:
         ROOT: <root> /
         PAGE_TEMPLATE: Page Template
         LOADING_TEMPLATES: Loading templates...
+        STATUS_HELP: Drafts are saved but not visible on the site until you publish them
         VISIBLE: Visible
         CONTROLS_WHETHER_THIS_PAGE_APPEARS_IN: Controls whether this page appears in navigation menus
         CONTINUE: Continue
@@ -243,6 +249,7 @@ ICU:
       SUBTITLE: Manage your site content and structure
     FIELDS:
       CLEAR_DATE: Clear date
+      SET_DATE_NOW: Set to now
       REGENERATE_SLUG: Auto-regenerate from page title
       ADD_ENTRY: Add entry
       ADD_ITEM: Add item
@@ -279,6 +286,13 @@ ICU:
         NO_TRIGGERS_ACTIVE_ENABLE_WEBHOOKS_OR: No triggers active! Enable webhooks or configure cron.
         RUNNING: Running...
         RUN_ALL: Run All
+        RUN_ALL_HELP: Run every enabled job now, whatever its schedule says.
+        RUN_PENDING: Run Pending
+        RUN_NOW: Run this job now
+        PENDING: Pending
+        NEVER: Never
+        BY_HAND: by hand
+        MANUAL_RUN_HELP: "Run Pending runs the jobs that have missed their last scheduled time, which is what you want on a site with no cron entry. Runs you start here are recorded as manual, and do not count towards the cron status above."
       CUSTOM_FIELD_WRAPPER:
         LOADING_CUSTOM_FIELD: Loading custom field...
       DATE_FORMAT:
@@ -291,6 +305,10 @@ ICU:
         SEARCH_ICONS: Search icons...
         NO_ICONS_FOUND: No icons found
         SHOWING_FIRST_200_RESULTS_TYPE_TO_NARROW: Showing first 200 results — type to narrow
+        FAMILY_ALL: All
+        FAMILY_SOLID: Solid
+        FAMILY_REGULAR: Regular
+        FAMILY_BRANDS: Brands
       PAGE_EXISTS:
         CHECKING_PAGE: Checking page...
       PAGE_MEDIA:
@@ -328,6 +346,16 @@ ICU:
         SELECT_FILES: Select files…
       FILE:
         LIMIT_REACHED: "This field accepts at most {limit} file(s)."
+      MEDIA:
+        TITLE: Select media
+        SELECT: Select media…
+        ADD: Add media…
+        CHANGE: Change
+        REMOVE: Remove
+        MOVE_EARLIER: Move earlier
+        MOVE_LATER: Move later
+        DONE: Done
+        SELECTED_COUNT: "{count, plural, =0 {Nothing selected} one {# selected} other {# selected}}"
     NAV:
       DASHBOARD: Dashboard
       CONFIGURATION: Configuration
@@ -454,6 +482,7 @@ ICU:
     REAUTH_MODAL:
       SESSION_EXPIRED: Session expired
       PLEASE_RE_ENTER_YOUR_PASSWORD_TO: Please re-enter your password to continue. Your work has been preserved.
+      SIGN_IN_AGAIN_TO_CONTINUE: Sign in again to continue. Your work has been preserved.
     USERNAME: Username
     PASSWORD: Password
     REMOVE: Remove
@@ -865,13 +894,14 @@ ICU:
         PROCESS_UNAVAILABLE: "This host has PHP's proc_open function disabled, so jobs cannot be started from the admin. They still run whenever your scheduler is triggered by cron or a webhook."
         CRON_UNDETERMINED: Grav cannot inspect this server's crontab, so it cannot confirm how the scheduler is being triggered.
         LAST_TRIGGERED: Last triggered
+        LAST_MANUAL_RUN: Last run by hand
         ENVIRONMENT_MISMATCH: "The scheduler last ran under the **{last}** environment, but this site is using **{current}**, which has its own configuration in user/env/{current}/config. Custom jobs and settings defined only there never run from that trigger. Update the bin/grav scheduler line in your crontab to the command below (it passes --env={current}), or export GRAV_ENVIRONMENT={current} before it runs."
         SCHEDULER_CONFIGURATION_SAVED: Scheduler configuration saved
         FAILED_TO_SAVE: Failed to save
         LOADING_SCHEDULER: Loading scheduler...
         NOT_ENABLED_FOR_USER: "Not Enabled for user:"
         GRAV_SCHEDULER: Grav Scheduler
-        INFO_BANNER: The scheduler can use either system crontab or webhook triggers to execute commands. Webhooks are recommended for cloud environments. Only advanced users should configure custom jobs. Misconfiguration or abuse can lead to security vulnerabilities.
+        INFO_BANNER: The scheduler can use either system crontab or webhook triggers to execute commands. Webhooks are recommended for cloud environments.
         CRONTAB_INSTRUCTIONS: To enable the Scheduler's functionality, you must add the **Grav Scheduler** to your system's crontab file for the **{user}** user. Run the command above from the terminal to add it automatically. Once saved, refresh this page to see the status.
         WEBHOOK_ALTERNATIVE: Alternatively, install the **scheduler-webhook** plugin to use webhook-based cron firing, which is recommended for cloud environments where system crontab access is not available.
         SECURITY_WARNING: Only advanced users should configure custom scheduler jobs. Incorrect configuration can cause performance issues or security vulnerabilities.
@@ -1045,6 +1075,11 @@ ICU:
       OR_CONTINUE_WITH: Or continue with
       CONTINUE_WITH: Continue with {provider}
       SSO_FAILED: Could not sign in with that provider. Please try again.
+      INVALID_AUTHENTICATION_CODE: Invalid authentication code
+      CAPTCHA_VERIFYING: Checking you're human...
+      CAPTCHA_VERIFIED: Verified you're human
+      CAPTCHA_NOT_COMPLETED: Please complete the challenge to continue
+      CAPTCHA_FAILED_TO_LOAD: The challenge could not be loaded. Reload the page and try again.
     PLUGIN:
       BACK_TO_DASHBOARD: Back to Dashboard
       NO_CONTENT_AVAILABLE_FOR_THIS_PLUGIN: No content available for this plugin page.
@@ -1114,6 +1149,8 @@ ICU:
       ACCENT_COLOR: Accent Color
       PRIMARY_COLOR_USED_FOR_BUTTONS_LINKS: Primary color used for buttons, links, and highlights
       SATURATION: Saturation
+      CURRENT_COLOR: Color
+      COPY_COLOR: Copy this color
       TYPEFACE_USED_THROUGHOUT_THE_ADMIN: Typeface used throughout the admin
       FONT_SIZE: Font Size
       TEXT_SIZE_USED_THROUGHOUT_THE_ADMIN: Text size used throughout the admin
@@ -1767,6 +1804,8 @@ ICU:
     IMAGES_LOADING_HELP: "The loading attribute allows a browser to defer loading offscreen images and iframes until users scroll near them. loading supports three values: auto, lazy, eager"
     IMAGES_MAX_PIXELS: Maximum image pixels
     IMAGES_MAX_PIXELS_HELP: "Total-pixel ceiling (width x height) for URL-based resize actions. Requests above this limit are refused. Set to 0 to disable the check."
+    IMAGES_PROGRESSIVE_JPEG: Progressive JPEGs
+    IMAGES_PROGRESSIVE_JPEG_HELP: "Save resized and cached JPEGs as progressive, so they appear as a whole blurry image that sharpens rather than filling in from the top. Usually smaller too. Does not affect PNG, WebP or AVIF."
     IMAGES_SEOFRIENDLY: SEO-Friendly Image names
     IMAGES_SEOFRIENDLY_HELP: When enabled, the image name is displayed first, then a smaller hash to reflect processed operations
     IMAGES_URL_ACTIONS: Allow URL-based image actions

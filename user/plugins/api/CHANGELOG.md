@@ -1,3 +1,87 @@
+# v1.0.29
+## 09/09/2026
+
+1. [](#improved)
+    * Previewing a modular child page now loads the page it lives in, with the module in place, instead of rendering the module's template on its own. A module is only ever a section inside its parent, so on its own it came out as a bare, doubled fragment with no theme styling. Unpublished modules show up in the preview too. Thanks to @onetrev [getgrav/grav-plugin-admin2#170](https://github.com/getgrav/grav-plugin-admin2/issues/170)
+
+1. [](#bugfix)
+    * A page whose header sets an empty route alias (`routes.default: ''`) is listed again. The listings skip Grav's invisible root container, and did so by asking whether a page had a route at all, which an empty one answers falsely, so the page went missing from the pages section, the parent picker and the dashboard count. Thanks to @TomOne [#34](https://github.com/getgrav/grav-plugin-api/issues/34)
+    * Such a page is also counted by the page-view tracker again, and can be found through the `parent` filter, both of which had the same flaw
+
+# v1.0.28
+## 09/09/2026
+
+1. [](#new)
+    * A plugin's MCP tool manifest can now name the one argument that carries the whole request body, so a route whose fields are decided by the site's own blueprints, such as a Flex directory's, can be offered as a tool. The fields come from the blueprint rather than the manifest, and an argument called `type` or `key` no longer collides with a path placeholder [#32](https://github.com/getgrav/grav-plugin-api/issues/32)
+    * Manifests opt into that by declaring `version: 2`, so an older API plugin skips such a file with a warning instead of serving a tool that would write a junk field. Version 1 manifests are read exactly as they were
+
+1. [](#improved)
+    * A tool definition carrying a key the manifest format does not define is now dropped with a warning naming the key, instead of being quietly ignored, so a typo costs you that one tool and says so
+    * The README and OpenAPI description now say what `additionalProperties: true` at the root of a tool's `input` means: arguments the schema does not declare are passed through, and it cannot be combined with `body`
+
+# v1.0.27
+## 09/08/2026
+
+1. [](#bugfix)
+    * **Saving a plugin's settings no longer deletes a secret the form did not send back.** Secrets are masked on the way out and restored on the way in, and the restore only looked at the paths present in what was submitted — so a secret that came back as the sentinel was put back, and one that came back missing entirely was silently dropped. Found on a live store: a merchant changed one From address on a plugin's settings form, and every webhook signing secret that plugin kept under a config key its blueprint does not declare was removed, leaving five registered webhooks posting at addresses that had stopped existing with nothing on any screen to say so. A secret absent from a submission is now restored from disk, which is the only honest reading of a field that was not sent. Clearing one on purpose still clears it, because that posts an empty string — a value, not an absence
+
+# v1.0.26
+## 09/05/2026
+
+1. [](#new)
+    * **A plugin page can now draw another plugin's settings.** A page definition gains a `settings_page` key beside `settings_route`, naming the plugin whose admin page holds the form. Answer `onApiPluginPageInfo` for an add-on that has no admin page of its own, point it at your page, and `GET /gpm/plugins` and `GET /gpm/plugins/{slug}` carry both keys so Admin Next sends `/plugins/{add-on}` and the Configure button on the Plugins list to `/plugin/{settings_page}{settings_route}`. That is how a suite of add-ons keeps every setting in one admin page instead of scattering them across the Plugins list. The named plugin has to be installed and have an admin page, and `settings_route` still has to be a hash route — otherwise both keys are dropped. Listing plugins now asks every installed plugin rather than only those with a page on disk, which is what lets a plugin answer for its add-ons.
+
+# v1.0.25
+## 09/03/2026
+
+1. [](#improved)
+    * The `onApiPageUpdated` event now says which template a page had before, when a save changed it, so a plugin keeping anything keyed on the template can clean up after itself [getgrav/grav-plugin-sync#4](https://github.com/getgrav/grav-plugin-sync/issues/4)
+
+# v1.0.24
+## 09/03/2026
+
+1. [](#bugfix)
+    * A package built for another generation of Grav can no longer be installed from the Plugins page. Nothing on this path checked, so a plugin still requiring the Grav 1.7 admin plugin could pull it in alongside Admin 2 whenever the repository happened to serve it [getgrav/grav-premium-issues#618](https://github.com/getgrav/grav-premium-issues/issues/618)
+
+# v1.0.23
+## 09/02/2026
+
+1. [](#new)
+    * A plugin page can now say its settings live on the plugin's own page, with a `settings_route` key holding a hash route such as `#/settings`. The plugin's entry in `GET /gpm/plugins` and `GET /gpm/plugins/{slug}` carries it too, so Admin Next can send `/plugins/{slug}` and the Configure button on the Plugins list straight to the plugin's own settings screen instead of drawing a second copy of the same form. Only a hash route is accepted, so the key names a place inside the plugin's page and nowhere else, and a plugin with no admin page on disk is never asked.
+    * Albert Sans joins the admin font choices. The preferences resolver accepts `albert-sans` as a site default and as a personal choice, to match the Admin Next 2.1.4 bundle that ships the face.
+    * Page Statistics now ignores command-line and library HTTP clients such as curl, wget and python-requests, which were being counted as real visitors. A new Excluded User Agents setting lets you add your own, for monitoring tools and scanners. Thanks to @mschiegg [#4274](https://github.com/getgrav/grav/issues/4274)
+    * Uploading or deleting a file on the Media page now notifies plugins, the same way uploading to a page always has. Plugins that react to media changes, such as Git Sync's automatic sync, previously never heard about a site-wide upload [#261](https://github.com/trilbymedia/grav-plugin-git-sync/issues/261)
+
+1. [](#bugfix)
+    * **The route cache follows plugin upgrades.** The compiled route table was keyed on the set of enabled plugins alone, so a plugin whose new version registered a route it did not have before kept the old table until someone ran `bin/grav clear`, and every call to the new route answered 404 while the admin screen that made it looked installed. The key now also carries the modification time of each enabled plugin's `blueprints.yaml`, which a version bump always edits, at the cost of one stat per plugin per request.
+
+# v1.0.22
+## 08/31/2026
+
+1. [](#new)
+    * A plugin can now describe its API routes as MCP tools in an `mcp.yaml` manifest at its root, or add them in code through the new `onApiMcpTools` event. `GET /mcp/tools` serves the union for the authenticated caller, filtered to the tools their permissions let them call, so an MCP server such as grav-mcp offers a model every plugin's tools with no code written per plugin. See the README section "MCP tool manifests" for the format.
+1. [](#bugfix)
+    * Moving or reordering a page now keeps the number of digits its folder already used, so a site set up for three-digit ordering no longer has `005.about` quietly rewritten to `05.about`
+
+# v1.0.21
+## 08/27/2026
+
+1. [](#new)
+    * Added an optional captcha on the admin login form, using a built-in challenge that needs no keys and no third-party service [#4254](https://github.com/getgrav/grav/issues/4254)
+    * Cloudflare Turnstile and Google reCAPTCHA can be used for that challenge instead, on sites that already have them configured in the Form plugin
+    * The captcha can also guard the forgotten-password and first-run setup forms
+    * Blueprint fields now carry their `sources` list to the admin, so a `media` field can say which pickers it offers
+    * `POST /scheduler/run` can now run the jobs that have missed their scheduled time, which is what a manual trigger is usually for, and is what it does by default. It can also run every job regardless of schedule, or a single job by name
+    * The scheduler job listing now says when each job next runs, whether it has missed its last scheduled time, and whether its last run was started by cron or by hand
+1. [](#improved)
+    * A manual scheduler run now reports which jobs actually ran, whether each succeeded and what it printed, instead of only that the run finished
+1. [](#bugfix)
+    * Fixed the admin never receiving Grav's own translations or any plugin's. Only the admin plugin's strings were being sent, so a plugin's labels showed up as a guess at the key name rather than the text it ships [#259](https://github.com/trilbymedia/grav-plugin-git-sync/discussions/259)
+    * Fixed every API-key request failing on a site where `user/data` is not writable by the web server. Recording when a key was last used is bookkeeping and no longer takes down the request that triggered it. Thanks to @sandymac for the report and the diagnosis [#30](https://github.com/getgrav/grav-plugin-api/issues/30)
+    * Fixed the same failure in three other places: an unwritable folder no longer breaks token validation, frontend page views, or the media manager's thumbnails.
+    * Errors from a folder that cannot be written now say which path is at fault, instead of reporting a missing temporary file.
+    * Fixed the account, user group and configuration forms failing with "Parent blueprint missing" on any site that adds its own fields to them. A site's own blueprint was loaded on its own, so the one it was extending was no longer there to extend. Thanks to @nerdyjan for the report and the diagnosis [#31](https://github.com/getgrav/grav-plugin-api/issues/31)
+
 # v1.0.20
 ## 08/21/2026
 

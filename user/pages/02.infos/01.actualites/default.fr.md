@@ -1,7 +1,8 @@
 ---
-title: 'Actualités'
-menu: 'Actualités'
+title: Actualités
+menu: Actualités
 ---
+
 <p class="p_first">
 Retrouvez ici les actualités de la compagnie <em>Les Mégères de l'Humus</em> : prochaines représentations, sorties de création,
 rendez-vous de théâtre forum, ateliers et temps forts de la compagnie.
@@ -13,7 +14,7 @@ et actions culturelles menées dans l'Aude et en Occitanie.
 
 <div class="actus-list" aria-live="polite">
 <article class="actu-item">
-<img class="actu-image" src="/infos/actualites/actu-event.webp" alt="Les événements de la compagnie" loading="lazy" decoding="async">
+[img name="actu-event.webp" alt="Les événements de la compagnie" class="actu-image"]
 <h2>Les événements</h2>
 <div class="actu-content">
 <p class="actu-date">mer. 24 juin 2026 à 19 heures</p>
@@ -33,7 +34,7 @@ et actions culturelles menées dans l'Aude et en Occitanie.
 </article>
 
 <article class="actu-item">
-<img class="actu-image" src="/infos/actualites/le-croco-bleu.jpg" alt="Stage ados 2026 à Carcassonne" loading="lazy" decoding="async">
+[img name="le-croco-bleu.jpg" alt="Stage ados 2026 à Carcassonne" class="actu-image"]
 <h2>Les réseaux sociaux</h2>
 <div class="actu-content">
 <p class="actu-date">mer. 23 avril 2026</p>

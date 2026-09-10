@@ -1334,6 +1334,7 @@ figure.bio {
     margin: 2rem 1rem 1rem 0;
     shape-image-threshold: 0.5;
     shape-outside: circle(50%) margin-box;
+    height:9.375rem;
 }
 
 .g_co-item11 {

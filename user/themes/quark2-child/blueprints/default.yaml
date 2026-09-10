@@ -32,4 +32,4 @@ form:
                   label: Titre de la carte
                 .lien:
                   type: text
-                  label: Lien de redirection (ex: /compagnie ou /cours)
+                  label: "Lien de redirection (ex: /compagnie ou /cours)"

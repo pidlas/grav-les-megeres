@@ -1,7 +1,7 @@
 name: API
 slug: api
 type: plugin
-version: 1.0.20
+version: 1.0.29
 description: RESTful API for Grav CMS. Provides headless access to pages, media, configuration, users, and system management.
 icon: plug
 author:
@@ -17,7 +17,7 @@ compatibility:
   grav: ["2.0"]
 
 dependencies:
-  - { name: grav, version: ">=2.0.19" }
+  - { name: grav, version: ">=2.0.24" }
   - { name: login, version: ">=3.9.2" }
 
 form:
@@ -232,6 +232,101 @@ form:
               validate:
                 type: bool
 
+            section_login_captcha:
+              type: section
+              title: Login Captcha
+              underline: true
+
+            login.captcha.enabled:
+              type: toggle
+              label: Login Captcha
+              help: "Require a captcha challenge on the admin login form. The login is already rate-limited and supports per-account 2FA, so this is an extra layer rather than the only one."
+              highlight: 0
+              default: 0
+              options:
+                1: Enabled
+                0: Disabled
+              validate:
+                type: bool
+
+            login.captcha.provider:
+              type: select
+              label: Captcha Provider
+              help: "Cap is a proof-of-work challenge served by this plugin — no keys and no third-party service. Turnstile and reCAPTCHA require the Form plugin, and use the keys already configured there."
+              default: cap
+              options:
+                cap: "Cap (built-in, no keys)"
+                turnstile: "Cloudflare Turnstile (Form plugin)"
+                recaptcha: "Google reCAPTCHA (Form plugin)"
+              validate:
+                type: string
+
+            login.captcha.mode:
+              type: select
+              label: Captcha Mode
+              help: "Invisible solves in the background while the user types their credentials. Checkbox makes them click. Honored by Cap and Turnstile."
+              default: invisible
+              options:
+                invisible: Invisible
+                checkbox: Checkbox
+              validate:
+                type: string
+
+            login.captcha.flows.login:
+              type: toggle
+              label: Guard Login
+              highlight: 1
+              default: 1
+              options:
+                1: Enabled
+                0: Disabled
+              validate:
+                type: bool
+
+            login.captcha.flows.forgot_password:
+              type: toggle
+              label: Guard Forgotten Password
+              help: "Recommended — the forgotten-password endpoint sends mail, which makes it a more attractive target than login itself."
+              highlight: 1
+              default: 1
+              options:
+                1: Enabled
+                0: Disabled
+              validate:
+                type: bool
+
+            login.captcha.flows.setup:
+              type: toggle
+              label: Guard First-run Setup
+              help: "Only reachable on a site with no accounts yet."
+              highlight: 0
+              default: 0
+              options:
+                1: Enabled
+                0: Disabled
+              validate:
+                type: bool
+
+            login.captcha.cap.challenge_difficulty:
+              type: text
+              label: Cap Difficulty
+              help: "Leading zero bits each sub-challenge must produce. Higher is more work for the client — raise only if you're seeing scripted attempts get through."
+              default: 4
+              validate:
+                type: int
+                min: 1
+                max: 8
+
+            login.captcha.cap.challenge_count:
+              type: text
+              label: Cap Sub-challenges
+              help: "How many sub-challenges make up one captcha. The default takes well under a second on a phone."
+              default: 30
+              validate:
+                type: int
+                min: 1
+                max: 200
+
         tab_cors:
           type: tab
           title: CORS
@@ -394,6 +489,24 @@ form:
               type: array
               label: Excluded IP Addresses
               help: "Visitor IPs or CIDR ranges to exclude from tracking, e.g. 203.0.113.7 or 203.0.113.0/24. IPv4 and IPv6 are both supported."
+              value_only: true
+
+            popularity.exclude_non_browsers:
+              type: toggle
+              label: Exclude Non-Browser Clients
+              help: Skip page views from command-line and library HTTP clients such as curl, wget, Go-http-client and python-requests. These report themselves as browsers rather than bots, so a scanner hitting your site would otherwise count as real traffic
+              highlight: 1
+              default: 1
+              options:
+                1: Enabled
+                0: Disabled
+              validate:
+                type: bool
+
+            popularity.exclude_agents:
+              type: array
+              label: Excluded User Agents
+              help: "Additional User-Agent fragments to exclude from tracking, matched anywhere in the header and ignoring case, e.g. uptimerobot or my-scanner. Added to the built-in list above."
               value_only: true
 
         tab_audit_trail:

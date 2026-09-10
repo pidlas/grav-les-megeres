@@ -15,6 +15,40 @@ use Grav\Common\Yaml;
  */
 class PopularityTracker
 {
+    /**
+     * Command-line and library HTTP clients that are never a person reading a
+     * page. Matched case-insensitively anywhere in the User-Agent header.
+     *
+     * Core's Browser::isHuman() only rejects parsed browser names containing
+     * `bot` or `crawl`, and the user-agent parser has no rule for these, so it
+     * falls through to a generic name/version pattern and reports `curl` as
+     * the browser. A security scanner hammering the site therefore lands in
+     * Page Statistics as real traffic.
+     *
+     * Deliberately not listed: headless Chrome, Lighthouse and uptime
+     * monitors. Those are ambiguous enough to be somebody's legitimate
+     * traffic, which is what `exclude_agents` is for.
+     */
+    private const NON_BROWSER_AGENTS = [
+        'curl/',
+        'wget/',
+        'go-http-client/',
+        'python-requests/',
+        'python-urllib/',
+        'libwww-perl/',
+        'okhttp/',
+        'apache-httpclient/',
+        'guzzlehttp/',
+        'node-fetch/',
+        'axios/',
+        'postmanruntime/',
+        'insomnia/',
+        'httpie/',
+        'restsharp/',
+        'java/',
+        'php/',
+    ];
+
     private Config $config;
     private PopularityStore $store;
 
@@ -39,6 +73,19 @@ class PopularityTracker
             return;
         }
 
+        // Skip command-line and library HTTP clients (curl, wget, scanners,
+        // monitoring tools). These parse as browsers rather than bots, so
+        // isHuman() above lets them through. On by default; `exclude_agents`
+        // is an additive list for anything site-specific.
+        $agent = (string) ($_SERVER['HTTP_USER_AGENT'] ?? '');
+        $excludeAgents = (array) $this->config->get('plugins.api.popularity.exclude_agents', []);
+        if ($this->config->get('plugins.api.popularity.exclude_non_browsers', true)) {
+            $excludeAgents = array_merge(self::NON_BROWSER_AGENTS, $excludeAgents);
+        }
+        if ($excludeAgents !== [] && self::agentMatches($agent, $excludeAgents)) {
+            return;
+        }
+
         // Skip views from logged-in admins so an author's own testing and
         // demo visits don't skew the real-visitor numbers. On by default.
         if ($this->config->get('plugins.api.popularity.exclude_admin', true)
@@ -57,14 +104,23 @@ class PopularityTracker
 
         /** @var \Grav\Common\Page\Interfaces\PageInterface|null $page */
         $page = $grav['page'] ?? null;
-        if ($page === null || !$page->route()) {
+        if ($page === null || $page->route() === null) {
             return;
         }
         if ($page->template() === 'error') {
             return;
         }
 
+        // A page carrying `routes.default: ''` has a legitimately empty public
+        // route, which used to fail the guard above and go uncounted. It is a
+        // real, reachable page, so it gets tracked like any other; the store
+        // keys records by route, and an empty string is no use as a key, so
+        // fall back to the structural route which is always present
+        // (getgrav/grav-plugin-api#34).
         $route = $page->route();
+        if ($route === '') {
+            $route = (string) $page->rawRoute();
+        }
         $url = (string) str_replace($grav['base_url_relative'], '', $page->url());
 
         foreach ((array) $this->config->get('plugins.api.popularity.ignore', []) as $ignore) {
@@ -96,6 +152,31 @@ class PopularityTracker
         } catch (\Throwable) {
             // Tracking must never break the page response — swallow.
         }
+    }
+
+    /**
+     * Match a User-Agent header against a list of exclusion patterns. A
+     * pattern matches if it appears anywhere in the header, ignoring case
+     * (e.g. `curl/` matches `curl/8.7.1`). Substring rather than glob
+     * matching, because a user-agent is a free-form string, not a path.
+     *
+     * @param array<int, string> $patterns
+     */
+    public static function agentMatches(string $agent, array $patterns): bool
+    {
+        if ($agent === '') {
+            return false;
+        }
+
+        $agent = strtolower($agent);
+        foreach ($patterns as $pattern) {
+            $pattern = strtolower(trim((string) $pattern));
+            if ($pattern !== '' && str_contains($agent, $pattern)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**

@@ -1,3 +1,77 @@
+# v2.0.24
+## 09/03/2026
+
+1. [](#new)
+    * **A dependency can now name the generation of Grav it is for.** A plugin that supports both 1.7 and 2.0 often needs a different version of the same dependency on each, so a `dependencies` entry takes an optional `grav` key: `- { name: form, version: '>=9.1.0', grav: '2.0' }`. Entries without it apply everywhere, so existing blueprints are unchanged. See [Plugin Compatibility](https://learn.getgrav.org/20/plugins/plugin-compatibility#requiring-different-versions-per-grav-generation)
+    * A new `system.images.progressive_jpeg` setting, on by default, controls whether resized and cached JPEGs are saved as progressive
+
+1. [](#bugfix)
+    * Installing a package whose dependency is not in the GPM index now says so and carries on, instead of stopping the command with a PHP fatal error. A plugin that still asks for the Grav 1.7 admin plugin was enough to trigger it [getgrav/grav-premium-issues#618](https://github.com/getgrav/grav-premium-issues/issues/618)
+    * A plugin that asks for the `admin` plugin now has that read as Admin 2 on Grav 2, so a plugin written for both 1.7 and 2.0 installs instead of failing on a dependency that cannot exist there. The version it asks for is not carried over, because it describes the old admin's numbering [getgrav/grav-premium-issues#618](https://github.com/getgrav/grav-premium-issues/issues/618)
+    * Any other dependency that cannot be installed on this generation of Grav is now left out of the install rather than attempted and failed
+    * A JSON request whose body is a bare scalar (`"text"`, `12345`, `true`) sent with `Content-Type: application/json` no longer answers a 500 from the request pipeline before any route runs. It is treated as an empty body, so a plugin's webhook or API route gets to answer it, log it and refuse it itself. With `errors.display` on, the old failure also printed a stack trace with server paths to whoever sent it
+    * An image default such as `resize` set in `system.images.defaults` works again. Every image manipulation was being skipped since 2.0.22, leaving only the loading and decoding hints [#4282](https://github.com/getgrav/grav/issues/4282)
+    * Settings such as `loading: lazy` now stay on the image when `link` is also on, instead of moving onto the surrounding link where the browser never sees them [#4282](https://github.com/getgrav/grav/issues/4282)
+    * Resized and cached JPEGs are saved as progressive again, so a photo appears as a whole blurry image that sharpens instead of filling in one line at a time. It has been Grav's default since 2014 but silently stopped working in 1.4.6 [#4284](https://github.com/getgrav/grav/issues/4284)
+    * A media file's own settings from `media.yaml` are no longer overwritten the moment the image is opened, so custom default filters for an image type work again
+    * A URL typed with a trailing slash no longer errors out on a site that has the debugger switched on and the Login plugin protecting page media, because the debug bar is now skipped on redirects, where there is no page to put it on [#4280](https://github.com/getgrav/grav/issues/4280)
+    * With the optional `system.session.read_and_close` setting turned on, a change made to the session early in a request is no longer thrown away by a later write in that same request, and a message added just before a redirect now reaches the page it was meant for [#4281](https://github.com/getgrav/grav/issues/4281)
+
+# v2.0.23
+## 09/02/2026
+
+1. [](#improved)
+    * `composer.json` now declares the `ctype` and `session` extensions it has always used, and suggests `fileinfo` and `simplexml`. Installing with `composer create-project` on a machine missing one of these no longer quietly walks back to a years-old release of Grav instead of failing [#4273](https://github.com/getgrav/grav/discussions/4273)
+1. [](#bugfix)
+    * Reading the browser name, platform or version no longer raises a PHP deprecation notice when a request arrives with no user agent, which is every request from a bare script or a health check
+    * Opening Clockwork before anything has been profiled, on a fresh install or right after `bin/grav clear`, now reports that there is no data yet instead of failing with a 500
+    * A `GRAV_CONFIG__` override set to `true` or `false` now reaches the configuration as a real yes/no value instead of the word itself, so switching something off from a `.env` file or the server environment actually switches it off. Thanks to @nerdyjan for the report and @AdilAzhariOmsan for the fix [#4277](https://github.com/getgrav/grav/issues/4277)
+    * `Uri::ip()` now reads the visitor's address from `$_SERVER`, falling back to the environment, so hosts that don't hand request variables to PHP's environment no longer report every visitor as `UNKNOWN`. Anything that counts per address there, such as the Login plugin's failed-login lockout and per-IP rate limiting, had been sharing a single bucket. Thanks to @sandymac [#2507](https://github.com/getgrav/grav/issues/2507)
+    * On those same hosts the `system.http_x_forwarded` options for `ip`, `client_ip` and `cf_connecting_ip` had no effect at all, and now work as documented. If you turned one on and saw nothing change, turn it back off unless the site really is behind a proxy that overwrites that header
+
+# v2.0.22
+## 08/31/2026
+
+1. [](#new)
+    * The `url()` Twig function now takes a language, so a link to a route that isn't a page - a search page, a form action - can carry the site's language prefix: `{{ url('/search', lang=true) }}`
+    * Blueprints can use a `media` field type, which saves a picked file as its path and keeps a list of them when the field allows more than one
+    * Page collections can now exclude one or more template types with `notOfType()`, the counterpart to the existing `ofType()` [#3910](https://github.com/getgrav/grav/issues/3910)
+    * The scheduler can now run the jobs that have missed their scheduled time, rather than only the ones due this very minute. Run it with `bin/grav scheduler --catch-up`, which is what you want on a site that has no cron entry set up
+1. [](#improved)
+    * Twig in page content can no longer read the site's configuration through the `print_r`, `vardump`, `json_encode`, `yaml_encode` and `string` filters. The check that was meant to stop it had been asking whether the whole site was in sandbox mode, which Grav never does — it decides per template — so it had been letting everything through. Thanks to @Vectrain51
+    * The `|map`, `|filter` and `|reduce` Twig filters now check for themselves whether the template calling them is sandboxed, rather than relying on Twig to work it out. Thanks to @DhiyaneshGeek
+    * The scheduler no longer rebuilds a queued job from an unsigned queue file, so a file written into the queue folder by something other than Grav can at most re-run a job the site was already set up to run. The page index also refuses to build objects while reading its cache. Thanks to @elite0529
+    * Plugin and theme descriptions are now rendered in Parsedown's safe mode before admin displays them, so a description carrying raw HTML shows as text rather than being rendered. Thanks to @alham-rizvi
+    * The debugger's Clockwork data endpoint now answers only requests coming from the server itself, or requests presenting the secret set in the new `debugger.token` option. Cookies and API tokens are no longer recorded in profiler data whatever the `censored` option is set to
+    * Building a URL is now faster, which adds up over the hundreds of asset and link URLs a single page render produces
+    * The scheduler now records whether a run was started by cron or by hand, and a run you started yourself no longer counts as evidence that cron is set up
+    * `bin/grav scheduler -r` now records the run against each job, the same as a scheduled run, so the next run knows what has already happened
+    * A field that is rejected only for being too long or too short now says so, and gives both the length submitted and the limit, instead of the same "Invalid input" any other bad value gets
+    * Multiline fields no longer carry a length limit low enough to affect real writing. Set `max: 0` on a field to remove the limit altogether
+1. [](#bugfix)
+    * The `|reduce` Twig filter now actually reduces. It was running the `|map` code by mistake and throwing away the starting value, so `[1,2,3]|reduce((c, v) => c + v, 0)` gave back a list instead of `6`. Thanks to @DhiyaneshGeek
+    * A form field's `minlength` and `maxlength` are now checked when the form is submitted, not only by the browser. They were being written into the page as HTML attributes but ignored on the server, so anything that skipped the browser's own check went straight through [#642](https://github.com/getgrav/grav-plugin-form/issues/642)
+    * A field with a `step` set now accepts the lengths and counts that land on a step, and rejects the ones that do not. The check was the wrong way round, so it rejected exactly the values it was meant to allow
+    * A long page can be saved from the admin again. Page content was capped at 65,536 characters, so anything longer than roughly twenty pages of text was refused, and the only way to edit it was to write the file directly [#3643](https://github.com/getgrav/grav/issues/3643)
+    * A site installed in a subfolder no longer mangles URLs whose path repeats the install folder's name, such as an image at `/images/subdir/photo.jpg` on a site installed at `/subdir`
+    * A link to a page that carries a query string or an anchor, such as `/blog?page=2`, now resolves to the page and keeps its language prefix, instead of being passed through as a plain path
+    * On a site installed in a subfolder, links written with the full path now resolve to the page, so they pick up the site's language and page extension
+    * A cache folder that the web server cannot write to no longer takes the whole site down. Grav now logs a warning naming the folder and serves the request without the cache, so the front end and the admin both stay reachable and the Problems plugin can report what is wrong [#4260](https://github.com/getgrav/grav/issues/4260)
+    * The same failure writing `user/config/versions.yaml` no longer stops the site either [#3688](https://github.com/getgrav/grav/issues/3688)
+    * Errors about a file that cannot be written now name the folder and say whether it is missing or not writable, instead of only reporting the file
+    * A session cookie name starting with `__Secure-` or `__Host-` now keeps that prefix and is sent with the settings browsers require for it, so the extra protection those prefixes give actually applies. Thanks to @wakqasahmed for the fix [#3773](https://github.com/getgrav/grav/issues/3773)
+      Note: sites whose `system.session.name` contains capitals, underscores or a leading or trailing dash will get a slightly different cookie name after this update, which signs their users out once.
+    * The scheduler no longer reports that cron is not set up when the crontab entry is written in a valid but slightly different style, such as one using `&&` or an absolute path to `bin/grav`
+    * On a site with a custom scheduler job of its own, looking up a job by name no longer misses every job the system and its plugins register, so the backup and cache jobs can be found and run individually
+    * A scheduler job that finished its work but could not then write its output file, send its notification email or run its callback no longer aborts the whole run. The remaining jobs run, every result is still recorded, and the problem is written to the log
+    * A scheduler job registered without a schedule of its own no longer causes an error when its next run time is worked out
+    * `bin/grav scheduler -j` no longer fails on a site with jobs registered by a plugin, and `-d` no longer fails on a job that has never run
+    * A scheduler job that runs one of Grav's own command line scripts now works when the scheduler is triggered from the web rather than from cron. Those jobs used to fail with "env: php: No such file or directory", because the web server does not have php on its path
+    * A scheduler job registered as a whole command line, such as `bin/plugin myplugin sync`, now runs. Only the executable and its arguments given separately used to work, so a job written the other way looked for a file whose name contained spaces and failed every time it ran
+    * A site served from a subpath by a proxy no longer loses that subpath when a trailing slash is redirected, which previously sent visitors outside the site. The homepage of such a site also no longer redirects to the bare domain. Thanks to @wakqasahmed for the fix [#3822](https://github.com/getgrav/grav/issues/3822)
+    * With `force_ssl` turned on, a page that does not exist now redirects to HTTPS like every other page, instead of serving the 404 over plain HTTP. Thanks to @wakqasahmed for the fix [#3703](https://github.com/getgrav/grav/issues/3703)
+    * Image settings are no longer applied to audio, video, SVG or document media. An embedded MP3 kept its player instead of being turned into a linked thumbnail, and media URLs no longer pick up stray `loading`, `decoding` and `fetchpriority` values, which happened on every site whether or not those settings had been changed. Thanks to @wakqasahmed for the fix [#4264](https://github.com/getgrav/grav/issues/4264)
+
 # v2.0.21
 ## 08/22/2026
 

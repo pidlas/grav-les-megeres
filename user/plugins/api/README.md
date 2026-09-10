@@ -15,7 +15,7 @@ Built for the AI-native era — designed to work seamlessly with AI agents, MCP 
 ### GPM (preferred)
 
 ```bash
-bin/grav install api
+bin/gpm install api
 ```
 
 ### Manual
@@ -1020,6 +1020,8 @@ The page definition structure:
 | `data_endpoint` | string | API path to fetch form data |
 | `save_endpoint` | string | API path to save form data |
 | `actions` | array | Toolbar action buttons (see below) |
+| `settings_route` | string | A hash route inside this page where the plugin keeps its own settings, such as `#/settings`. With it set, Admin Next redirects `/plugins/{slug}` to `/plugin/{slug}#/settings` and sends the Configure button on the Plugins list to the same place, so a plugin that renders its settings on its own page does not end up with two copies of them. Only a hash route is accepted — anything else is ignored. |
+| `settings_page` | string | The slug of the plugin whose page draws those settings, when it is not this plugin's own. Answer `onApiPluginPageInfo` for an add-on that has no admin page of its own, name your page here, and Admin Next redirects `/plugins/{add-on}` to `/plugin/{settings_page}{settings_route}` — that is how an add-on's settings end up inside the page of the plugin it extends. Kept only when it names an installed plugin that has an admin page and `settings_route` is a hash route; otherwise both keys are dropped. |
 
 Each action in the `actions` array:
 
@@ -1033,6 +1035,167 @@ Each action in the `actions` array:
 | `download` | bool | Whether this action triggers a file download |
 | `endpoint` | string | API path for the action (required for upload/download actions) |
 
+### MCP tool manifests
+
+An MCP server such as [grav-mcp](https://github.com/getgrav/grav-mcp) gives a model a set of tools it can call against a Grav site. The tools for everything this plugin does itself are built into that server, but the routes your plugin registers through `onApiRegisterRoutes` are invisible to it. A tool manifest fixes that: you describe your routes in a `mcp.yaml` file next to them, the API serves the union of every plugin's manifest at `GET /mcp/tools`, and the MCP server turns each entry into a tool at startup with no code written per plugin.
+
+Drop `mcp.yaml` in your plugin root, beside `blueprints.yaml` and `permissions.yaml`:
+
+```yaml
+version: 1
+prefix: kahunacart          # optional; defaults to the plugin slug. Tool name = "{prefix}_{name}"
+tools:
+  - name: list_products
+    title: List products
+    description: >
+      List catalog products with paging, search and status filters. Returns product rows with their
+      variants and attributes. Use get_product for one product with everything on it.
+    method: GET
+    path: /kahunacart/products
+    permission: kahunacart.products.manage
+    annotations:
+      readOnly: true
+    input:
+      type: object
+      properties:
+        q: { type: string, description: "Search title, slug or SKU" }
+        status: { type: string, enum: [draft, published, archived] }
+        page: { type: integer, minimum: 1, default: 1 }
+        per_page: { type: integer, minimum: 1, maximum: 100, default: 20 }
+
+  - name: update_product
+    title: Update a product
+    description: Change one or more fields of a product. Only the fields sent are changed.
+    method: PATCH
+    path: /kahunacart/products/{id}
+    permission: kahunacart.products.manage
+    annotations:
+      idempotent: true
+    input:
+      type: object
+      required: [id]
+      properties:
+        id: { type: integer, description: "Product id" }
+        title: { type: string }
+        status: { type: string, enum: [draft, published, archived] }
+        attributes:
+          type: object
+          description: "Attribute slug to value; null removes"
+          additionalProperties: true
+```
+
+The fields:
+
+| Key | Required | Meaning |
+|---|---|---|
+| `version` | yes | Manifest format version. `1` or `2`. Version 2 adds `body`. A manifest without it, or with any other value, is skipped whole. |
+| `prefix` | no | Tool-name prefix. Defaults to the plugin slug with `-` replaced by `_`. |
+| `tools[].name` | yes | Must match `^[a-z][a-z0-9_]*$`. The final tool name is `{prefix}_{name}` and must be 64 characters or fewer. |
+| `tools[].title` | no | Human title an MCP client may show. |
+| `tools[].description` | yes | What the tool does and returns, when to use it, and anything the model must know to call it well. One to four sentences. Do not repeat the permission; the MCP server appends `[Requires: <permission>]` itself. |
+| `tools[].method` | yes | `GET`, `POST`, `PATCH`, `PUT` or `DELETE`. |
+| `tools[].path` | yes | Route path relative to the API base, starting with `/`. `{name}` placeholders name path parameters; each must exist in `input.properties` and is treated as required. A FastRoute regex constraint such as `{id:\d+}` is not accepted here, since the client has to be able to substitute the placeholder literally. |
+| `tools[].permission` | no | The permission your route enforces. A caller who lacks it never sees the tool. |
+| `tools[].annotations` | no | `readOnly`, `destructive` and `idempotent` booleans. Defaults follow the method: `GET` is `readOnly: true, idempotent: true`; `DELETE` is `destructive: true, idempotent: true`; `PUT` and `PATCH` are `idempotent: true`; `POST` is all false. Setting a key overrides the default for that key only. |
+| `tools[].input` | no | A JSON Schema object (`type: object`) in the subset below. Omit it for a tool that takes no arguments. |
+| `tools[].query` | no | For `POST`, `PATCH`, `PUT` and `DELETE`, the property names to send as query-string parameters rather than in the JSON body. Ignored for `GET`, which sends every non-path property as a query parameter. |
+| `tools[].body` | no | Version 2 only. Names the single declared property whose value *is* the request body, instead of the body being assembled from whatever properties are left over. For a route whose body fields the site decides — a Flex directory's, say — or whose fields would collide with a path placeholder. The property must be declared, must be `type: object`, and must be neither a path placeholder nor listed in `query`; the method cannot be `GET`; the root `input` must not be open (`additionalProperties: true`); and every other declared property must be a path placeholder or in `query`, since nothing is left over to fall into the body. Whether it is `required` is yours to decide. |
+
+Only JSON bodies are supported. Multipart routes (file, image and release uploads) are out of scope, so leave them out of the manifest.
+
+An `additionalProperties: true` at the root of `input` is honored: arguments the schema does not declare are passed through, as query parameters for a `GET` and into the body for everything else. Use it for a route that forwards whatever it is handed. The root is an object like any other, so the free-form-map rule below reaches it too: an `input` declaring `type: object` with no `properties` is open. For a tool that takes no arguments, omit `input` entirely rather than writing an empty `type: object`. It cannot be combined with `body`, which needs a closed schema so that every property has exactly one place to go. A key on a tool that is not one of the keys above is an error, not something ignored: the tool is dropped with an `unknown key` warning.
+
+A body-designated tool, for a route whose fields come from the site's own blueprints:
+
+```yaml
+version: 2
+prefix: flex
+tools:
+  - name: update_object
+    description: Change one or more fields of an object in a Flex directory.
+    method: PATCH
+    path: /flex-objects/{type}/{key}
+    permission: flex-objects.update
+    body: object
+    input:
+      type: object
+      required: [type, key, object]
+      properties:
+        type:   { type: string, description: "Directory name" }
+        key:    { type: string, description: "Object key" }
+        object: { type: object, additionalProperties: true, description: "Fields per the directory blueprint" }
+```
+
+**The JSON Schema subset.** An MCP client converts `input` into its own validator at load time, so a manifest may only use what that conversion understands. A tool that uses anything else is rejected and the reason is reported under `warnings`.
+
+Allowed per property: `type` (`string`, `integer`, `number`, `boolean`, `array`, `object`), `description`, `default`, `enum` (strings or numbers), `nullable: true`, `minimum`, `maximum`, `minLength`, `maxLength`, `pattern`, `format` (`date`, `date-time`, `email` or `uri`, advisory only and passed through to the description), `items` (the same subset, for arrays), and `properties` + `required` + `additionalProperties` for nested objects. An `object` with no `properties` is a free-form map, and `additionalProperties` defaults to `true` in that case.
+
+Not allowed anywhere in the tree: `$ref`, `oneOf`, `anyOf`, `allOf`, `not`, `if`/`then`, tuple `items`, `patternProperties`, `const` and `dependencies`.
+
+**Tools built at runtime.** If your tool list depends on data rather than on a file, add entries in code through the `onApiMcpTools` event. The event carries an `McpToolCollector` under `tools`:
+
+```php
+public static function getSubscribedEvents(): array
+{
+    return ['onApiMcpTools' => ['onApiMcpTools', 0]];
+}
+
+public function onApiMcpTools(Event $event): void
+{
+    $event['tools']->add('kahunacart', [
+        'name'        => 'sync_stripe',
+        'description' => 'Re-sync products and prices with the payment provider.',
+        'method'      => 'POST',
+        'path'        => '/kahunacart/providers/stripe/sync',
+        'permission'  => 'kahunacart.settings',
+    ]);
+}
+```
+
+The first argument is your plugin slug, which decides the name prefix and fills the `plugin` field. Entries are validated exactly like manifest entries. Files are read first and the event fires afterwards, so a name your own `mcp.yaml` already claimed wins over the one added in code.
+
+**What the endpoint returns.** `GET /mcp/tools` needs only `api.access`:
+
+```json
+{
+  "data": {
+    "tools": [
+      {
+        "name": "kahunacart_list_products",
+        "plugin": "kahunacart",
+        "title": "List products",
+        "description": "List catalog products ...",
+        "method": "GET",
+        "path": "/kahunacart/products",
+        "permission": "kahunacart.products.manage",
+        "annotations": { "readOnly": true, "destructive": false, "idempotent": true },
+        "input_schema": { "type": "object", "properties": { "q": { "type": "string" } } },
+        "path_params": [],
+        "query": [],
+        "body": null
+      }
+    ],
+    "plugins": [
+      { "slug": "kahunacart", "name": "KahunaCart", "version": "0.1.0", "tools": 48 }
+    ],
+    "warnings": [
+      "kahunacart: tool 'upload_image' skipped: unsupported schema keyword 'oneOf' at properties.file"
+    ],
+    "fingerprint": "5f1d9c2a7b3e4d08"
+  }
+}
+```
+
+A few rules worth knowing while you write a manifest:
+
+- Only enabled plugins are read. A plugin with no `mcp.yaml` and no `onApiMcpTools` listener contributes nothing and is not listed under `plugins`.
+- A tool whose `permission` the caller does not hold is left out, and super admins see everything. Tools without a permission are always included. `plugins[].tools` counts what that caller can see, so the number moves with who is asking.
+- `annotations` always comes back fully populated with the defaults applied, and `input_schema` is always present (`{"type":"object","properties":{}}` for a tool that takes no arguments). `path_params` lists the placeholders in `path` in the order they appear.
+- `body` is always present, and is `null` unless the tool designated one. When it names a property, that property's value is the whole request body and every other property is a path or query parameter; when it is `null`, the body is whatever is left after the path and query parameters are taken out.
+- `fingerprint` hashes the enabled-plugin set plus the manifest file modification times, so a client can tell whether anything changed without diffing the tool list. It is also sent as the `ETag`, and a matching `If-None-Match` gets a 304. Tools added through the event have no file behind them, so editing that code does not move the fingerprint.
+- `warnings` names every entry that was skipped and why, and is safe to show to any authenticated caller. Use it while writing a manifest: a typo costs you that one tool, never the rest of the file.
+- A broken manifest never takes the endpoint down. A YAML parse error becomes one warning naming your plugin and every other plugin is served as usual.
+
 ## Events
 
 The API fires events before and after all write operations, allowing plugins to react, validate, modify data, or cancel operations.
@@ -1044,7 +1207,7 @@ The API fires events before and after all write operations, allowing plugins to 
 | `onApiBeforePageCreate` | Before a page is saved | `route`, `header`, `content`, `template`, `lang` (modifiable by reference) |
 | `onApiPageCreated` | After page creation | `page` (PageInterface), `route`, `lang` |
 | `onApiBeforePageUpdate` | Before a page is updated | `page` (PageInterface), `data` (request body, modifiable by reference) |
-| `onApiPageUpdated` | After page update | `page` (PageInterface) |
+| `onApiPageUpdated` | After page update | `page` (PageInterface), `previous_template` (string, only when the template changed) |
 | `onApiBeforePageDelete` | Before a page is deleted | `page` (PageInterface), `lang` (if language-specific delete) |
 | `onApiPageDeleted` | After page deletion | `route`, `lang` (if language-specific delete) |
 | `onApiPageMoved` | After page move | `page` (PageInterface), `old_route`, `new_route` |
@@ -1101,6 +1264,12 @@ The API fires events before and after all write operations, allowing plugins to 
 | `onApiSidebarItems` | Sidebar items are collected via `GET /sidebar/items` | `items` (array, modifiable), `user` (UserInterface) |
 | `onApiPluginPageInfo` | Plugin page definition requested via `GET /gpm/plugins/{slug}/page` | `plugin` (string), `definition` (array\|null, modifiable), `user` (UserInterface) |
 | `onApiDashboardWidgets` | Widget registry is collected via `GET /dashboard/widgets` | `widgets` (array, modifiable), `user` (UserInterface) |
+
+### MCP Events
+
+| Event | When | Event Data |
+|-------|------|------------|
+| `onApiMcpTools` | Plugin tool manifests are collected via `GET /mcp/tools`, after every `mcp.yaml` has been read | `tools` (McpToolCollector) |
 
 ### Using Events in Your Plugin
 

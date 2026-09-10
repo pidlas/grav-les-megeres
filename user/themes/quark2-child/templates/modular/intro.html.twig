@@ -1,0 +1,15 @@
+<div class="g_compagnie">
+
+    <div class="g_co-item1">
+        
+        {# Affiche le texte principal du fichier intro.md #}
+        {{ page.content|raw }}
+        
+        {# Cherche correctement l'image dans le dossier du bloc #}
+        {% set image_bloc = page.media.images|first %}
+        {% if image_bloc %}
+            {{ image_bloc.html(null, "Le théâtre d'ombres - Grésilhette et la Salimonde")|raw }}
+        {% endif %}
+    </div>
+    
+</div>

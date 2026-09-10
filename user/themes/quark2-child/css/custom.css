@@ -28,3 +28,19 @@ fieldset.visually-hidden {
     position: relative;
     display: block;
 }
+
+img.text-image-loaded {
+  /* Augmenté à 1.8 secondes pour un effet bien visible et fluide */
+  animation: smoothFadeZoom 1.8s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+}
+
+@keyframes smoothFadeZoom {
+  from {
+    opacity: 0;
+    transform: scale(0.92); /* Un zoom de départ légèrement plus prononcé pour mieux voir l'effet */
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}

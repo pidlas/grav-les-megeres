@@ -13,6 +13,7 @@ use Grav\Framework\Psr7\Response;
 use Grav\Plugin\Api\Audit\AuditContext;
 use Grav\Plugin\Api\Controllers\AuditController;
 use Grav\Plugin\Api\Controllers\AuthController;
+use Grav\Plugin\Api\Controllers\CaptchaController;
 use Grav\Plugin\Api\Controllers\BlueprintController;
 use Grav\Plugin\Api\Controllers\BlueprintFilesController;
 use Grav\Plugin\Api\Controllers\BlueprintUploadController;
@@ -20,6 +21,7 @@ use Grav\Plugin\Api\Controllers\ConfigController;
 use Grav\Plugin\Api\Controllers\DashboardController;
 use Grav\Plugin\Api\Controllers\DashboardWidgetController;
 use Grav\Plugin\Api\Controllers\GpmController;
+use Grav\Plugin\Api\Controllers\McpController;
 use Grav\Plugin\Api\Controllers\MediaController;
 use Grav\Plugin\Api\Controllers\SchedulerController;
 use Grav\Plugin\Api\Controllers\PagesController;
@@ -582,16 +584,61 @@ class ApiRouter extends ProcessorBase
      * this file on plugin install, which made "install a plugin from the admin"
      * silently half-work until someone ran `bin/grav clear`.
      *
-     * Keyed on the enabled plugin set rather than invalidated by an event: it
-     * needs no cooperation from whatever changed the set, and it is correct for
-     * install, enable, disable and removal alike. Stale files stay in cache://api
-     * and go with any cache clear; the set changes rarely enough that they do not
-     * accumulate meaningfully.
+     * Keyed on the enabled plugin set and each plugin's blueprint mtime rather
+     * than invalidated by an event: it needs no cooperation from whatever
+     * changed the set, and it is correct for install, enable, disable, removal
+     * and upgrade alike. Stale files stay in cache://api and go with any cache
+     * clear; the set changes rarely enough that they do not accumulate
+     * meaningfully.
      */
     protected function routeCacheFingerprint(): string
     {
+        $locator = $this->container['locator'];
+
+        return self::routeSetFingerprint($this->config, static function (string $slug) use ($locator): int {
+            $file = $locator->findResource("plugins://{$slug}/blueprints.yaml");
+
+            return \is_string($file) ? (int) (@filemtime($file) ?: 0) : 0;
+        });
+    }
+
+    /**
+     * The route table's identity: the enabled plugin set, plus when each
+     * plugin's blueprints.yaml last changed.
+     *
+     * The set alone covers install, enable and disable, but not upgrade: a
+     * plugin whose new version registers a route it did not have before keeps
+     * the old table until someone runs `bin/grav clear`, and every call to the
+     * new route 404s while the admin screen that makes it looks installed. A
+     * version bump always edits blueprints.yaml, so its mtime is the cheapest
+     * honest signal of "this plugin is not the one the table was built from".
+     * A stat per enabled plugin per request is the whole cost.
+     *
+     * @param callable(string): int $blueprintMtime the mtime of a plugin's blueprints.yaml, 0 when it has none
+     */
+    public static function routeSetFingerprint(Config $config, callable $blueprintMtime): string
+    {
+        $parts = [];
+        foreach (self::enabledPluginSlugs($config) as $slug) {
+            $parts[] = $slug . '@' . $blueprintMtime($slug);
+        }
+
+        return substr(hash('sha256', implode(',', $parts)), 0, 16);
+    }
+
+    /**
+     * The slugs of every enabled plugin, sorted.
+     *
+     * Shared with the MCP manifest loader, which keys its own fingerprint on the
+     * same set: both want "what is switched on right now", and one definition of
+     * that keeps the two from drifting apart.
+     *
+     * @return array<int, string>
+     */
+    public static function enabledPluginSlugs(Config $config): array
+    {
         $enabled = [];
-        foreach ((array) $this->config->get('plugins', []) as $slug => $settings) {
+        foreach ((array) $config->get('plugins', []) as $slug => $settings) {
             // Grav treats a missing `enabled` as on, so only an explicit false
             // counts as disabled.
             if (!is_array($settings) || ($settings['enabled'] ?? true) !== false) {
@@ -600,7 +647,7 @@ class ApiRouter extends ProcessorBase
         }
         sort($enabled);
 
-        return substr(hash('sha256', implode(',', $enabled)), 0, 16);
+        return $enabled;
     }
 
     protected function registerCoreRoutes(RouteCollector $r): void
@@ -619,6 +666,14 @@ class ApiRouter extends ProcessorBase
         $r->addRoute('GET',  '/auth/setup', [SetupController::class, 'status']);
         $r->addRoute('POST', '/auth/setup', [SetupController::class, 'create']);
         $r->addRoute('GET',  '/auth/password-policy', [PasswordPolicyController::class, 'show']);
+
+        // Login captcha (public — under /auth/). `captcha` is discovery: the
+        // login page asks what challenge to render, the way it asks for SSO
+        // providers. The challenge/redeem pair is the cap.js proof-of-work
+        // round-trip, and only responds while cap is the active provider.
+        $r->addRoute('GET',  '/auth/captcha', [CaptchaController::class, 'show']);
+        $r->addRoute('POST', '/auth/captcha/challenge', [CaptchaController::class, 'challenge']);
+        $r->addRoute('POST', '/auth/captcha/redeem', [CaptchaController::class, 'redeem']);
 
         // SSO / OAuth login bridge for admin-next (public — under /auth/). Static
         // routes before the parameterized ones (FastRoute matching order).
@@ -774,6 +829,9 @@ class ApiRouter extends ProcessorBase
         $r->addRoute('GET', '/gpm/repository/plugins', [GpmController::class, 'repositoryPlugins']);
         $r->addRoute('GET', '/gpm/repository/themes', [GpmController::class, 'repositoryThemes']);
         $r->addRoute('GET', '/gpm/repository/{slug}', [GpmController::class, 'repositoryPackage']);
+
+        // MCP tool manifests contributed by plugins, for an MCP server to load.
+        $r->addRoute('GET', '/mcp/tools', [McpController::class, 'tools']);
 
         // Dashboard
         $r->addRoute('GET', '/dashboard/notifications', [DashboardController::class, 'notifications']);
