@@ -1,5 +1,5 @@
 timezone: Europe/Paris
-custom_base_url: null
+custom_base_url: 'http://grav.localhost'
 languages:
   supported:
     - fr

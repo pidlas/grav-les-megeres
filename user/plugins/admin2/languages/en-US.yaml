@@ -27,6 +27,7 @@ ICU:
     EDIT: Edit
     LOADING: Loading...
     NO_CHANGES: No changes to save
+    RETRY: Retry
     SAVE: Save
     SAVING: Saving...
     SEARCH: Search
@@ -407,6 +408,11 @@ ICU:
       FAILED_TO_LOAD_AVAILABLE_THEMES_FROM_GPM: Failed to load available themes from GPM
       ADD_THEME: Add Theme
       SELECT_A_THEME_TO_VIEW_DETAILS: Select a theme to view details
+    API_CLIENT:
+      INVALID_JSON_TITLE: Unexpected response from the server
+      INVALID_JSON_DETAIL: "The server's reply could not be read because it is not valid JSON. Something on the server may be printing extra output, such as a PHP warning, alongside the API response. The browser console has the details."
+      UNEXPECTED_RESPONSE_TITLE: Unexpected response from the server
+      UNEXPECTED_RESPONSE_DETAIL: The server replied with data in a format this screen does not expect. The browser console has the details.
     API_KEYS_FIELD:
       REVOKE_KEY: Revoke key
       E_G_MY_CLI_TOOL: e.g. My CLI Tool
@@ -974,6 +980,8 @@ ICU:
       TITLE: Configuration
       TITLE_SCROLLED: "Configuration: {scope}"
       LOADING_CONFIGURATION: Loading configuration...
+      FAILED_TO_LOAD_CONFIGURATION: Failed to load configuration.
+      SCOPE_NOT_FOUND: No configuration scope named {scope} was found.
       TWIG_PROFILE:
         LABEL: Twig in Content
         HELP: Choose who can run Twig inside page content. This sets the advanced toggles below.
@@ -1650,6 +1658,8 @@ ICU:
     DEBUGGER_CENSORED_HELP: "Clockwork Provider ONLY: If Yes, censor potentially sensitive information (POST parameters, cookies, files, configuration and most array/object data in log messages)"
     DEBUGGER_CLOCKWORK: Clockwork Browser Extension
     DEBUGGER_DEBUGBAR: PHP Debug Bar
+    DEBUGGER_FLEX_RENDER_HINTS: Flex Render Hints
+    DEBUGGER_FLEX_RENDER_HINTS_HELP: Wrap every rendered Flex object and collection in an HTML comment naming it, so the source of a block can be found in the page markup. Only applies to HTML pages
     DEBUGGER_HELP: Enable Grav debugger and following settings
     DEBUGGER_PROVIDER: Debugger Provider
     DEBUGGER_PROVIDER_HELP: Default is PHP Debug Bar, but Clockwork browser extension provides for a less intrusive approach
@@ -1898,6 +1908,19 @@ ICU:
     PAGE_INHERIT_PERMISSIONS_HELP: Inherit ACL from parent page.
     PAGE_MEDIA: Page Media
     PAGE_SUMMARY: Page Summary
+    MARKDOWN_OUTPUT: Markdown Output
+    MARKDOWN_OUTPUT_ENABLED: Serve Pages as Markdown
+    MARKDOWN_OUTPUT_ENABLED_HELP: Any page can be fetched as Markdown by adding `.md` to its URL, or by sending an `Accept:&nbsp;text/markdown` request header. Built for AI agents and other text clients. The page is rendered through the theme, reduced to its main content region and converted, so listings, shops and modular pages read the way they display.
+    MARKDOWN_OUTPUT_FRONTMATTER: Frontmatter Block
+    MARKDOWN_OUTPUT_FRONTMATTER_HELP: Start the Markdown with a YAML block holding the title, URL, date, description and taxonomy.
+    MARKDOWN_OUTPUT_LINKS: Navigation Links
+    MARKDOWN_OUTPUT_LINKS_HELP: End the Markdown with links to the parent, neighbouring and child pages, so an agent can walk the site without leaving Markdown.
+    MARKDOWN_OUTPUT_MAX_LINKS: Most Child Links
+    MARKDOWN_OUTPUT_MAX_LINKS_HELP: The most child pages listed in the navigation section. Zero lists them all.
+    MARKDOWN_OUTPUT_ABSOLUTE_URLS: Absolute URLs
+    MARKDOWN_OUTPUT_ABSOLUTE_URLS_HELP: Turn root-relative links and images into full URLs, so they still work once the Markdown has left the site.
+    MARKDOWN_OUTPUT_TOKEN_HEADER: Token Count Header
+    MARKDOWN_OUTPUT_TOKEN_HEADER_HELP: Send an `X-Markdown-Tokens` response header with an estimated token count, the same header Cloudflare's Markdown for Agents uses.
     PAGE_TYPES: Page Types
     PAGE_TYPES_HELP: Determines the page types that Grav supports and the order determines which type to fall back to if the request is ambiguous
     PAGE_VISIBILITY_REQUIRES_ACCESS: Menu Visibility Requires Access
@@ -2188,6 +2211,17 @@ ICU:
     TWIG_CONTENT_EDITOR_ENABLED_HELP: "When off (default), the Twig checkbox in the page editor's Advanced tab is only visible to users granted the <code>admin.pages_twig</code> permission, and pages that already have Twig enabled can only be edited by those users. When on, anyone with page-edit access can toggle Twig on individual pages."
     TWIG_CONTENT_CONFIG_ACCESS: Allow config variable access in Twig
     TWIG_CONTENT_CONFIG_ACCESS_HELP: "Whether the <code>config</code> Twig variable is readable from page content. When off (default), reading <code>config.system.title</code> from a page returns nothing. When on, <code>config</code> is exposed but still filtered by <code>config_denied_paths</code> (see Twig Sandbox below) so credentials and other sensitive subtrees stay hidden."
+    GRAV_UPGRADE:
+      CONFIRM_TITLE: "Upgrade Grav core?"
+      CONFIRM_MESSAGE: "This will upgrade Grav from v{current} to v{target}. The site may be briefly unavailable during the upgrade."
+      UPGRADING: "Upgrading Grav to v{version}…"
+      FAILED: "Grav upgrade failed: {detail}"
+      NO_DETAIL: "the server gave no reason"
+      PREFLIGHT_TITLE: "Grav can't upgrade to v{version} yet"
+      PREFLIGHT_MESSAGE: "The checks that run before an upgrade stopped it for these reasons. Fix them and try again, or upgrade anyway if you know these plugins and themes work with the new version."
+      INCOMPATIBLE_PACKAGE: "{name} {version} is marked compatible with Grav {compatible}"
+      UPGRADE_ANYWAY: "Upgrade anyway"
+      STILL_BLOCKED: "Grav upgrade is still blocked: {detail}"
     TOASTS:
       CONFIG_SAVED: "{name} configuration saved"
       CONFIG_MODIFIED_ELSEWHERE: Configuration was modified elsewhere — reload to see latest

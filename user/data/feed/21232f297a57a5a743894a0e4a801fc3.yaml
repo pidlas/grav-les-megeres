@@ -1,5 +1,10 @@
-last_checked: 1789048307
+last_checked: 1789210458
 data:
+  -
+    title: 'Grav 2.1 Released: Every Page Speaks Markdown'
+    url: 'https://getgrav.org/blog/grav-2-1-released'
+    date: '2026-09-11T12:00:00+00:00'
+    summary: ''
   -
     title: 'KahunaCart: A Real Store, Inside Your Grav Site'
     url: 'https://getgrav.org/blog/kahunacart-coming-soon'
@@ -44,9 +49,4 @@ data:
     title: 'Grav 2.0: Twig in Content and the New Security Sandbox'
     url: 'https://getgrav.org/blog/grav-2-twig-content-security'
     date: '2026-06-17T12:00:00+00:00'
-    summary: ''
-  -
-    title: 'macOS Golden Gate Web Development: Meet Reeve'
-    url: 'https://getgrav.org/blog/macos-golden-gate-reeve'
-    date: '2026-06-16T10:00:00+00:00'
     summary: ''
