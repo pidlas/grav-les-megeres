@@ -4,7 +4,7 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInit1dd663bd521cb92772a23acb2f91b5f2
+class ComposerStaticInit0ccc9e2aeb213cdf9742b3add442b956
 {
     public static $files = array (
         '6e3fae29631ef280660b3cdad06f25a8' => __DIR__ . '/..' . '/symfony/deprecation-contracts/function.php',
@@ -105,6 +105,7 @@ class ComposerStaticInit1dd663bd521cb92772a23acb2f91b5f2
         ),
         'L' =>
         array (
+            'League\\HTMLToMarkdown\\' => 22,
             'League\\CLImate\\' => 15,
         ),
         'G' =>
@@ -324,6 +325,10 @@ class ComposerStaticInit1dd663bd521cb92772a23acb2f91b5f2
         'Monolog\\' =>
         array (
             0 => __DIR__ . '/..' . '/monolog/monolog/src/Monolog',
+        ),
+        'League\\HTMLToMarkdown\\' =>
+        array (
+            0 => __DIR__ . '/..' . '/league/html-to-markdown/src',
         ),
         'League\\CLImate\\' =>
         array (
@@ -760,6 +765,7 @@ class ComposerStaticInit1dd663bd521cb92772a23acb2f91b5f2
         'Grav\\Common\\Media\\Interfaces\\MediaPlayerInterface' => __DIR__ . '/../..' . '/system/src/Grav/Common/Media/Interfaces/MediaPlayerInterface.php',
         'Grav\\Common\\Media\\Interfaces\\MediaUploadInterface' => __DIR__ . '/../..' . '/system/src/Grav/Common/Media/Interfaces/MediaUploadInterface.php',
         'Grav\\Common\\Media\\Interfaces\\VideoMediaInterface' => __DIR__ . '/../..' . '/system/src/Grav/Common/Media/Interfaces/VideoMediaInterface.php',
+        'Grav\\Common\\Media\\MediaRouteUrls' => __DIR__ . '/../..' . '/system/src/Grav/Common/Media/MediaRouteUrls.php',
         'Grav\\Common\\Media\\Traits\\AudioMediaTrait' => __DIR__ . '/../..' . '/system/src/Grav/Common/Media/Traits/AudioMediaTrait.php',
         'Grav\\Common\\Media\\Traits\\ImageDecodingTrait' => __DIR__ . '/../..' . '/system/src/Grav/Common/Media/Traits/ImageDecodingTrait.php',
         'Grav\\Common\\Media\\Traits\\ImageFetchPriorityTrait' => __DIR__ . '/../..' . '/system/src/Grav/Common/Media/Traits/ImageFetchPriorityTrait.php',
@@ -784,6 +790,8 @@ class ComposerStaticInit1dd663bd521cb92772a23acb2f91b5f2
         'Grav\\Common\\Page\\Interfaces\\PageTranslateInterface' => __DIR__ . '/../..' . '/system/src/Grav/Common/Page/Interfaces/PageTranslateInterface.php',
         'Grav\\Common\\Page\\Interfaces\\PagesSourceInterface' => __DIR__ . '/../..' . '/system/src/Grav/Common/Page/Interfaces/PagesSourceInterface.php',
         'Grav\\Common\\Page\\Markdown\\Excerpts' => __DIR__ . '/../..' . '/system/src/Grav/Common/Page/Markdown/Excerpts.php',
+        'Grav\\Common\\Page\\Markdown\\MarkdownOutput' => __DIR__ . '/../..' . '/system/src/Grav/Common/Page/Markdown/MarkdownOutput.php',
+        'Grav\\Common\\Page\\Markdown\\PlainTextConverter' => __DIR__ . '/../..' . '/system/src/Grav/Common/Page/Markdown/PlainTextConverter.php',
         'Grav\\Common\\Page\\Media' => __DIR__ . '/../..' . '/system/src/Grav/Common/Page/Media.php',
         'Grav\\Common\\Page\\Medium\\AbstractMedia' => __DIR__ . '/../..' . '/system/src/Grav/Common/Page/Medium/AbstractMedia.php',
         'Grav\\Common\\Page\\Medium\\AudioMedium' => __DIR__ . '/../..' . '/system/src/Grav/Common/Page/Medium/AudioMedium.php',
@@ -1259,6 +1267,33 @@ class ComposerStaticInit1dd663bd521cb92772a23acb2f91b5f2
         'League\\CLImate\\Util\\Writer\\StdErr' => __DIR__ . '/..' . '/league/climate/src/Util/Writer/StdErr.php',
         'League\\CLImate\\Util\\Writer\\StdOut' => __DIR__ . '/..' . '/league/climate/src/Util/Writer/StdOut.php',
         'League\\CLImate\\Util\\Writer\\WriterInterface' => __DIR__ . '/..' . '/league/climate/src/Util/Writer/WriterInterface.php',
+        'League\\HTMLToMarkdown\\Coerce' => __DIR__ . '/..' . '/league/html-to-markdown/src/Coerce.php',
+        'League\\HTMLToMarkdown\\Configuration' => __DIR__ . '/..' . '/league/html-to-markdown/src/Configuration.php',
+        'League\\HTMLToMarkdown\\ConfigurationAwareInterface' => __DIR__ . '/..' . '/league/html-to-markdown/src/ConfigurationAwareInterface.php',
+        'League\\HTMLToMarkdown\\Converter\\BlockquoteConverter' => __DIR__ . '/..' . '/league/html-to-markdown/src/Converter/BlockquoteConverter.php',
+        'League\\HTMLToMarkdown\\Converter\\CodeConverter' => __DIR__ . '/..' . '/league/html-to-markdown/src/Converter/CodeConverter.php',
+        'League\\HTMLToMarkdown\\Converter\\CommentConverter' => __DIR__ . '/..' . '/league/html-to-markdown/src/Converter/CommentConverter.php',
+        'League\\HTMLToMarkdown\\Converter\\ConverterInterface' => __DIR__ . '/..' . '/league/html-to-markdown/src/Converter/ConverterInterface.php',
+        'League\\HTMLToMarkdown\\Converter\\DefaultConverter' => __DIR__ . '/..' . '/league/html-to-markdown/src/Converter/DefaultConverter.php',
+        'League\\HTMLToMarkdown\\Converter\\DivConverter' => __DIR__ . '/..' . '/league/html-to-markdown/src/Converter/DivConverter.php',
+        'League\\HTMLToMarkdown\\Converter\\EmphasisConverter' => __DIR__ . '/..' . '/league/html-to-markdown/src/Converter/EmphasisConverter.php',
+        'League\\HTMLToMarkdown\\Converter\\HardBreakConverter' => __DIR__ . '/..' . '/league/html-to-markdown/src/Converter/HardBreakConverter.php',
+        'League\\HTMLToMarkdown\\Converter\\HeaderConverter' => __DIR__ . '/..' . '/league/html-to-markdown/src/Converter/HeaderConverter.php',
+        'League\\HTMLToMarkdown\\Converter\\HorizontalRuleConverter' => __DIR__ . '/..' . '/league/html-to-markdown/src/Converter/HorizontalRuleConverter.php',
+        'League\\HTMLToMarkdown\\Converter\\ImageConverter' => __DIR__ . '/..' . '/league/html-to-markdown/src/Converter/ImageConverter.php',
+        'League\\HTMLToMarkdown\\Converter\\LinkConverter' => __DIR__ . '/..' . '/league/html-to-markdown/src/Converter/LinkConverter.php',
+        'League\\HTMLToMarkdown\\Converter\\ListBlockConverter' => __DIR__ . '/..' . '/league/html-to-markdown/src/Converter/ListBlockConverter.php',
+        'League\\HTMLToMarkdown\\Converter\\ListItemConverter' => __DIR__ . '/..' . '/league/html-to-markdown/src/Converter/ListItemConverter.php',
+        'League\\HTMLToMarkdown\\Converter\\ParagraphConverter' => __DIR__ . '/..' . '/league/html-to-markdown/src/Converter/ParagraphConverter.php',
+        'League\\HTMLToMarkdown\\Converter\\PreformattedConverter' => __DIR__ . '/..' . '/league/html-to-markdown/src/Converter/PreformattedConverter.php',
+        'League\\HTMLToMarkdown\\Converter\\TableConverter' => __DIR__ . '/..' . '/league/html-to-markdown/src/Converter/TableConverter.php',
+        'League\\HTMLToMarkdown\\Converter\\TextConverter' => __DIR__ . '/..' . '/league/html-to-markdown/src/Converter/TextConverter.php',
+        'League\\HTMLToMarkdown\\Element' => __DIR__ . '/..' . '/league/html-to-markdown/src/Element.php',
+        'League\\HTMLToMarkdown\\ElementInterface' => __DIR__ . '/..' . '/league/html-to-markdown/src/ElementInterface.php',
+        'League\\HTMLToMarkdown\\Environment' => __DIR__ . '/..' . '/league/html-to-markdown/src/Environment.php',
+        'League\\HTMLToMarkdown\\HtmlConverter' => __DIR__ . '/..' . '/league/html-to-markdown/src/HtmlConverter.php',
+        'League\\HTMLToMarkdown\\HtmlConverterInterface' => __DIR__ . '/..' . '/league/html-to-markdown/src/HtmlConverterInterface.php',
+        'League\\HTMLToMarkdown\\PreConverterInterface' => __DIR__ . '/..' . '/league/html-to-markdown/src/PreConverterInterface.php',
         'Monolog\\Attribute\\AsMonologProcessor' => __DIR__ . '/..' . '/monolog/monolog/src/Monolog/Attribute/AsMonologProcessor.php',
         'Monolog\\Attribute\\WithMonologChannel' => __DIR__ . '/..' . '/monolog/monolog/src/Monolog/Attribute/WithMonologChannel.php',
         'Monolog\\DateTimeImmutable' => __DIR__ . '/..' . '/monolog/monolog/src/Monolog/DateTimeImmutable.php',
@@ -2330,11 +2365,11 @@ class ComposerStaticInit1dd663bd521cb92772a23acb2f91b5f2
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInit1dd663bd521cb92772a23acb2f91b5f2::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInit1dd663bd521cb92772a23acb2f91b5f2::$prefixDirsPsr4;
-            $loader->fallbackDirsPsr4 = ComposerStaticInit1dd663bd521cb92772a23acb2f91b5f2::$fallbackDirsPsr4;
-            $loader->prefixesPsr0 = ComposerStaticInit1dd663bd521cb92772a23acb2f91b5f2::$prefixesPsr0;
-            $loader->classMap = ComposerStaticInit1dd663bd521cb92772a23acb2f91b5f2::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInit0ccc9e2aeb213cdf9742b3add442b956::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInit0ccc9e2aeb213cdf9742b3add442b956::$prefixDirsPsr4;
+            $loader->fallbackDirsPsr4 = ComposerStaticInit0ccc9e2aeb213cdf9742b3add442b956::$fallbackDirsPsr4;
+            $loader->prefixesPsr0 = ComposerStaticInit0ccc9e2aeb213cdf9742b3add442b956::$prefixesPsr0;
+            $loader->classMap = ComposerStaticInit0ccc9e2aeb213cdf9742b3add442b956::$classMap;
 
         }, null, ClassLoader::class);
     }

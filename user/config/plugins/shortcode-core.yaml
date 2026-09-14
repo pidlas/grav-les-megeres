@@ -1,4 +1,8 @@
 admin_pages_only: false
-custom_shortcodes: /user/custom/shortcodes
+custom_shortcodes: '/user/custom/shortcodes'
 fontawesome:
   load: false
+
+# 👇 LE BLOC INDISPENSABLE POUR ÉVITER LE CONFLIT INTERNE AVEC CUSTOM
+include_default_shortcodes:
+  img: false

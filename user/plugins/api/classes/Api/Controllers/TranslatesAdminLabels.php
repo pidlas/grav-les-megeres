@@ -6,6 +6,7 @@ namespace Grav\Plugin\Api\Controllers;
 
 use Grav\Plugin\Api\Services\DisabledPluginLangIndex;
 use Grav\Plugin\Api\Services\PreferencesResolver;
+use Grav\Plugin\Api\Services\TranslationSourceIndex;
 use Psr\Http\Message\ServerRequestInterface;
 use Throwable;
 
@@ -170,6 +171,98 @@ trait TranslatesAdminLabels
         }
 
         return $this->regionVariantIndex = $index;
+    }
+
+    /**
+     * Resolve a value that *might* be a translation key, or return null.
+     *
+     * This is the cautious sibling of {@see translateLabel()}, for free-prose
+     * fields where the author is equally entitled to write a literal sentence:
+     * a package's top-level `name` / `description` in its blueprints.yaml
+     * (#39). Two differences matter:
+     *
+     *   - The key test is strict. `translateLabel()` accepts any uppercase
+     *     value containing a dot, which a literal description like
+     *     "FAST. SIMPLE. SECURE." would satisfy. Here the whole value has to be
+     *     a single dotted token with no whitespace.
+     *   - Nothing is invented. There is no `PLUGIN_API.*` last-resort namespace
+     *     and no humanizer, both of which would turn an unresolved
+     *     `MY_THEME.DESCRIPTION` into the word "Description". A caller that
+     *     gets null keeps the author's own text untouched.
+     *
+     * The `disabledOnly` filter `translateLabel()` applies is deliberately not
+     * applied either: the key belongs to the package being described, and a
+     * disabled plugin or a switched-away theme is exactly what the package
+     * manager lists.
+     */
+    protected function resolveTranslationKey(string $value): ?string
+    {
+        if (!$this->looksLikeTranslationKey($value)) {
+            return null;
+        }
+
+        $languages = $this->adminLabelLanguages;
+
+        try {
+            $lang = $this->grav['language'];
+
+            foreach (['ICU.' . $value, $value] as $key) {
+                // array_support=true so a key landing on a nested namespace
+                // comes back as an array and is skipped, rather than blowing up
+                // on "Array to string conversion".
+                $translated = $lang->translate($key, $languages, true);
+                if (is_string($translated) && $translated !== '' && $translated !== $key) {
+                    return $translated;
+                }
+            }
+        } catch (Throwable) {
+            // No language service (CLI, tests) — fall through to the on-disk walk.
+        }
+
+        return $this->valueFromLanguageFiles($value, $languages);
+    }
+
+    /**
+     * Last resort for {@see resolveTranslationKey()}: read the key straight off
+     * the language files on disk.
+     *
+     * Grav merges only the *active* theme's language files
+     * (`Themes::loadLanguages()` reads `theme://languages`, which resolves to
+     * that one theme), so a key shipped by any other installed theme is absent
+     * from the compiled dictionary the lookup above searches — and browsing
+     * themes you have not switched to is most of what the package manager is
+     * for. {@see TranslationSourceIndex} already walks every source's own files
+     * for the translations UI, including inactive themes, and is cached against
+     * their mtimes, so reuse it rather than parsing YAML again here.
+     *
+     * @param array<int, string>|null $languages
+     */
+    private function valueFromLanguageFiles(string $value, ?array $languages): ?string
+    {
+        try {
+            $index = new TranslationSourceIndex($this->grav);
+
+            foreach ($languages ?? ['en'] as $code) {
+                $entry = $index->index($code)[$value] ?? null;
+                if (is_string($entry['value'] ?? null) && $entry['value'] !== '') {
+                    return $entry['value'];
+                }
+            }
+        } catch (Throwable) {
+            // Nothing scannable (no locator/cache/config, as in unit tests).
+        }
+
+        return null;
+    }
+
+    /**
+     * Whether a value is shaped like a translation key and nothing else:
+     * `FOO.BAR`, `PLUGIN_MYTHEME.DESCRIPTION`. Requires at least one dot, all
+     * caps, and no whitespace, so authored prose never matches.
+     */
+    private function looksLikeTranslationKey(string $value): bool
+    {
+        return (bool) preg_match('/^[A-Z][A-Z0-9_]*(?:\.[A-Z0-9_]+)+$/', $value);
     }
 
     /**

@@ -1,3 +1,16 @@
+# v2.1.16
+## 09/13/2026
+
+1. [](#bugfix)
+    * A `selectize` field that lists its own predefined values suggests them again when you click into it. Blueprints that declare those values the way the documentation shows, under `selectize.options`, were left with an empty tag box and nothing to pick. Thanks to @Salvatos [trilbymedia/grav-plugin-flex-objects#243](https://github.com/trilbymedia/grav-plugin-flex-objects/issues/243)
+    * Flex list columns holding several values now read as text, such as `EN: Hello, FR: Bonjour`, instead of showing `[object Object]`. Long values are shortened, with the whole value on the cell's tooltip. Thanks to @Salvatos [trilbymedia/grav-plugin-flex-objects#241](https://github.com/trilbymedia/grav-plugin-flex-objects/issues/241)
+
+# v2.1.15
+## 09/12/2026
+
+1. [](#bugfix)
+    * The session-expired prompt no longer interrupts a session that is still valid. Returning to an admin tab left open in the background, or working with several admin tabs at once, could ask for a password that reloading the page proved was never needed
+
 # v2.1.14
 ## 09/11/2026
 

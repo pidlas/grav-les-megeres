@@ -14,6 +14,7 @@ use Grav\Common\Config\Config;
 use Grav\Common\Config\Setup;
 use Grav\Common\Helpers\Exif;
 use Grav\Common\Page\Interfaces\PageInterface;
+use Grav\Common\Page\Markdown\MarkdownOutput;
 use Grav\Common\Page\Medium\ImageMedium;
 use Grav\Common\Page\Medium\Medium;
 use Grav\Common\Page\Pages;
@@ -94,6 +95,15 @@ class Grav extends Container
 
     /** @var static The singleton instance */
     protected static $instance;
+
+    /**
+     * Whether the shutdown handler has been registered for this request. Both
+     * the normal page path and close() register it, and a plugin that calls
+     * close() from inside onShutdown must not queue a second run.
+     *
+     * @var bool
+     */
+    protected $shutdownRegistered = false;
 
     /**
      * @var array Contains all Services and ServicesProviders that are mapped
@@ -336,9 +346,34 @@ class Grav extends Container
 
         // Response object can turn off all shutdown processing. This can be used for example to speed up AJAX responses.
         // Note that using this feature will also turn off response compression.
-        if ($response->getHeaderLine('Grav-Internal-SkipShutdown') !== '1') {
-            register_shutdown_function([$this, 'shutdown']);
+        $this->registerShutdown($response);
+    }
+
+    /**
+     * Register shutdown() to run once PHP finishes this request, unless the
+     * response asked to skip it with the `Grav-Internal-SkipShutdown` header.
+     *
+     * Registered rather than called, so it runs after exit() as well as after
+     * a normal render: close() and redirect() end with exit(), and the work
+     * that plugins hang on onShutdown (sending queued mail, warming a cache)
+     * has to run after those responses too, not only after a rendered page.
+     *
+     * @param ResponseInterface $response
+     * @return bool whether shutdown() will run for this request
+     */
+    protected function registerShutdown(ResponseInterface $response): bool
+    {
+        if ($response->getHeaderLine('Grav-Internal-SkipShutdown') === '1') {
+            return false;
         }
+        if ($this->shutdownRegistered) {
+            return true;
+        }
+
+        $this->shutdownRegistered = true;
+        register_shutdown_function([$this, 'shutdown']);
+
+        return true;
     }
 
     /**
@@ -351,11 +386,46 @@ class Grav extends Container
     public function cleanOutputBuffers(): void
     {
         // Make sure nothing extra gets written to the response.
-        while (ob_get_level()) {
-            ob_end_clean();
-        }
+        self::endOutputBuffers(false);
         // Work around PHP bug #8218 (8.0.17 & 8.1.4).
         header_remove('Content-Encoding');
+    }
+
+    /**
+     * End the output buffers PHP allows to be ended, sending or discarding what
+     * they hold.
+     *
+     * Stops at the first buffer that cannot be removed. PHP's own
+     * zlib.output_compression handler becomes one of those once it has written
+     * its first compressed chunk, and ending it anyway raises a notice that the
+     * error handler turns into an exception (#4294). Inside shutdown() that
+     * skipped onShutdown and appended an error page to the gzip stream. Nothing
+     * below such a buffer can be reached and PHP finishes it at the end of the
+     * request, so its pending output is only flushed or discarded in place, and
+     * only where the buffer allows it.
+     *
+     * @param bool $flush True to send the buffered output, false to discard it.
+     * @return void
+     */
+    private static function endOutputBuffers(bool $flush): void
+    {
+        while (ob_get_level() > 0) {
+            $flags = ob_get_status()['flags'] ?? 0;
+            if (!($flags & PHP_OUTPUT_HANDLER_REMOVABLE)) {
+                if ($flush && ($flags & PHP_OUTPUT_HANDLER_FLUSHABLE)) {
+                    ob_flush();
+                } elseif (!$flush && ($flags & PHP_OUTPUT_HANDLER_CLEANABLE)) {
+                    ob_clean();
+                }
+
+                return;
+            }
+
+            // Never spin on a buffer PHP refused to end.
+            if (!($flush ? ob_end_flush() : ob_end_clean())) {
+                return;
+            }
+        }
     }
 
     /**
@@ -485,11 +555,30 @@ class Grav extends Container
             }
         }
 
+        // A redirect or an early close is still a finished request: the slow
+        // work plugins queue for onShutdown runs after it exactly as it does
+        // after a rendered page.
+        $shutdown = $this->registerShutdown($response);
+
         // Echo page content.
         $this->header($response);
-        if (!$this->streamResponseBody($body)) {
-            echo $body;
+        if ($this->streamResponseBody($body)) {
+            // Streaming committed the headers, so shutdown() will skip the
+            // header-based connection close and only run the event.
+            exit();
         }
+
+        if ($shutdown) {
+            // Hold the body in a buffer, the way a rendered page is held, so
+            // that on a host without fastcgi_finish_request shutdown() can still
+            // frame the response with Content-Length and Connection: close
+            // before the slow work starts. Without this the client would wait
+            // for the whole of onShutdown before its redirect or JSON answer
+            // was complete.
+            ob_start();
+        }
+        echo $body;
+
         exit();
     }
 
@@ -554,6 +643,20 @@ class Grav extends Container
                     $url .= trim((string) $route, '/'); // Remove trailing slash
                 } else {
                     $url .= ltrim((string) $route, '/'); // Support trailing slash default routes
+                }
+
+                // A request for `/section.md` that Grav redirects (to a first
+                // child, a default route, a language prefix) should land on
+                // Markdown too, or the agent following it silently gets HTML.
+                if ($uri->extension() === MarkdownOutput::FORMAT
+                    && MarkdownOutput::enabled()
+                    && !preg_match('/[?#]/', $url)
+                    && !Utils::pathinfo($url, PATHINFO_EXTENSION)) {
+                    // The site root has nothing to carry an extension; it is `/index.md`.
+                    if (trim((string) parse_url($url, PHP_URL_PATH), '/') === '') {
+                        $url = rtrim($url, '/') . '/index';
+                    }
+                    $url .= '.' . MarkdownOutput::FORMAT;
                 }
             }
         } elseif ($route instanceof Route) {
@@ -707,7 +810,7 @@ class Grav extends Container
 
             // FastCGI allows us to flush all response data to the client and finish the request.
             $success = function_exists('fastcgi_finish_request') ? @fastcgi_finish_request() : false;
-            if (!$success) {
+            if (!$success && !headers_sent()) {
                 // Unfortunately without FastCGI there is no way to force close the connection.
                 // We need to ask browser to close the connection for us.
 
@@ -735,7 +838,7 @@ class Grav extends Container
                         $canSetContentLength = false;
                     }
 
-                    if ($canSetContentLength) {
+                    if ($canSetContentLength && ob_get_level() > 0) {
                         // Get length and close the connection (only when not using compression).
                         header('Content-Length: ' . ob_get_length());
                     }
@@ -743,8 +846,15 @@ class Grav extends Container
 
                 header('Connection: close');
 
-                ob_end_flush();
-                @ob_flush();
+                // close() has already emptied every buffer before echoing, so
+                // there may be nothing left to end here.
+                self::endOutputBuffers(true);
+                flush();
+            } elseif (!$success) {
+                // Headers are out already (close() echoed the body, or the body
+                // was streamed), so the connection cannot be closed early. Push
+                // whatever is buffered so the client at least has the response.
+                self::endOutputBuffers(true);
                 flush();
             }
         }

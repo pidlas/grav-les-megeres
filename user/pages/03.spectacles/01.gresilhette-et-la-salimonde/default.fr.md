@@ -41,7 +41,8 @@ Votre navigateur ne prend pas en charge la lecture vidéo HTML5.
 <div class="g_spectacles">
 <p class="g_sp_e-intro">Le spectacle aborde le thème de l'écologie de façon ludique. C’est un conte théâtralisé avec une esthétique merveilleuse et intemporelle. Il existe trois versions du spectacle&nbsp;:</p>
 <a class="g_sp_theatre-d-ombres morph" href="{{ base_url_relative }}/spectacles/gresilhette-et-la-salimonde/theatre-d-ombres">
-<img src="{{ base_url_relative }}/user/pages/03.spectacles/01.gresilhette-et-la-salimonde/sp_theatre-d-ombres.png" width="200" alt="">
+[img name="sp_theatre-d-ombres.png" alt="Spectacle Grésilhette et la Salimonde - Théâtre d'ombres"]
+<!--<img src="{{ base_url_relative }}/user/pages/03.spectacles/01.gresilhette-et-la-salimonde/sp_theatre-d-ombres.png" width="200" alt="">-->
 </a>
 <a class="g_sp_sieste-contee morph" href="{{ base_url_relative }}/spectacles/gresilhette-et-la-salimonde/sieste-contee">
 <img src="{{ base_url_relative }}/user/pages/03.spectacles/01.gresilhette-et-la-salimonde/sp_sieste-contee.png" width="200" alt="La sieste contée - Grésilhette et la Salimonde">

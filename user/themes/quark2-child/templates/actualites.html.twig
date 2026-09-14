@@ -1,0 +1,86 @@
+{% extends 'main-layout.html.twig' %}
+
+{% block content %}
+<main>
+    <section class="{{ page.slug }}">
+
+        {# Habillage commun du haut #}
+        <div class="conteneur-champignons">
+            <img src="{{ url('theme://images/i_champignons.svg') }}" class="champignons" alt="" loading="lazy">
+            <h1>{{ page.title }}</h1>
+            {% if page.header.subtitle %}<p class="sous-titre">{{ page.header.subtitle | raw }}</p>{% endif %}
+        </div>
+
+        {# Rendu de l'introduction rédigée en Markdown #}
+        <div class="page-content">
+            {{ page.content | raw }}
+        </div>
+
+        {# Zone dynamique de la liste des Actualités #}
+        {% if page.header.actualites %}
+        <div class="actus-list" aria-live="polite">
+            {% for item in page.header.actualites %}
+                <article class="actu-item">
+                    
+                    {# 1. Image principale de la catégorie actu #}
+                    {% if item.image_principale %}
+                        {% set img_main = page.media[item.image_principale] %}
+                        {% if img_main %}
+                            <img src="{{ img_main.url }}" alt="{{ item.image_alt }}" class="actu-image" loading="lazy">
+                        {% endif %}
+                    {% endif %}
+                    
+                    <h2>{{ item.categorie }}</h2>
+                    
+                    <div class="actu-content">
+                        {# Boucle sur les événements/blocs internes de cette catégorie #}
+                        {% for bloc in item.blocs %}
+                            <p class="actu-date">{{ bloc.date }}</p>
+                            
+                            <div class="{% if bloc.miniature %}alignement{% else %}actu-wrapper{% endif %}">
+                                
+                                {# 2. Rendu de la miniature (affiche) #}
+                                {% if bloc.miniature %}
+                                    {% set img_mini = page.media[bloc.miniature] ?: pages.find('/infos/actualites').media[bloc.miniature] %}
+                                    {% if img_mini %}
+                                        <img src="{{ img_mini.url }}" width="80" alt="{{ bloc.miniature_alt }}" loading="lazy">
+                                    {% else %}
+                                        <img src="{{ url('theme://images/' ~ bloc.miniature) }}" width="80" alt="{{ bloc.miniature_alt }}" loading="lazy">
+                                    {% endif %}
+                                    <div class="actu-wrapper">
+                                {% endif %}
+                                
+                                <h3 class="actu-titre">{{ bloc.titre }}</h3>
+                                <p class="actu-resume">{{ bloc.resume | raw }}</p>
+                                
+                                {# 3. Boucle automatique pour afficher les boutons de liens s'ils existent #}
+                                {% if bloc.liens %}
+                                    {% for lien in bloc.liens %}
+                                        <p class="actu-action">
+                                            {% set is_external = lien.url starts with 'http' %}
+                                            <a href="{{ lien.url }}" 
+                                               data-type="{{ is_external ? 'external' : 'internal' }}"
+                                               {% if is_external %}target="_blank" rel="noopener noreferrer"{% endif %}>
+                                                {{ lien.texte }}
+                                            </a>
+                                            {% if is_external %}
+                                                <span class="lien-e-seul"></span>
+                                            {% endif %}
+                                        </p>
+                                    {% endfor %}
+                                {% endif %}
+                                
+                                {% if bloc.miniature %}
+                                    </div> {# Fermeture de actu-wrapper si alignement #}
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    </div>
+                </article>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+    </section>
+</main>
+{% endblock %}

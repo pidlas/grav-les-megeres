@@ -1,4 +1,4 @@
-last_checked: 1789210458
+last_checked: 1789391587
 data:
   feed:
     -
@@ -8,7 +8,7 @@ data:
       location:
         - feed
       icon: 🗣️
-      message: 'Run a real community on your own site with **Forum Pro** for Grav 2.0, now available.'
+      message: 'Run a real community on your own site with **Forum Pro** for Grav 2, now available.'
       link: 'https://getgrav.org/premium/forum-pro'
     -
       id: 212

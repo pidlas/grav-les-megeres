@@ -30,6 +30,7 @@ use DebugBar\DebugBar;
 use DebugBar\DebugBarException;
 use DebugBar\JavascriptRenderer;
 use Grav\Common\Config\Config;
+use Grav\Common\Page\Interfaces\PageInterface;
 use Grav\Common\Processors\ProcessorInterface;
 use Grav\Common\Twig\TwigClockworkDataSource;
 use Grav\Framework\Psr7\Response;
@@ -477,11 +478,21 @@ class Debugger
      */
     protected function debuggerCredentials(RequestInterface $request): array
     {
-        $body = (string)$request->getBody();
-        $data = json_decode($body, true);
-        if (!is_array($data)) {
-            $data = [];
-            parse_str($body, $data);
+        // The Clockwork browser extension posts the password as multipart/form-data,
+        // which only ever shows up in the parsed body ($_POST), never as a raw JSON
+        // or query-string body. Read that first, then fall back to the raw body for
+        // scripts posting JSON or application/x-www-form-urlencoded.
+        $data = $request instanceof ServerRequestInterface ? $request->getParsedBody() : null;
+        if (!is_array($data) || $data === []) {
+            $body = (string)$request->getBody();
+            $data = json_decode($body, true);
+            if (!is_array($data)) {
+                $data = [];
+                parse_str($body, $data);
+            }
+        }
+        if ($data === [] && !empty($_POST)) {
+            $data = $_POST;
         }
 
         return [
@@ -608,6 +619,28 @@ class Debugger
     }
 
     /**
+     * Whether Flex should wrap each rendered object and collection in an HTML comment
+     * naming it, so the source of a block can be found in the page markup.
+     *
+     * Off unless the debugger is on and `system.debugger.flex_render_hints` is enabled,
+     * and never for a non-HTML response (JSON, RSS, Atom, XML, Markdown), where a
+     * comment marker corrupts the output.
+     *
+     * @return bool
+     */
+    public function flexRenderHints(): bool
+    {
+        if (!$this->enabled || !$this->config || !$this->config->get('system.debugger.flex_render_hints', false)) {
+            return false;
+        }
+
+        $page = $this->grav->offsetExists('page') ? $this->grav['page'] : null;
+        $format = $page instanceof PageInterface ? $page->templateFormat() : Utils::getPageFormat();
+
+        return $format === 'html';
+    }
+
+    /**
      * Add the debugger assets to the Grav Assets
      *
      * @return $this
@@ -634,7 +667,8 @@ class Debugger
                 $assets->addCss('/system/assets/debugger/clockwork.css');
                 $assets->addJs('/system/assets/debugger/clockwork.js', [
                     'id' => 'clockwork-script',
-                    'data-route' => $route
+                    'data-route' => $route,
+                    'pipeline' => false
                 ]);
             }
 
@@ -729,7 +763,7 @@ class Debugger
 
             // Only render the bar if the page is HTML.
             $page = $this->grav['page'];
-            if ($page->templateFormat() !== 'html') {
+            if (!$page instanceof PageInterface || $page->templateFormat() !== 'html') {
                 return $this;
             }
 

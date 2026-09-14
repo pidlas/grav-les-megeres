@@ -61,10 +61,61 @@ class TranslatesAdminLabelsTest extends TestCase
         self::assertSame(['en', 'en-US'], $controller->languageChain('en'));
     }
 
-    private function controller(): TranslatesAdminLabelsProbeController
+    #[Test]
+    public function a_package_description_written_as_a_key_resolves_from_the_dictionary(): void
+    {
+        $controller = $this->controller(['MYTHEME.DESCRIPTION' => 'A theme for Grav']);
+
+        self::assertSame('A theme for Grav', $controller->resolveKey('MYTHEME.DESCRIPTION'));
+    }
+
+    #[Test]
+    public function the_icu_namespace_is_tried_before_the_flat_key(): void
+    {
+        $controller = $this->controller([
+            'ICU.MYTHEME.DESCRIPTION' => 'From admin2',
+            'MYTHEME.DESCRIPTION' => 'From the plugin',
+        ]);
+
+        self::assertSame('From admin2', $controller->resolveKey('MYTHEME.DESCRIPTION'));
+    }
+
+    #[Test]
+    public function an_untranslated_key_comes_back_null_rather_than_humanized(): void
+    {
+        // translateLabel() would answer "Description" here, from its humanizer.
+        // A package description has to keep whatever its author wrote (#39).
+        $controller = $this->controller();
+
+        self::assertNull($controller->resolveKey('MY_THEME.DESCRIPTION'));
+    }
+
+    #[Test]
+    public function authored_prose_is_never_treated_as_a_key(): void
+    {
+        $controller = $this->controller(['FAST. SIMPLE. SECURE.' => 'should not be used']);
+
+        self::assertNull($controller->resolveKey('A fast, simple theme.'));
+        // All caps with dots, but prose: translateLabel()'s looser test matches
+        // this one, the package-field test must not.
+        self::assertNull($controller->resolveKey('FAST. SIMPLE. SECURE.'));
+        // No dot at all.
+        self::assertNull($controller->resolveKey('MYTHEME'));
+    }
+
+    #[Test]
+    public function a_key_landing_on_a_nested_namespace_is_skipped(): void
+    {
+        $controller = $this->controller(['MYTHEME.DESCRIPTION' => ['SHORT' => 'A theme']]);
+
+        self::assertNull($controller->resolveKey('MYTHEME.DESCRIPTION'));
+    }
+
+    private function controller(array $dictionary = []): TranslatesAdminLabelsProbeController
     {
         $grav = new Grav();
         $grav['locator'] = new TranslatesAdminLabelsTestLocator($this->admin2Languages);
+        $grav['language'] = new TranslatesAdminLabelsTestLanguage($dictionary);
 
         return new TranslatesAdminLabelsProbeController($grav, new Config([]));
     }
@@ -80,6 +131,30 @@ final class TranslatesAdminLabelsProbeController extends AbstractApiController
     public function languageChain(string $lang): array
     {
         return $this->expandLanguageChain($lang);
+    }
+
+    public function resolveKey(string $value): ?string
+    {
+        return $this->resolveTranslationKey($value);
+    }
+}
+
+/**
+ * Stands in for Grav's Language service: returns the key itself when it has no
+ * translation, which is what `Language::translate()` does.
+ */
+final class TranslatesAdminLabelsTestLanguage
+{
+    public function __construct(private readonly array $dictionary) {}
+
+    public function translate(string $key, ?array $languages = null, bool $arraySupport = false): mixed
+    {
+        return $this->dictionary[$key] ?? $key;
+    }
+
+    public function getLanguage(): string
+    {
+        return 'en';
     }
 }
 

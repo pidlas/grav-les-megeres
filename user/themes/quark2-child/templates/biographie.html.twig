@@ -44,10 +44,14 @@
             </div>
 
             {# ÉLÉMENT 3 : LA FIN DE LA BIO #}
-            <div class="e_fin_bio">
-                {# page.content récupère le texte restant situé APRÈS le marqueur === #}
-                {{ page.content|raw }}
-            </div>
+            {# On vérifie si le contenu complet est plus grand que le résumé #}
+            {% if page.content|length > page.summary|length %}
+                <div class="e_fin_bio">
+                    {# On affiche le reste du texte #}
+                    {{ page.content|slice(page.summary|length)|raw }}
+                </div>
+            {% endif %}
+
         </article>
     </section>
 </main>

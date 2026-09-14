@@ -1,0 +1,25 @@
+{# 1. Récupération des attributs de base fournis par le shortcode #}
+{% set path = shortcode.getParameter('path', shortcode.getParameter('src', '')) %}
+{% set alt = shortcode.getParameter('alt', '') %}
+{% set class = shortcode.getParameter('class', '') %}
+{% set id = shortcode.getParameter('id', '') %}
+
+{# 2. Extraction du média via Grav #}
+{% set image = page.media[path] %}
+
+{% if image %}
+    {# On calcule l'URL de base et la version .avif associée #}
+    {% set url_webp = image.url %}
+    {% set url_avif = url_webp|replace({'.webp': '.avif', '.png': '.avif', '.jpg': '.avif', '.jpeg': '.avif'}) %}
+
+    <picture {% if id %}id="{{ id }}"{% endif %} {% if class %}class="{{ class }}"{% endif %}>
+        {# Si le fichier AVIF a bien été généré par votre script, on le propose en priorité #}
+        <source srcset="{{ url_avif }}" type="image/avif">
+        
+        {# On conserve le WebP ou format d'origine géré par Grav #}
+        <source srcset="{{ url_webp }}" type="image/webp">
+        
+        {# Balise img finale pour l'accessibilité #}
+        <img src="{{ url_webp }}" alt="{{ alt }}" loading="lazy">
+    </picture>
+{% endif %}

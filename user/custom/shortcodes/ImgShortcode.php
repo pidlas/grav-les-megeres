@@ -8,55 +8,52 @@ class ImgShortcode extends Shortcode
     public function init()
     {
         $this->shortcode->getHandlers()->add('img', function (ShortcodeInterface $sc) {
-            $name = trim((string) $sc->getParameter('name'));
-            if ($name === '') {
-                return '';
-            }
-
+            $filename = $sc->getParameter('name') ?? $sc->getParameter('src');
+            $alt = $sc->getParameter('alt', $this->grav['page']->title());
+            $class = $sc->getParameter('class', '');
+            
             $page = $this->grav['page'] ?? null;
-            $alt = self::escAttr($sc->getParameter('alt', ''));
-            $class = self::escAttr($sc->getParameter('class', ''));
-            $loading = self::escAttr($sc->getParameter('loading') ?: 'lazy');
-
             if (!$page || !method_exists($page, 'media')) {
                 return '';
             }
 
-            $media = method_exists($page, 'media') ? $page->media() : null;
-            if (!$media || !is_array($media->all()) && !($media instanceof \ArrayAccess)) {
-                return '';
-            }
-
-            $image = null;
-            if (is_array($media)) {
-                $image = $media[$name] ?? null;
-            } else {
-                $image = $media[$name] ?? null;
-            }
+            $image = $page->media()[$filename] ?? null;
 
             if (!$image) {
-                return '';
+                return "<!-- Image [img] manquante dans le dossier : $filename -->";
             }
 
-            try {
-                $url = method_exists($image, 'url') ? (string) $image->url() : '';
-                if ($url === '') {
-                    return '';
+            $extension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+            $derivatives = $image->derivatives(400, 1200, 400);
+
+            if ($extension === 'avif') {
+                $avifSrcset = $derivatives->srcset();
+                try {
+                    $webpSrcset = $derivatives->format('webp')->srcset();
+                    $jpegSrcset = $derivatives->format('jpg')->srcset();
+                    $fallbackUrl = $image->resize(1200)->format('jpg')->url();
+                } catch (\Exception $e) {
+                    $webpSrcset = $avifSrcset;
+                    $jpegSrcset = $avifSrcset;
+                    $fallbackUrl = $image->resize(1200)->url();
                 }
-
-                $attributes = [];
-                $attributes[] = "src='" . self::escAttr($url) . "'";
-                $attributes[] = "alt='" . $alt . "'";
-                $attributes[] = "loading='" . $loading . "'";
-
-                if ($class !== '') {
-                    $attributes[] = "class='" . $class . "'";
-                }
-
-                return '<img ' . implode(' ', $attributes) . '>';
-            } catch (\Throwable $e) {
-                return '';
+            } else {
+                $avifSrcset = $derivatives->format('avif')->srcset();
+                $webpSrcset = $derivatives->format('webp')->srcset();
+                $jpegSrcset = $derivatives->srcset();
+                $fallbackUrl = $image->resize(1200)->url();
             }
+
+            // On nettoie la classe CSS reçue du shortcode
+            $classAttr = $class ? " class='" . self::escAttr($class) . "'" : "";
+            
+            // 👇 LE SÉPARATEUR PARFAIT : <picture> reste neutre, la classe va sur l'<img>
+            return "<picture>
+                <source type='image/avif' srcset='{$avifSrcset}' sizes='(max-width:400px) 100vw, (max-width:800px) 50vw, 33vw'>
+                <source type='image/webp' srcset='{$webpSrcset}' sizes='(max-width:400px) 100vw, (max-width:800px) 50vw, 33vw'>
+                <source type='image/jpeg' srcset='{$jpegSrcset}' sizes='(max-width:400px) 100vw, (max-width:800px) 50vw, 33vw'>
+                <img src='{$fallbackUrl}' alt='" . self::escAttr($alt) . "'{$classAttr} loading='lazy'>
+            </picture>";
         });
     }
 }

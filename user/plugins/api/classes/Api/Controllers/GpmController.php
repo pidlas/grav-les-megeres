@@ -21,6 +21,8 @@ use RocketTheme\Toolbox\Event\Event;
 
 class GpmController extends AbstractApiController
 {
+    use TranslatesAdminLabels;
+
     /**
      * Package management: browsing the repository, listing installed packages,
      * checking updates. NOT the routes that serve an installed plugin's own
@@ -40,7 +42,13 @@ class GpmController extends AbstractApiController
     public function __construct(\Grav\Common\Grav $grav, \Grav\Common\Config\Config $config)
     {
         parent::__construct($grav, $config);
-        $this->serializer = new PackageSerializer();
+        // A package's own blueprints.yaml may write its name/description as a
+        // translation key, the way every other label in that file is written.
+        // Resolve those server-side; anything that isn't a key we can translate
+        // is served exactly as the author wrote it (#39).
+        $this->serializer = new PackageSerializer(
+            fn (string $value): ?string => $this->resolveTranslationKey($value),
+        );
         $cacheDir = $grav['locator']->findResource('cache://', true, true) . '/api/thumbnails';
         $this->thumbSmall = new ThumbnailService($cacheDir, 500);
         $this->thumbLarge = new ThumbnailService($cacheDir, 2000);
@@ -52,6 +60,10 @@ class GpmController extends AbstractApiController
     public function plugins(ServerRequestInterface $request): ResponseInterface
     {
         $this->requirePermission($request, self::PERMISSION_READ);
+
+        // Package name/description may be translation keys; resolve them against
+        // the caller's admin language (#39).
+        $this->primeAdminLanguages($request);
 
         $gpm = $this->getGpm();
         $installed = $gpm->getInstalledPlugins();
@@ -85,6 +97,10 @@ class GpmController extends AbstractApiController
     public function plugin(ServerRequestInterface $request): ResponseInterface
     {
         $this->requirePermission($request, self::PERMISSION_READ);
+
+        // Package name/description may be translation keys; resolve them against
+        // the caller's admin language (#39).
+        $this->primeAdminLanguages($request);
 
         $slug = $this->getRouteParam($request, 'slug');
         $gpm = $this->getGpm();
@@ -123,6 +139,10 @@ class GpmController extends AbstractApiController
     {
         $this->requirePermission($request, self::PERMISSION_READ);
 
+        // Package name/description may be translation keys; resolve them against
+        // the caller's admin language (#39).
+        $this->primeAdminLanguages($request);
+
         $gpm = $this->getGpm();
         $installed = $gpm->getInstalledThemes();
         $updatable = $gpm->getUpdatableThemes();
@@ -151,6 +171,10 @@ class GpmController extends AbstractApiController
     public function theme(ServerRequestInterface $request): ResponseInterface
     {
         $this->requirePermission($request, self::PERMISSION_READ);
+
+        // Package name/description may be translation keys; resolve them against
+        // the caller's admin language (#39).
+        $this->primeAdminLanguages($request);
 
         $slug = $this->getRouteParam($request, 'slug');
         $gpm = $this->getGpm();
@@ -189,6 +213,10 @@ class GpmController extends AbstractApiController
     public function updates(ServerRequestInterface $request): ResponseInterface
     {
         $this->requirePermission($request, self::PERMISSION_READ);
+
+        // Package name/description may be translation keys; resolve them against
+        // the caller's admin language (#39).
+        $this->primeAdminLanguages($request);
 
         $query = $request->getQueryParams();
         $flush = filter_var($query['flush'] ?? false, FILTER_VALIDATE_BOOLEAN);
@@ -255,7 +283,7 @@ class GpmController extends AbstractApiController
         if ($license) {
             if (!Licenses::validate($license)) {
                 throw new ValidationException(
-                    "Invalid license format. Expected: XXXXXXXX-XXXXXXXX-XXXXXXXX-XXXXXXXX (uppercase hex)."
+                    "That does not look like a licence key. Paste the key exactly as the store sent it."
                 );
             }
             Licenses::set($package, $license);
@@ -823,6 +851,10 @@ class GpmController extends AbstractApiController
     {
         $this->requirePermission($request, self::PERMISSION_READ);
 
+        // Package name/description may be translation keys; resolve them against
+        // the caller's admin language (#39).
+        $this->primeAdminLanguages($request);
+
         $pagination = $this->getPagination($request);
         // Allow fetching all repository packages (the install modal needs the full list)
         $query = $request->getQueryParams();
@@ -871,6 +903,10 @@ class GpmController extends AbstractApiController
     {
         $this->requirePermission($request, self::PERMISSION_READ);
 
+        // Package name/description may be translation keys; resolve them against
+        // the caller's admin language (#39).
+        $this->primeAdminLanguages($request);
+
         $pagination = $this->getPagination($request);
         $query = $request->getQueryParams();
         if (isset($query['per_page']) && (int) $query['per_page'] > $pagination['per_page']) {
@@ -918,6 +954,10 @@ class GpmController extends AbstractApiController
     {
         $this->requirePermission($request, self::PERMISSION_READ);
 
+        // Package name/description may be translation keys; resolve them against
+        // the caller's admin language (#39).
+        $this->primeAdminLanguages($request);
+
         $slug = $this->getRouteParam($request, 'slug');
         $gpm = $this->getGpm();
 
@@ -943,6 +983,10 @@ class GpmController extends AbstractApiController
     public function search(ServerRequestInterface $request): ResponseInterface
     {
         $this->requirePermission($request, self::PERMISSION_READ);
+
+        // Package name/description may be translation keys; resolve them against
+        // the caller's admin language (#39).
+        $this->primeAdminLanguages($request);
 
         $query = $request->getQueryParams();
         $search = $query['q'] ?? null;

@@ -77,6 +77,7 @@ RSYNC_EXCLUDES=(
   ".htaccess"
   "/media/"
   "config/themes/quark2.yaml"
+  "config/versions.yaml"
 )
 
 usage() {

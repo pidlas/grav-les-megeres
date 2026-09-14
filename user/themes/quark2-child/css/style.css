@@ -899,113 +899,15 @@ main:focus-visible {
     min-width: 0;
     overflow: hidden;
     transition: 0.6s cubic-bezier(0.28, -0.03, 0, 0.99);
+    border-radius:1rem;
+    background-position:49.5%;
 }
 
 .card:hover {
     transform: scaleY(1.03);
 }
 
-.card[for="c1"] {
-    background-image: -webkit-image-set(
-        url(../images/p_qui-sommes-nous.webp) type("image/webp"),
-        url(../images/p_qui-sommes-nous.jpg) type("image/jpeg")
-    );
-    background-image: image-set(
-        url(../images/p_qui-sommes-nous.webp) type("image/webp"),
-        url(../images/p_qui-sommes-nous.jpg) type("image/jpeg")
-    );
-}
-.card[for="c1"],
-
-.card[for="c2"] {
-    background-position: 49.5%;
-    border-radius: 1rem;
-}
-
-.card[for="c2"] {
-    background-image: -webkit-image-set(
-        url(../images/p_gresilhette-et-salimonde.webp) type("image/webp"),
-        url(../images/p_gresilhette-et-salimonde.jpg) type("image/jpeg")
-    );
-    background-image: image-set(
-        url(../images/p_gresilhette-et-salimonde.webp) type("image/webp"),
-        url(../images/p_gresilhette-et-salimonde.jpg) type("image/jpeg")
-    );
-}
-
-.card[for="c3"] {
-    background-image: -webkit-image-set(
-        url(../images/p_ta-grand-mere-sous-le-figuier.webp) type("image/webp"),
-        url(../images/p_ta-grand-mere-sous-le-figuier.jpg) type("image/jpeg")
-    );
-    background-image: image-set(
-        url(../images/p_ta-grand-mere-sous-le-figuier.webp) type("image/webp"),
-        url(../images/p_ta-grand-mere-sous-le-figuier.jpg) type("image/jpeg")
-    );
-    background-position: center !important;
-    background-size: cover !important;
-}
-
-.card[for="c3"],
-
-.card[for="c4"] {
-    background-position: center;
-    border-radius: 1rem;
-}
-
-.card[for="c4"] {
-    background-image: -webkit-image-set(
-        url(../images/p_theatre-forum.webp) type("image/webp"),
-        url(../images/p_theatre-forum.jpg) type("image/jpeg")
-    );
-    background-image: image-set(
-        url(../images/p_theatre-forum.webp) type("image/webp"),
-        url(../images/p_theatre-forum.jpg) type("image/jpeg")
-    );
-}
-
-.card[for="c5"] {
-    background-image: -webkit-image-set(
-        url(../images/p_cours.webp) type("image/webp"),
-        url(../images/p_cours.jpg) type("image/jpeg")
-    );
-    background-image: image-set(
-        url(../images/p_cours.webp) type("image/webp"),
-        url(../images/p_cours.jpg) type("image/jpeg")
-    );
-}
-.card[for="c5"],
-
-.card[for="c6"] {
-    background-position: 49.5%;
-    border-radius: 1rem;
-}
-
-.card[for="c6"] {
-    background-image: -webkit-image-set(
-        url(../images/p_stage.webp) type("image/webp"),
-        url(../images/p_stage.jpg) type("image/jpeg")
-    );
-    background-image: image-set(
-        url(../images/p_stage.webp) type("image/webp"),
-        url(../images/p_stage.jpg) type("image/jpeg")
-    );
-}
-
-.card[for="c7"] {
-    background-image: -webkit-image-set(
-        url(../images/p_ateliers.webp) type("image/webp"),
-        url(../images/p_ateliers.jpg) type("image/jpeg")
-    );
-    background-image: image-set(
-        url(../images/p_ateliers.webp) type("image/webp"),
-        url(../images/p_ateliers.jpg) type("image/jpeg")
-    );
-    background-position: 50%;
-    border-radius: 1rem;
-}
 input,
-
 input .description {
     display: none;
     pointer-events: none;

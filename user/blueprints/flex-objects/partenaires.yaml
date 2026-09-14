@@ -1,0 +1,59 @@
+type: flex-objects
+
+title: Partenaires
+description: Gestion conviviale des partenaires du site
+
+config:
+  data:
+    storage:
+      className: 'Grav\Framework\Flex\Storage\FolderStorage'
+      options:
+        formatter:
+          class: 'Grav\Framework\File\Formatter\YamlFormatter'
+        folder: 'user/pages/02.infos/04.partenaires'
+    media:
+      per_object: true
+
+  admin:
+    router:
+      path: /partenaires
+    menu:
+      list:
+        route: /partenaires
+        title: Partenaires
+        icon: fa fa-handshake-o
+    list:
+      title: Liste des Partenaires
+      ordering:
+        nom: asc
+      fields:
+        nom:
+          title: Nom du partenaire
+          link: edit
+        url:
+          title: Site Internet
+
+form:
+  fields:
+    nom:
+      type: text
+      label: 'Identifiant / Nom du partenaire'
+      help: 'Obligatoire. Ce nom sert à lister le partenaire dans ce tableau.'
+      validate:
+        required: true
+        
+    url:
+      type: text
+      label: 'Lien du site internet (URL)'
+      placeholder: 'https://exemple.com'
+      validate:
+        type: url
+
+    # 👇 LE SEUL CONFIGURATION QUI MARCHE POUR DU GLISSER-DÉPOSER HORS PAGES
+    logo:
+      type: file
+      label: 'Logo du partenaire'
+      multiple: false
+      destination: 'flex-objects/partenaires' # Stockage relatif géré par le moteur Flex
+      accept:
+        - image/*

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Grav\Plugin\Api\Serializers;
 
+use Closure;
 use Grav\Common\GPM\Licenses;
 use Parsedown;
 
@@ -11,13 +12,26 @@ class PackageSerializer implements SerializerInterface
 {
     private static ?Parsedown $parsedown = null;
 
+    /**
+     * @param Closure(string):?string|null $translator Resolves a package-level
+     *        string that is a translation key to its translation, returning
+     *        null for anything it can't positively translate — literal prose
+     *        included. Supplied by GpmController from TranslatesAdminLabels;
+     *        absent everywhere else, which leaves values untouched.
+     */
+    public function __construct(private readonly ?Closure $translator = null)
+    {
+    }
+
     public function serialize(object $resource, array $options = []): array
     {
-        $description = $resource->description ?? null;
+        // Translate before rendering: the markdown in a description belongs to
+        // the translated text, not to the key (#39).
+        $description = $this->translateValue($resource->description ?? null);
 
         $data = [
             'slug' => $resource->slug ?? null,
-            'name' => $resource->name ?? null,
+            'name' => $this->translateValue($resource->name ?? null),
             'version' => $resource->version ?? null,
             'type' => $options['type'] ?? null,
             'description' => $description,
@@ -187,6 +201,28 @@ class PackageSerializer implements SerializerInterface
         // For themes, check if it's the active theme
         $activeTheme = \Grav\Common\Grav::instance()['config']->get('system.pages.theme');
         return $slug === $activeTheme;
+    }
+
+    /**
+     * Resolve a package-level string that may be a translation key.
+     *
+     * A package's `name` and `description` come from its own blueprints.yaml,
+     * where an author may write literal prose or — following the same
+     * convention every other label in that file follows — a translation key.
+     * Both have to work: the value is handed to the translator, and anything it
+     * can't positively translate comes back exactly as authored (#39).
+     *
+     * `author.name` and `keywords` are left out on purpose. They are proper
+     * nouns and tag words, never keyed, and running a person's name through a
+     * translation lookup is not something anyone asked for.
+     */
+    private function translateValue(mixed $value): mixed
+    {
+        if (!is_string($value) || $value === '' || $this->translator === null) {
+            return $value;
+        }
+
+        return ($this->translator)($value) ?? $value;
     }
 
     /**

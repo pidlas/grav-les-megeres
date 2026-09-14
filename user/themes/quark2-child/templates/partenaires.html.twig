@@ -1,0 +1,59 @@
+{% extends 'main-layout.html.twig' %}
+
+{% block content %}
+    <main>
+        <section>
+            {# Habillage commun du haut #}
+            <div class="conteneur-champignons">
+                <img src="{{ url('theme://images/i_champignons.svg') }}" class="champignons" alt="" loading="lazy">
+                <h1>{{ page.title }}</h1>
+                {% if page.header.subtitle %}<p class="sous-titre">{{ page.header.subtitle | raw }}</p>{% endif %}
+            </div>
+
+            {# Récupération de la liste des Partenaires depuis Flex-Objects #}
+            {% set liste_partenaires = grav.flex.directory('partenaires').getIndex() %}
+
+            {% if liste_partenaires is not empty %}
+                {# 1. Votre liste globale d'origine brute #}
+                <ul class="g_partenaires">
+                    
+                    {% for partenaire in liste_partenaires %}
+                        {# 2. Vos puces de liste d'origine #}
+                        <li>
+                            {# L'encadré visuel pro #}
+                            <div class="partenaire-carte-pro">
+                                
+                                {% set alt_text = partenaire.nom is not empty ? partenaire.nom : 'Logo partenaire' %}
+                                
+                                {% if partenaire.url %}
+                                    <a href="{{ partenaire.url }}" target="_blank" rel="noopener noreferrer">
+                                {% endif %}
+
+                                {% if partenaire.logo is not empty %}
+                                    {% set logo_data = partenaire.logo|first %}
+                                    <img src="{{ url(logo_data.path) }}" alt="{{ alt_text }}" class="partenaire-logo-pro" loading="lazy">
+                                {% else %}
+                                    <h3 class="partenaire-titre-pro">{{ alt_text }}</h3>
+                                {% endif %}
+
+                                {% if partenaire.url %}
+                                    </a>
+                                    {# Le bouton d'action sous le logo #}
+                                    <a href="{{ partenaire.url }}" target="_blank" rel="noopener noreferrer" class="btn btn-primary partenaire-btn-pro">
+                                        Visiter le site
+                                    </a>
+                                {% endif %}
+                                
+                            </div>
+                        </li>
+                    {% endfor %}
+                    
+                </ul>
+            {% endif %}
+
+            {# 3. Le contenu textuel de la page s'affiche désormais ici, après la liste des logos #}
+            {{ page.content|raw }}
+
+        </section>
+    </main>
+{% endblock %}

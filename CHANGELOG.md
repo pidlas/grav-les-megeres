@@ -1,3 +1,108 @@
+# v2.1.3
+## 09/13/2026
+
+1. [](#bugfix)
+    * **Asking a template for an image caption or credit that was never set no longer changes the image address.** Reading a `.meta.yaml` field that is missing, such as `{{ image.copyright }}`, added the field name to the end of the image URL for every visitor instead of simply returning nothing. Thanks @phmg701 [#4301](https://github.com/getgrav/grav/issues/4301)
+    * **The debug bar is back on pages that swap in a different page while the request runs.** A form that failed validation, or an error page served by the Error plugin, rendered without the bar because Grav no longer recognised the replacement page as one it had already loaded. Thanks @hughbris [#4300](https://github.com/getgrav/grav/issues/4300)
+    * The Clockwork debug badge now appears when the JavaScript pipeline is enabled. Its script was being merged into the combined file, which dropped the attributes it needs to find itself. Thanks @wakqasahmed [#3871](https://github.com/getgrav/grav/issues/3871)
+    * AVIF images now honour the quality setting when the Imagick adapter is in use. The value was being written to a field the AVIF encoder never reads, so every AVIF came out at the encoder's own default regardless of the setting. Thanks @sridharkalaibala and @Rotzbua [#4059](https://github.com/getgrav/grav/issues/4059)
+    * **Saving a page or a Flex object no longer fails with `Invalid input in "Date"` on a date the author never touched.** A `date:` written the ordinary unquoted way comes back out of YAML as a number, and the date validator only accepted text, so editing any other field and saving was refused outright in Admin Next and through the API. Classic admin was never affected because it reformatted the date before submitting it [#4304](https://github.com/getgrav/grav/issues/4304)
+
+# v2.1.2
+## 09/11/2026
+
+1. [](#bugfix)
+    * **Updating a 2.0 site to 2.1 from Admin2 no longer fails.** The check that runs before an update still treated a minor release as a major one, so it refused the update unless every enabled plugin and theme listed Grav 2.1 as compatible, which almost none do yet. From 2.0 on those checks only run for a new major version [#4299](https://github.com/getgrav/grav/issues/4299)
+    * `bin/gpm update` no longer calls a 2.0 to 2.1 update a new major version
+
+# v2.1.1
+## 09/11/2026
+
+1. [](#bugfix)
+    * **Grav 2.0 sites can update to 2.1.** `bin/gpm selfupgrade` treated each minor release as a separate line, the way 1.7 and 1.8 were, so a 2.0 site was told it was up to date while 2.1.0 was out. Only a new major version now needs a manual move [#4299](https://github.com/getgrav/grav/issues/4299)
+    * When a new major version of Grav is out, `bin/gpm selfupgrade` says so and links to the migration guide instead of only reporting that the site is up to date
+
+# v2.1.0
+## 09/11/2026
+
+1. [](#new)
+    * Every page can now be read as Markdown, built for AI agents and other text clients. Add `.md` to any page URL, or send an `Accept: text/markdown` request header, and Grav answers with the rendered page converted back to Markdown instead of the theme's HTML
+    * The Markdown is the page as the theme renders it, reduced to its main content region, so blog listings, shops, product pages and anything else a template builds read the way they display. Shortcodes, content Twig, modular pages and resolved image and link paths all come through, and site navigation, sidebars and footers are left out
+    * Each Markdown document opens with a YAML block (title, URL, date, description, taxonomy) and closes with links to the parent, neighbouring and child pages by their own `.md` URLs, so an agent can walk a whole site without leaving Markdown
+    * The feature and each of its parts can be switched off under the new **Markdown Output** settings in **Configuration → System → Content**
+    * HTML responses now carry a `Link` header and a `<link rel="alternate" type="text/markdown">` tag pointing at their Markdown version, and Markdown responses carry an `X-Markdown-Tokens` header with an estimated token count, matching Cloudflare's Markdown for Agents
+    * Themes can override the Markdown layout with a `default.md.twig` or `<template>.md.twig` template, using the new `markdown_output()`, `markdown_frontmatter()`, `markdown_body()`, `markdown_links()` and `markdown_url()` Twig functions and the `html_to_markdown` filter
+    * Grav's own templates are now also reachable under the `@grav` Twig namespace, so a theme can include or extend `@grav/partials/metadata.html.twig` to add a line instead of keeping a copy of the whole file
+    * The home page can be requested in any output format as `/index.md`, `/index.rss`, `/index.json` and so on, the way static site generators do it, instead of `/.md`, which every web server treats as a hidden file. A root page actually named `index` still takes precedence
+    * `page.url()` takes a fifth argument naming an output format, so `page.url(true, false, true, false, 'rss')` gives the right link for any page, home included, without a theme having to check for the home page and append `index` itself
+    * A media file's `url()` now takes a second argument that prepends the scheme and host, so `page.media['photo.jpg'].url(true, true)` gives a full URL for one image where Open Graph, Pinterest or a feed needs it, without turning on `absolute_urls` for the whole site. It matches `page.url(true)` in subfolder installs, with `custom_base_url`, and for media linked through the page route with `pages.media_route_urls` [#894](https://github.com/getgrav/grav/issues/894)
+    * The content type served for an output format can be changed per site: set `media.types.rss.mime` in `user/config/media.yaml` and the RSS feed is sent as that type, so a feed can be styled with XSLT without a plugin. The same works for `atom`, `xml`, `json` and `md`. Thanks to @wakqasahmed for the matching PR [#4293](https://github.com/getgrav/grav/pull/4293) [#3735](https://github.com/getgrav/grav/issues/3735)
+    * The short and long date format pickers offer ISO 8601 presets, `Y-m-d` and `Y-m-d H:i` [#2283](https://github.com/getgrav/grav/issues/2283)
+    * A new **Flex Render Hints** debugger setting wraps every rendered Flex object and collection in an HTML comment naming it, so the source of a block can be found in the page markup. Off by default
+1. [](#improved)
+    * A redirect answered to a `.md` request now points at the `.md` version of its target, so a section URL that forwards to its first page keeps an agent in Markdown
+    * A URL with no extension sends `Vary: Accept` while Markdown output is on, so a shared cache never hands an agent the HTML or a browser the Markdown
+    * The Apache and lighttpd configs now forbid `.md` URLs only when they point at a real file, so page routes ending in `.md` reach Grav while source files under `user/pages` stay blocked
+    * Upgrading patches the same rule into an existing site's `.htaccess`, which upgrades never replace, as long as the stock line is still there untouched. nginx, Caddy and IIS configs never blocked page routes and need no change
+    * Parsedown Extra updated to 1.0.1, which removes two PHP 8.2+ deprecation notices
+1. [](#bugfix)
+    * **The Clockwork browser extension can now sign in with the debugger token.** The extension posts the password as a multipart form, and the `/__clockwork/auth` endpoint only read raw JSON or query-string bodies, so every password entered in the extension was refused while `curl` with the same token worked. The parsed form body is read first now
+    * **Updating Grav no longer deletes the processed-image cache.** The update ran a full cache clear that ignored `cache.clear_images_by_default`, so every gallery thumbnail was regenerated on the next visit. Resized images now survive every cache clear and update unless that setting is on; `bin/grav cache --images-only` still removes them on demand [#3416](https://github.com/getgrav/grav/issues/3416)
+    * With the debugger on, Flex wrote a comment marker around every rendered object and collection into RSS, Atom, XML and Markdown output, breaking feeds and sitemaps. The marker also used dashes that are not a valid HTML comment. It is now opt-in through the new Flex Render Hints setting, only ever appears in HTML pages, and is a real comment [#3538](https://github.com/getgrav/grav/issues/3538)
+    * Pages with `twig_first: true` broke in 2.0.26 with a Twig syntax error such as `Unexpected character "&"`, because the fix for GHSA-pp89-h475-7gj6 sent every content-Twig page down a path that always ran Markdown before Twig. Twig-first pages run Twig on the raw source again and their output is never put in the page cache, and Markdown-first pages no longer have their Twig tags altered by Markdown
+    * **Large responses on hosts with `zlib.output_compression` turned on no longer end in a PHP error.** On the way out Grav tried to close PHP's own compression buffer, which PHP refuses once compressed output has started, so every response over about 16 KB got an HTML error block appended (breaking Admin2's plugin picker and other large API responses), a CRITICAL line was logged, and `onShutdown` work never ran. Grav now only closes the buffers PHP allows it to. Thanks to @sandymac [#4294](https://github.com/getgrav/grav/issues/4294)
+    * **Scheduler folders and processed-image cache folders are created group-writable like the rest of Grav**, so on hosts where the web server and the command line run as different users, `bin/grav clearcache` can empty them again. The `system.images.cache_perms` default is now `0775`, and the umask still applies. Thanks to @sandymac [#4295](https://github.com/getgrav/grav/issues/4295)
+    * A user group saved without a display name is listed under its own name in the Groups field, instead of as a blank entry [getgrav/grav-plugin-admin2#172](https://github.com/getgrav/grav-plugin-admin2/issues/172)
+    * Saving a page whose code samples contain heredocs or long runs of `key='value'` lines no longer fails with `PREG_BACKTRACK_LIMIT_ERROR`. The XSS check's event-handler rule gave up on that content, and a check that can't finish counts as a hit, so the save was refused. The rule now runs in linear time and still catches everything it did before. Thanks to @amadeusp [#4291](https://github.com/getgrav/grav/issues/4291)
+    * Markdown Extra no longer deletes page content that follows the first element of an HTML block. Every raw HTML block went through PHP's DOM parser, which kept only its first element [#4291](https://github.com/getgrav/grav/issues/4291) [#3452](https://github.com/getgrav/grav/issues/3452) [#1198](https://github.com/getgrav/grav/issues/1198)
+    * Markdown Extra leaves raw HTML exactly as written, as it does with Extra off, so Twig in `href` and `src` attributes works again and SVG attributes, entities and self-closing tags are no longer rewritten. Only blocks marked `markdown="1"` are still processed [#1495](https://github.com/getgrav/grav/issues/1495) [#1449](https://github.com/getgrav/grav/issues/1449) [#1352](https://github.com/getgrav/grav/issues/1352)
+    * Pages with an HTML block that starts with `<html>` no longer crash with Markdown Extra turned on
+    * Markdown inside a `markdown="1"` block is now rendered from the text as written, so a fenced code block keeps its capital letters and tags [#1840](https://github.com/getgrav/grav/issues/1840)
+    * A `>` blockquote inside a `markdown="1"` block now renders as a blockquote [#3204](https://github.com/getgrav/grav/issues/3204)
+    * `&` in code spans and entities such as `&commat;` inside a `markdown="1"` block are no longer escaped twice [#764](https://github.com/getgrav/grav/issues/764) [#2590](https://github.com/getgrav/grav/issues/2590)
+    * `<https://...>` and `<name@example.com>` links now work inside a `markdown="1"` block [#287](https://github.com/getgrav/grav/issues/287)
+    * A `<source>` inside a `<picture markdown="1">` no longer swallows the image after it [#1168](https://github.com/getgrav/grav/issues/1168)
+    * Twig in attributes, SVG attribute names and text after a `<` are kept as written inside a `markdown="1"` block
+    * `markdown="1"` on a `<script>` or `<style>` tag no longer turns its code into paragraphs
+    * Reference links, footnotes and abbreviations now work on both sides of a `markdown="1"` block, instead of the block wiping out every definition written above it
+    * Footnotes inside a `markdown="1"` block now join the page's single footnote list and are numbered in reading order
+    * A definition list item with more than one paragraph no longer breaks every reference link after it on the page
+    * With `system.custom_base_url` set to something like `/act`, pages whose names start with the same letters, such as `/action-bar`, no longer open the wrong page. Thanks to @wakqasahmed [#4296](https://github.com/getgrav/grav/pull/4296) [#3057](https://github.com/getgrav/grav/issues/3057)
+    * Images placed in page content with Markdown, including images from other pages and the image inside a `?lightbox` link, now link through the page route when `pages.media_route_urls` is on, so enabling the `user/pages` deny rule that goes with it no longer turns them into 403s. Thanks to @complanar [#4298](https://github.com/getgrav/grav/issues/4298)
+    * With `pages.media_route_urls` and `images.cls.auto_sizes` both on, a page showing an image at its original size no longer fails with a `getimagesize()` error [#4298](https://github.com/getgrav/grav/issues/4298)
+    * **Licence keys from other stores are accepted.** GPM serves packages licensed by stores other than Grav Premium, but the key format check only knew the Grav Premium shape, so a KahunaCart key such as `KC-XXXX-XXXX-XXXX-XXXX` was refused by the API plugin's install endpoint and by License Manager while a hand-written `user/data/licenses.yaml` worked. The check now only turns away what no store could have issued and leaves the store that issued the key to say whether it is real
+    * When getgrav.org refuses a premium download for a reason the person can act on, such as an updates window that has ended or a key that does not cover the add-on being installed, `bin/gpm install` now prints the store's explanation and where to renew or buy, instead of only "Unauthorized Premium License Key"
+
+# v2.0.26
+## 09/09/2026
+
+1. [](#bugfix)
+    * Plain text that happens to contain a word ending in `data`, `feed` or another URI scheme name no longer blocks a page from saving with "Potential XSS issues detected". The check matched the scheme anywhere inside a word, so a Hungarian sentence ending in "mondata:" or an English one mentioning "metadata:" was read as a `data:` URI. Thanks to @csbrny [#619](https://github.com/getgrav/grav-premium-issues/issues/619)
+
+# v2.0.25
+## 09/09/2026
+
+1. [](#new)
+    * A new `pages.media_route_urls` setting in `system.yaml`, off by default, links a page's media by its page route instead of its path on disk, so plugins can apply the page's `access` rules to media requests. Resized images keep serving from the image cache
+    * Every web server config now carries a commented rule for denying direct access to `user/pages`, which only becomes safe to enable once `pages.media_route_urls` is on
+
+2. [](#improved)
+    * Now depends on a released `rockettheme/toolbox` 2.0 rather than tracking its development branch, so a build always resolves to the same code
+    * **An operator who manages users can no longer give themselves full admin rights.** Permission fields that only a super admin may write were guarded by name, and writing the same field under its flattened name slipped past that guard. Thanks to @movon-ava
+    * **Twig in page content can no longer read the site's configuration through the `array` filter.** The `|array` cast was the one conversion that never asked the sandbox whether it was allowed, so it could turn Grav's internal service registry into a plain list and read the settings the sandbox exists to keep out of page content, including plugin passwords and API keys. Thanks to @1diot9 and @AlpetGexha
+    * **A page can no longer capture the session of an administrator who views it.** Page content could read the visitor's cookies, and the finished page was stored in a cache shared by everyone, so an administrator's session could be handed to the next visitor. Cookie reading is no longer available to page content, and pages that run editor-written code are no longer cached after that code runs. Thanks to @canhieu
+    * **The bundled IIS and lighttpd configs now block sensitive files whatever the capitalisation of the request.** Only the Apache and PHP rules were corrected when this was last fixed. Anyone serving Grav with the bundled `web.config` or `lighttpd.conf` should re-copy the sample, as the updater only heals `.htaccess`. Thanks to @movon-ava
+    * Uploaded files are now checked for embedded scripts based on the file itself rather than the type the browser claims it is. Thanks to @AlpetGexha
+    * A disabled account is now refused permissions even when its rights are checked outside of a login session, and an account permission check no longer matches any permission whose name merely contains the word "login". Thanks to @AlpetGexha
+
+3. [](#bugfix)
+    * `onShutdown` now fires after a request that ended through `close()` or `redirect()`, not only after a rendered page. Those requests echoed their response and exited before the shutdown handler was registered, so a plugin doing slow work after the response (sending queued mail, warming a cache) never ran on a form submit that redirected. The non-FastCGI fallback also stops trying to set headers once they have been sent
+    * Fixed the Flex user ACL treating an unsaved account and an anonymous visitor as the same person. Thanks to @AlpetGexha
+    * Corrected the `security.yaml` comment claiming Twig in page content is off by default. It has shipped on since 2.0.19
+    * A page dated with an unquoted `date: 2022-01-06` header no longer lands in the year 7200. The YAML parser reads an unquoted date as a date and hands over a timestamp rather than a string, which the date parsing then misread. Thanks to @wakqasahmed [#3812](https://github.com/getgrav/grav/issues/3812)
+    * A relative path handed to the resource locator can no longer resolve outside the site folder. Making file paths absolute meant a `..` climbed out through the base instead of being refused. Stream paths such as `user://` were never affected, and Grav addresses its own resources that way
+    * Page content is now validated against the rules its blueprint declares. The Content field and the Content tab that holds it share the name `content`, and the tab was overwriting the field, so every rule set on a page body was quietly unused. Thanks to @wakqasahmed [#4271](https://github.com/getgrav/grav/issues/4271)
+
 # v2.0.24
 ## 09/03/2026
 

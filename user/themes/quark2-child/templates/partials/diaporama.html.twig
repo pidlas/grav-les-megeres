@@ -9,13 +9,29 @@
             
             <input type="radio" name="slide" id="{{ slide_id }}" {{ loop.first ? 'checked' : '' }}>
             
-            {# Génère le chemin d'image directement lié au dossier images du thème enfant #}
+            {# Gestion dynamique des formats d'images (AVIF et WebP) depuis les médias de la page #}
             {% set style_bg = '' %}
             {% if slide.image %}
-                {% set style_bg = ' style="background-image: url(' ~ url('theme://images/' ~ slide.image) ~ ');"' %}
+                {# 1. Récupération du fichier WebP attaché à la page #}
+                {% set img_webp = page.media[slide.image] %}
+                
+                {% if img_webp %}
+                    {% set url_webp = img_webp.url %}
+                    {# 2. Déduction de l'URL du fichier AVIF converti par votre script #}
+                    {% set url_avif = url_webp | replace({'.webp': '.avif'}) %}
+                    
+                    {# 3. Construction des propriétés CSS de repli et de sélection moderne #}
+                    {% set style_bg %}
+                        style="
+                            background-image: url('{{ url_webp }}');
+                            background-image: -webkit-image-set(url('{{ url_avif }}') type('image/avif'), url('{{ url_webp }}') type('image/webp'));
+                            background-image: image-set(url('{{ url_avif }}') type('image/avif'), url('{{ url_webp }}') type('image/webp'));
+                        "
+                    {% endset %}
+                {% endif %}
             {% endif %}
             
-            <label for="{{ slide_id }}" class="card"{{ style_bg | raw }}>
+            <label for="{{ slide_id }}" class="card" {{ style_bg | raw }}>
                 <div class="row">
                     <div class="description">
                         <a href="{{ base_url }}{{ slide.lien }}">
