@@ -1,5 +1,21 @@
-last_checked: 1789391587
+last_checked: 1789485804
 data:
+  dashboard-row:
+    -
+      id: 215
+      date: '2026-09-14 08:00'
+      type: promo
+      location:
+        - dashboard-row
+      title: KahunaCart
+      message: 'A complete **store inside your Grav site**, now available.'
+      image: 'https://kahunacart.com/user/themes/kahuna-site/images/kahunacart-wordmark-white.svg?v=2'
+      image_height: 38
+      accent: teal
+      layout: joined
+      action:
+        label: 'Learn more'
+        url: 'https://kahunacart.com'
   feed:
     -
       id: 214
@@ -126,9 +142,10 @@ data:
       location:
         - dashboard
       title: 'Grav Premium'
-      message: 'Turbo-charge your Grav site with **premium plugins & themes** from the creators of Grav.'
+      message: 'Premium **plugins & themes** from the creators of Grav.'
       image: 'https://getgrav.org/user/themes/planetoid/images/grav-premium-logo-white.svg'
       accent: purple
+      layout: joined
       action:
         label: 'Learn more'
         url: 'https://getgrav.org/premium'

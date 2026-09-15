@@ -1,5 +1,10 @@
-last_checked: 1789391587
+last_checked: 1789485805
 data:
+  -
+    title: 'KahunaCart Is Out'
+    url: 'https://getgrav.org/blog/kahunacart-released'
+    date: '2026-09-14T10:00:00+00:00'
+    summary: ''
   -
     title: 'Grav 2.1 Released: Every Page Speaks Markdown'
     url: 'https://getgrav.org/blog/grav-2-1-released'
@@ -44,9 +49,4 @@ data:
     title: 'The New getgrav.org'
     url: 'https://getgrav.org/blog/new-getgrav-org'
     date: '2026-06-20T12:00:00+00:00'
-    summary: ''
-  -
-    title: 'Grav 2.0: Twig in Content and the New Security Sandbox'
-    url: 'https://getgrav.org/blog/grav-2-twig-content-security'
-    date: '2026-06-17T12:00:00+00:00'
     summary: ''

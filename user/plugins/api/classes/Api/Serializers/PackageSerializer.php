@@ -27,12 +27,17 @@ class PackageSerializer implements SerializerInterface
     {
         // Translate before rendering: the markdown in a description belongs to
         // the translated text, not to the key (#39).
-        $description = $this->translateValue($resource->description ?? null);
+        $description = self::text($this->translateValue($resource->description ?? null));
 
+        // Cast: YAML types bare scalars, so a blueprint carrying `version: 1.0`
+        // hands us the float 1, not the string "1.0". Emitting that as a JSON
+        // number breaks every client that treats a version as text — one such
+        // package installed was enough to blank the admin's Plugins and Info
+        // pages for the whole site.
         $data = [
             'slug' => $resource->slug ?? null,
-            'name' => $this->translateValue($resource->name ?? null),
-            'version' => $resource->version ?? null,
+            'name' => self::text($this->translateValue($resource->name ?? null)),
+            'version' => self::text($resource->version ?? null),
             'type' => $options['type'] ?? null,
             'description' => $description,
             'description_html' => $this->renderMarkdown($description),
@@ -216,6 +221,25 @@ class PackageSerializer implements SerializerInterface
      * nouns and tag words, never keyed, and running a person's name through a
      * translation lookup is not something anyone asked for.
      */
+    /**
+     * Normalize a blueprint scalar to a string, preserving null.
+     *
+     * Only strings are left alone; ints, floats and bools become their text
+     * form. Anything non-scalar (a stray array in the blueprint) is dropped to
+     * null rather than coerced into "Array".
+     */
+    private static function text(mixed $value): ?string
+    {
+        if ($value === null) {
+            return null;
+        }
+        if (is_string($value)) {
+            return $value;
+        }
+
+        return is_scalar($value) ? (string) $value : null;
+    }
+
     private function translateValue(mixed $value): mixed
     {
         if (!is_string($value) || $value === '' || $this->translator === null) {

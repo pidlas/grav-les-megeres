@@ -16,10 +16,13 @@
             {{ page.content | raw }}
         </div>
 
+        {# Récupération de la collection des catégories d'actualités du Flex-Object #}
+        {% set actualites_flex = grav.flex_objects.directory('actualites').getCollection() %}
+
         {# Zone dynamique de la liste des Actualités #}
-        {% if page.header.actualites %}
+        {% if actualites_flex is not empty %}
         <div class="actus-list" aria-live="polite">
-            {% for item in page.header.actualites %}
+            {% for item in actualites_flex %}
                 <article class="actu-item">
                     
                     {# 1. Image principale de la catégorie actu #}
@@ -41,11 +44,18 @@
                                 
                                 {# 2. Rendu de la miniature (affiche) #}
                                 {% if bloc.miniature %}
-                                    {% set img_mini = page.media[bloc.miniature] ?: pages.find('/infos/actualites').media[bloc.miniature] %}
+
+                                    {# 1. Tentative via les médias de la page ou chemin absolu direct basé sur l'URL de la page #}
+                                    {% set img_mini = page.media[bloc.miniature] %}
+                                    
                                     {% if img_mini %}
                                         <img src="{{ img_mini.url }}" width="80" alt="{{ bloc.miniature_alt }}" loading="lazy">
                                     {% else %}
-                                        <img src="{{ url('theme://images/' ~ bloc.miniature) }}" width="80" alt="{{ bloc.miniature_alt }}" loading="lazy">
+                                        {# 2. Secours ultime : on construit l'URL directement par rapport à l'adresse de la page ou du dossier de secours #}
+                                        {% set direct_url = page.url ~ '/' ~ bloc.miniature %}
+                                        {% set global_media = media['page://' ~ bloc.miniature] ?: media['theme://images/' ~ bloc.miniature] %}
+                                        
+                                        <img src="{{ global_media ? global_media.url : direct_url }}" width="80" alt="{{ bloc.miniature_alt }}" loading="lazy">
                                     {% endif %}
                                     <div class="actu-wrapper">
                                 {% endif %}

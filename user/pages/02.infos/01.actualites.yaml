@@ -1,0 +1,27 @@
+72468e47eb7e6427bd42be9acf461a9a:
+  categorie: 'Les évènements'
+  image_principale: actu-event.avif
+  image_alt: 'Les évènements de la compagnie'
+  blocs:
+    -
+      date: 'mercredi 24 juin 2026 à 19h00'
+      titre: "Spectacle de fin d'année de la section Théâtre Enfants"
+      resume: 'En partenariat avec le FSC de Moussoulens, ce spectacle se tiendra à la Maison du Temps Libre. Réservation obligatoire'
+      miniature: les-7-petits-cauchemars.avif
+      miniature_alt: "Miniature de l'affiche du spectacle de fin d'année Les 7 Petits Cauchemards"
+    -
+      date: 'novembre 2026 - date à venir'
+      titre: 'Spectacle de Théâtre Forum'
+      resume: "En partenariat avec la FDE de Montpellier, antenne de Carcassonne, à l'occasion de la semaine de lutte contre les LGBT+phobies. À l'intention des étudiants et du personnel de l'établissement."
+cb81d4d97cea3272948649dc194c9ed2:
+  categorie: 'Les réseaux sociaux'
+  image_principale: le-croco-bleu.avif
+  image_alt: 'Stage ados 2026 à Carcassonne'
+  blocs:
+    -
+      date: 'jeudi 23 avril 2026'
+      titre: 'Stage ados 2026 à Carcassonne'
+      resume: "Pendant ces vacances scolaire de Printemps, la compagnie Les Mégères de l'Humus a fait découvrir le théâtre a un petit groupe d'adolescent·e·s du territoire. Partage, joie, rires et apprentissage."
+      liens:
+        - { texte: 'Voir la publication sur Facebook', url: 'https://www.facebook.com/share/p/1AzNZwvigi/' }
+        - { texte: 'Voir la publication sur Instagram', url: 'https://www.instagram.com/p/DXezLzSDTUO/?utm_source=ig_web_button_share_sheet&igsh=MzRIODBiNWFIZA==' }

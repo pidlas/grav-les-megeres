@@ -201,10 +201,6 @@ p.traduction {
     margin: 0;
 }
 
-.p_first {
-    margin-top: var(--space-m);
-}
-
 .p_centrer {
     text-align: center;
 }

@@ -1,0 +1,85 @@
+type: flex-objects
+
+title: Actualités
+description: Gestion conviviale des actualités et événements de la compagnie
+
+config:
+  data:
+    storage:
+      className: 'Grav\Framework\Flex\Storage\FolderStorage'
+      options:
+        formatter:
+          class: 'Grav\Framework\File\Formatter\YamlFormatter'
+        folder: 'user/pages/02.infos/01.actualites' # <-- Pointe directement dans votre dossier de page
+    media:
+      per_object: true
+
+  admin:
+    router:
+      path: /actualites
+    menu:
+      list:
+        route: /actualites
+        title: Actualités
+        icon: fa fa-newspaper-o
+    list:
+      title: Liste des catégories d'Actualités
+      fields:
+        categorie:
+          title: Nom de la Catégorie
+          link: edit
+
+form:
+  fields:
+    # L'identifiant du dossier créé par Flex (ex: les-evenements)
+    categorie:
+      type: text
+      label: 'Nom de la Catégorie'
+      help: 'Obligatoire. Ce nom servira également de nom de dossier pour stocker ces actualités.'
+      validate:
+        required: true
+
+    image_principale:
+      type: text
+      label: Nom de l'image principale
+      placeholder: "Ex: actu-event.webp"
+
+    image_alt:
+      type: text
+      label: Texte alternatif (Alt) de l'image principale
+
+    blocs:
+      type: list
+      label: Blocs / Articles de cette catégorie
+      btn_add: Ajouter un bloc
+      fields:
+        .date:
+          type: text
+          label: Date de l'événement
+          placeholder: "Ex: mer. 24 juin 2026 à 19 heures"
+        .titre:
+          type: text
+          label: Titre du bloc
+        .resume:
+          type: textarea
+          label: Résumé / Description
+          rows: 3
+        .miniature:
+          type: text
+          label: Nom de la miniature (Optionnel)
+        .miniature_alt:
+          type: text
+          label: Texte alternatif de la miniature
+
+        .liens:
+          type: list
+          label: Liens associés
+          btn_add: Ajouter un lien
+          fields:
+            .texte:
+              type: text
+              label: Texte du lien
+              placeholder: "Voir la publication sur Facebook"
+            .url:
+              type: text
+              label: URL du lien

@@ -1,3 +1,9 @@
+# v1.0.34
+## 09/14/2026
+
+1. [](#bugfix)
+    * A plugin or theme whose `blueprints.yaml` gives its version as a plain number, such as `version: 1.0`, is now reported as text rather than as a number. Admin2's Info and Plugins pages went blank on any site with one installed.
+
 # v1.0.33
 ## 09/13/2026
 

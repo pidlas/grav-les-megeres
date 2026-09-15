@@ -25,6 +25,11 @@ cache:
 errors:
   display: 1
   log: true
+system:
+  debugger:
+    enabled: true     # <-- Assurez-vous que cette ligne est sur true
+    shutdown:
+      close_connection: true
 images:
   adapter: imagick
   cls:

@@ -134,7 +134,7 @@ class SystemController extends AbstractApiController
             'php_version' => PHP_VERSION,
             'php_extensions' => get_loaded_extensions(),
             'server_software' => $redact ? self::DEMO_REDACTED : ($_SERVER['SERVER_SOFTWARE'] ?? 'unknown'),
-            'environment' => $this->config->get('system.environment') ?? $this->grav['uri']->environment(),
+            'environment' => (string) ($this->config->get('system.environment') ?? $this->grav['uri']->environment()),
             'plugins' => $plugins,
             'themes' => $themes,
             'php_config' => $this->getPhpConfig($redact),
@@ -856,10 +856,15 @@ class SystemController extends AbstractApiController
                 }
             }
 
+            // Cast: YAML types bare scalars, so `version: 1.0` in a package's
+            // blueprint parses as the float 1, not the string "1.0". Shipping
+            // that through as a JSON number breaks every consumer that treats
+            // it as text — the admin's Info page went blank on any site with
+            // one such plugin installed. Same for a numeric `name`.
             $plugins[] = [
-                'name' => $bpName ?? $name,
-                'version' => $bpVersion ?? '0.0.0',
-                'enabled' => $this->config->get("plugins.{$name}.enabled", false),
+                'name' => (string) ($bpName ?? $name),
+                'version' => (string) ($bpVersion ?? '0.0.0'),
+                'enabled' => (bool) $this->config->get("plugins.{$name}.enabled", false),
             ];
         }
 
@@ -890,9 +895,11 @@ class SystemController extends AbstractApiController
             $blueprint = \Grav\Common\Yaml::parse(file_get_contents($blueprintFile));
             $themeName = $item->getFilename();
 
+            // See getPluginsInfo() — a bare `version: 1.0` in the theme's
+            // blueprint is a float, and must not leave here as one.
             $themes[] = [
-                'name' => $blueprint['name'] ?? $themeName,
-                'version' => $blueprint['version'] ?? '0.0.0',
+                'name' => (string) ($blueprint['name'] ?? $themeName),
+                'version' => (string) ($blueprint['version'] ?? '0.0.0'),
                 'active' => $themeName === $activeTheme,
             ];
         }
