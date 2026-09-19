@@ -3,7 +3,7 @@ title: 'Sabine Rance'
 visible: false
 routable: true
 # Vos nouvelles variables uniques :
-personne_image: 'webRigolote_sr.jpg'
+personne_image: 'webRigolote_sr.avif'
 image_alt: 'Sabine Rance, Responsable artistique, metteuse en scène, autrice, comédienne'
 citation: "Elle savait qu'on se remet de tout. Un peu de traviole, mais on repart"
 citation_auteur: 'Apocalypse bébé, Virginie Despentes'

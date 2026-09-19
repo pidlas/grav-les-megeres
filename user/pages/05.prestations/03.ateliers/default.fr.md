@@ -3,10 +3,7 @@ title: 'Ateliers de théâtre'
 menu: 'Ateliers'
 ---
 <div class="img-centre">
-<picture>
-<source srcset="/prestations/ateliers/ateliers.webp" type="image/webp">
-<img class="photo-stages-ateliers" src="/prestations/ateliers/ateliers.jpg" alt="Un stage de théâtre de la Compagnie Les Mégères de l'Humus" loading="lazy">
-</picture>
+<img class="photo-stages-ateliers" src="/prestations/ateliers/ateliers.avif" alt="Un stage de théâtre de la Compagnie Les Mégères de l'Humus" loading="lazy">
 </div>
 
 <p class="p_first">

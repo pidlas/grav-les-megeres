@@ -41,24 +41,30 @@
 
             {# 3. Bloc des premières images au centre #}
             <div class="image-au-centre">
-                <picture>    
-                    <source srcset="{{ page.media['les-cours.webp'].url }}" type="image/webp">
-                    <img class="affiche-cours" alt="Le tarif des cours de théâtre" src="{{ page.media['les-cours.jpg'].url }}" loading="lazy">
-                </picture>
-                <picture>
-                    <source srcset="{{ page.media['photo-cours.webp'].url }}" type="image/webp">
-                    <img class="photo-cours" alt="Photo d'un cours de théâtre" src="{{ page.media['photo-cours.jpg'].url }}" loading="lazy">
-                </picture> 
+                {# Image 1 : Les tarifs des cours #}
+                {% set img_tarifs = page.media['les-cours.avif'] %}
+                {% if img_tarifs %}
+                    <img class="affiche-cours" alt="Le tarif des cours de théâtre" src="{{ img_tarifs.url }}" loading="lazy">
+                {% endif %}
+
+                {# Image 2 : Photo d'illustration #}
+                {% set img_photo = page.media['photo-cours.avif'] %}
+                {% if img_photo %}
+                    <img class="photo-cours" alt="Photo d'un cours de théâtre" src="{{ img_photo.url }}" loading="lazy">
+                {% endif %}
             </div>
 
             {# 4. Bloc des objectifs pédagogiques #}
             <div class="image-au-centre">
                 <h2 class="display-title">Les objectifs pédagogiques</h2>
-                <picture>    
-                    <source srcset="{{ page.media['objectifs-des-cours.webp'].url }}" type="image/webp">
-                    <img class="objectifs-pedagogiques" alt="Les objectifs pédagogiques du cours de théâtre" src="{{ page.media['objectifs-des-cours.jpg'].url }}" loading="lazy">
-                </picture>
+    
+                {# Sécurisation et appel direct de l'image AVIF #}
+                {% set img_objectifs = page.media['objectifs-des-cours.avif'] %}
+                {% if img_objectifs %}
+                    <img class="objectifs-pedagogiques" alt="Les objectifs pédagogiques du cours de théâtre" src="{{ img_objectifs.url }}" loading="lazy">
+                {% endif %}
             </div>
+
         </div>      
     </section>
 </main>

@@ -1,0 +1,66 @@
+<div class="g_compagnie3">
+    
+    {# ITEM 7 : RAPPORT 2024 #}
+    <div class="g_co-item7">
+        {% if page.media['rapport-2024_compressed.pdf'] and page.media['rapport2024.png'] %}
+            <a target="_blank" rel="noopener noreferrer" href="{{ page.media['rapport-2024_compressed.pdf'].url }}" title="Visualiser le rapport 2024">
+                <img alt="Rapport d'activités 2024 de la compagnie Les Mégères de l'Humus" src="{{ page.media['rapport2024.avif'].url }}" loading="lazy">
+            </a>
+        {% endif %}
+    </div>
+
+    {# ITEM 8 : RAPPORT 2025 #}
+    <div class="g_co-item8">
+        {% if page.media['rapport-2025_compressed.pdf'] and page.media['rapport2025.png'] %}
+            <a target="_blank" rel="noopener noreferrer" href="{{ page.media['rapport-2025_compressed.pdf'].url }}" title="Visualiser le rapport 2025">
+                <img alt="Rapport d'activités 2025 de la compagnie Les Mégères de l'Humus" src="{{ page.media['rapport2025.avif'].url }}" loading="lazy">
+            </a>
+        {% endif %}
+    </div>
+
+    {# ITEM 9 : TITRE #}
+    <div class="g_co-item9">
+        <h2 class="display-title">Et pourquoi les Mégères ?</h2>
+    </div>
+
+    {# ITEM 10 : MASQUE + PARAGRAPHE 1 #}
+    <div class="g_co-item10">
+        {% if page.media['co_masque.jpg'] %}
+            <img class="forme-masque" alt="Masque de Gorgone du théâtre antique" src="{{ page.media['co_masque.avif'].url }}" loading="lazy">
+        {% endif %}
+        {# On va chercher le 1er paragraphe du fichier markdown #}
+        <p>{{ page.content|split('</p>')[0]|raw }}</p>
+    </div>
+
+    {# ITEM 11 : ERINYES + PARAGRAPHE 2 #}
+    <div class="g_co-item11">
+        {% if page.media['co_les-erynies.jpg'] %}
+            <img class="forme-erinyes" alt="Les Erynies, peinture moderne" src="{{ page.media['co_les-erynies.avif'].url }}" loading="lazy">
+        {% endif %}
+        {# On va chercher le 2e paragraphe du fichier markdown #}
+        <p>{{ page.content|split('</p>')[1]|raw }}</p>
+    </div>
+            
+    {# ITEM 12 : ORESTE #}
+    <div class="g_co-item12">
+        <h2 class="display-title">Les Érynies poursuivent Oreste pour avoir tué Clytemnestre</h2>
+        {% if page.media['co_les-erinyes-et-oreste.avif'] %}
+            <img alt="Les Erynies et Oreste, peinture classique" src="{{ page.media['co_les-erinyes-et-oreste.avif'].url }}" loading="lazy">
+        {% endif %}
+    </div>
+            
+    {# ITEM 13 : HUMUS + PARAGRAPHE 3 #}
+    <div class="g_co-item13">
+        <h2 class="display-title">Et l'humus dans tout ça ?</h2>
+        {# On va chercher le 3e paragraphe du fichier markdown #}
+        <p>{{ page.content|split('</p>')[2]|raw }}</p>
+        <figure>
+            {% if page.media['co_l-humus.avif'] %}
+                <img alt="L'humus, peinture stylisée" src="{{ page.media['co_l-humus.avif'].url }}" loading="lazy">
+            {% endif %}
+            <figcaption class="p_centrer legende">
+                Emerson Munduruku est une biologiste munduruku. Elle utilise le drag, sous le nom d'Uýra Sodoma afin de militer pour la préservation de l'Amazonie.
+            </figcaption>
+        </figure>
+    </div>
+</div>

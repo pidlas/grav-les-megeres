@@ -1,0 +1,70 @@
+type: flex-objects
+
+title: Galerie Compagnie
+description: Gestion des métadonnées de la galerie (Alts, images et PDFs).
+
+config:
+  data:
+    storage:
+      className: 'Grav\Framework\Flex\Storage\FolderStorage'
+      options:
+        formatter:
+          class: 'Grav\Framework\File\Formatter\YamlFormatter'
+        folder: 'user/pages/02.infos/03.galerie-liens'
+        file: 'galerie-liens.yaml'
+    media:
+      per_object: true
+
+  admin:
+    router:
+      path: /galerie-liens
+    menu:
+      list:
+        route: /galerie-liens
+        title: Galerie Compagnie
+        icon: fa fa-picture-o
+    list:
+      title: Liste des Éléments
+      fields:
+        # 👇 Corrigé ici pour afficher la bonne colonne dans l'admin
+        item_data:
+          title: Emplacement
+          link: edit
+        alt_text:
+          title: Texte Alternatif
+
+form:
+  fields:
+    # 👇 Renommé et transformé en liste déroulante (select)
+    item_data:
+      type: select
+      label: "Emplacement de l'élément (Item)"
+      help: "Sélectionnez l'emplacement sur la page où cette image/document doit s'afficher."
+      validate:
+        required: true
+      options:
+        item7: "Item 7 : Rapport d'activités 2024 (Haut gauche)"
+        item8: "Item 8 : Rapport d'activités 2025 (Haut droit)"
+        item10: "Item 10 : Bloc Masque de Gorgone (Milieu)"
+        item11: "Item 11 : Bloc Les Érinyes (Milieu)"
+        item12: "Item 12 : Bloc Peinture Oreste (Bas)"
+        item13: "Item 13 : Bloc L'Humus & Légende (Pied de page)"
+
+    alt_text:
+      type: text
+      label: 'Texte alternatif (Alt)'
+      validate:
+        required: true
+
+    image_name:
+      type: text
+      label: 'Nom exact du fichier image .avif'
+
+    pdf_name:
+      type: text
+      label: 'Nom exact du fichier PDF (Optionnel)'
+
+    legende:
+      type: textarea
+      label: 'Légende (Optionnel)'
+      rows: 2

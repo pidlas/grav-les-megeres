@@ -3,7 +3,7 @@ title: 'Estelle Doumeng'
 visible: false
 routable: true
 # Vos nouvelles variables uniques :
-personne_image: 'webRigolote_ed.jpg'
+personne_image: 'webRigolote_ed.avif'
 image_alt: 'Estelle Doumeng, comédienne'
 citation: "Exister, c’est oser se jeter dans le monde."
 citation_auteur: 'Simone de Beauvoir'

@@ -4,3 +4,4 @@ directories:
   - 'blueprints://flex-objects/user-groups.yaml'
   - 'blueprints://flex-objects/partenaires.yaml'
   - 'blueprints://flex-objects/actualites.yaml'
+  - 'blueprints://flex-objects/galerie-liens.yaml'

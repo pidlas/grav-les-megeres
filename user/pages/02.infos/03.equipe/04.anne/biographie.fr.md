@@ -3,7 +3,7 @@ title: 'Anne Spielmann'
 visible: false
 routable: true
 # Vos nouvelles variables uniques :
-personne_image: 'webRigolote_as.jpg'
+personne_image: 'webRigolote_as.avif'
 image_alt: 'Anne Spielmann, plasticienne, scénographe, metteuse en scène, comédienne'
 citation: "Puisque ces mystères me dépassent, feignons d'en être l'organisateur."
 citation_auteur: 'Les Mariés de la Tour Eiffel, Jean Cocteau'

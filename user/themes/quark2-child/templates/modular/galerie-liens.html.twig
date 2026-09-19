@@ -1,0 +1,113 @@
+<div class="g_compagnie3">
+    {# 1. Chargement de la collection Flex-Object 'galerie-liens' #}
+    {% set galerie_items = grav['flex'].collection('galerie-liens') %}
+    
+    {# 2. Indexation dynamique des objets par leur clé d'emplacement (item7, item8...) #}
+    {% set items = {} %}
+    {% for obj in galerie_items %}
+        {% set items = items|merge({ (obj.item_data|trim): obj }) %}
+    {% endfor %}
+
+    {# ITEM 7 : RAPPORT 2024 #}
+    <div class="g_co-item7">
+        {% if items.item7 %}
+            {% set pdf_2024 = items.item7.pdf_name|trim ? page.media[items.item7.pdf_name|trim] : null %}
+            {% set img_2024 = page.media[items.item7.image_name|trim] %}
+            
+            {# On exige UNIQUEMENT l'image pour afficher le bloc #}
+            {% if img_2024 %}
+                {% if pdf_2024 %}
+                    <a target="_blank" rel="noopener noreferrer" href="{{ pdf_2024.url }}" title="Visualiser le rapport 2024">
+                {% endif %}
+                
+                <img alt="{{ items.item7.alt_text }}" src="{{ img_2024.url }}" loading="lazy">
+                
+                {% if pdf_2024 %}
+                    </a>
+                {% endif %}
+            {% endif %}
+        {% endif %}
+    </div>
+
+
+    {# ITEM 8 : RAPPORT 2025 #}
+    <div class="g_co-item8">
+        {% if items.item8 %}
+            {% set pdf_2025 = items.item8.pdf_name|trim ? page.media[items.item8.pdf_name|trim] : null %}
+            {% set img_2025 = page.media[items.item8.image_name|trim] %}
+
+            {# On exige UNIQUEMENT l'image pour afficher le bloc #}
+            {% if img_2025 %}
+                {% if pdf_2025 %}
+                    <a target="_blank" rel="noopener noreferrer" href="{{ pdf_2025.url }}" title="Visualiser le rapport 2025">
+                {% endif %}
+
+                    <img alt="{{ items.item8.alt_text }}" src="{{ img_2025.url }}" loading="lazy">
+
+                {% if pdf_2025 %}
+                    </a>
+                {% endif %}
+            {% endif %}
+        {% endif %}
+    </div>
+
+    {# ITEM 9 : TITRE #}
+    <div class="g_co-item9">
+        <h2 class="display-title">Et pourquoi les Mégères ?</h2>
+    </div>
+
+    {# ITEM 10 : MASQUE + PARAGRAPHE 1 #}
+    <div class="g_co-item10">
+        {% if items.item10 %}
+            {% set img_masque = page.media[items.item10.image_name|trim] %}
+            {% if img_masque %}
+                <img class="forme-masque" alt="{{ items.item10.alt_text }}" src="{{ img_masque.url }}" loading="lazy">
+            {% endif %}
+        {% endif %}
+        <p>{{ page.content|split('</p>')[0]|raw }}</p>
+    </div>
+
+    {# ITEM 11 : ERINYES + PARAGRAPHE 2 #}
+    <div class="g_co-item11">
+        {% if items.item11 %}
+            {% set img_erinyes = page.media[items.item11.image_name|trim] %}
+
+            {% if img_erinyes %}
+                <img class="forme-erinyes" alt="{{ items.item11.alt_text }}" src="{{ img_erinyes.url }}" loading="lazy">
+            {% endif %}
+        {% endif %}
+        <p>{{ page.content|split('</p>')[1]|raw }}</p>
+    </div>
+            
+    {# ITEM 12 : ORESTE #}
+    <div class="g_co-item12">
+        <h2 class="display-title">Les Érynies poursuivent Oreste pour avoir tué Clytemnestre</h2>
+        {% if items.item12 %}
+            {% set img_oreste = page.media[items.item12.image_name|trim] %}
+
+            {% if img_oreste %}
+                <img alt="{{ items.item12.alt_text }}" src="{{ img_oreste.url }}" loading="lazy">
+            {% endif %}
+        {% endif %}
+    </div>
+            
+    {# ITEM 13 : HUMUS + PARAGRAPHE 3 #}
+    <div class="g_co-item13">
+        <h2 class="display-title">Et l'humus dans tout ça ?</h2>
+        <p>{{ page.content|split('</p>')[2]|raw }}</p>
+        <figure>
+            {% if items.item13 %}
+                {% set img_humus = page.media[items.item13.image_name|trim] %}
+                
+                {% if img_humus %}
+                    <img alt="{{ items.item13.alt_text }}" src="{{ img_humus.url }}" loading="lazy">
+                {% endif %}
+                {% if items.item13.legende %}
+                    <figcaption class="p_centrer legende">
+                        {{ items.item13.legende }}
+                    </figcaption>
+                {% endif %}
+            {% endif %}
+        </figure>
+    </div>
+</div>

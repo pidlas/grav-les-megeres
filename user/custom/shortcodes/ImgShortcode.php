@@ -24,6 +24,7 @@ class ImgShortcode extends Shortcode
             }
 
             $extension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+            // .derivatives(min, max, step)
             $derivatives = $image->derivatives(400, 1200, 400);
 
             if ($extension === 'avif') {
@@ -33,6 +34,7 @@ class ImgShortcode extends Shortcode
                     $jpegSrcset = $derivatives->format('jpg')->srcset();
                     $fallbackUrl = $image->resize(1200)->format('jpg')->url();
                 } catch (\Exception $e) {
+                    // Si la conversion échoue à la volée, on utilise l'AVIF natif partout
                     $webpSrcset = $avifSrcset;
                     $jpegSrcset = $avifSrcset;
                     $fallbackUrl = $image->resize(1200)->url();
@@ -44,15 +46,14 @@ class ImgShortcode extends Shortcode
                 $fallbackUrl = $image->resize(1200)->url();
             }
 
-            // On nettoie la classe CSS reçue du shortcode
-            $classAttr = $class ? " class='" . self::escAttr($class) . "'" : "";
+            $classAttr = $class ? " class='" . htmlspecialchars($class, ENT_QUOTES, 'UTF-8') . "'" : "";
+            $altEscaped = htmlspecialchars($alt, ENT_QUOTES, 'UTF-8');
             
-            // 👇 LE SÉPARATEUR PARFAIT : <picture> reste neutre, la classe va sur l'<img>
             return "<picture>
                 <source type='image/avif' srcset='{$avifSrcset}' sizes='(max-width:400px) 100vw, (max-width:800px) 50vw, 33vw'>
                 <source type='image/webp' srcset='{$webpSrcset}' sizes='(max-width:400px) 100vw, (max-width:800px) 50vw, 33vw'>
                 <source type='image/jpeg' srcset='{$jpegSrcset}' sizes='(max-width:400px) 100vw, (max-width:800px) 50vw, 33vw'>
-                <img src='{$fallbackUrl}' alt='" . self::escAttr($alt) . "'{$classAttr} loading='lazy'>
+                <img src='{$fallbackUrl}' alt='{$altEscaped}'{$classAttr} loading='lazy'>
             </picture>";
         });
     }

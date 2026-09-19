@@ -1,0 +1,5 @@
+types:
+  avif:
+    type: image
+    thumb: media/thumb-jpg.png
+    mime: image/avif

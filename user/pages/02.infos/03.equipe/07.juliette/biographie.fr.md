@@ -3,7 +3,7 @@ title: 'Juliette Gaubert'
 visible: false
 routable: true
 # Vos nouvelles variables uniques :
-personne_image: 'webRigolote_jg.jpg'
+personne_image: 'webRigolote_jg.avif'
 image_alt: 'Juliette Gaubert, graphiste'
 citation: "Si y’a un problème, y’a une solution. Quand y’a pas de solution, y’a pas de problème."
 citation_auteur: 'Juliette Gaubert'

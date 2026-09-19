@@ -1,0 +1,152 @@
+======================================================================
+[1;34m[1/3] ANALYSE DES TEMPLATES TWIG (Fichiers .twig)[0m
+======================================================================
+
+--> Méthode 4 & 6 : Utilisation des collections dynamiques (images | files)
+/var/www/grav/user/themes/quark2-child/templates/modular/intro.html.twig:9:        {% set image_bloc = page.media.images|first %}
+/var/www/grav/user/themes/quark2/templates/partials/blog-list-item.html.twig:2:    {% set image = page.media.images|first %}
+/var/www/grav/user/themes/quark2/templates/blog.html.twig:2:{% set blog_image = page.media.images[page.header.hero_image] ?: page.media.images|first %}
+/var/www/grav/user/themes/quark2/templates/modular/hero.html.twig:1:{% set hero_image = page.header.hero_image ? page.media[page.header.hero_image] : page.media.images|first %}
+/var/www/grav/user/themes/quark2/templates/modular/text.html.twig:1:{% set image = page.media.images|first %}
+
+--> Méthode 5 : Appels par clé explicite page.media[...] ou méthodes d'objets
+/var/www/grav/user/themes/quark2-child/templates/partials/diaporama.html.twig:16:                {% set img_webp = page.media[slide.image] %}
+/var/www/grav/user/themes/quark2-child/templates/actualites.html.twig:30:                        {% set img_main = page.media[item.image_principale] %}
+/var/www/grav/user/themes/quark2-child/templates/actualites.html.twig:49:                                    {% set img_mini = page.media[bloc.miniature] %}
+/var/www/grav/user/themes/quark2-child/templates/biographie.html.twig:18:                {% if page.header.personne_image and page.media[page.header.personne_image] %}
+/var/www/grav/user/themes/quark2-child/templates/biographie.html.twig:21:                        src="{{ page.media[page.header.personne_image].url }}" 
+/var/www/grav/user/themes/quark2-child/templates/modular/galerie-liens.html.twig:14:            {% set pdf_2024 = items.item7.pdf_name|trim ? page.media[items.item7.pdf_name|trim] : null %}
+/var/www/grav/user/themes/quark2-child/templates/modular/galerie-liens.html.twig:15:            {% set img_2024 = page.media[items.item7.image_name|trim] %}
+/var/www/grav/user/themes/quark2-child/templates/modular/galerie-liens.html.twig:36:            {% set pdf_2025 = items.item8.pdf_name|trim ? page.media[items.item8.pdf_name|trim] : null %}
+/var/www/grav/user/themes/quark2-child/templates/modular/galerie-liens.html.twig:37:            {% set img_2025 = page.media[items.item8.image_name|trim] %}
+/var/www/grav/user/themes/quark2-child/templates/modular/galerie-liens.html.twig:62:            {% set img_masque = page.media[items.item10.image_name|trim] %}
+/var/www/grav/user/themes/quark2-child/templates/modular/galerie-liens.html.twig:73:            {% set img_erinyes = page.media[items.item11.image_name|trim] %}
+/var/www/grav/user/themes/quark2-child/templates/modular/galerie-liens.html.twig:86:            {% set img_oreste = page.media[items.item12.image_name|trim] %}
+/var/www/grav/user/themes/quark2-child/templates/modular/galerie-liens.html.twig:100:                {% set img_humus = page.media[items.item13.image_name|trim] %}
+/var/www/grav/user/themes/quark2-child/templates/main-layout.html.twig:22:                url('{{ page.media["livre-blanc-fleur-remplie.webp"].url }}') type("image/webp"),
+/var/www/grav/user/themes/quark2-child/templates/main-layout.html.twig:23:                url('{{ page.media["livre-blanc-fleur-remplie.png"].url }}') type("image/png")
+/var/www/grav/user/themes/quark2-child/templates/ta-grand-mere.html.twig:15:        {% if page.media['spectacle5EHPAD.mp3'] or page.media['spectacle5EHPAD.ogg'] %}
+/var/www/grav/user/themes/quark2-child/templates/ta-grand-mere.html.twig:18:                {% if page.media['spectacle5EHPAD.mp3'] %}
+/var/www/grav/user/themes/quark2-child/templates/ta-grand-mere.html.twig:19:                    <source src="{{ page.media['spectacle5EHPAD.mp3'].url }}" type="audio/mpeg" />
+/var/www/grav/user/themes/quark2-child/templates/ta-grand-mere.html.twig:21:                {% if page.media['spectacle5EHPAD.ogg'] %}
+/var/www/grav/user/themes/quark2-child/templates/ta-grand-mere.html.twig:22:                    <source src="{{ page.media['spectacle5EHPAD.ogg'].url }}" type="audio/ogg" />
+/var/www/grav/user/themes/quark2-child/templates/ta-grand-mere.html.twig:24:                {% if page.media['spectacle5EHPAD.mp3'] %}
+/var/www/grav/user/themes/quark2-child/templates/ta-grand-mere.html.twig:25:                    <a href="{{ page.media['spectacle5EHPAD.mp3'].url }}">Télécharger l'audio</a>
+/var/www/grav/user/themes/quark2-child/templates/spectacle.html.twig:32:                    <img class="forme-montage" alt="Photos donnant de l'inspiration" src="{{ page.media['montage-inspiration.jpg'].url }}" loading="lazy">
+/var/www/grav/user/themes/quark2-child/templates/spectacle.html.twig:39:                    {% if page.media['visuel-sieste.jpg'] %}
+/var/www/grav/user/themes/quark2-child/templates/spectacle.html.twig:41:                            <img src="{{ page.media['sigean.webp'].url }}" alt="Illustration de la sieste contée" loading="lazy">
+/var/www/grav/user/themes/quark2-child/templates/spectacle.html.twig:62:            {% if fiche and page.media[fiche.img] %}
+/var/www/grav/user/themes/quark2-child/templates/spectacle.html.twig:66:                        <img alt="Fiche technique de la compagnie Les Mégères de l'Humus" src="{{ page.media[fiche.img].resize(300).url }}" loading="lazy">
+/var/www/grav/user/themes/quark2-child/templates/cours.html.twig:18:                    <source src="{{ page.media['les-enfants-parlent.mp3'].url }}" type="audio/mpeg" />
+/var/www/grav/user/themes/quark2-child/templates/cours.html.twig:19:                    <source src="{{ page.media['les-enfants-parlent.ogg'].url }}" type="audio/ogg" />
+/var/www/grav/user/themes/quark2-child/templates/cours.html.twig:20:                    <a href="{{ page.media['les-enfants-parlent.mp3'].url }}"> Télécharger l'audio </a>
+/var/www/grav/user/themes/quark2-child/templates/cours.html.twig:45:                    <source srcset="{{ page.media['les-cours.webp'].url }}" type="image/webp">
+/var/www/grav/user/themes/quark2-child/templates/cours.html.twig:46:                    <img class="affiche-cours" alt="Le tarif des cours de théâtre" src="{{ page.media['les-cours.jpg'].url }}" loading="lazy">
+/var/www/grav/user/themes/quark2-child/templates/cours.html.twig:49:                    <source srcset="{{ page.media['photo-cours.webp'].url }}" type="image/webp">
+/var/www/grav/user/themes/quark2-child/templates/cours.html.twig:50:                    <img class="photo-cours" alt="Photo d'un cours de théâtre" src="{{ page.media['photo-cours.jpg'].url }}" loading="lazy">
+/var/www/grav/user/themes/quark2-child/templates/cours.html.twig:58:                    <source srcset="{{ page.media['objectifs-des-cours.webp'].url }}" type="image/webp">
+/var/www/grav/user/themes/quark2-child/templates/cours.html.twig:59:                    <img class="objectifs-pedagogiques" alt="Les objectifs pédagogiques du cours de théâtre" src="{{ page.media['objectifs-des-cours.jpg'].url }}" loading="lazy">
+/var/www/grav/user/themes/quark2-child/templates/shortcodes/picture.html.twig:8:{% set image = page.media[path] %}
+/var/www/grav/user/themes/quark2/templates/modular/hero.html.twig:1:{% set hero_image = page.header.hero_image ? page.media[page.header.hero_image] : page.media.images|first %}
+/var/www/grav/user/themes/quark2/templates/modular/gallery.html.twig:20:                {% set item_image = page.media[item.image] %}
+/var/www/grav/user/themes/quark2/templates/item.html.twig:10:        {% set hero_image = page.media[hero_image_name] %}
+
+--> Méthode 1 : Balises HTML <img> codées en dur avec de l'avif dans le thème
+======================================================================
+[1;32m[2/3] ANALYSE DU CONTENU (Fichiers .md)[0m
+======================================================================
+
+--> Méthode 3 : Utilisation de Shortcodes d'images [image]
+
+--> Méthode 2 : Utilisation du Markdown Standard ![Alt](...)
+
+--> Méthode 1 : Balises HTML <img> injectées dans le texte Markdown
+/var/www/grav/user/pages/03.spectacles/01.gresilhette-et-la-salimonde/default.fr.md:45:<!--<img src="{{ base_url_relative }}/user/pages/03.spectacles/01.gresilhette-et-la-salimonde/sp_theatre-d-ombres.avif" width="200" alt="">-->
+/var/www/grav/user/pages/03.spectacles/01.gresilhette-et-la-salimonde/default.fr.md:48:<img src="{{ base_url_relative }}/user/pages/03.spectacles/01.gresilhette-et-la-salimonde/sp_sieste-contee.avif" width="200" alt="La sieste contée - Grésilhette et la Salimonde">
+/var/www/grav/user/pages/03.spectacles/01.gresilhette-et-la-salimonde/default.fr.md:51:<img src="{{ base_url_relative }}/user/pages/03.spectacles/01.gresilhette-et-la-salimonde/sp_projet-pedagogique.avif" width="200" alt="Le projet pédagogique - Grésilhette et la Salimonde">
+/var/www/grav/user/pages/03.spectacles/01.gresilhette-et-la-salimonde/default.fr.md:57:<img alt="Dossier artistique Grésilhette et la Salimonde de la compagnie Les Mégères de l'Humus" src="{{ base_url_relative }}/user/pages/03.spectacles/01.gresilhette-et-la-salimonde/btn-prez.jpg" width="300" height="66" loading="lazy"></a></p>
+/var/www/grav/user/pages/06.contact/default.fr.md:10:<p><img src="{{ page.media['iconeTel.png'].url }}" width="50px" alt=""></p>
+/var/www/grav/user/pages/06.contact/default.fr.md:42:<img src="{{ page.media['iconeMail.png'].url }}" width="50px" alt="">
+/var/www/grav/user/pages/06.contact/default.fr.md:55:<p><img src="{{ page.media['iconeAdresse.png'].url }}" width="50px" alt=""></p>
+/var/www/grav/user/pages/06.contact/default.fr.md:62:<p><img src="{{ page.media['connect.png'].url }}" width="40px" alt=""></p>
+/var/www/grav/user/pages/02.infos/03.equipe/default.fr.md:12:<img alt="Suzie Idlas, la responsable communication" src="{{ base_url_relative }}/user/pages/02.infos/03.equipe/webJolie_si.jpg">
+/var/www/grav/user/pages/02.infos/03.equipe/default.fr.md:20:<img alt="Sabine Rance, la responsable artistique" src="{{ base_url_relative }}/user/pages/02.infos/03.equipe/webJolie_sr.jpg">
+/var/www/grav/user/pages/02.infos/03.equipe/default.fr.md:28:<img alt="Estelle Doumeng, comédienne" src="{{ base_url_relative }}/user/pages/02.infos/03.equipe/webJolie_ed.jpg" loading="lazy">
+/var/www/grav/user/pages/02.infos/03.equipe/default.fr.md:36:<img alt="Anne Spielmann, plasticienne" src="{{ base_url_relative }}/user/pages/02.infos/03.equipe/webJolie_as.jpg" loading="lazy">
+/var/www/grav/user/pages/02.infos/03.equipe/default.fr.md:44:<img alt="Delphine Verniol, la présidente" src="{{ base_url_relative }}/user/pages/02.infos/03.equipe/webJolie_dv.jpg" loading="lazy">
+/var/www/grav/user/pages/02.infos/03.equipe/default.fr.md:52:<img alt="Marie Diel, la trésorière" src="{{ base_url_relative }}/user/pages/02.infos/03.equipe/webJolie_md.jpg" loading="lazy">
+/var/www/grav/user/pages/02.infos/03.equipe/default.fr.md:60:<img alt="Juliette Gaubert, la graphiste" src="{{ base_url_relative }}/user/pages/02.infos/03.equipe/webJolie_jg.jpg" loading="lazy">
+/var/www/grav/user/pages/02.infos/03.equipe/default.fr.md:68:<img alt="Philippe Guerrini, l'informaticien" src="{{ base_url_relative }}/user/pages/02.infos/03.equipe/webJolie_pi.jpg" loading="lazy">
+/var/www/grav/user/pages/05.prestations/03.ateliers/default.fr.md:8:<img class="photo-stages-ateliers" src="/prestations/ateliers/ateliers.jpg" alt="Un stage de théâtre de la Compagnie Les Mégères de l'Humus" loading="lazy">
+/var/www/grav/user/pages/05.prestations/02.stages/default.fr.md:9:<img class="photo-stages-ateliers" src="/prestations/stages/stages.jpg" alt="Un stage de théâtre de la Compagnie Les Mégères de l'Humus" loading="lazy">
+/var/www/grav/user/pages/05.prestations/02.stages/default.fr.md:23:<img class="affiche-stage" src="/prestations/stages/les-stages-recto.jpg" alt="Le tarif des stages de théâtre" loading="lazy">
+/var/www/grav/user/pages/05.prestations/02.stages/default.fr.md:27:<img class="affiche-stage" src="/prestations/stages/les-stages-verso.jpg" alt="Les objectifs pédagogiques des stages de théâtre" loading="lazy">
+======================================================================
+[1;35m[3/3] INVENTAIRE DES IMAGES .AVIF ORPHELINES OU PRÉSENTES[0m
+======================================================================
+Liste de tous les fichiers .avif physiques actuellement stockés :
+  - /var/www/grav/user/pages/03.spectacles/01.gresilhette-et-la-salimonde/sp_theatre-d-ombres.avif
+  - /var/www/grav/user/pages/03.spectacles/01.gresilhette-et-la-salimonde/02.sieste-contee/sigean.avif
+  - /var/www/grav/user/pages/03.spectacles/01.gresilhette-et-la-salimonde/02.sieste-contee/btn-tech-sieste.avif
+  - /var/www/grav/user/pages/03.spectacles/01.gresilhette-et-la-salimonde/livre-blanc-fleur-remplie.avif
+  - /var/www/grav/user/pages/03.spectacles/01.gresilhette-et-la-salimonde/btn-prez.avif
+  - /var/www/grav/user/pages/03.spectacles/01.gresilhette-et-la-salimonde/03.projet-pedagogique/btn-tech-projet.avif
+  - /var/www/grav/user/pages/03.spectacles/01.gresilhette-et-la-salimonde/sp_sieste-contee.avif
+  - /var/www/grav/user/pages/03.spectacles/01.gresilhette-et-la-salimonde/01.theatre-d-ombres/montage-inspiration.avif
+  - /var/www/grav/user/pages/03.spectacles/01.gresilhette-et-la-salimonde/01.theatre-d-ombres/btn-tech-ombres.avif
+  - /var/www/grav/user/pages/03.spectacles/01.gresilhette-et-la-salimonde/sp_projet-pedagogique.avif
+  - /var/www/grav/user/pages/03.spectacles/02.ta-grand-mere-sous-le-figuier/lampe-horloge.avif
+  - /var/www/grav/user/pages/06.contact/connect.avif
+  - /var/www/grav/user/pages/06.contact/iconeMail.avif
+  - /var/www/grav/user/pages/06.contact/iconeAdresse.avif
+  - /var/www/grav/user/pages/06.contact/iconeTel.avif
+  - /var/www/grav/user/pages/02.infos/01.actualites/actu-event.avif
+  - /var/www/grav/user/pages/02.infos/01.actualites/les-7-petits-cauchemars.avif
+  - /var/www/grav/user/pages/02.infos/01.actualites/le-croco-bleu.avif
+  - /var/www/grav/user/pages/02.infos/04.partenaires/aude.avif
+  - /var/www/grav/user/pages/02.infos/04.partenaires/blason-moussoulens.avif
+  - /var/www/grav/user/pages/02.infos/04.partenaires/fdva.avif
+  - /var/www/grav/user/pages/02.infos/04.partenaires/cdc-montagne-noire.avif
+  - /var/www/grav/user/pages/02.infos/04.partenaires/prefet-region-occitanie.avif
+  - /var/www/grav/user/pages/02.infos/04.partenaires/carcassonne-agglo.avif
+  - /var/www/grav/user/pages/02.infos/04.partenaires/fsc-theatre.avif
+  - /var/www/grav/user/pages/02.infos/02.compagnie/_1-intro/co_dossier-prez.avif
+  - /var/www/grav/user/pages/02.infos/02.compagnie/_3-galerie-liens/co_l-humus.avif
+  - /var/www/grav/user/pages/02.infos/02.compagnie/_3-galerie-liens/co_les-erynies.avif
+  - /var/www/grav/user/pages/02.infos/02.compagnie/_3-galerie-liens/co_masque.avif
+  - /var/www/grav/user/pages/02.infos/02.compagnie/_3-galerie-liens/rapport2024.avif
+  - /var/www/grav/user/pages/02.infos/02.compagnie/_3-galerie-liens/co_les-erinyes-et-oreste.avif
+  - /var/www/grav/user/pages/02.infos/02.compagnie/_3-galerie-liens/rapport2025.avif
+  - /var/www/grav/user/pages/02.infos/03.equipe/05.delphine/webRigolote_dv.avif
+  - /var/www/grav/user/pages/02.infos/03.equipe/webJolie_ed.avif
+  - /var/www/grav/user/pages/02.infos/03.equipe/08.philippe/webRigolote_pi.avif
+  - /var/www/grav/user/pages/02.infos/03.equipe/webJolie_jg.avif
+  - /var/www/grav/user/pages/02.infos/03.equipe/04.anne/webRigolote_as.avif
+  - /var/www/grav/user/pages/02.infos/03.equipe/webJolie_sr.avif
+  - /var/www/grav/user/pages/02.infos/03.equipe/webJolie_md.avif
+  - /var/www/grav/user/pages/02.infos/03.equipe/07.juliette/webRigolote_jg.avif
+  - /var/www/grav/user/pages/02.infos/03.equipe/06.marie/webRigolote_md.avif
+  - /var/www/grav/user/pages/02.infos/03.equipe/03.estelle/webRigolote_ed.avif
+  - /var/www/grav/user/pages/02.infos/03.equipe/webJolie_pi.avif
+  - /var/www/grav/user/pages/02.infos/03.equipe/webJolie_dv.avif
+  - /var/www/grav/user/pages/02.infos/03.equipe/01.sabine/webRigolote_sr.avif
+  - /var/www/grav/user/pages/02.infos/03.equipe/02.suzie/webRigolote_si.avif
+  - /var/www/grav/user/pages/02.infos/03.equipe/webJolie_si.avif
+  - /var/www/grav/user/pages/02.infos/03.equipe/webJolie_as.avif
+  - /var/www/grav/user/pages/01.home/ta-grand-mere-sous-le-figuier.avif
+  - /var/www/grav/user/pages/01.home/stage.avif
+  - /var/www/grav/user/pages/01.home/gresilhette-et-salimonde.avif
+  - /var/www/grav/user/pages/01.home/theatre-forum.avif
+  - /var/www/grav/user/pages/01.home/qui-sommes-nous.avif
+  - /var/www/grav/user/pages/01.home/ateliers.avif
+  - /var/www/grav/user/pages/01.home/logo/logo.avif
+  - /var/www/grav/user/pages/01.home/cours.avif
+  - /var/www/grav/user/pages/05.prestations/03.ateliers/ateliers.avif
+  - /var/www/grav/user/pages/05.prestations/01.cours/objectifs-des-cours.avif
+  - /var/www/grav/user/pages/05.prestations/01.cours/photo-cours.avif
+  - /var/www/grav/user/pages/05.prestations/01.cours/les-cours.avif
+  - /var/www/grav/user/pages/05.prestations/02.stages/les-stages-verso.avif
+  - /var/www/grav/user/pages/05.prestations/02.stages/les-stages-recto.avif
+  - /var/www/grav/user/pages/05.prestations/02.stages/stages.avif
+
+[1;32mAnalyse terminée.[0m

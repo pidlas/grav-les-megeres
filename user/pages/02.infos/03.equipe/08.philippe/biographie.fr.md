@@ -3,7 +3,7 @@ title: 'Philippe Guerrini'
 visible: false
 routable: true
 # Vos nouvelles variables uniques :
-personne_image: 'webRigolote_pi.jpg'
+personne_image: 'webRigolote_pi.avif'
 image_alt: "Philippe Guerrini, Philippe Idlas, dev, auto-hébergeur, philosophe des bacs à sable"
 citation: "Le dormeur doit s'éveiller."
 citation_auteur: 'Duc Leto Atréides - Dune, Frank Herbert'

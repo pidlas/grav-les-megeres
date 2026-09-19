@@ -7,9 +7,8 @@ class PictureShortcode extends Shortcode
 {
     public function init()
     {
-        // 👇 CORRECTION : On utilise getHandlers()->add() pour éviter le plantage de méthode indéfinie
         $this->shortcode->getHandlers()->add('picture', function(ShortcodeInterface $sc) {
-            $filename = $sc->getParameter('name');
+            $filename = $sc->getParameter('name') ?? $sc->getParameter('src');
             $alt = $sc->getParameter('alt', $this->grav['page']->title());
             
             $page = $this->grav['page'] ?? null;
@@ -26,27 +25,31 @@ class PictureShortcode extends Shortcode
             $extension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
             $derivatives = $image->derivatives(400, 1200, 400);
 
-            // Gestion intelligente si l'image d'origine est déjà un .avif
             if ($extension === 'avif') {
                 $avifSrcset = $derivatives->srcset();
                 try {
                     $webpSrcset = $derivatives->format('webp')->srcset();
+                    $jpegSrcset = $derivatives->format('jpg')->srcset(); // ✅ Ajouté pour éviter l'erreur de variable indéfinie
                     $fallbackUrl = $image->resize(1200)->format('jpg')->url();
                 } catch (\Exception $e) {
                     $webpSrcset = $avifSrcset;
+                    $jpegSrcset = $avifSrcset; // ✅ Sécurité
                     $fallbackUrl = $image->resize(1200)->url();
                 }
             } else {
                 $avifSrcset = $derivatives->format('avif')->srcset();
                 $webpSrcset = $derivatives->format('webp')->srcset();
+                $jpegSrcset = $derivatives->srcset();
                 $fallbackUrl = $image->resize(1200)->url();
             }
+
+            $altEscaped = htmlspecialchars($alt, ENT_QUOTES, 'UTF-8');
 
             return "<picture>
                 <source type='image/avif' srcset='{$avifSrcset}' sizes='(max-width:400px) 100vw, (max-width:800px) 50vw, 33vw'>
                 <source type='image/webp' srcset='{$webpSrcset}' sizes='(max-width:400px) 100vw, (max-width:800px) 50vw, 33vw'>
                 <source type='image/jpeg' srcset='{$jpegSrcset}' sizes='(max-width:400px) 100vw, (max-width:800px) 50vw, 33vw'>
-                <img src='{$fallbackUrl}' alt='{$alt}' loading='lazy'>
+                <img src='{$fallbackUrl}' alt='{$altEscaped}' loading='lazy'>
             </picture>";
         });
     }

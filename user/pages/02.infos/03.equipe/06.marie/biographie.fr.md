@@ -3,7 +3,7 @@ title: 'Marie Diel'
 visible: false
 routable: true
 # Vos nouvelles variables uniques :
-personne_image: 'webRigolote_md.jpg'
+personne_image: 'webRigolote_md.avif'
 image_alt: 'Marie Diel, Trésorière'
 citation: "L'essentiel c'est d'embrasser l'entièreté de ce que nous sommes, à la fois notre part d'ombre et nos lumières."
 citation_auteur: 'Ne marche pas si tu peux danser, Anne Van Stappen'

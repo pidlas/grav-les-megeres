@@ -3,7 +3,7 @@ title: 'Suzie Idlas'
 visible: false
 routable: true
 # Vos nouvelles variables uniques :
-personne_image: 'webRigolote_si.jpg'
+personne_image: 'webRigolote_si.avif'
 image_alt: 'Suzie Idlas, responsable communication, metteuse en scène, autrice, comédienne'
 citation: 'Je veux juste la Terre que j’adore.'
 citation_auteur: 'Testament, Vita Sackville West'

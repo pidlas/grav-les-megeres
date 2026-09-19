@@ -1,3 +1,9 @@
+# v1.1.14
+## 09/15/2026
+
+1. [](#new)
+    * Spanish is now available as a site language. Thanks @pmoreno-rodriguez [#24](https://github.com/getgrav/grav-theme-quark2/pull/24)
+
 # v1.1.13
 ## 09/11/2026
 

@@ -3,7 +3,7 @@ title: 'Delphine Verniol'
 visible: false
 routable: true
 # Vos nouvelles variables uniques :
-personne_image: 'webRigolote_dv.jpg'
+personne_image: 'webRigolote_dv.avif'
 image_alt: 'Delphine Verniol, Présidente'
 citation: "Faire les choses sérieusement, sans se prendre au sérieux."
 citation_auteur: 'Bertrand Belin'

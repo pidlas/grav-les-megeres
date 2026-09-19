@@ -1607,14 +1607,12 @@ section {
 .encadre-extrait:before,
 .encadre-lenga:before,
 .encadre:before {
-    /*background-image: -webkit-image-set(
-        url(../images/livre-blanc-fleur-remplie.webp) type("image/webp"),
-        url(../images/livre-blanc-fleur-remplie.png) type("image/png")
+    background-image: -webkit-image-set(
+        url(../images/livre-blanc-fleur-remplie.webp) type("image/avif")
     );
     background-image: image-set(
-        url(../images/livre-blanc-fleur-remplie.webp) type("image/webp"),
-        url(../images/livre-blanc-fleur-remplie.png) type("image/png")
-    );*/
+        url(../images/livre-blanc-fleur-remplie.webp) type("image/avif")
+    );
     background-position: 50%;
     background-repeat: no-repeat;
     background-size: 110% 150%;
