@@ -16,6 +16,6 @@ autour de Carcassonne et de Moussoulens, rendez-vous sur la page <a data-type="i
 </p>
 </div>
 <div class="img-centre">
-<img class="affiche-stage" src="/prestations/stages/les-stages-recto.avif" alt="Le tarif des stages de théâtre" loading="lazy">
-<img class="affiche-stage" src="/prestations/stages/les-stages-verso.avif" alt="Les objectifs pédagogiques des stages de théâtre" loading="lazy">
+[img class="affiche-stage" name="les-stages-recto.avif" alt="Le tarif des stages de théâtre"]
+[img class="affiche-stage" name="les-stages-verso.avif" alt="Les objectifs pédagogiques des stages de théâtre"]
 </div>
