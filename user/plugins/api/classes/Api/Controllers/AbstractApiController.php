@@ -244,6 +244,12 @@ abstract class AbstractApiController
      */
     protected function hasPermission(UserInterface $user, string $permission): bool
     {
+        // Super is an explicit tier, never an inherited child permission.
+        // A blanket `admin: true` or `api: true` grant must not satisfy it.
+        if ($permission === 'admin.super' || $permission === 'api.super') {
+            return (bool) $this->getPermissionResolver()->resolveExact($user, $permission);
+        }
+
         return (bool) $this->getPermissionResolver()->resolve($user, $permission);
     }
 

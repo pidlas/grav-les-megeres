@@ -4,7 +4,8 @@ menu: 'Stages'
 ---
 <div>
 <div class="img-centre">
-<img class="photo-stages-ateliers" src="/prestations/stages/stages.avif" alt="Un stage de théâtre de la Compagnie Les Mégères de l'Humus" loading="lazy">
+<!--<img class="photo-stages-ateliers" src="/prestations/stages/stages.avif" alt="Un stage de théâtre de la Compagnie Les Mégères de l'Humus" loading="lazy">-->
+[img name="stages.avif" class="photo-stages-ateliers" alt="Un stage de théâtre de la Compagnie Les Mégères de l'Humus" /]
 </div>
 <p class="p_first">Ces stages sont pensés pour progresser en confiance, découvrir différents
 langages scéniques et vivre une aventure collective. La compagnie intervient auprès de

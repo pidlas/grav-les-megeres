@@ -1,3 +1,54 @@
+# v2.1.8
+## 09/18/2026
+
+1. [](#bugfix)
+    * Upgrading now adds the `tmp/` block from 2.1.7 to an existing site's `.htaccess`, so upgraded Apache sites stop serving temporary files and the dashboard storage warning clears. [#4316](https://github.com/getgrav/grav/issues/4316)
+
+# v2.1.7
+## 09/18/2026
+
+1. [](#improved)
+    * Updated vendor libraries to latest versions
+    * Defer OPcache compilation of newly generated YAML and Markdown cache files until they are first included, reducing cold-cache rebuild work on large sites while still invalidating stale bytecode immediately.
+    * Repeated deprecation notices now share one debug trace with an occurrence count, preventing large page-tree rebuilds from filling memory and the debug toolbar with thousands of identical traces. Notices from different YAML documents and Twig source locations remain separate.
+
+1. [](#bugfix)
+    * [security] Editor-authored Twig can no longer read the Clockwork debugger token from system configuration. Thanks @manus-pi
+    * [security] Bundled nginx, Caddy, lighttpd and IIS rules now block hidden files and directories at any depth, including nested Git repositories, while still allowing `.well-known` for ACME challenges. Operators who copied one of these configurations must update their active server configuration. Thanks @onetrev
+    * [security] Image transforms now refuse source rasters above the configured pixel limit before GD or Imagick decodes them. Thanks @manus-pi
+    * Modular page content that uses request-aware Twig is now rendered for each visitor instead of being shared from the page cache. Thanks @Lxcardoza993
+    * [security] Clockwork profiler data now requires a configured token, including for requests from the local machine. Thanks @Zagn
+    * GPM now explains skipped symlinked updates and reports unwritable package directories before downloading or changing packages. Preflight annotates the same destination issues, and development builds no longer receive a misleading prompt to upgrade to an older release. [#4319](https://github.com/getgrav/grav/issues/4319)
+    * Block direct access to `tmp/` in the bundled Apache, nginx, Caddy, lighttpd and IIS rules, including temporary package downloads. Servers that serve static files before Apache must apply the equivalent rule at that layer, and operators who copied one of these configurations must update their active server configuration. [#4316](https://github.com/getgrav/grav/issues/4316)
+    * Image `format()` and `quality()` settings now apply to all srcset alternatives, including derivatives created before or after those settings. This also fixes format conversion through `images.defaults`. Thanks @onetrev [#4318](https://github.com/getgrav/grav/pull/4318)
+    * **A theme's Flex, user or config blueprints are now found, instead of being ignored unless the theme also happened to ship page blueprints.** A theme supplying, say, a Flex type of its own had it quietly never register: nothing errored and nothing was logged, the type simply never appeared. Each kind of blueprint a theme ships is now registered on its own, which also keeps a theme from shadowing the blueprints Grav itself provides. Thanks @wakqasahmed [#4303](https://github.com/getgrav/grav/issues/4303)
+
+# v2.1.6
+## 09/15/2026
+
+1. [](#improved)
+    * **A package that ships its own `.htaccess` can no longer opt out of the protections around `user/`.** Those rules are pushed down into every folder beneath `user/` and run first, which is what stops a plugin or theme from replacing them. A folder can still ask Apache to run them last and then stop before they are reached. That takes a deliberate line in the package's own file rather than the accidental case this guards against, but the protection Grav shipped before 2.1.4 held against it, so this restores that. A second set of rules now backs up the first using a different Apache module, one that a folder underneath cannot switch off. [#4236](https://github.com/getgrav/grav/issues/4236)
+
+1. [](#bugfix)
+    * **The compiled cache is written in one piece, so a busy site no longer logs `Corrupt compiled cache` warnings after an install or a cache clear.** Every request includes the compiled copy of a YAML or markdown file without taking a lock, while the process rebuilding it truncated the file first and filled it afterwards. A request landing in between saw a syntax error, and since 2.0.20 each one wrote a warning to `grav.log`, which on a cold cache with the admin's parallel requests meant a burst of them for a problem that had already healed itself. The compiled file is now written next to its target and renamed over it, so a reader only ever sees a complete file. The warning stays for a file that really is broken, but no longer fires when another process is in the middle of writing it, and a corrupt file is reported once per request rather than once per read path. A compiled file that cannot be written is now a cache miss instead of a server error.
+    * **`user/data` answers correctly on a restricted host too, on sites an earlier update had put beyond the reach of 2.1.5's repair.** An update in June widened that folder's file in place rather than replacing it, which produced two versions that exist only on disk — in no release and in no checkout — so the sweep behind 2.1.5 could not find them to list. A site carrying either one kept the directive that returns a server error for the whole folder on a host with a restricted `AllowOverride`, which is every image and file uploaded to `user/data`. Both are now recognised and replaced. [#4311](https://github.com/getgrav/grav/issues/4311)
+    * **A number field accepts every value that sits on its step, instead of refusing some of them.** Checking a value against a step was done in binary floating point, where a decimal like `0.0000001` has no exact representation, so a perfectly valid entry could be rejected with no way for the person filling the form to tell why — a latitude of `81.96` on a field stepping by `0.0000001` was refused. The check is now done on the digits as typed, which has an exact answer. Thanks @TheoAcker12 [#3585](https://github.com/getgrav/grav/issues/3585)
+    * **A number, range or select field no longer takes the site down when its step is `any`, zero, or not a number.** `any` is the standard way to say a field has no step at all, and it was being read as zero and then divided by, which is a fatal error rather than a failed validation — the same for a step left empty or set to something that is not a number. Multi-value select and checkbox fields had the same fault a few lines away. All of them now treat a step that is not a positive number as no step, which is what browsers do. Thanks @sridharkalaibala [#4308](https://github.com/getgrav/grav/pull/4308)
+    * **The last folder under `user/` that could answer with a server error on a host with a restricted `AllowOverride` now answers correctly.** 2.1.5 fixed the four files Grav ships, but a site with a `user/env` folder also has a file there that an earlier update wrote, and Grav has never shipped that one — so it kept the directive the rest were moved off. Nothing is served from that folder, so no site was broken by it; it is a stray error page where a "forbidden" belongs. An upgrade replaces the file if it is the one Grav wrote, and leaves a file you edited alone. [#4311](https://github.com/getgrav/grav/issues/4311)
+
+# v2.1.5
+## 09/14/2026
+
+1. [](#bugfix)
+    * **Avatars and files uploaded to `user/data` are served again, and the rest of the `user/.htaccess` fix from 2.1.4 now reaches the folders it missed.** 2.1.4 restated the site root's folder blocks without the two exceptions the root makes, so profile avatars and Flex Object image uploads came back as "forbidden" on Apache. The separate files in `user/accounts`, `user/config` and `user/data` also still used the directive that takes a site offline on a host with a restricted `AllowOverride`, so those three folders kept failing where 2.1.4 had fixed the rest. All four files now work the same way, and an upgrade replaces any of them a previous Grav wrote — a file you edited yourself is left alone. Thanks @onetrev [#4311](https://github.com/getgrav/grav/issues/4311)
+    * **A premium package covered by a licence you already hold now installs, instead of being refused as unlicensed.** A store can sell one licence that carries several packages — a shop plugin whose payment providers come with it, say — and the repository entry says so with `premium.license_product`. The download proxy has always honoured that, but GPM only ever looked for a key filed under the package's own name, so a customer holding one key had to paste it once per package, and `bin/gpm install` failed on every package they had not pasted it against. The key filed under the product a package belongs to now counts for that package, and a key filed under the package's own name still wins wherever there is one.
+
+# v2.1.4
+## 09/14/2026
+
+1. [](#bugfix)
+    * **Sites on hosts with a restricted `AllowOverride` are no longer taken offline by the `user/.htaccess` file added in 2.0.19.** That file used an Apache directive many shared hosts do not permit in `.htaccess`, and where it was not permitted Apache returned an error for everything inside `user/` — so the admin went blank, the theme's styles and scripts stopped loading, and the front end broke too. It kept happening after a rollback, because rolling back Grav never replaces `user/`. The file now does the same job with directives every host running Grav already allows. Thanks @elanorpam [#4309](https://github.com/getgrav/grav/issues/4309)
+
 # v2.1.3
 ## 09/13/2026
 

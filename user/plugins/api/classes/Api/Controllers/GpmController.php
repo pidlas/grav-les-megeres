@@ -289,9 +289,12 @@ class GpmController extends AbstractApiController
             Licenses::set($package, $license);
         }
 
-        // Check if premium package has a license available
+        // Check if premium package has a license available. A package sold
+        // inside a wider licence is covered by the key filed under that
+        // licence's product, so the gate asks the same question the download
+        // proxy does rather than insisting on a key filed under this slug.
         $repoPackage = $gpm->findPackage($package, true);
-        if ($repoPackage && !empty($repoPackage->premium) && !Licenses::get($package)) {
+        if ($repoPackage && !empty($repoPackage->premium) && !Licenses::forPackage($repoPackage)) {
             throw new ValidationException(
                 "'{$package}' is a premium package and requires a license. Pass a 'license' field in the request body, or upload a license via the license-manager plugin/API."
             );
@@ -1291,7 +1294,14 @@ class GpmController extends AbstractApiController
         }
 
         $base = $type === 'themes' ? 'themes' : 'plugins';
-        $path = $this->grav['locator']->findResource("user://{$base}/{$slug}", true);
+        $locator = $this->grav['locator'];
+        $path = $locator->findResource("{$base}://{$slug}", true);
+
+        // Honor configured package stream precedence (including multisite
+        // overlays). Retain the legacy user path when no package resolves.
+        if (!$path || !is_dir($path)) {
+            $path = $locator->findResource("user://{$base}/{$slug}", true);
+        }
 
         if (!$path || !is_dir($path)) {
             throw new NotFoundException("Package '{$slug}' not found.");

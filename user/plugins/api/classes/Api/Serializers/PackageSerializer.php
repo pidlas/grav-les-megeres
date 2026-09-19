@@ -78,7 +78,12 @@ class PackageSerializer implements SerializerInterface
             };
 
             $data['premium'] = true;
-            $data['licensed'] = !empty(Licenses::get($slug));
+            // Not against the slug alone: a package sold inside a wider licence
+            // names that licence's product in `premium.license_product`, and the
+            // key filed under it covers this one. Checking only the slug reads a
+            // licence the customer holds as one they do not, and the admin
+            // offers them a Buy button for something they have already bought.
+            $data['licensed'] = Licenses::resolve($slug, $premium) !== '';
 
             // Not every premium package is sold from the Grav Premium store.
             // A package may name its own storefront, in which case the client

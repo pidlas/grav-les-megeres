@@ -11,6 +11,7 @@ use Grav\Plugin\Api\Controllers\UsersController;
 use Grav\Plugin\Api\Exceptions\ForbiddenException;
 use Grav\Plugin\Api\Tests\Unit\TestHelper;
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ServerRequestInterface;
@@ -241,5 +242,64 @@ class UsersControllerUpdatePrivescTest extends TestCase
         $controller->update($this->makeRequest($manager, 'manager', ['access' => $newAccess]));
 
         $this->assertSame($newAccess, $manager->get('access'));
+    }
+
+    /**
+     * GHSA-m2rq-76vx-vv4j: a user manager could write a scalar `admin` or `api`
+     * grant, which the inheriting resolver used to treat as super.
+     *
+     * @return array<string, array{0: array<string, mixed>}>
+     */
+    public static function scalarParentGrants(): array
+    {
+        return [
+            'admin: true' => [['api' => ['access' => true], 'admin' => true]],
+            'api: true'   => [['api' => true]],
+            "api: '1'"    => [['api' => '1']],
+        ];
+    }
+
+    /**
+     * @param array<string, mixed> $access
+     */
+    #[Test]
+    #[DataProvider('scalarParentGrants')]
+    public function user_manager_cannot_write_a_scalar_parent_grant(array $access): void
+    {
+        $manager = TestHelper::createMockUser('manager', [
+            'access' => ['api' => ['access' => true, 'users' => ['write' => true]]],
+        ]);
+        $target = TestHelper::createMockUser('user1', [
+            'access' => ['api' => ['access' => true]],
+        ]);
+        $original = $target->get('access');
+
+        $controller = $this->buildController($target);
+
+        try {
+            $controller->update($this->makeRequest($manager, 'user1', ['access' => $access]));
+            $this->fail('A scalar admin/api grant must be refused for a non-super user manager.');
+        } catch (ForbiddenException) {
+        }
+
+        $this->assertSame($original, $target->get('access'));
+    }
+
+    #[Test]
+    public function user_manager_can_still_write_a_scalar_false_parent(): void
+    {
+        $manager = TestHelper::createMockUser('manager', [
+            'access' => ['api' => ['access' => true, 'users' => ['write' => true]]],
+        ]);
+        $target = TestHelper::createMockUser('user1', [
+            'access' => ['api' => ['access' => true]],
+        ]);
+
+        $controller = $this->buildController($target);
+
+        $newAccess = ['api' => ['access' => true], 'admin' => false];
+        $controller->update($this->makeRequest($manager, 'user1', ['access' => $newAccess]));
+
+        $this->assertSame($newAccess, $target->get('access'));
     }
 }

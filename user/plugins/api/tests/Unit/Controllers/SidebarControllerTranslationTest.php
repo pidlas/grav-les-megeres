@@ -35,6 +35,7 @@ class SidebarControllerTranslationTest extends TestCase
             static fn($key) => match ($key) {
                 'language' => $language,
                 'locator' => new SidebarTranslationTestLocator(),
+                'config' => new Config([]),
                 default => null,
             },
         );
@@ -68,6 +69,12 @@ final class SidebarTranslationTestLocator
     public function findResource(string $uri, bool $absolute = true, bool $create = false): ?string
     {
         return null;
+    }
+
+    /** @return array<int, string> */
+    public function findResources(string $uri, bool $absolute = true, bool $all = false): array
+    {
+        return [];
     }
 }
 

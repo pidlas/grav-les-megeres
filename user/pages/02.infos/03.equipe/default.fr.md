@@ -9,7 +9,7 @@ process:
 <div class="anime_hover">
 <p class="montre coco">Plus sur Suzie</p>
 <a href="{{ base_url_relative }}/infos/equipe/suzie">
-<img alt="Suzie Idlas, la responsable communication" src="{{ base_url_relative }}/user/pages/02.infos/03.equipe/webJolie_si.avif">
+<img alt="Suzie Idlas, la responsable communication" src="{{ base_url_relative }}/infos/equipe/webJolie_si.avif">
 </a>
 </div>
 </li>

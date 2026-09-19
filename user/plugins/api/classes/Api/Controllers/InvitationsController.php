@@ -8,6 +8,7 @@ use Grav\Common\User\Authentication;
 use Grav\Common\User\DataUser\User as DataUser;
 use Grav\Common\User\Interfaces\UserCollectionInterface;
 use Grav\Common\User\Interfaces\UserInterface;
+use Grav\Common\Utils;
 use Grav\Plugin\Api\Auth\JwtAuthenticator;
 use Grav\Plugin\Api\Exceptions\ApiException;
 use Grav\Plugin\Api\Exceptions\ConflictException;
@@ -362,6 +363,12 @@ class InvitationsController extends AbstractApiController
     private function stripSuperFlags(array $access): array
     {
         foreach (['admin', 'api'] as $scope) {
+            // Scalar parent grants are ambiguous at this boundary and older
+            // authorization code inherited them into `*.super`. Drop a
+            // positive parent grant rather than minting an over-broad invite.
+            if (isset($access[$scope]) && !is_array($access[$scope]) && Utils::isPositive($access[$scope])) {
+                unset($access[$scope]);
+            }
             if (isset($access[$scope]) && is_array($access[$scope])) {
                 unset($access[$scope]['super']);
             }

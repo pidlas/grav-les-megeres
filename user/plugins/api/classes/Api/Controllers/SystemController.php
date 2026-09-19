@@ -791,10 +791,10 @@ class SystemController extends AbstractApiController
     {
         $this->requirePermission($request, 'api.system.read');
 
-        $dir = GRAV_ROOT . '/user/plugins/admin2/languages';
+        $dir = $this->grav['locator']->findResource('plugins://admin2/languages', true);
         $languages = [];
 
-        if (is_dir($dir)) {
+        if ($dir && is_dir($dir)) {
             foreach (glob($dir . '/*.yaml') ?: [] as $file) {
                 $code = basename($file, '.yaml');
                 $languages[] = [
@@ -842,8 +842,8 @@ class SystemController extends AbstractApiController
                 }
             } else {
                 // Direct file read — bypasses Plugin::loadBlueprint() entirely.
-                $file = GRAV_ROOT . "/user/plugins/{$name}/blueprints.yaml";
-                if (is_file($file)) {
+                $file = $this->grav['locator']->findResource("plugins://{$name}/blueprints.yaml", true);
+                if ($file && is_file($file)) {
                     try {
                         $raw = \Symfony\Component\Yaml\Yaml::parseFile($file);
                         if (is_array($raw)) {

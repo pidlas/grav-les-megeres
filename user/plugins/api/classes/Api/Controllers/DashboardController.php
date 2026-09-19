@@ -9,6 +9,7 @@ use Grav\Common\HTTP\Response;
 use Grav\Common\User\DataUser\User as DataUser;
 use Grav\Plugin\Api\FlexBackend;
 use Grav\Plugin\Api\Response\ApiResponse;
+use Grav\Plugin\Api\Services\ExposureProbe;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use RocketTheme\Toolbox\Event\Event;
@@ -288,8 +289,11 @@ class DashboardController extends AbstractApiController
         // dashboard endpoint, so the tally is cached for a few minutes — a
         // slightly stale count is invisible on a dashboard card, while walking
         // a 10k-file library per visit is not.
-        $mediaDir = $this->grav['locator']->findResource('user://media', true)
-            ?: $this->grav['locator']->findResource('user://images', true);
+        // Only `user://media` counts: that is the one directory the Media
+        // browser lists, so anything else here reports a number the user cannot
+        // reconcile with what they see (`user://images` is a plain assets
+        // folder that plugins and themes write to).
+        $mediaDir = $this->grav['locator']->findResource('user://media', true);
         $totalMedia = 0;
         if ($mediaDir && is_dir($mediaDir)) {
             $cache = $this->grav['cache'];
@@ -326,7 +330,9 @@ class DashboardController extends AbstractApiController
         $backupsDir = $this->grav['locator']->findResource('backup://', true);
         $lastBackup = null;
         if ($backupsDir && is_dir($backupsDir)) {
-            $backups = glob($backupsDir . '/*.zip');
+            // Only Grav's own `<name>--<timestamp>.zip` archives, not the exposure
+            // probe's sentinel or anything else that happens to be a zip.
+            $backups = preg_grep('/--\d+\.zip$/', glob($backupsDir . '/*.zip') ?: []);
             if (!empty($backups)) {
                 $latest = max(array_map('filemtime', $backups));
                 $lastBackup = date('c', $latest);
@@ -393,59 +399,46 @@ class DashboardController extends AbstractApiController
     }
 
     /**
-     * GET /dashboard/security/exposure-probe
-     *
-     * Returns the public URL of a sentinel file under user/data plus the
-     * random token it contains. The dashboard fetches that URL directly from
-     * the browser: a 200 whose body matches the token means the sensitive
-     * user/ folders are reachable over the web (a misconfigured webserver),
-     * while a 403/404 means they are correctly blocked.
-     *
-     * The sentinel uses a `.dat` extension on purpose — that extension is not
-     * in the legacy per-extension blocklist, so it is only refused when the
-     * folder-wide block (Grav 2.0 / 1.7.53+) is actually in place. A plain
-     * `.txt`/`.yaml` probe would read as "safe" on installs that still expose
-     * certificates, keys and databases stored with other extensions.
+     * Test multiple file types because front proxies may serve only some extensions
+     * themselves. Never probe real submissions, credentials or backup archives.
      */
     public function securityProbe(ServerRequestInterface $request): ResponseInterface
     {
         $this->requirePermission($request, 'api.system.read');
 
-        $dataDir = $this->grav['locator']->findResource('user://data', true, true);
-        $available = false;
-        $token = '';
-
-        if ($dataDir) {
-            if (!is_dir($dataDir)) {
-                @mkdir($dataDir, 0770, true);
+        $rootUrl = rtrim($this->grav['uri']->rootUrl(true), '/');
+        $probes = [];
+        $legacy = ['url' => '', 'token' => '', 'available' => false];
+        foreach (['user://data', 'backup://', 'tmp://'] as $stream) {
+            $directory = $this->grav['locator']->findResource($stream, true, true);
+            if (!is_string($directory) || $directory === '') {
+                continue;
             }
-            $probeFile = $dataDir . '/grav-security-probe.dat';
-
-            // Reuse a stable token so concurrent dashboards don't race each
-            // other into writing different tokens.
-            if (is_file($probeFile)) {
-                $existing = trim((string) @file_get_contents($probeFile));
-                if (preg_match('/^[a-f0-9]{32,}$/', $existing)) {
-                    $token = $existing;
+            $publicPath = ExposureProbe::publicPath($directory, GRAV_WEBROOT);
+            // user/ can be symlinked outside the web root while retaining its public
+            // URL. Use that configured path when the locator resolves the symlink.
+            if ($stream === 'user://data') {
+                $userPath = defined('GRAV_USER_PATH') ? GRAV_USER_PATH : 'user';
+                if (!str_starts_with($userPath, '/') && !preg_match('/^[a-z]:/i', $userPath)) {
+                    $publicPath = ExposureProbe::publicPath(GRAV_WEBROOT . '/' . $userPath . '/data', GRAV_WEBROOT);
                 }
             }
-            if ($token === '') {
-                $token = bin2hex(random_bytes(16));
-                @file_put_contents($probeFile, $token);
+            // Relocated backup/tmp storage outside the web root has no direct URL.
+            if ($publicPath !== null) {
+                $created = ExposureProbe::create($directory, $publicPath, $rootUrl);
+                if ($stream === 'user://data') {
+                    $legacy = $created[0];
+                }
+                array_push($probes, ...$created);
             }
-            $available = is_file($probeFile);
         }
 
-        // Public URL to the sentinel, relative to the site web root (honours a
-        // custom GRAV_USER_PATH and a subfolder install).
-        $userPath = defined('GRAV_USER_PATH') ? trim(GRAV_USER_PATH, '/') : 'user';
-        $rootUrl = rtrim($this->grav['uri']->rootUrl(true), '/');
-        $url = $rootUrl . '/' . $userPath . '/data/grav-security-probe.dat';
-
+        // Keep the original single-probe fields for older Admin2 bundles.
         return ApiResponse::create([
-            'url' => $url,
-            'token' => $token,
-            'available' => $available,
+            'url' => $legacy['url'],
+            'token' => $legacy['token'],
+            'available' => $legacy['available'],
+            'probes' => $probes,
         ]);
     }
 

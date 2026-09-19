@@ -64,7 +64,7 @@ class PreferencesResolver
             'editorFixedHeight' => 0,
             'adminLanguage' => 'en',
             'pagesPerPage' => 20,
-            'pagesViewMode' => 'tree',
+            'pagesViewMode' => 'miller',
             'usersViewMode' => 'cards',
             'groupsViewMode' => 'cards',
             'pluginsViewMode' => 'cards',
@@ -88,6 +88,40 @@ class PreferencesResolver
             'autoSaveBatchWindowMs' => 0,
             'collabEnabled' => true,
             'menubarLinks' => [],
+        ];
+    }
+
+    /**
+     * Media upload constraints, read straight through from the classic admin
+     * plugin's `pagemedia` config (Admin -> Configuration -> Pages, "Page Media
+     * Resizer"). Classic admin applies these as a client-side canvas resize in
+     * Dropzone; admin-next applies the same numbers in Uppy so a site that
+     * configured the resizer keeps it after moving to the new admin.
+     *
+     * Derived, never stored under `ui.settings`: the admin plugin's config is
+     * the single source of truth, so the two admins cannot drift apart. A site
+     * without the classic admin installed simply gets zeros, which is "off".
+     *
+     * @return array<string, mixed>
+     */
+    public function mediaUploadSettings(): array
+    {
+        $config = $this->grav['config'];
+        $int = static fn (string $key): int => max(0, (int) $config->get("plugins.admin.pagemedia.{$key}", 0));
+
+        $quality = (float) $config->get('plugins.admin.pagemedia.resize_quality', 0.8);
+        if ($quality <= 0.0 || $quality > 1.0) {
+            $quality = 0.8;
+        }
+
+        return [
+            'resizeWidth' => $int('resize_width'),
+            'resizeHeight' => $int('resize_height'),
+            'resizeQuality' => $quality,
+            'minWidth' => $int('res_min_width'),
+            'minHeight' => $int('res_min_height'),
+            'maxWidth' => $int('res_max_width'),
+            'maxHeight' => $int('res_max_height'),
         ];
     }
 
@@ -168,6 +202,7 @@ class PreferencesResolver
      * @return array{
      *   branding: array<string, mixed>,
      *   site: array<string, mixed>,
+     *   media_upload: array<string, mixed>,
      *   user: array<string, mixed>,
      *   effective: array<string, mixed>,
      *   can_edit_site: bool
@@ -213,6 +248,7 @@ class PreferencesResolver
             'branding' => $this->siteBranding(),
             'site' => $site,
             'site_settings' => $siteSettings,
+            'media_upload' => $this->mediaUploadSettings(),
             'user' => $userPrefs,
             'effective' => $effective,
             'can_edit_site' => $canEditSite,

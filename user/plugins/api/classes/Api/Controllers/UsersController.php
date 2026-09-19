@@ -1646,6 +1646,10 @@ class UsersController extends AbstractApiController
         }
 
         foreach (['admin', 'api'] as $scope) {
+            if (isset($access[$scope]) && !is_array($access[$scope]) && Utils::isPositive($access[$scope])) {
+                return true;
+            }
+
             if (!empty($access[$scope]['super']) || !empty($access["{$scope}.super"])) {
                 return true;
             }

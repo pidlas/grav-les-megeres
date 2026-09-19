@@ -164,6 +164,6 @@ final class TranslatesAdminLabelsTestLocator
 
     public function findResource(string $uri, bool $absolute = true, bool $create = false): ?string
     {
-        return $uri === 'plugin://admin2/languages' ? $this->admin2Languages : null;
+        return $uri === 'plugins://admin2/languages' ? $this->admin2Languages : null;
     }
 }

@@ -157,7 +157,7 @@ trait TranslatesAdminLabels
         }
 
         $index = [];
-        $dir = $this->grav['locator']->findResource('plugin://admin2/languages')
+        $dir = $this->grav['locator']->findResource('plugins://admin2/languages')
             ?: (defined('GRAV_ROOT') ? GRAV_ROOT . '/user/plugins/admin2/languages' : null);
 
         if (is_string($dir) && is_dir($dir)) {

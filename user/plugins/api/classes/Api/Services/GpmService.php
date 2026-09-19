@@ -119,7 +119,7 @@ class GpmService
                 return false;
             }
 
-            $license = Licenses::get($package->slug);
+            $license = Licenses::forPackage($package);
             $local = static::download($package, $license);
 
             Installer::install(

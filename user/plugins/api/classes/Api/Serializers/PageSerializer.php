@@ -93,6 +93,10 @@ class PageSerializer implements SerializerInterface
         $headerTitle = $headerArr['title'] ?? null;
         $headerMenu = $headerArr['menu'] ?? null;
 
+        $published = array_key_exists('published', $headerArr)
+            ? (bool) $headerArr['published']
+            : $resource->published();
+
         $data = [
             'route' => $resource->route(),
             // Structural route — for the home page, route() returns the
@@ -129,7 +133,16 @@ class PageSerializer implements SerializerInterface
             // legacy Page where the method is correct. Reading the serialized
             // header array (same one we return to the client) gives the same
             // answer in both paths.
-            'published' => array_key_exists('published', $headerArr) ? (bool)$headerArr['published'] : $resource->published(),
+            'published' => $published,
+            // `published` above is a single boolean and can't tell a draft
+            // apart from a page that is merely scheduled or already expired:
+            // on the legacy path Page::setPublishState() folds the dates into
+            // it (a scheduled page reads false, same as a draft), while on the
+            // flex path published() is a bare header read that ignores the
+            // dates entirely (a scheduled page reads true and looks live).
+            // These three fields are purely additive — `published` keeps
+            // exactly the value it has always had (admin2#2523).
+            ...$this->publishWindow($headerArr, $published),
             'visible' => array_key_exists('visible', $headerArr) ? (bool)$headerArr['visible'] : $resource->visible(),
             'routable' => $resource->routable(),
             'date' => $this->formatTimestamp($resource->date()),
@@ -202,6 +215,110 @@ class PageSerializer implements SerializerInterface
         }
 
         return $data;
+    }
+
+    /**
+     * Resolve the page's publishing window into three additive fields:
+     * `publish_date`, `unpublish_date` (both ISO 8601 or null) and
+     * `publish_state` (published|unpublished|scheduled|expired).
+     *
+     * The dates are read from the header array rather than from
+     * PageInterface::publishDate()/unpublishDate() on purpose: the header
+     * array is the one source that is correct on BOTH paths. During a
+     * flex-indexed listing the object's own header is empty, so the flex
+     * accessors return null for a page that plainly has a `publish_date:` in
+     * its frontmatter — the same materialization gap that forces the
+     * re-parse above for `published`/`visible`.
+     *
+     * @param array<string,mixed> $headerArr
+     * @return array{publish_date: ?string, unpublish_date: ?string, publish_state: string}
+     */
+    private function publishWindow(array $headerArr, bool $published): array
+    {
+        $dateformat = $headerArr['dateformat'] ?? null;
+        $dateformat = is_string($dateformat) && $dateformat !== '' ? $dateformat : null;
+
+        $publishTs = $this->headerDate($headerArr['publish_date'] ?? null, $dateformat);
+        $unpublishTs = $this->headerDate($headerArr['unpublish_date'] ?? null, $dateformat);
+
+        return [
+            'publish_date' => $this->formatTimestamp($publishTs),
+            'unpublish_date' => $this->formatTimestamp($unpublishTs),
+            'publish_state' => $this->resolvePublishState($headerArr, $published, $publishTs, $unpublishTs),
+        ];
+    }
+
+    /**
+     * Parse a frontmatter date into a Unix timestamp using Grav's own parser,
+     * honoring the page's `dateformat:`.
+     *
+     * Utils::date2timestamp() is mandatory here: `10/02/2026` is day-first or
+     * month-first depending entirely on `dateformat`, and strtotime() (or a
+     * client-side `new Date()`) always guesses month-first and silently reads
+     * the wrong day (getgrav/grav-plugin-admin2#134).
+     */
+    private function headerDate(mixed $value, ?string $dateformat): ?int
+    {
+        if ($value === null || $value === '' || $value === false) {
+            return null;
+        }
+
+        // A DateTime survives Grav's YAML parse; anything else non-scalar
+        // (an array left by the json round-trip, say) is not a date.
+        if (!$value instanceof \DateTimeInterface && !is_scalar($value)) {
+            return null;
+        }
+
+        $timestamp = Utils::date2timestamp($value, $dateformat);
+
+        return is_int($timestamp) && $timestamp !== 0 ? $timestamp : null;
+    }
+
+    /**
+     * Decide which of the four publish states a page is in.
+     *
+     * Mirrors core's precedence in Page::setPublishState(): the dates are only
+     * consulted when `system.pages.publish_dates` is on AND the frontmatter
+     * carries no explicit `published:` key — an explicit value wins outright
+     * and makes both dates inert. Core uses isset(), so a `published:` with a
+     * null value counts as absent; array_key_exists() would not match that.
+     *
+     * @param array<string,mixed> $headerArr
+     */
+    private function resolvePublishState(array $headerArr, bool $published, ?int $publishTs, ?int $unpublishTs): string
+    {
+        if (isset($headerArr['published'])) {
+            return $published ? 'published' : 'unpublished';
+        }
+
+        if ($this->publishDatesEnabled()) {
+            $now = time();
+
+            // Core evaluates the unpublish date first and the publish date
+            // second, so on contradictory dates the publish date has the final
+            // say. Keep that order of precedence here.
+            if ($publishTs !== null && $publishTs > $now) {
+                return 'scheduled';
+            }
+
+            if ($unpublishTs !== null && $unpublishTs < $now) {
+                return 'expired';
+            }
+        }
+
+        return $published ? 'published' : 'unpublished';
+    }
+
+    /**
+     * Whether core would act on publish/unpublish dates at all.
+     */
+    private function publishDatesEnabled(): bool
+    {
+        try {
+            return (bool) Grav::instance()['config']->get('system.pages.publish_dates', true);
+        } catch (\Throwable) {
+            return true;
+        }
     }
 
     /**

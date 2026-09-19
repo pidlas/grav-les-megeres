@@ -461,6 +461,20 @@ class MediaController extends AbstractApiController
         $created = [];
         $uploadedNames = [];
         foreach ($uploadedFiles as $file) {
+            // Fire before event — plugins can throw to reject specific files.
+            // The page-media upload has fired this since day one; site media
+            // never did, so a listener vetting uploads was silently bypassed
+            // by anything added on Admin Next's Media page (#41). `page` is
+            // null and `path` carries the media-root-relative folder, matching
+            // the after-events below.
+            $this->fireEvent('onApiBeforeMediaUpload', [
+                'page' => null,
+                'path' => $relativePath,
+                'filename' => $file->getClientFilename(),
+                'type' => $file->getClientMediaType(),
+                'size' => $file->getSize(),
+            ]);
+
             $filename = $this->processUploadedFile($file, $targetDir, $settings);
             $uploadedNames[] = $filename;
             $created[] = $this->serializeSiteFile($targetDir, $filename, $relativePath);
@@ -508,6 +522,14 @@ class MediaController extends AbstractApiController
         if (!file_exists($filePath)) {
             throw new NotFoundException("Media file not found.");
         }
+
+        // Fire before event — plugins can throw to veto the delete. Same
+        // parity gap as the upload side: only page media used to fire it (#41).
+        $this->fireEvent('onApiBeforeMediaDelete', [
+            'page' => null,
+            'filename' => basename($relativePath),
+            'path' => $relativePath,
+        ]);
 
         unlink($filePath);
 

@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace Grav\Plugin\Api\Tests\Unit\Serializers;
 
+use Grav\Common\GPM\Licenses;
 use Grav\Plugin\Api\Serializers\PackageSerializer;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
+use RocketTheme\Toolbox\File\FileInterface;
 
 /**
  * A package's top-level `name` / `description` come from its own
@@ -157,5 +159,79 @@ class PackageSerializerTest extends TestCase
 
         self::assertNull($data['description']);
         self::assertNull($data['description_html']);
+    }
+
+    // ------------------------------------------------------------- licensing
+
+    /**
+     * Stand the licence file in for an in-memory one, so `licensed` can be
+     * exercised without a Grav locator or anything on disk.
+     *
+     * @param array<string, string> $licenses slug => key
+     */
+    private function storedLicenses(array $licenses): void
+    {
+        $file = $this->createMock(FileInterface::class);
+        $file->method('content')->willReturn(['licenses' => $licenses]);
+
+        $property = new \ReflectionProperty(Licenses::class, 'file');
+        $property->setValue(null, $file);
+    }
+
+    /**
+     * The stand-in is a static on a core class, so it outlives the test that
+     * set it. Put it back, or the next class to ask about a licence gets this
+     * one's answer.
+     */
+    protected function tearDown(): void
+    {
+        (new \ReflectionProperty(Licenses::class, 'file'))->setValue(null, null);
+
+        parent::tearDown();
+    }
+
+    #[Test]
+    public function a_premium_package_with_its_own_key_is_licensed(): void
+    {
+        $this->storedLicenses(['kahunacart' => 'KC-AAAA-BBBB-CCCC-DDDD']);
+
+        $data = (new PackageSerializer())->serialize($this->package([
+            'slug' => 'kahunacart',
+            'premium' => ['license_product' => 'kahunacart', 'checkout_url' => 'https://example.com/buy'],
+        ]));
+
+        self::assertTrue($data['premium']);
+        self::assertTrue($data['licensed']);
+    }
+
+    /**
+     * The case the admin got wrong: a package sold inside a wider licence, with
+     * the customer's one key filed under the product they actually bought. It
+     * is licensed, and the admin must offer Install rather than Buy.
+     */
+    #[Test]
+    public function a_premium_package_covered_by_another_products_key_is_licensed(): void
+    {
+        $this->storedLicenses(['kahunacart' => 'KC-AAAA-BBBB-CCCC-DDDD']);
+
+        $data = (new PackageSerializer())->serialize($this->package([
+            'slug' => 'kahunacart-stripe',
+            'premium' => ['license_product' => 'kahunacart'],
+        ]));
+
+        self::assertTrue($data['licensed']);
+    }
+
+    #[Test]
+    public function a_premium_package_the_customer_has_not_bought_is_not_licensed(): void
+    {
+        $this->storedLicenses(['kahunacart' => 'KC-AAAA-BBBB-CCCC-DDDD']);
+
+        $data = (new PackageSerializer())->serialize($this->package([
+            'slug' => 'kahunacart-newsletters',
+            'premium' => ['license_product' => 'kahunacart-newsletters'],
+        ]));
+
+        self::assertFalse($data['licensed']);
     }
 }

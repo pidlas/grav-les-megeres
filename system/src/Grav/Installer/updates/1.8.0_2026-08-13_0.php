@@ -12,11 +12,13 @@
  * per-directory rewrite strips the directory prefix before matching
  * (getgrav/grav#4236).
  *
- * Require / FilesMatch access control is merged into subdirectories rather than
- * replaced, so a `user/.htaccess` written that way keeps applying whatever a
- * subfolder does with rewriting. New installs ship the file; `user` and
- * `.htaccess` are both in the installer `$ignores` list, so this postflight is
- * how existing installs get it.
+ * `RewriteOptions InheritDownBefore` is the fix: it pushes these rules down into
+ * every subdirectory and runs them BEFORE whatever that subdirectory declares, so
+ * a package's own .htaccess cannot switch them off. Everything written here is
+ * FileInfo-class — `Require` is AuthConfig-class and returns 500 for the whole
+ * user/ tree on a host granting only `AllowOverride FileInfo` (getgrav/grav#4309).
+ * New installs ship the file; `user` and `.htaccess` are both in the installer
+ * `$ignores` list, so this postflight is how existing installs get it.
  *
  * Best-effort and non-destructive: a site that already has its own
  * `user/.htaccess`, or a read-only filesystem, is left alone.
@@ -36,44 +38,63 @@ return [
                 return;
             }
 
-            // Keep in sync with the shipped user/.htaccess and with the
-            // `^(user)/(.*)\.(...)` rule in the site root .htaccess.
+            // Byte-for-byte the shipped user/.htaccess. Keep the two in sync,
+            // along with the `^(user)/...` rules in the site root .htaccess.
             $contents = <<<'HTACCESS'
-            # Deny direct web access to code and data files anywhere under user/.
-            # This is a defense-in-depth backup for the rules in the site root .htaccess.
+            # Defense-in-depth backup for the `^(user)/...` rules in the site root .htaccess.
+            # Keep the folder and extension lists in sync with them.
             #
-            # Why it exists: mod_rewrite rules are not inherited by subdirectories. Any
-            # .htaccess in a theme or plugin folder that turns on RewriteEngine replaces the
-            # root ruleset for that folder and everything beneath it, so a package shipping
-            # its own .htaccess (to block a Makefile, say) can silently expose its .yaml,
-            # .md, .twig and .php files (getgrav/grav#4236). Access control written with
-            # Require / FilesMatch is merged into subdirectories rather than replaced, so
-            # these rules keep applying no matter what a subfolder does with rewriting.
-            #
-            # Keep the extension list in sync with the `^(user)/(.*)\.(...)` rule in the
-            # site root .htaccess.
-            <FilesMatch "(?i)\.(txt|md|json|yaml|yml|php|php2|php3|php4|php5|phar|phtml|pl|py|cgi|twig|sh|bat)$">
-                <IfModule mod_authz_core.c>
-                    Require all denied
-                </IfModule>
-                <IfModule !mod_authz_core.c>
-                    Order allow,deny
-                    Deny from all
-                </IfModule>
-            </FilesMatch>
+            # InheritDownBefore pushes these rules down into every subdirectory and runs them
+            # first, so a plugin or theme shipping its own RewriteEngine cannot switch them
+            # off (getgrav/grav#4236). Everything here is deliberately FileInfo-class:
+            # `Require` is AuthConfig-class and returns 500 for the whole user/ tree on hosts
+            # that grant only `AllowOverride FileInfo` (getgrav/grav#4309).
+            <IfModule mod_rewrite.c>
+                RewriteEngine On
+                RewriteOptions InheritDownBefore
 
-            # Dot-files: .env, git and CI metadata, editor state. Files *inside* a
-            # dot-folder cannot be matched here, because <DirectoryMatch> is not allowed in
-            # .htaccess; those still rely on the root rewrite rules.
-            <FilesMatch "^\.">
-                <IfModule mod_authz_core.c>
-                    Require all denied
-                </IfModule>
-                <IfModule !mod_authz_core.c>
-                    Order allow,deny
-                    Deny from all
-                </IfModule>
-            </FilesMatch>
+                RewriteRule ^(config|env)/ - [F,NC]
+
+                # The same two exceptions the site root makes: avatar images under
+                # user/accounts (`avatars/<file>` for flatfile accounts, `<username>/<file>`
+                # for Flex folder storage) and public asset uploads under user/data are
+                # served; everything else in both folders is denied. The conditions read
+                # REQUEST_URI, which is the whole original path, so they are written exactly
+                # as they are in the root — a per-directory rule only sees the path below
+                # this folder. Keep all three copies in sync.
+                RewriteCond %{REQUEST_URI} !/user/accounts/[^/]+/[^/]+\.(jpe?g|png|gif|webp|avif|bmp|ico)$ [NC]
+                RewriteRule ^accounts/ - [F,NC]
+                RewriteCond %{REQUEST_URI} !\.(jpe?g|png|gif|webp|avif|bmp|ico|mp4|webm|ogg|ogv|mov|mp3|wav|m4a|flac|pdf|woff2|woff|ttf|otf|eot|css|js)$ [NC]
+                RewriteRule ^data/ - [F,NC]
+                RewriteRule (?i)\.(txt|md|json|yaml|yml|php|php2|php3|php4|php5|phar|phtml|pl|py|cgi|twig|sh|bat)$ - [F]
+
+                # `(^|/)`, not `^`: paths are relative to whichever folder the rules run in.
+                RewriteRule (?i)(^|/)\. - [F]
+
+                # The site root's front-controller rule no longer reaches us. `../index.php`,
+                # not `/index.php`, or a subdirectory install lands on the wrong one.
+                RewriteCond %{REQUEST_FILENAME} !-f
+                RewriteCond %{REQUEST_FILENAME} !-d
+                RewriteRule . ../index.php [L]
+            </IfModule>
+
+            # Backstop for the rules above. A subfolder that turns RewriteEngine on with
+            # `RewriteOptions Inherit` and then ends its own rules with an unconditional [L]
+            # never reaches them, because the inherited rules run last and [L] stops first.
+            # mod_alias is FileInfo-class like mod_rewrite, but it sits outside the rewrite
+            # pipeline and its rules merge into subdirectories instead of replacing what is
+            # there, so no [L] can reach past this. It only covers the file types, which is
+            # the case that matters: third-party packages, the ones that ship an .htaccess
+            # of their own (getgrav/grav#4236), install into user/plugins and user/themes.
+            #
+            # Deliberately unanchored. These rules only run for requests that resolve into
+            # this folder, which is what scopes them, and matching the tail rather than a
+            # leading /user/ keeps them correct for a Grav installed in a subdirectory.
+            # Keep the extension list in sync with the rule above.
+            <IfModule mod_alias.c>
+                RedirectMatch 403 (?i)\.(txt|md|json|yaml|yml|php|php2|php3|php4|php5|phar|phtml|pl|py|cgi|twig|sh|bat)$
+                RedirectMatch 403 (?i)(^|/)\.
+            </IfModule>
 
             HTACCESS;
 

@@ -1,3 +1,33 @@
+# v1.0.37
+## 09/18/2026
+
+1. [](#bugfix)
+    * The dashboard exposure probe now also tests `.json` files, the format most data in `user/data` is stored in.
+    * The dashboard's "last backup" time no longer counts the exposure probe's test file as a backup. It only counts archives Grav's backup tool created.
+
+# v1.0.36
+## 09/18/2026
+
+1. [](#bugfix)
+    * **[security] A blanket `admin` or `api` grant no longer counts as super user.** Permissions inherit from their parent key, so an account given all of `api` picked up `api.super` along with it — and super is the flag that decides who can hand super to somebody else. Super must now be granted deliberately, and an invitation can no longer carry it. Ordinary permission inheritance is unchanged. Thanks to @redwolf1919
+    * **[security] Disabling or deleting an account now ends its API sessions immediately.** A session carried its own copy of the account's permissions, and if the account could no longer be read from disk that stale copy was kept rather than refused, so a revoked account stayed usable until its session expired. Thanks to @AlpetGexha
+    * The dashboard exposure probe now tests `.dat`, `.txt` and `.zip` files in data, backup and temporary storage, so front proxies serving only some file types are detected. Storage outside the web root is excluded, and the response remains compatible with older Admin2 bundles. [getgrav/grav#4316](https://github.com/getgrav/grav/issues/4316)
+    * Admin2 package resources, including custom field components, now resolve through Grav's `plugins://` and `themes://` streams, honoring configured multisite overlay precedence. [#43](https://github.com/getgrav/grav-plugin-api/pull/43)
+    * The admin language list, plugin details and AI Translate detection now find plugins outside the default `user/plugins` folder, such as in multisite setups.
+
+# v1.0.35
+## 09/15/2026
+
+1. [](#new)
+    * Pages now report their publish and unpublish dates along with an effective publishing state, so an admin listing can tell a page scheduled to go live later apart from a draft, and an expired page apart from either. Dates are read using the page's own date format, so a day-first date is no longer read as month-first. [getgrav/grav-plugin-admin2#2523](https://github.com/getgrav/grav-plugin-admin2/issues/2523)
+
+    * The admin's page media upload settings are now part of the preferences the admin interface reads at start-up, so the new admin can apply the same image resizing and resolution limits the old one always has [getgrav/grav-plugin-api#41](https://github.com/getgrav/grav-plugin-api/issues/41)
+
+1. [](#bugfix)
+    * Plugins that watch media are now told before a file is added to or removed from the site Media library, the same way they already were for page media. A plugin that checks or blocks uploads was quietly skipped for anything done on the Media screen. Thanks to @onetrev [#41](https://github.com/getgrav/grav-plugin-api/issues/41)
+    * The Media count in the sidebar now counts only the site media library. On a site with no `user/media` folder it fell back to counting `user/images` — a plain assets folder plugins and themes write to — so the badge showed a number that had nothing to do with the empty Media screen beside it.
+    * **The Plugins and Themes screens no longer offer to sell you a premium add-on you have already bought.** Where a store sells one licence that covers several packages, the repository entry names the product the key belongs to in `premium.license_product`. The API only reported a package as licensed when a key was filed under that package's own name, so Add Plugin drew a Buy cart beside add-ons the customer's key already covers, and installing one was refused with "requires a license" before the download proxy — which would have approved it — was ever asked. Both now read the key filed under the product the package belongs to. Requires Grav 2.1.5.
+
 # v1.0.34
 ## 09/14/2026
 

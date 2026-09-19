@@ -19,8 +19,12 @@ class DOMSanitizer
     // as much a resource load as http:. Requiring a quote here let
     // `url(//evil.example/x)` through on every attribute. (GHSA-jfrr-ch68-f2w9)
     const EXTERNAL_URL = "/url\s*\(\s*[\"']?\s*(ftp:\/\/|http:\/\/|https:\/\/|\/\/|data:)/i";
-    const JAVASCRIPT_ATTR = "/(\s(?:href|xlink\:href)\s*=\s*\"javascript:.*?\")/i";
-    const SNEAKY_ONLOAD = "/(\s(?:href|xlink\:href)\s*=\s*\"data:.*onload.*?\")/i";
+    const JAVASCRIPT_ATTR = "/(\s(?:href|xlink\:href|action|cite|poster|src|srcset|background)\s*=\s*\"javascript:.*?\")/i";
+    const SNEAKY_ONLOAD = "/(\s(?:href|xlink\:href|action|cite|poster|src|srcset|background)\s*=\s*\"data:.*onload.*?\")/i";
+    // Belt-and-braces for the post-serialization pass: any `data:` URL attribute
+    // whose declared MIME is not an inert image type is stripped, mirroring the
+    // scheme-level policy in isDangerousUrl(). (GHSA-wcj2-r6vg-rm97, GHSA-mrpv-6x26-mf6c)
+    const SNEAKY_DATA_URL = "/(\s(?:href|xlink\:href|action|cite|poster|src|srcset|background)\s*=\s*\"data:(?!image\/(?:png|jpe?g|gif|webp|bmp|x-icon|vnd\.microsoft\.icon)[;,])[^\"]*\")/i";
     const NAMESPACE_TAGS = '/xmlns[^=]*="[^"]*"/i';
     const HTML_TAGS = "~<(?:!DOCTYPE|/?(?:html|body))[^>]*>\s*~i";
     const PHP_TAGS = '/<\?(=|php)(.+?)\?>/i';
@@ -110,6 +114,7 @@ class DOMSanitizer
         $document->preserveWhiteSpace = false;
         $document->strictErrorChecking = false;
         $document->formatOutput = true;
+        $this->sanitizeDocumentNodes($document);
 
         $tags = array_diff($this->allowed_tags, $this->disallowed_tags);
         $attributes = array_diff($this->allowed_attributes, $this->disallowed_attributes);
@@ -120,6 +125,10 @@ class DOMSanitizer
             $tag_name = $element->tagName;
             $tag_name_lower = strtolower($tag_name);
             if(in_array($tag_name_lower, $tags)) {
+                if ($this->hasDangerousAnimationTarget($element)) {
+                    $element->parentNode->removeChild($element);
+                    continue;
+                }
                 if ($tag_name_lower === 'style' && $this->hasDangerousStyleContent($element->textContent)) {
                     $element->parentNode->removeChild($element);
                     continue;
@@ -166,6 +175,54 @@ class DOMSanitizer
         }
 
         return trim($output);
+    }
+
+    /**
+     * XML processing instructions and comments can hide markup that becomes
+     * active when SVG/MathML is embedded in HTML. CDATA has the same risk at
+     * HTML integration points, so preserve its content as escaped text instead.
+     * Walk all nodes, including siblings of the document element; the element
+     * allow-list alone never visits these nodes. (GHSA-4hr3-f334-mcr4)
+     */
+    protected function sanitizeDocumentNodes(\DOMNode $node): void
+    {
+        for ($i = $node->childNodes->length; --$i >= 0;) {
+            $child = $node->childNodes->item($i);
+            if ($child->nodeType === XML_PI_NODE || $child->nodeType === XML_COMMENT_NODE) {
+                $node->removeChild($child);
+            } elseif ($child->nodeType === XML_CDATA_SECTION_NODE) {
+                $node->replaceChild($child->ownerDocument->createTextNode($child->nodeValue), $child);
+            } elseif ($child->hasChildNodes()) {
+                $this->sanitizeDocumentNodes($child);
+            }
+        }
+    }
+
+    /**
+     * An animation can recreate a dangerous attribute after sanitization,
+     * even when its static value was removed. WebKit allows animateTransform
+     * to target href, despite the element's name. Reject the whole animation
+     * independently of its values, timing, or tag. (GHSA-7x4f-fj83-6xfw)
+     */
+    protected function hasDangerousAnimationTarget(\DOMElement $element): bool
+    {
+        foreach ($element->attributes as $attribute) {
+            if (strtolower($attribute->localName) !== 'attributename') {
+                continue;
+            }
+
+            // Compare the local target name so xlink:href and namespace aliases
+            // cannot bypass the policy. DOM parsing already decoded entities.
+            $parts = explode(':', strtolower(trim($attribute->value)));
+            $target = end($parts);
+            if (in_array($target, self::URL_ATTRS, true) ||
+                $target === 'style' || $target === 'xmlns' ||
+                $parts[0] === 'xmlns' || strncmp($target, 'on', 2) === 0) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -302,12 +359,20 @@ class DOMSanitizer
     /**
      * Determines if the attribute value is an external link
      *
+     * SVG presentation attributes (fill, stroke, filter, clip-path, mask,
+     * marker-*) carry CSS url() values, and a CSS comment or hex escape placed
+     * between `url(` and the scheme defeats a raw regex match while the
+     * browser's CSS tokenizer still decodes it into a live external reference.
+     * The <style>/style paths already normalize before their checks, so the
+     * same normalizer runs here, making every url()-carrying attribute agree.
+     * (GHSA-cjfg-j8jp-5xvc)
+     *
      * @param $attr_value
      * @return bool
      */
     protected function isExternalUrl($attr_value): bool
     {
-        return preg_match(self::EXTERNAL_URL, $attr_value);
+        return preg_match(self::EXTERNAL_URL, $this->normalizeCss((string) $attr_value));
     }
 
     /**
@@ -337,9 +402,25 @@ class DOMSanitizer
     }
 
     /**
-     * Determines if an href/xlink:href attribute contains a dangerous URL scheme
-     * (javascript:, data: with script content). Normalizes control characters
-     * before checking to prevent entity-encoding bypasses (CVE-2026-33172 bypass).
+     * URL-bearing attributes whose values must be scheme-validated.
+     *
+     * The allow-lists admit many more URL-valued attributes than hyperlinks:
+     * `action` (forms), `cite` (quotations), and the media attributes `poster`,
+     * `src`, `srcset` and `background`. Restricting the check to href/xlink:href
+     * left `form action="javascript:..."` — a complete, submittable form, since
+     * `form`, `button`/`input` and `type` are all allowed — intact end-to-end.
+     * (GHSA-mrpv-6x26-mf6c)
+     */
+    const URL_ATTRS = ['href', 'xlink:href', 'action', 'cite', 'poster', 'src', 'srcset', 'background'];
+
+    /**
+     * Determines if a URL-bearing attribute contains a dangerous URL scheme
+     * (javascript:, or data: whose declared MIME type is not an inert image).
+     * Normalizes control characters before checking to prevent entity-encoding
+     * bypasses (CVE-2026-33172 bypass), and judges data: URLs by scheme policy
+     * rather than payload content, since Base64 encoding defeats substring
+     * matching (GHSA-wcj2-r6vg-rm97). Applies to every URL-bearing attribute in
+     * the allow-list, not only hyperlinks (GHSA-mrpv-6x26-mf6c).
      *
      * @param string $attr_name
      * @param string $attr_value
@@ -347,7 +428,7 @@ class DOMSanitizer
      */
     protected function isDangerousUrl(string $attr_name, string $attr_value): bool
     {
-        if (!in_array(strtolower($attr_name), ['href', 'xlink:href'])) {
+        if (!in_array(strtolower($attr_name), self::URL_ATTRS, true)) {
             return false;
         }
 
@@ -355,12 +436,33 @@ class DOMSanitizer
         // bypasses via tab, newline, CR, null bytes, or other control chars
         $normalized = preg_replace('/[\x00-\x20]+/', '', $attr_value);
 
-        if (preg_match('/^javascript:/i', $normalized)) {
-            return true;
-        }
+        // srcset carries several candidates ("a.png 1x, javascript:... 2x"); a
+        // scheme hidden in a later candidate must be caught too, so each
+        // comma-separated candidate is judged on its own.
+        $candidates = strtolower($attr_name) === 'srcset' ? explode(',', $normalized) : [$normalized];
 
-        if (preg_match('/^data:.*onload/i', $normalized)) {
-            return true;
+        foreach ($candidates as $candidate) {
+            if (preg_match('/^javascript:/i', $candidate)) {
+                return true;
+            }
+
+            // A data: URL carries an embedded document whose type is declared in the
+            // URL itself, and Base64 encoding hides any dangerous marker (`onload`,
+            // `<script>`, ...) from a substring test, so `data:` cannot be judged by
+            // matching against its content. The old `data:.*onload` heuristic let
+            // `data:text/html;base64,...` through. Policy is therefore scheme-level:
+            // only inert image types are allowed through, everything script-capable
+            // (text/html, image/svg+xml, application/xhtml+xml, ...) is rejected.
+            // (GHSA-wcj2-r6vg-rm97)
+            if (preg_match('/^data:/i', $candidate)) {
+                if (!preg_match('/^data:image\/(?:png|jpe?g|gif|webp|bmp|x-icon|vnd\.microsoft\.icon)[;,]/i', $candidate)) {
+                    return true;
+                }
+
+                if (preg_match('/^data:.*onload/i', $candidate)) {
+                    return true;
+                }
+            }
         }
 
         return false;
@@ -617,6 +719,7 @@ class DOMSanitizer
     {
         $output = preg_replace(self::JAVASCRIPT_ATTR, '', $output);
         $output = preg_replace(self::SNEAKY_ONLOAD, '', $output);
+        $output = preg_replace(self::SNEAKY_DATA_URL, '', $output);
         $output = preg_replace(self::HTML_COMMENTS, '', $output);
         return $output;
     }

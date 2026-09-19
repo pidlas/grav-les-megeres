@@ -410,7 +410,7 @@ class TranslationsEditorController extends AbstractApiController
         // flat `available: false` would leave the UI guessing, and the guess
         // most people would make ("go install it") is wrong two times out of
         // three for anyone who already has it.
-        $installed = is_dir(GRAV_ROOT . '/user/plugins/ai-translate');
+        $installed = (bool) $this->grav['locator']->findResource('plugins://ai-translate', true);
         $enabled = (bool) $this->config->get('plugins.ai-translate.enabled', false);
         $manager = $this->translationManager();
 

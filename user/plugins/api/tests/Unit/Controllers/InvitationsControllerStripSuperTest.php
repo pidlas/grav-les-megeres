@@ -72,4 +72,23 @@ class InvitationsControllerStripSuperTest extends TestCase
         $this->assertSame(['api' => ['pages' => true], 'site' => ['login' => true]], $out);
         $this->assertFalse($this->grantsSuper($out));
     }
+
+    /**
+     * GHSA-m2rq-76vx-vv4j: a positive scalar `admin` or `api` parent grant used
+     * to inherit into `*.super`, so it is dropped rather than carried into an
+     * invitation.
+     */
+    #[Test]
+    public function a_positive_scalar_parent_grant_is_dropped(): void
+    {
+        $this->assertSame(['site' => ['login' => true]], $this->strip(['admin' => true, 'site' => ['login' => true]]));
+        $this->assertSame([], $this->strip(['api' => true]));
+        $this->assertSame([], $this->strip(['api' => '1', 'admin' => 1]));
+    }
+
+    #[Test]
+    public function a_negative_scalar_parent_grant_is_kept(): void
+    {
+        $this->assertSame(['admin' => false, 'api' => ['pages' => true]], $this->strip(['admin' => false, 'api' => ['pages' => true]]));
+    }
 }

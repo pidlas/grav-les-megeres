@@ -50,13 +50,18 @@ class SessionAuthenticator implements AuthenticatorInterface
                 if ($username !== '') {
                     try {
                         $fresh = $this->grav['accounts']->load($username);
-                        if ($fresh->exists()) {
-                            $user->set('access', $fresh->get('access'));
-                            $user->set('groups', $fresh->get('groups'));
+                        if (!$fresh->exists() || $fresh->get('state', 'enabled') !== 'enabled') {
+                            return null;
                         }
+
+                        $user->set('state', $fresh->get('state', 'enabled'));
+                        $user->set('access', $fresh->get('access'));
+                        $user->set('groups', $fresh->get('groups'));
                     } catch (Throwable) {
-                        // Disk reload failed — fall through with stale access
-                        // rather than denying a legitimately authenticated user.
+                        // Revocation and permission checks must fail closed. A
+                        // stale serialized session is not sufficient authority
+                        // when the account cannot be refreshed.
+                        return null;
                     }
                 }
                 return $user;

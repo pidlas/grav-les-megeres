@@ -11,6 +11,8 @@ class ImgShortcode extends Shortcode
             $filename = $sc->getParameter('name') ?? $sc->getParameter('src');
             $alt = $sc->getParameter('alt', $this->grav['page']->title());
             $class = $sc->getParameter('class', '');
+            // ✅ AJOUT : Récupère l'option lazy (vrai par défaut)
+            $lazy = $sc->getParameter('lazy', 'true');
             
             $page = $this->grav['page'] ?? null;
             if (!$page || !method_exists($page, 'media')) {
@@ -46,15 +48,23 @@ class ImgShortcode extends Shortcode
                 $fallbackUrl = $image->resize(1200)->url();
             }
 
+            // Sécurisation et préparation des attributs de classe
             $classAttr = $class ? " class='" . htmlspecialchars($class, ENT_QUOTES, 'UTF-8') . "'" : "";
+            $pictureClassAttr = $class ? " class='wrapper-" . htmlspecialchars($class, ENT_QUOTES, 'UTF-8') . "'" : "";
+            
+            // ✅ AJOUT : Détermination dynamique de l'attribut loading
+            $loading = ($lazy === 'false' || $lazy === false) ? 'eager' : 'lazy';
+            
             $altEscaped = htmlspecialchars($alt, ENT_QUOTES, 'UTF-8');
             
-            return "<picture>
-                <source type='image/avif' srcset='{$avifSrcset}' sizes='(max-width:400px) 100vw, (max-width:800px) 50vw, 33vw'>
-                <source type='image/webp' srcset='{$webpSrcset}' sizes='(max-width:400px) 100vw, (max-width:800px) 50vw, 33vw'>
-                <source type='image/jpeg' srcset='{$jpegSrcset}' sizes='(max-width:400px) 100vw, (max-width:800px) 50vw, 33vw'>
-                <img src='{$fallbackUrl}' alt='{$altEscaped}'{$classAttr} loading='lazy'>
+            // ✅ CORRECTION : Injection de l'attribut {$loading} dynamique
+            return "<picture{$pictureClassAttr}>
+                <source type='image/avif' srcset='{$avifSrcset}' sizes='(max-width:400px) 33vw, (max-width:800px) 55vw, 100vw'>
+                <source type='image/webp' srcset='{$webpSrcset}' sizes='(max-width:400px) 33vw, (max-width:800px) 55vw, 100vw'>
+                <source type='image/jpeg' srcset='{$jpegSrcset}' sizes='(max-width:400px) 33vw, (max-width:800px) 55vw, 100vw'>
+                <img src='{$fallbackUrl}' alt='{$altEscaped}'{$classAttr} loading='{$loading}'>
             </picture>";
+
         });
     }
 }

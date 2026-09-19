@@ -5868,8 +5868,41 @@ components:
             tag: [intro, grav]
         published:
           type: boolean
-          description: Whether the page is published.
+          description: |
+            Whether the page is published. This is a single boolean and cannot
+            distinguish a draft from a page that is scheduled or expired — use
+            `publish_state` for that.
           example: true
+        publish_date:
+          type: string
+          format: date-time
+          nullable: true
+          description: |
+            The page's `publish_date` frontmatter value as ISO 8601, parsed
+            with the page's own `dateformat`. Null when unset.
+          example: "2026-12-01T09:00:00+00:00"
+        unpublish_date:
+          type: string
+          format: date-time
+          nullable: true
+          description: |
+            The page's `unpublish_date` frontmatter value as ISO 8601, parsed
+            with the page's own `dateformat`. Null when unset.
+          example: "2027-01-01T00:00:00+00:00"
+        publish_state:
+          type: string
+          enum: [published, unpublished, scheduled, expired]
+          description: |
+            The page's effective publishing state, resolved the way Grav core
+            resolves it: an explicit `published:` in the frontmatter wins
+            outright and makes both dates inert, and the dates are only
+            consulted when `system.pages.publish_dates` is enabled.
+
+            * `published` — live now.
+            * `unpublished` — an explicit `published: false` draft.
+            * `scheduled` — `publish_date` is in the future.
+            * `expired` — `unpublish_date` is in the past.
+          example: published
         visible:
           type: boolean
           description: Whether the page is visible in navigation menus.
@@ -6030,6 +6063,24 @@ components:
         published:
           type: boolean
           example: true
+        publish_date:
+          type: string
+          format: date-time
+          nullable: true
+          example: "2026-12-01T09:00:00+00:00"
+        unpublish_date:
+          type: string
+          format: date-time
+          nullable: true
+          example: "2027-01-01T00:00:00+00:00"
+        publish_state:
+          type: string
+          enum: [published, unpublished, scheduled, expired]
+          description: |
+            Effective publishing state. `published` is only a boolean, so a
+            scheduled or expired page needs this field to be told apart from a
+            plain draft.
+          example: published
         visible:
           type: boolean
           example: true

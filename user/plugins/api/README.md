@@ -1218,12 +1218,28 @@ The API fires events before and after all write operations, allowing plugins to 
 
 ### Media Events
 
+The same media event names are fired from three different places, and the payload differs depending on what the file is attached to. Read the "Payload by emitter" table below before dereferencing anything.
+
 | Event | When | Event Data |
 |-------|------|------------|
-| `onApiBeforeMediaUpload` | Before each file is saved | `page`, `filename`, `type`, `size` |
-| `onApiMediaUploaded` | After upload completes | `page`, `filenames` (array) |
-| `onApiBeforeMediaDelete` | Before a media file is deleted | `page`, `filename` |
-| `onApiMediaDeleted` | After media deletion | `page`, `filename` |
+| `onApiBeforeMediaUpload` | Before each file is saved | `page`, `filename`, `type`, `size` — plus `path` on site media, or `object` instead of `page` on flex media |
+| `onApiMediaUploaded` | After upload completes | `page`, `filenames` (array) — plus `path` on site media, or `object` instead of `page` on flex media |
+| `onApiBeforeMediaDelete` | Before a media file is deleted | `page`, `filename` — plus `path` on site media, or `object` instead of `page` on flex media |
+| `onApiMediaDeleted` | After media deletion | `page`, `filename` — plus `path` on site media, or `object` instead of `page` on flex media |
+| `onApiMediaMetadataUpdated` | After a `.meta.yaml` sidecar is written | `page`, `filename` on page media; `path`, `filename` on site media (no `page` key at all) |
+| `onApiMediaMetadataDeleted` | After a sidecar's editable fields are cleared | `page`, `filename` on page media; `path`, `filename` on site media (no `page` key at all) |
+
+**Payload by emitter:**
+
+| Emitted by | Routes | Payload |
+|------------|--------|---------|
+| Page media | `/pages/{route}/media…` | `page` is the `PageInterface` the file belongs to. No `path` key. |
+| Site media | `/media…` | `page` is **always `null`** — site media belongs to no page. An extra `path` key is added: on the upload events it is the destination *folder* relative to the media root (`''` for the root itself); on the delete and metadata events it is the *file's* path relative to the media root. The metadata events carry `path` but no `page` key at all. |
+| Flex media | `/flex-objects/{type}/{key}/media…` (provided by the Flex Objects plugin) | There is no `page` key at all; `object` carries the `FlexObjectInterface` instead. No `path` key. Flex fires only the four upload/delete events, not the metadata pair. |
+
+> A listener that does `$event['page']->route()` will fatal on a site-media upload and warn on a flex one. Check the key exists and is not null, and fall back to `path` (site) or `object` (flex).
+
+Site media folder operations (`POST /media/folders`, `POST /media/folders/rename`, `DELETE /media/folders/{path}`) fire no `onApi*` event, because there is no page-media counterpart to keep parity with.
 
 ### Config Events
 

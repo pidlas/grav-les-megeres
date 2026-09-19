@@ -10,6 +10,7 @@ class PictureShortcode extends Shortcode
         $this->shortcode->getHandlers()->add('picture', function(ShortcodeInterface $sc) {
             $filename = $sc->getParameter('name') ?? $sc->getParameter('src');
             $alt = $sc->getParameter('alt', $this->grav['page']->title());
+            $class = $sc->getParameter('class', ''); // ✅ AJOUT : Récupération de la classe
             
             $page = $this->grav['page'] ?? null;
             if (!$page || !method_exists($page, 'media')) {
@@ -29,11 +30,11 @@ class PictureShortcode extends Shortcode
                 $avifSrcset = $derivatives->srcset();
                 try {
                     $webpSrcset = $derivatives->format('webp')->srcset();
-                    $jpegSrcset = $derivatives->format('jpg')->srcset(); // ✅ Ajouté pour éviter l'erreur de variable indéfinie
+                    $jpegSrcset = $derivatives->format('jpg')->srcset(); 
                     $fallbackUrl = $image->resize(1200)->format('jpg')->url();
                 } catch (\Exception $e) {
                     $webpSrcset = $avifSrcset;
-                    $jpegSrcset = $avifSrcset; // ✅ Sécurité
+                    $jpegSrcset = $avifSrcset; 
                     $fallbackUrl = $image->resize(1200)->url();
                 }
             } else {
@@ -43,14 +44,20 @@ class PictureShortcode extends Shortcode
                 $fallbackUrl = $image->resize(1200)->url();
             }
 
+            // ✅ AJOUT : Sécurisation et préparation des attributs de classe
+            $classAttr = $class ? " class='" . htmlspecialchars($class, ENT_QUOTES, 'UTF-8') . "'" : "";
+            $pictureClassAttr = $class ? " class='wrapper-" . htmlspecialchars($class, ENT_QUOTES, 'UTF-8') . "'" : "";
+
             $altEscaped = htmlspecialchars($alt, ENT_QUOTES, 'UTF-8');
 
-            return "<picture>
-                <source type='image/avif' srcset='{$avifSrcset}' sizes='(max-width:400px) 100vw, (max-width:800px) 50vw, 33vw'>
-                <source type='image/webp' srcset='{$webpSrcset}' sizes='(max-width:400px) 100vw, (max-width:800px) 50vw, 33vw'>
-                <source type='image/jpeg' srcset='{$jpegSrcset}' sizes='(max-width:400px) 100vw, (max-width:800px) 50vw, 33vw'>
-                <img src='{$fallbackUrl}' alt='{$altEscaped}' loading='lazy'>
+            // ✅ CORRECTION : Injection des variables de classe dans le HTML
+            return "<picture{$pictureClassAttr}>
+                <source type='image/avif' srcset='{$avifSrcset}' sizes='(max-width:400px) 33vw, (max-width:800px) 55vw, 100vw'>
+                <source type='image/webp' srcset='{$webpSrcset}' sizes='(max-width:400px) 33vw, (max-width:800px) 55vw, 100vw'>
+                <source type='image/jpeg' srcset='{$jpegSrcset}' sizes='(max-width:400px) 33vw, (max-width:800px) 55vw, 100vw'>
+                <img src='{$fallbackUrl}' alt='{$altEscaped}'{$classAttr} loading='lazy'>
             </picture>";
+
         });
     }
 }
