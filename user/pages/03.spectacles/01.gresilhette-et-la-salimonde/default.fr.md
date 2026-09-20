@@ -39,22 +39,20 @@ Votre navigateur ne prend pas en charge la lecture vidéo HTML5.
 </div>
 
 <div class="g_spectacles">
-<p class="g_sp_e-intro">Le spectacle aborde le thème de l'écologie de façon ludique. C’est un conte théâtralisé avec une esthétique merveilleuse et intemporelle. Il existe trois versions du spectacle&nbsp;:</p>
-<a class="g_sp_theatre-d-ombres morph" href="{{ base_url_relative }}/spectacles/gresilhette-et-la-salimonde/theatre-d-ombres">
-[img name="sp_theatre-d-ombres.avif" alt="Spectacle Grésilhette et la Salimonde - Théâtre d'ombres"]
-<!--<img src="{{ base_url_relative }}/user/pages/03.spectacles/01.gresilhette-et-la-salimonde/sp_theatre-d-ombres.avif" width="200" alt="">-->
-</a>
-<a class="g_sp_sieste-contee morph" href="{{ base_url_relative }}/spectacles/gresilhette-et-la-salimonde/sieste-contee">
-<img src="{{ base_url_relative }}/user/pages/03.spectacles/01.gresilhette-et-la-salimonde/sp_sieste-contee.avif" width="200" alt="La sieste contée - Grésilhette et la Salimonde">
-</a>
-<a class="g_sp_projet-pedagogique morph" href="{{ base_url_relative }}/spectacles/gresilhette-et-la-salimonde/projet-pedagogique">
-<img src="{{ base_url_relative }}/user/pages/03.spectacles/01.gresilhette-et-la-salimonde/sp_projet-pedagogique.avif" width="200" alt="Le projet pédagogique - Grésilhette et la Salimonde">
-</a>
-<p class="g_sp_e-fin">Ce conte s’inspire de la légende de la Salimonde&nbsp;:&nbsp; sorcière de la Montagne Noire qui vit dans une grotte. Une fois par an, au milieu de l'hiver, tout le monde l’entend. S'iels entendent des pleurs, les villageois&middot;e&middot;s savent alors qu'iels doivent encore rester bien au chaud. S’iels entendent une mélodie de flûte, iels savent alors que les beaux jours reviennent. Cette année là, la Salimonde pleure&nbsp;!</p>
-<p class="g_sp_e-pitch">Au village, c’est la catastrophe&nbsp;! La météo est instable. Les températures oscillent entre -20° et +40° et les villageois&middot;e&middot;s sont désemparé&middot;e&middot;s. Grésilhette, un&middot;e enfant du village, décide d’aller demander de l’aide directement à la sorcière. Iel va être la première humaine à approcher la Salimonde...<br><span> On sillone les sentiers de la montagne en compagnie de l'enfant. Grâce à sa spontanéité, son bagou et sa franchise, iel entraîne personnages et spectateur&middot;rice&middot;s dans son aventure. Grésilhette permet la rencontre de ces deux mondes autour des mêmes questionnements&nbsp;:&nbsp;Comment pallier les conséquences néfastes que peut avoir le déréglement climatique&nbsp;?&nbsp;Et quelles sont les responsabilités qui incombent aux personnages&nbsp;?</span></p>
-<p class="g_sp_e-presentation">
-<a target="_blank" rel="noopener noreferrer" href="{{ base_url_relative }}/user/pages/03.spectacles/01.gresilhette-et-la-salimonde/dossier-prez_compressed.pdf" title="Visualiser le dossier artistique Grésilhette et la Salimonde de la compagnie Les Mégères de l'Humus">
-<img alt="Dossier artistique Grésilhette et la Salimonde de la compagnie Les Mégères de l'Humus" src="{{ base_url_relative }}/user/pages/03.spectacles/01.gresilhette-et-la-salimonde/btn-prez.jpg" width="300" height="66" loading="lazy"></a></p>
+<p class="g_sp_e-intro">Le spectacle aborde le thème de l'écologie de façon ludique. C’est un conte théâtralisé avec une esthétique merveilleuse et intemporelle. Il existe trois versions du spectacle :</p>
+[a class="g_sp_theatre-d-ombres morph" url="/spectacles/gresilhette-et-la-salimonde/theatre-d-ombres"]
+[img name="sp_theatre-d-ombres.avif" alt="Spectacle Grésilhette et la Salimonde - Théâtre d'ombres" /]
+[/a]
+[a class="g_sp_sieste-contee morph" url="/spectacles/gresilhette-et-la-salimonde/sieste-contee"]
+[img name="sp_sieste-contee.avif" alt="La sieste contée - Grésilhette et la Salimonde" /]
+[/a]
+[a class="g_sp_projet-pedagogique morph" url="/spectacles/gresilhette-et-la-salimonde/projet-pedagogique"]
+[img name="sp_projet-pedagogique.avif" alt="Le projet pédagogique - Grésilhette et la Salimonde" /]
+[/a]
+<p class="g_sp_e-fin">Ce conte s’inspire de la légende de la Salimonde : sorcière de la Montagne Noire qui vit dans une grotte. Une fois par an, au milieu de l'hiver, tout le monde l’entend. S'iels entendent des pleurs, les villageois·e·s savent alors qu'iels doivent encore rester bien au chaud. S’iels entendent une mélodie de flûte, iels savent alors que les beaux jours reviennent. Cette année là, la Salimonde pleure !</p>
+<p class="g_sp_e-pitch">Au village, c’est la catastrophe ! La météo est instable. Les températures oscillent entre -20° et +40° et les villageois·e·s sont désemparé·e·s. Grésilhette, un·e enfant du village, décide d’aller demander de l’aide directement à la sorcière. Iel va être la première humaine à approcher la Salimonde...<br><span> On sillone les sentiers de la montagne en compagnie de l'enfant. Grâce à sa spontanéité, son bagou et sa franchise, iel entraîne personnages et spectateur·rice·s dans son aventure. Grésilhette permet la rencontre de ces deux mondes autour des mêmes questionnements : Comment pallier les conséquences néfastes que peut avoir le déréglement climatique ? Et quelles sont les responsabilités qui incombent aux personnages ?</span></p>
+<p class="g_sp_e-presentation">[a url="/spectacles/gresilhette-et-la-salimonde/dossier-prez_compressed.pdf" title="Visualiser le dossier artistique Grésilhette et la Salimonde de la compagnie Les Mégères de l'Humus"]
+[img alt="Dossier artistique Grésilhette et la Salimonde de la compagnie Les Mégères de l'Humus" name="btn-prez.avif" class="btn-pdf" /][/a]</p>
 <p class="p_terra g_sp_e-generique">
 <span>Écriture, mise en scène : Suzie Idlas et Sabine Rance</span><br>
 <span>Interprétation : Estelle Doumeng et Suzie Idlas</span><br>
@@ -70,9 +68,9 @@ Votre navigateur ne prend pas en charge la lecture vidéo HTML5.
 <p>L'intégration de la langue occitane dans le spectacle est venue comme une évidence. Langue interdite pendant des années, elle symbolise aujourd'hui
 la richesse culturelle du territoire de la Salimonde.</p>
 <p class="tresgras">L'integracion de la lenga occitana dins l'espectacle es venguda coma una evidéncia. Lenga interdita pendent
-d'annadas, simbolisa uéi la riquesa culturala del territ&ograve;ri de la Salimonda.</p>
+d'annadas, simbolisa uéi la riquesa culturala del territòri de la Salimonda.</p>
 <p>Les deux comédiennes délivrent sur scène un chant révolutionnaire occitan acapella. Médium séculaire de communication, le chant apporte une agréable
-sensation de fraîcheur. Il permet aux spectateur&middot;ice&middot;s de faire une pause sans entracte. Fermer les yeux, reprendre sa respiration, sourire.</p>
+sensation de fraîcheur. Il permet aux spectateur·ice·s de faire une pause sans entracte. Fermer les yeux, reprendre sa respiration, sourire.</p>
 <p class="tresgras">Las doas comedianes desliuran sus l'empont un cant revolucionari occitan a capella. Mejan secular de comunicacion, lo cant mena una
 agradiva sensacion de frescura. Permet als espectators de faire una pausa sens entracte. Tampar los uèlhs, fornar prene le buf, faire riseta.</p>
 <p>"Grésilhette et la Salimonde" vous invite à renouer avec vos racines.</p>
@@ -85,11 +83,11 @@ agradiva sensacion de frescura. Permet als espectators de faire una pausa sens e
 
 <div class="extrait">
 <h2 class="display-title">Extrait</h2>
-<p>CONTEUSE&nbsp;:&nbsp;Iel s’élance vers la forêt et prend le petit chemin qui descend jusqu’au Grésilhou. Iel longe la rivière, passe un petit pont de bois, et là, une douce lumière dorée apparaît&nbsp;;&nbsp;ce sont des lucioles, elles la guident dans la pénombre. Devant les yeux de Grésilhette un monde enchanté apparaît. Les feuilles des arbres sont toutes bleues de givre. Des guirlandes de perles de rosée gelées habillent les troncs. Le sol scintille sous une fine couche de glace qui craque sous son poids. Grésilhette s’arrête net. L’antre de la sorcière est là, plongée dans le noir.</p>
-<p>GRESILHETTE&nbsp;:&nbsp;Salimonde&nbsp;!&nbsp;Je m’appelle Grésilhette, j’ai 8 ans, à la maison j’ai une grande collection de feuilles des arbres, j’adore le champignon et je n’ai pas peur de toi&nbsp;!</p>
-<p>SALIMONDE&nbsp;:&nbsp;Qu’est-ce que tu fais là, petit insecte insignifiant&nbsp;?!&nbsp;Comment oses-tu troubler ma quiétude&nbsp;?</p>
-<p>GRESILHETTE&nbsp;:&nbsp;Maquiétude&nbsp;?&nbsp;C’est quoi&nbsp;?&nbsp;Ça s'écrit comment&nbsp;?&nbsp;Oh d’ailleurs, merci de m’avoir allumé les lucioles sur le chemin, c’était joliiii&nbsp;!&nbsp;J’avais l’impression de marcher sur un miroir gelé… Oh&nbsp;!&nbsp;Elle est rigolote ta barbichette, tu ressembles à une chèvre&nbsp;! Huun&nbsp;!&nbsp;Au village c’est la catastrophe&nbsp;!&nbsp;Les bébés chèvres y meurent de froid et Juju, elle est fatiguée&nbsp;!</p>
-<p>SALIMONDE&nbsp;:&nbsp;Et alors&nbsp;?&nbsp;Que veux-tu que j’y fasse&nbsp;?!&nbsp;Vous n'aviez qu’à faire attention à votre couche d’ozone&nbsp;!</p>
-<p>GRESILHETTE&nbsp;:&nbsp;Buuurk&nbsp;!&nbsp;La couche de qui&nbsp;?&nbsp;Mais chuis pô là pour ça moi&nbsp;!&nbsp;Ma mémé Nini, elle m’a dit que t’étais une sorcière avec des pouvoirs magiques&nbsp;!&nbsp;Alors tu peux m’aider&nbsp;!</p>
+<p>CONTEUSE : Iel s’élance vers la forêt et prend le petit chemin qui descend jusqu’au Grésilhou. Iel longe la rivière, passe un petit pont de bois, et là, une douce lumière dorée apparaît : ce sont des lucioles, elles la guident dans la pénombre. Devant les yeux de Grésilhette un monde enchanté apparaît. Les feuilles des arbres sont toutes bleues de givre. Des guirlandes de perles de rosée gelées habillent les troncs. Le sol scintille sous une fine couche de glace qui craque sous son poids. Grésilhette s’arrête net. L’antre de la sorcière est là, plongée dans le noir.</p>
+<p>GRESILHETTE : Salimonde ! Je m’appelle Grésilhette, j’ai 8 ans, à la maison j’ai une grande collection de feuilles des arbres, j’adore le champignon et je n’ai pas peur de toi !</p>
+<p>SALIMONDE : Qu’est-ce que tu fais là, petit insecte insignifiant ?! Comment oses-tu troubler ma quiétude ?</p>
+<p>GRESILHETTE : Maquiétude ? C’est quoi ? Ça s'écrit comment ? Oh d’ailleurs, merci de m’avoir allumé les lucioles sur le chemin, c’était joliiii ! J’avais l’impression de marcher sur un miroir gelé… Oh ! Elle est rigolote ta barbichette, tu ressembles à une chèvre ! Huun ! Au village c’est la catastrophe ! Les bébés chèvres y meurent de froid et Juju, elle est fatiguée !</p>
+<p>SALIMONDE : Et alors ? Que veux-tu que j’y fasse ?! Vous n'aviez qu’à faire attention à votre couche d’ozone !</p>
+<p>GRESILHETTE : Buuurk ! La couche de qui ? Mais chuis pô là pour ça moi ! Ma mémé Nini, elle m’a dit que t’étais une sorcière avec des pouvoirs magiques ! Alors tu peux m’aider !</p>
 </div>
 </div>

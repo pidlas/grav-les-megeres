@@ -1376,12 +1376,13 @@ figure.bio {
     position: relative;
 }
 
-.sigean-sieste-contee {
+/*.sigean-sieste-contee {
     display: block;
     margin: var(--space-m) auto 0;
-}
+}*/
 
-.sigean-sieste-contee img {
+.sigean-sieste-contee{
+    margin: var(--space-m) auto 0;
     border: 0.3125rem solid #e4896a;
     border-radius: 2rem;
     box-shadow: -0.5rem 0.5rem 0.75rem rgba(0, 0, 0, 0.3);

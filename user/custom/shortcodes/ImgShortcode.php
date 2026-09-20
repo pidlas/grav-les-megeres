@@ -11,14 +11,21 @@ class ImgShortcode extends Shortcode
             $filename = $sc->getParameter('name') ?? $sc->getParameter('src');
             $alt = $sc->getParameter('alt', $this->grav['page']->title());
             $class = $sc->getParameter('class', '');
-            // ✅ AJOUT : Récupère l'option lazy (vrai par défaut)
             $lazy = $sc->getParameter('lazy', 'true');
             
+            // Récupération de la page courante par défaut
             $page = $this->grav['page'] ?? null;
             if (!$page || !method_exists($page, 'media')) {
                 return '';
             }
 
+            // --- AJOUT : Gestion du dossier parent si préfixé par parent:// ---
+            if (strpos($filename, 'parent://') === 0) {
+                $filename = str_replace('parent://', '', $filename); // On retire le préfixe pour avoir le nom propre
+                $page = $page->parent(); // On bascule sur la page parente
+            }
+
+            // Recherche de l'image dans la page sélectionnée (courante ou parente)
             $image = $page->media()[$filename] ?? null;
 
             if (!$image) {
@@ -26,7 +33,6 @@ class ImgShortcode extends Shortcode
             }
 
             $extension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
-            // .derivatives(min, max, step)
             $derivatives = $image->derivatives(400, 1200, 400);
 
             if ($extension === 'avif') {
@@ -36,7 +42,6 @@ class ImgShortcode extends Shortcode
                     $jpegSrcset = $derivatives->format('jpg')->srcset();
                     $fallbackUrl = $image->resize(1200)->format('jpg')->url();
                 } catch (\Exception $e) {
-                    // Si la conversion échoue à la volée, on utilise l'AVIF natif partout
                     $webpSrcset = $avifSrcset;
                     $jpegSrcset = $avifSrcset;
                     $fallbackUrl = $image->resize(1200)->url();
@@ -48,16 +53,12 @@ class ImgShortcode extends Shortcode
                 $fallbackUrl = $image->resize(1200)->url();
             }
 
-            // Sécurisation et préparation des attributs de classe
             $classAttr = $class ? " class='" . htmlspecialchars($class, ENT_QUOTES, 'UTF-8') . "'" : "";
             $pictureClassAttr = $class ? " class='wrapper-" . htmlspecialchars($class, ENT_QUOTES, 'UTF-8') . "'" : "";
             
-            // ✅ AJOUT : Détermination dynamique de l'attribut loading
             $loading = ($lazy === 'false' || $lazy === false) ? 'eager' : 'lazy';
-            
             $altEscaped = htmlspecialchars($alt, ENT_QUOTES, 'UTF-8');
             
-            // ✅ CORRECTION : Injection de l'attribut {$loading} dynamique
             return "<picture{$pictureClassAttr}>
                 <source type='image/avif' srcset='{$avifSrcset}' sizes='(max-width:400px) 33vw, (max-width:800px) 55vw, 100vw'>
                 <source type='image/webp' srcset='{$webpSrcset}' sizes='(max-width:400px) 33vw, (max-width:800px) 55vw, 100vw'>

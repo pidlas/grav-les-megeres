@@ -16,24 +16,54 @@ class LinkShortcode extends Shortcode
             $class = self::escAttr($sc->getParameter('class', ''));
             $target = trim((string) $sc->getParameter('target', ''));
             
+            // Récupération d'un éventuel data-type forcé par l'utilisateur
+            $forced_type = trim((string) $sc->getParameter('data-type', ''));
+
             // 2. Récupération du texte entre [a] et [/a]
             $content = $sc->getContent();
 
-            // 3. Détection automatique si le lien est externe ou interne
-            $is_external = (strpos($url, 'http') === 0);
+            // --- Détection des fichiers ---
+            // Liste des extensions de téléchargement courantes
+            $file_extensions = ['pdf', 'zip', 'doc', 'docx', 'xls', 'xlsx', 'pdf', 'mp3', 'mp4', 'jpg', 'png'];
+            $url_path = parse_url($url, PHP_URL_PATH);
+            $extension = strtolower(pathinfo($url_path, PATHINFO_EXTENSION));
+            $is_file = in_array($extension, $file_extensions);
 
-            $target_attr = '';
-            $data_type = 'internal'; // Par défaut, le lien est interne
-
-            if ($target === '_blank' || $is_external) {
-                $target_attr = " target='_blank' rel='noopener noreferrer'";
-                $data_type = 'external'; // Si c'est http ou _blank, il devient externe
+            // 3. Détection automatique et dynamique (Interne vs Externe vs Fichier)
+            if ($forced_type !== '') {
+                // Si l'utilisateur a spécifié un type, on l'utilise directement (ex: internal, external, file)
+                $data_type = $forced_type;
+            } else {
+                if ($is_file) {
+                    $data_type = 'file'; // Détection automatique d'un fichier
+                } else {
+                    $data_type = 'internal'; // Par défaut
+                    
+                    // Vérification du domaine
+                    $url_host = parse_url($url, PHP_URL_HOST);
+                    if ($url_host) {
+                        $current_host = $this->grav['uri']->host();
+                        if (strcasecmp($url_host, $current_host) !== 0) {
+                            $data_type = 'external';
+                        }
+                    }
+                }
             }
 
-            // 4. Construction des attributs de la balise (avec injection du data-type)
+            // Détermination du comportement d'ouverture (target)
+            $is_external = ($data_type === 'external');
+            $is_file_type = ($data_type === 'file');
+            $target_attr = '';
+            
+            // On ouvre dans un nouvel onglet si c'est externe, si c'est un fichier, ou si forcé
+            if ($target === '_blank' || $is_external || $is_file_type) {
+                $target_attr = " target='_blank' rel='noopener noreferrer'";
+            }
+
+            // 4. Construction des attributs de la balise
             $attributes = [];
             $attributes[] = "href='" . self::escAttr($url) . "'";
-            $attributes[] = "data-type='" . $data_type . "'"; // <--- Injection automatique ici
+            $attributes[] = "data-type='" . $data_type . "'";
             
             if ($class !== '') {
                 $attributes[] = "class='" . $class . "'";
@@ -47,9 +77,12 @@ class LinkShortcode extends Shortcode
             $output .= $content;
             $output .= '</a>';
 
-            // 6. Gestion automatique des spans graphiques additionnels (si nécessaires en CSS)
+            // 6. Gestion automatique des spans graphiques additionnels
             if ($is_external) {
                 $output .= '<span class="lien-e-seul"></span>';
+            } elseif ($is_file_type) {
+                // Ajout d'une classe spécifique pour les icônes de téléchargement/fichier
+                $output .= '<span class="lien-f-seul"></span>'; 
             } elseif (strpos($url, '/contact') !== false || $class === 'lien-interne') {
                 $output .= '<span class="lien-i-seul"></span>';
             }
