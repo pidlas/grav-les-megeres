@@ -16,7 +16,7 @@
             <div class="p_theatre-d-ombres">
                 {% set menu_shortcodes %}
                     {# Image 1 : Théâtre d'ombres #}
-                    [a url="{{ base_url_absolute ~ page.parent.route ~ '/theatre-d-ombres' }}" class="{{ page.slug != 'theatre-d-ombres' ? 'image-wrapper morph' : '' }}" alt="Voir le théâtre d'ombres"]
+                    [a url="{{ (page.parent.url ~ '/theatre-d-ombres') | url }}" class="{{ page.slug != 'theatre-d-ombres' ? 'image-wrapper morph' : '' }}" alt="Voir le théâtre d'ombres"]
                         [img class="img-menu-spectacle" name="parent://sp_theatre-d-ombres.avif" alt="Le théâtre d'ombres - Grésilhette et la Salimonde" /]
                     [/a]
 
@@ -26,7 +26,7 @@
                     [/a]
 
                     {# Image 3 : Projet pédagogique #}
-                    [a url="{{ base_url_absolute ~ page.parent.route  ~ /'projet-pedagogique' }}" class="{{ page.slug != 'projet-pedagogique' ? 'image-wrapper morph' : '' }}" alt="Voir le projet pédagogique"]
+                    [a url="{{ base_url_absolute ~ page.parent.route  ~ '/projet-pedagogique' }}" class="{{ page.slug != 'projet-pedagogique' ? 'image-wrapper morph' : '' }}" alt="Voir le projet pédagogique"]
                         [img class="img-menu-spectacle" name="parent://sp_projet-pedagogique.avif" alt="Le projet pédagogique - Grésilhette et la Salimonde" /]
                     [/a]
                 {% endset %}
