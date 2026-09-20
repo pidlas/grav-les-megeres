@@ -3,13 +3,13 @@ title: 'Ta grand-mère sous le figuier'
 menu: 'Ta grand-mère sous le figuier'
 image_lampe: 'lampe-horloge.avif'
 questions_interview:
-  - 'Avez-vous un surnom&nbsp;?'
-  - 'Partiez-vous en vacances quand vous étiez enfant&nbsp;?'
-  - 'Quels étaient les métiers de vos parents&nbsp;?'
-  - 'Et le vôtre&nbsp;?'
-  - 'Quelles bêtises faisiez-vous quand vous étiez adolescente&nbsp;?'
-  - 'Vous souvenez-vous d’un moment en particulier où vous avez ressentiti un bonheur intense&nbsp;?'
-  - 'Voulez-vous nous le partager&nbsp;? etc.'
+  - 'Avez-vous un surnom ?'
+  - 'Partiez-vous en vacances quand vous étiez enfant ?'
+  - 'Quels étaient les métiers de vos parents ?'
+  - 'Et le vôtre ?'
+  - 'Quelles bêtises faisiez-vous quand vous étiez adolescente ?'
+  - 'Vous souvenez-vous d’un moment en particulier où vous avez ressentiti un bonheur intense ?'
+  - 'Voulez-vous nous le partager ? etc.'
 ---
 
 Le spectacle *Ta grand-mère sous le figuier* est le tout premier projet de la compagnie.

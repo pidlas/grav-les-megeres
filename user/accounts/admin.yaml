@@ -18,3 +18,4 @@ admin_next:
     adminLanguage: fr-FR
     editorMode: expert
     colorMode: dark
+    pagesViewMode: tree

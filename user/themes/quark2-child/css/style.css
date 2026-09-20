@@ -253,7 +253,7 @@ p.traduction {
     margin-top: var(--space-s);
 }
 
-.marge {
+.reglement-interieur p {
     border-left: 0.75rem solid #f7ae56;
     border-radius: 0.5rem;
     margin-bottom: 2rem;
@@ -1375,11 +1375,6 @@ figure.bio {
     margin-top: var(--space-l);
     position: relative;
 }
-
-/*.sigean-sieste-contee {
-    display: block;
-    margin: var(--space-m) auto 0;
-}*/
 
 .sigean-sieste-contee{
     margin: var(--space-m) auto 0;
