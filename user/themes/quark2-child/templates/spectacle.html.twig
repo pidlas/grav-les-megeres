@@ -16,17 +16,17 @@
             <div class="p_theatre-d-ombres">
                 {% set menu_shortcodes %}
                     {# Image 1 : Théâtre d'ombres #}
-                    [a url="{{ page.parent.url }}/theatre-d-ombres" class="{{ page.slug != 'theatre-d-ombres' ? 'image-wrapper morph' : '' }}" alt="Voir le théâtre d'ombres"]
+                    [a url="{{ base_url_absolute ~ page.parent.route ~ '/theatre-d-ombres' }}" class="{{ page.slug != 'theatre-d-ombres' ? 'image-wrapper morph' : '' }}" alt="Voir le théâtre d'ombres"]
                         [img class="img-menu-spectacle" name="parent://sp_theatre-d-ombres.avif" alt="Le théâtre d'ombres - Grésilhette et la Salimonde" /]
                     [/a]
 
                     {# Image 2 : Sieste contée #}
-                    [a url="{{ page.parent.url }}/sieste-contee" class="{{ page.slug != 'sieste-contee' ? 'image-wrapper morph' : '' }}" alt="Voir la sieste contée"]
+                    [a url="{{ base_url_absolute ~ page.parent.route ~ '/sieste-contee' }}" class="{{ page.slug != 'sieste-contee' ? 'image-wrapper morph' : '' }}" alt="Voir la sieste contée"]
                         [img class="img-menu-spectacle" name="parent://sp_sieste-contee.avif" alt="La sieste contée - Grésilhette et la Salimonde" /]
                     [/a]
 
                     {# Image 3 : Projet pédagogique #}
-                    [a url="{{ page.parent.url }}/projet-pedagogique" class="{{ page.slug != 'projet-pedagogique' ? 'image-wrapper morph' : '' }}" alt="Voir le projet pédagogique"]
+                    [a url="{{ base_url_absolute ~ page.parent.route  ~ /'projet-pedagogique' }}" class="{{ page.slug != 'projet-pedagogique' ? 'image-wrapper morph' : '' }}" alt="Voir le projet pédagogique"]
                         [img class="img-menu-spectacle" name="parent://sp_projet-pedagogique.avif" alt="Le projet pédagogique - Grésilhette et la Salimonde" /]
                     [/a]
                 {% endset %}
@@ -74,7 +74,7 @@
                 <div class="g_art-tech">
                     {% set fiche_shortcode %}
                         [a url="{{ page.url }}/{{ fiche.pdf }}" alt="Visualiser la fiche technique"]
-                            [img class="btn-pdf" name="{{ fiche.img }}" alt="Fiche technique de la compagnie Les Mégères de l'Humus" /]
+                            [img class="btn-pdf" name="{{ fiche.img }}" alt="Fiche technique de la compagnie Les Mégères de lHumus" /]
                         [/a]
                     {% endset %}
                     {{ fiche_shortcode | shortcodes | raw}}
