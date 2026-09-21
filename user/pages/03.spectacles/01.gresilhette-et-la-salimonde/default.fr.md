@@ -1,9 +1,6 @@
 ---
 title: 'Grésilhette et la Salimonde'
 menu: 'Grésilhette et la Salimonde'
-process:
-  twig: true
-cache_enable: false
 ---
 <div class="encadre">
 
@@ -41,18 +38,18 @@ Votre navigateur ne prend pas en charge la lecture vidéo HTML5.
 
 <div class="g_spectacles">
 <p class="g_sp_e-intro">Le spectacle aborde le thème de l'écologie de façon ludique. C’est un conte théâtralisé avec une esthétique merveilleuse et intemporelle. Il existe trois versions du spectacle :</p>
-[a class="g_sp_theatre-d-ombres morph" url="/spectacles/gresilhette-et-la-salimonde/theatre-d-ombres"]
+[a class="g_sp_theatre-d-ombres morph" url="theatre-d-ombres"]
 [img name="sp_theatre-d-ombres.avif" alt="Spectacle Grésilhette et la Salimonde - Théâtre d'ombres" /]
 [/a]
-[a class="g_sp_sieste-contee morph" url="/spectacles/gresilhette-et-la-salimonde/sieste-contee"]
+[a class="g_sp_sieste-contee morph" url="sieste-contee"]
 [img name="sp_sieste-contee.avif" alt="La sieste contée - Grésilhette et la Salimonde" /]
 [/a]
-[a class="g_sp_projet-pedagogique morph" url="/spectacles/gresilhette-et-la-salimonde/projet-pedagogique"]
+[a class="g_sp_projet-pedagogique morph" url="projet-pedagogique"]
 [img name="sp_projet-pedagogique.avif" alt="Le projet pédagogique - Grésilhette et la Salimonde" /]
 [/a]
 <p class="g_sp_e-fin">Ce conte s’inspire de la légende de la Salimonde : sorcière de la Montagne Noire qui vit dans une grotte. Une fois par an, au milieu de l'hiver, tout le monde l’entend. S'iels entendent des pleurs, les villageois·e·s savent alors qu'iels doivent encore rester bien au chaud. S’iels entendent une mélodie de flûte, iels savent alors que les beaux jours reviennent. Cette année là, la Salimonde pleure !</p>
 <p class="g_sp_e-pitch">Au village, c’est la catastrophe ! La météo est instable. Les températures oscillent entre -20° et +40° et les villageois·e·s sont désemparé·e·s. Grésilhette, un·e enfant du village, décide d’aller demander de l’aide directement à la sorcière. Iel va être la première humaine à approcher la Salimonde...<br><span> On sillone les sentiers de la montagne en compagnie de l'enfant. Grâce à sa spontanéité, son bagou et sa franchise, iel entraîne personnages et spectateur·rice·s dans son aventure. Grésilhette permet la rencontre de ces deux mondes autour des mêmes questionnements : Comment pallier les conséquences néfastes que peut avoir le déréglement climatique ? Et quelles sont les responsabilités qui incombent aux personnages ?</span></p>
-<p class="g_sp_e-presentation">[a url="/spectacles/gresilhette-et-la-salimonde/dossier-prez_compressed.pdf" title="Visualiser le dossier artistique Grésilhette et la Salimonde de la compagnie Les Mégères de l'Humus"]
+<p class="g_sp_e-presentation">[a url="dossier-prez_compressed.pdf" title="Visualiser le dossier artistique Grésilhette et la Salimonde de la compagnie Les Mégères de l'Humus"]
 [img alt="Dossier artistique Grésilhette et la Salimonde de la compagnie Les Mégères de l'Humus" name="btn-prez.avif" class="btn-pdf" /][/a]</p>
 <p class="p_terra g_sp_e-generique">
 <span>Écriture, mise en scène : Suzie Idlas et Sabine Rance</span><br>
