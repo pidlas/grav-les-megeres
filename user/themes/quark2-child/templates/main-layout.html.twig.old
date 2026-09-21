@@ -18,7 +18,10 @@
         .encadre:before, 
         .encadre-lenga:before, 
         .encadre-extrait:before {
-            background-image: url('{{ page.media["livre-blanc-fleur-remplie.avif"].url }}') !important;
+            background-image: image-set(
+                url('{{ page.media["livre-blanc-fleur-remplie.avif"].url }}') type("image/avif"),
+                url('{{ page.media["livre-blanc-fleur-remplie.png"].url }}') type("image/png")
+            ) !important;
         }
     </style>
     {% endif %}
