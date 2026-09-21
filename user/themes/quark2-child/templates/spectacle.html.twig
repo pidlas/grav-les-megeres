@@ -15,21 +15,13 @@
             {# 1. Menu des 3 images en rond (commun) #}
             <div class="p_theatre-d-ombres">
                 
-                {# ÉTAPE CHIRURGICALE : On base la route sur l'URL courante de la page pour ne rien perdre #}
-                {% if page.slug == 'gresilhette-et-la-salimonde' %}
-                    {# Si on est sur la page parent #}
-                    {% set current_base = page.url(false) %}
-                {% else %}
-                    {# Si on est déjà sur une page enfant, la base est l'URL du parent #}
-                    {% set current_base = page.parent.url(false) %}
-                {% endif %}
-
-                {# On nettoie les slashes de fin éventuels pour éviter les doubles barres // #}
-                {% set current_base = current_base|rtrim('/') %}
+                {# ÉTAPE DEFINITIVE : Récupération du sous-dossier réel via le framework Symfony #}
+                {# Renvoie "" en local et "/grav" sur YunoHost #}
+                {% set real_subfolder = app.request.baseUrl|rtrim('/') %}
                 
-                {% set url_ombres = current_base ~ '/theatre-d-ombres' %}
-                {% set url_sieste  = current_base ~ '/sieste-contee' %}
-                {% set url_projet  = current_base ~ '/projet-pedagogique' %}
+                {% set url_ombres = real_subfolder ~ '/spectacles/gresilhette-et-la-salimonde/theatre-d-ombres' %}
+                {% set url_sieste  = real_subfolder ~ '/spectacles/gresilhette-et-la-salimonde/sieste-contee' %}
+                {% set url_projet  = real_subfolder ~ '/spectacles/gresilhette-et-la-salimonde/projet-pedagogique' %}
 
                 {% set menu_shortcodes %}
                     {# Image 1 : Théâtre d'ombres #}
@@ -90,8 +82,8 @@
                 <p>Voir ci-dessous la fiche technique.</p>
                 <div class="g_art-tech">
                     {% set fiche_shortcode %}
-                        {# Construction de l'URL de la fiche par rapport à la page active #}
-                        [a url="{{ page.url(false)|rtrim('/') ~ '/' ~ fiche.pdf }}" alt="Visualiser la fiche technique"]
+                        {# Construction de l'URL absolue sécurisée avec la base réelle de l'application #}
+                        [a url="{{ real_subfolder ~ page.route ~ '/' ~ fiche.pdf }}" alt="Visualiser la fiche technique"]
                             [img class="btn-pdf" name="{{ fiche.img }}" alt="Fiche technique de la compagnie Les Mégères de l'Humus" /]
                         [/a]
                     {% endset %}
