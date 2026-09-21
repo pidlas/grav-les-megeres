@@ -12,34 +12,30 @@
         </div>
 
         <div class="page-content">
-            {# 1. Menu des 3 images en rond (commun) #}
+            
+            {# 1. Menu des 3 images en rond (commun) - Version Absolue Sécurisée #}
             <div class="p_theatre-d-ombres">
                 
-                {# ÉTAPE DEFINITIVE : Récupération du sous-dossier réel via le framework Symfony #}
-                {# Renvoie "" en local et "/grav" sur YunoHost #}
-                {% set real_subfolder = app.request.baseUrl|rtrim('/') %}
-                
-                {% set url_ombres = real_subfolder ~ '/spectacles/gresilhette-et-la-salimonde/theatre-d-ombres' %}
-                {% set url_sieste  = real_subfolder ~ '/spectacles/gresilhette-et-la-salimonde/sieste-contee' %}
-                {% set url_projet  = real_subfolder ~ '/spectacles/gresilhette-et-la-salimonde/projet-pedagogique' %}
-
-                {% set menu_shortcodes %}
-                    {# Image 1 : Théâtre d'ombres #}
-                    [a url="{{ url_ombres }}" class="{{ page.slug != 'theatre-d-ombres' ? 'image-wrapper morph' : '' }}" alt="Voir le théâtre d'ombres"]
-                        [img class="img-menu-spectacle" name="parent://sp_theatre-d-ombres.avif" alt="Le théâtre d'ombres - Grésilhette et la Salimonde" /]
-                    [/a]
-
-                    {# Image 2 : Sieste contée #}
-                    [a url="{{ url_sieste }}" class="{{ page.slug != 'sieste-contee' ? 'image-wrapper morph' : '' }}" alt="Voir la sieste contée"]
-                        [img class="img-menu-spectacle" name="parent://sp_sieste-contee.avif" alt="La sieste contée - Grésilhette et la Salimonde" /]
-                    [/a]
-
-                    {# Image 3 : Projet pédagogique #}
-                    [a url="{{ url_projet }}" class="{{ page.slug != 'projet-pedagogique' ? 'image-wrapper morph' : '' }}" alt="Voir le projet pédagogique"]
-                        [img class="img-menu-spectacle" name="parent://sp_projet-pedagogique.avif" alt="Le projet pédagogique - Grésilhette et la Salimonde" /]
-                    [/a]
-                {% endset %}
-                {{ menu_shortcodes | shortcodes | raw }}
+                {# base_url_relative contient obligatoirement "/grav" sur YunoHost et "" en local #}
+                {% set url_ombres = base_url_relative ~ '/spectacles/gresilhette-et-la-salimonde/theatre-d-ombres' %}
+                {% set url_sieste  = base_url_relative ~ '/spectacles/gresilhette-et-la-salimonde/sieste-contee' %}
+                {% set url_projet  = base_url_relative ~ '/spectacles/gresilhette-et-la-salimonde/projet-pedagogique' %}
+            
+                {# Image 1 : Théâtre d'ombres #}
+                <a href="{{ url_ombres }}" class="{{ page.slug != 'theatre-d-ombres' ? 'image-wrapper morph' : '' }}" title="Voir le théâtre d'ombres">
+                    [img class="img-menu-spectacle" name="parent://sp_theatre-d-ombres.avif" alt="Le théâtre d'ombres - Grésilhette et la Salimonde" /]
+                </a>
+            
+                {# Image 2 : Sieste contée #}
+                <a href="{{ url_sieste }}" class="{{ page.slug != 'sieste-contee' ? 'image-wrapper morph' : '' }}" title="Voir la sieste contée">
+                    [img class="img-menu-spectacle" name="parent://sp_sieste-contee.avif" alt="La sieste contée - Grésilhette et la Salimonde" /]
+                </a>
+            
+                {# Image 3 : Projet pédagogique #}
+                <a href="{{ url_projet }}" class="{{ page.slug != 'projet-pedagogique' ? 'image-wrapper morph' : '' }}" title="Voir le projet pédagogique">
+                    [img class="img-menu-spectacle" name="parent://sp_projet-pedagogique.avif" alt="Le projet pédagogique - Grésilhette et la Salimonde" /]
+                </a>
+            
             </div>
 
             {# 2. Section Contenu : s'adapte selon la page #}
