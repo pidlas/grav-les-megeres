@@ -26,7 +26,7 @@
                     [/a]
 
                     {# Image 3 : Projet pédagogique #}
-                    [a url="{{ base_url_absolute ~ page.parent.route  ~ '/projet-pedagogique' }}" class="{{ page.slug != 'projet-pedagogique' ? 'image-wrapper morph' : '' }}" alt="Voir le projet pédagogique"]
+                    [a url="{{ page.parent.url }}/projet-pedagogique" class="{{ page.slug != 'projet-pedagogique' ? 'image-wrapper morph' : '' }}" alt="Voir le projet pédagogique"]
                         [img class="img-menu-spectacle" name="parent://sp_projet-pedagogique.avif" alt="Le projet pédagogique - Grésilhette et la Salimonde" /]
                     [/a]
                 {% endset %}
