@@ -1,20 +1,6 @@
 {% extends 'main-layout.html.twig' %}
 
 {% block content %}
-{# --- ZONE DE CAPTURE POUR DUMP (S'affiche dans la Debugbar en bas à droite) --- #}
-{% if grav.debugger %}
-    {% do grav.debugger.addMessage(base_url, 'DEBUG - Valeur de base_url') %}
-    {% do grav.debugger.addMessage(base_url_relative, 'DEBUG - Valeur de base_url_relative') %}
-    {% do grav.debugger.addMessage(uri.rootUrl, 'DEBUG - Valeur de uri.rootUrl') %}
-    {% do grav.debugger.addMessage(page.url(false), 'DEBUG - URL relative calculée de la page active') %}
-    {% do grav.debugger.addMessage(page.parent.route, 'DEBUG - Route mémorisée du dossier parent') %}
-    
-    {# Test de recherche directe dans l'arborescence #}
-    {% set test_find = page.find('/spectacles/gresilhette-et-la-salimonde/theatre-d-ombres') %}
-    {% do grav.debugger.addMessage(test_find ? test_find.url(false) : 'PAGE NON TROUVÉE (NULL)', 'DEBUG - Résultat du page.find') %}
-{% endif %}
-{# ------------------------------------------------------------------------------ #}
-
 <main>
     <section class="{{ page.slug }}">
 
@@ -29,11 +15,10 @@
             {# 1. Menu des 3 images en rond (commun) #}
             <div class="p_theatre-d-ombres">
                 
-                {# Tentative basée sur l'URL de base brute du système #}
-                {% set url_base_spectacle = base_url ~ '/spectacles/gresilhette-et-la-salimonde' %}
-                {% set url_ombres = url_base_spectacle ~ '/theatre-d-ombres' %}
-                {% set url_sieste  = url_base_spectacle ~ '/sieste-contee' %}
-                {% set url_projet  = url_base_spectacle ~ '/projet-pedagogique' %}
+                {# On utilise la route absolue interne de Grav, puis le filtre |url se charge d'ajouter /grav/ de force sur le serveur distant #}
+                {% set url_ombres = '/spectacles/gresilhette-et-la-salimonde/theatre-d-ombres'|url %}
+                {% set url_sieste  = '/spectacles/gresilhette-et-la-salimonde/sieste-contee'|url %}
+                {% set url_projet  = '/spectacles/gresilhette-et-la-salimonde/projet-pedagogique'|url %}
 
                 {% set menu_shortcodes %}
                     {# Image 1 : Théâtre d'ombres #}
@@ -94,7 +79,8 @@
                 <p>Voir ci-dessous la fiche technique.</p>
                 <div class="g_art-tech">
                     {% set fiche_shortcode %}
-                        [a url="{{ page.url(true) }}/{{ fiche.pdf }}" alt="Visualiser la fiche technique"]
+                        {# page.route() renvoie la route propre, et |url injecte le sous-répertoire /grav/ de YunoHost #}
+                        [a url="{{ page.route() }}/{{ fiche.pdf }}" alt="Visualiser la fiche technique"]
                             [img class="btn-pdf" name="{{ fiche.img }}" alt="Fiche technique de la compagnie Les Mégères de lHumus" /]
                         [/a]
                     {% endset %}
