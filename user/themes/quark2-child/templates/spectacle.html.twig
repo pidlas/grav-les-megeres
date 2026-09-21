@@ -15,7 +15,7 @@
             {# 1. Menu des 3 images en rond (commun) #}
             <div class="p_theatre-d-ombres">
                 
-                {# On utilise la route absolue interne de Grav, puis le filtre |url se charge d'ajouter /grav/ de force sur le serveur distant #}
+                {# Utilisation des routes relatives à la racine de Grav, adaptatives en local et sur YunoHost #}
                 {% set url_ombres = '/spectacles/gresilhette-et-la-salimonde/theatre-d-ombres'|url %}
                 {% set url_sieste  = '/spectacles/gresilhette-et-la-salimonde/sieste-contee'|url %}
                 {% set url_projet  = '/spectacles/gresilhette-et-la-salimonde/projet-pedagogique'|url %}
@@ -79,12 +79,13 @@
                 <p>Voir ci-dessous la fiche technique.</p>
                 <div class="g_art-tech">
                     {% set fiche_shortcode %}
-                        {# page.route() renvoie la route propre, et |url injecte le sous-répertoire /grav/ de YunoHost #}
-                        [a url="{{ page.route() }}/{{ fiche.pdf }}" alt="Visualiser la fiche technique"]
-                            [img class="btn-pdf" name="{{ fiche.img }}" alt="Fiche technique de la compagnie Les Mégères de lHumus" /]
+                        {# Utilisation de la route propre combinée au nom du fichier pour éviter les erreurs d'objets #}
+                        [a url="{{ page.route ~ '/' ~ fiche.pdf }}" alt="Visualiser la fiche technique"]
+                            [img class="btn-pdf" name="{{ fiche.img }}" alt="Fiche technique de la compagnie Les Mégères de l'Humus" /]
                         [/a]
                     {% endset %}
-                    {{ fiche_shortcode | shortcodes | raw}}
+                    {# Correction majeure : Réintroduction du traitement du shortcode [a] #}
+                    {{ fiche_shortcode | shortcodes | raw }}
                 </div>
             {% endif %}
         </div>      
