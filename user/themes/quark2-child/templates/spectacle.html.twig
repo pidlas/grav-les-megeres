@@ -12,33 +12,38 @@
         </div>
 
         <div class="page-content">
-            {# 1. Menu des 3 images en rond (commun) #}
+            
+            {# 1. Menu des 3 images en rond (commun) - TEST COURT-CIRCUIT HTML #}
             <div class="p_theatre-d-ombres">
                 
-                {# grav.uri.base récupère dynamiquement le protocole, le domaine et le sous-dossier exact (ex: /grav) #}
-                {% set system_base = grav.uri.base %}
-                {% set url_ombres = system_base ~ '/spectacles/gresilhette-et-la-salimonde/theatre-d-ombres' %}
-                {% set url_sieste  = system_base ~ '/spectacles/gresilhette-et-la-salimonde/sieste-contee' %}
-                {% set url_projet  = system_base ~ '/spectacles/gresilhette-et-la-salimonde/projet-pedagogique' %}
-
-                {% set menu_shortcodes %}
-                    {# Image 1 : Théâtre d'ombres #}
-                    [a url="{{ url_ombres }}" class="{{ page.slug != 'theatre-d-ombres' ? 'image-wrapper morph' : '' }}" alt="Voir le théâtre d'ombres"]
-                        [img class="img-menu-spectacle" name="parent://sp_theatre-d-ombres.avif" alt="Le théâtre d'ombres - Grésilhette et la Salimonde" /]
-                    [/a]
-
-                    {# Image 2 : Sieste contée #}
-                    [a url="{{ url_sieste }}" class="{{ page.slug != 'sieste-contee' ? 'image-wrapper morph' : '' }}" alt="Voir la sieste contée"]
-                        [img class="img-menu-spectacle" name="parent://sp_sieste-contee.avif" alt="La sieste contée - Grésilhette et la Salimonde" /]
-                    [/a]
-
-                    {# Image 3 : Projet pédagogique #}
-                    [a url="{{ url_projet }}" class="{{ page.slug != 'projet-pedagogique' ? 'image-wrapper morph' : '' }}" alt="Voir le projet pédagogique"]
-                        [img class="img-menu-spectacle" name="parent://sp_projet-pedagogique.avif" alt="Le projet pédagogique - Grésilhette et la Salimonde" /]
-                    [/a]
-                {% endset %}
-                {{ menu_shortcodes | shortcodes | raw }}
+                {# Méthode adaptative directe #}
+                {% set url_ombres = '/spectacles/gresilhette-et-la-salimonde/theatre-d-ombres'|url %}
+                {% set url_sieste  = '/spectacles/gresilhette-et-la-salimonde/sieste-contee'|url %}
+                {% set url_projet  = '/spectacles/gresilhette-et-la-salimonde/projet-pedagogique'|url %}
+            
+                {# Image 1 : Théâtre d'ombres #}
+                <a href="{{ url_ombres }}" class="{{ page.slug != 'theatre-d-ombres' ? 'image-wrapper morph' : '' }}" title="Voir le théâtre d'ombres">
+                    {% if page.parent.media['sp_theatre-d-ombres.avif'] %}
+                        {{ page.parent.media['sp_theatre-d-ombres.avif'].html('Le théâtre d\'ombres - Grésilhette et la Salimonde', 'Le théâtre d\'ombres', 'img-menu-spectacle')|raw }}
+                    {% endif %}
+                </a>
+            
+                {# Image 2 : Sieste contée #}
+                <a href="{{ url_sieste }}" class="{{ page.slug != 'sieste-contee' ? 'image-wrapper morph' : '' }}" title="Voir la sieste contée">
+                    {% if page.parent.media['sp_sieste-contee.avif'] %}
+                        {{ page.parent.media['sp_sieste-contee.avif'].html('La sieste contée - Grésilhette et la Salimonde', 'La sieste contée', 'img-menu-spectacle')|raw }}
+                    {% endif %}
+                </a>
+            
+                {# Image 3 : Projet pédagogique #}
+                <a href="{{ url_projet }}" class="{{ page.slug != 'projet-pedagogique' ? 'image-wrapper morph' : '' }}" title="Voir le projet pédagogique">
+                    {% if page.parent.media['sp_projet-pedagogique.avif'] %}
+                        {{ page.parent.media['sp_projet-pedagogique.avif'].html('Le projet pédagogique - Grésilhette et la Salimonde', 'Le projet pédagogique', 'img-menu-spectacle')|raw }}
+                    {% endif %}
+                </a>
+            
             </div>
+
 
             {# 2. Section Contenu : s'adapte selon la page #}
             {% if page.slug == 'theatre-d-ombres' %}
