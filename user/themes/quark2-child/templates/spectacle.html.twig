@@ -12,38 +12,51 @@
         </div>
 
         <div class="page-content">
-            
-            {# 1. Menu des 3 images en rond (commun) - Version Absolue Sécurisée #}
+            {# 1. Menu des 3 images en rond (commun) #}
             <div class="p_theatre-d-ombres">
                 
-                {# base_url_relative contient obligatoirement "/grav" sur YunoHost et "" en local #}
+                {# Liens adaptatifs utilisant base_url_relative #}
                 {% set url_ombres = base_url_relative ~ '/spectacles/gresilhette-et-la-salimonde/theatre-d-ombres' %}
                 {% set url_sieste  = base_url_relative ~ '/spectacles/gresilhette-et-la-salimonde/sieste-contee' %}
                 {% set url_projet  = base_url_relative ~ '/spectacles/gresilhette-et-la-salimonde/projet-pedagogique' %}
-            
-                {# Image 1 : Théâtre d'ombres #}
-                <a href="{{ url_ombres }}" class="{{ page.slug != 'theatre-d-ombres' ? 'image-wrapper morph' : '' }}" title="Voir le théâtre d'ombres">
-                    [img class="img-menu-spectacle" name="parent://sp_theatre-d-ombres.avif" alt="Le théâtre d'ombres - Grésilhette et la Salimonde" /]
-                </a>
-            
-                {# Image 2 : Sieste contée #}
-                <a href="{{ url_sieste }}" class="{{ page.slug != 'sieste-contee' ? 'image-wrapper morph' : '' }}" title="Voir la sieste contée">
-                    [img class="img-menu-spectacle" name="parent://sp_sieste-contee.avif" alt="La sieste contée - Grésilhette et la Salimonde" /]
-                </a>
-            
-                {# Image 3 : Projet pédagogique #}
-                <a href="{{ url_projet }}" class="{{ page.slug != 'projet-pedagogique' ? 'image-wrapper morph' : '' }}" title="Voir le projet pédagogique">
-                    [img class="img-menu-spectacle" name="parent://sp_projet-pedagogique.avif" alt="Le projet pédagogique - Grésilhette et la Salimonde" /]
-                </a>
-            
+
+                {# ACCÈS DIRECT ET SÉCURISÉ AUX MÉDIAS DU PARENT #}
+                {# Qu'on soit sur le parent ou l'enfant, page.parent.media ou page.media trouve les images selon le cas #}
+                {% set parent_medias = (page.slug == 'gresilhette-et-la-salimonde') ? page.media : page.parent.media %}
+                
+                {# Génération des balises HTML des images directement par Grav (Zéro shortcode [img] instable) #}
+                {% set tag_img_ombres = parent_medias['sp_theatre-d-ombres.avif'].html('Le théâtre d\'ombres - Grésilhette et la Salimonde', 'Le théâtre d\'ombres', 'img-menu-spectacle') %}
+                {% set tag_img_sieste  = parent_medias['sp_sieste-contee.avif'].html('La sieste contée - Grésilhette et la Salimonde', 'La sieste contée', 'img-menu-spectacle') %}
+                {% set tag_img_projet  = parent_medias['sp_projet-pedagogique.avif'].html('Le projet pédagogique - Grésilhette et la Salimonde', 'Le projet pédagogique', 'img-menu-spectacle') %}
+
+                {# Capture pour l'évaluation du seul shortcode de lien [a] #}
+                {% set menu_shortcodes %}
+                    {# Image 1 : Théâtre d'ombres #}
+                    [a url="{{ url_ombres }}" class="{{ page.slug != 'theatre-d-ombres' ? 'image-wrapper morph' : '' }}" alt="Voir le théâtre d'ombres"]
+                        {{ tag_img_ombres | raw }}
+                    [/a]
+
+                    {# Image 2 : Sieste contée #}
+                    [a url="{{ url_sieste }}" class="{{ page.slug != 'sieste-contee' ? 'image-wrapper morph' : '' }}" alt="Voir la sieste contée"]
+                        {{ tag_img_sieste | raw }}
+                    [/a]
+
+                    {# Image 3 : Projet pédagogique #}
+                    [a url="{{ url_projet }}" class="{{ page.slug != 'projet-pedagogique' ? 'image-wrapper morph' : '' }}" alt="Voir le projet pédagogique"]
+                        {{ tag_img_projet | raw }}
+                    [/a]
+                {% endset %}
+                
+                {{ menu_shortcodes | shortcodes | raw }}
             </div>
 
-            {# 2. Section Contenu : s'adapte selon la page #}
+            {# 2. Section Contenu : s'adapte selon la page active #}
             {% if page.slug == 'theatre-d-ombres' %}
                 <div class="montage-wrapper">
                     <h2 class="display-title">Nos sources d'inspiration</h2>
-                    {% set img_inspiration %}[img name="montage-inspiration.avif" class="forme-montage" alt="Photos donnant de l'inspiration" /]{% endset %}
-                    {{ img_inspiration | shortcodes | raw }}
+                    {% if page.media['montage-inspiration.avif'] %}
+                        {{ page.media['montage-inspiration.avif'].html('Photos donnant de l\'inspiration', 'Inspiration', 'forme-montage') | raw }}
+                    {% endif %}
                     {{ page.content | raw }}
                 </div>
             {% elseif page.slug == 'sieste-contee' %}
@@ -52,13 +65,12 @@
                     {# Image centrée en dessous pour la sieste #}
                     {% if page.media['sigean.avif'] %}
                         <div class="image-centree">
-                            {% set img_sieste %}[img class="sigean-sieste-contee" name="sigean.avif" alt="Illustration de la sieste contée" /]{% endset %}
-                            {{ img_sieste | shortcodes | raw}}
+                            {{ page.media['sigean.avif'].html('Illustration de la sieste contée', 'Sigean', 'sigean-sieste-contee') | raw }}
                         </div>
                     {% endif %}
                 </div>
             {% else %}
-                {# Projet pédagogique : que du texte #}
+                {# Projet pédagogique : affichage du texte simple #}
                 <div class="projet-wrapper">
                     {{ page.content | raw }}
                 </div>
@@ -78,8 +90,7 @@
                 <p>Voir ci-dessous la fiche technique.</p>
                 <div class="g_art-tech">
                     {% set fiche_shortcode %}
-                        {# Construction de l'URL absolue sécurisée avec la base réelle de l'application #}
-                        [a url="{{ real_subfolder ~ page.route ~ '/' ~ fiche.pdf }}" alt="Visualiser la fiche technique"]
+                        [a url="{{ page.route ~ '/' ~ fiche.pdf }}" alt="Visualiser la fiche technique"]
                             [img class="btn-pdf" name="{{ fiche.img }}" alt="Fiche technique de la compagnie Les Mégères de l'Humus" /]
                         [/a]
                     {% endset %}
