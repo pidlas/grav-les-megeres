@@ -15,10 +15,11 @@
             {# 1. Menu des 3 images en rond (commun) #}
             <div class="p_theatre-d-ombres">
                 
-                {# Utilisation des routes relatives à la racine de Grav, adaptatives en local et sur YunoHost #}
-                {% set url_ombres = '/spectacles/gresilhette-et-la-salimonde/theatre-d-ombres'|url %}
-                {% set url_sieste  = '/spectacles/gresilhette-et-la-salimonde/sieste-contee'|url %}
-                {% set url_projet  = '/spectacles/gresilhette-et-la-salimonde/projet-pedagogique'|url %}
+                {# grav.uri.base récupère dynamiquement le protocole, le domaine et le sous-dossier exact (ex: /grav) #}
+                {% set system_base = grav.uri.base %}
+                {% set url_ombres = system_base ~ '/spectacles/gresilhette-et-la-salimonde/theatre-d-ombres' %}
+                {% set url_sieste  = system_base ~ '/spectacles/gresilhette-et-la-salimonde/sieste-contee' %}
+                {% set url_projet  = system_base ~ '/spectacles/gresilhette-et-la-salimonde/projet-pedagogique' %}
 
                 {% set menu_shortcodes %}
                     {# Image 1 : Théâtre d'ombres #}
@@ -79,12 +80,11 @@
                 <p>Voir ci-dessous la fiche technique.</p>
                 <div class="g_art-tech">
                     {% set fiche_shortcode %}
-                        {# Utilisation de la route propre combinée au nom du fichier pour éviter les erreurs d'objets #}
-                        [a url="{{ page.route ~ '/' ~ fiche.pdf }}" alt="Visualiser la fiche technique"]
+                        {# Utilisation de system_base pour forcer la racine absolue parfaite vers le fichier PDF #}
+                        [a url="{{ system_base ~ page.route ~ '/' ~ fiche.pdf }}" alt="Visualiser la fiche technique"]
                             [img class="btn-pdf" name="{{ fiche.img }}" alt="Fiche technique de la compagnie Les Mégères de l'Humus" /]
                         [/a]
                     {% endset %}
-                    {# Correction majeure : Réintroduction du traitement du shortcode [a] #}
                     {{ fiche_shortcode | shortcodes | raw }}
                 </div>
             {% endif %}
