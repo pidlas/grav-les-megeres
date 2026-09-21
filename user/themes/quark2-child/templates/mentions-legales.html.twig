@@ -1,0 +1,47 @@
+{% extends 'main-layout.html.twig' %}
+
+{% block content %}
+<main>
+    <section>
+        {# Habillage commun du haut #}
+            <div class="conteneur-champignons">
+                <img src="{{ url('theme://images/i_champignons.svg') }}" class="champignons" alt="" loading="lazy">
+                <h1>{{ page.title }}</h1>
+                {% if page.header.subtitle %}<p class="sous-titre">{{ page.header.subtitle | raw }}</p>{% endif %}
+            </div>
+        
+        {# 1. Affichage de la première liste (Infos Légales) #}
+        {% if page.header.infos_legales %}
+            <ul class="first-of-type">
+                {% for label, valeur in page.header.infos_legales %}
+                    <li>
+                        <span class="souligne">{{ label }}</span> : 
+                        
+                        {# On affiche la valeur textuelle brute #}
+                        {{ valeur }}
+
+                        {# Injection manuelle et sécurisée des liens selon la ligne #}
+                        {% if label == 'Coordonnées' %}
+                            <a href="{{ base_url_relative }}/contact" data-type="internal" class="lien-interne">contacter</a><span class="lien-i-seul"></span>
+                        {% endif %}
+
+                        {% if label == 'Hébergement' %}
+                            <a href="https://yunohost.org" data-type="external" target="_blank" rel="noopener noreferrer">YunoHost</a><span class="lien-e-seul"></span>, est auto-hébergé sur du matériel libre la <a href="https://labriqueinter.net" data-type="external" target="_blank" rel="noopener noreferrer">Brique Internet</a><span class="lien-e-seul"></span> et promeut les logiciels libres.
+                        {% endif %}
+                    </li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+
+        {# 2. Contenu principal (Articles) traité normalement par Grav #}
+        {# Vos shortcodes [a] s'exécuteront à 100% ici car on ne touche pas à la chaîne de caractères #}
+        {% set ProcessedContent = page.content
+            |regex_replace('/<h3>Article 10([^<]+)<\\/h3>\\s*<ul>/', '<h3>Article 10\\1</h3><ul class="jolie-ombres">')
+            |regex_replace('/<h3>Article 1([^<]+)<\\/h3>\\s*<ul>/', '<h3>Article 1\\1</h3><ul class="jolie-ombres">')
+            |regex_replace('/<h3>Conditions Générales d\'Utilisation<\\/h3>/', '<h3 class="display-title">Conditions Générales d\'Utilisation</h3>')
+        %}
+
+        {{ ProcessedContent|raw }}
+    </section>
+</main>
+{% endblock %}
