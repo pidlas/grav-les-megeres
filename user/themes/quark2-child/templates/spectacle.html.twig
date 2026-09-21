@@ -15,11 +15,17 @@
             {# 1. Menu des 3 images en rond (commun) #}
             <div class="p_theatre-d-ombres">
                 
-                {# Évaluation dynamique et ultra-propre des URLs des pages sœurs #}
-                {% set parent_route = page.parent.route %}
-                {% set url_ombres = page.find(parent_route ~ '/theatre-d-ombres').url(false) %}
-                {% set url_sieste  = page.find(parent_route ~ '/sieste-contee').url(false) %}
-                {% set url_projet  = page.find(parent_route ~ '/projet-pedagogique').url(false) %}
+                {# Récupération fiable des pages sœurs via la collection native de Grav #}
+                {% set items = page.parent.children %}
+                {% set url_ombres = '' %}
+                {% set url_sieste  = '' %}
+                {% set url_projet  = '' %}
+
+                {% for item in items %}
+                    {% if item.slug == 'theatre-d-ombres' %}{% set url_ombres = item.url(false) %}{% endif %}
+                    {% if item.slug == 'sieste-contee' %}{% set url_sieste = item.url(false) %}{% endif %}
+                    {% if item.slug == 'projet-pedagogique' %}{% set url_projet = item.url(false) %}{% endif %}
+                {% endfor %}
 
                 {% set menu_shortcodes %}
                     {# Image 1 : Théâtre d'ombres #}
