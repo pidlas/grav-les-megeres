@@ -1,6 +1,8 @@
 ---
 title: 'Grésilhette et la Salimonde'
 menu: 'Grésilhette et la Salimonde'
+# On stocke la route interne propre calculée dynamiquement par Grav
+route_parent: '{{ page.route() }}'
 ---
 <div class="encadre">
 
@@ -38,13 +40,13 @@ Votre navigateur ne prend pas en charge la lecture vidéo HTML5.
 
 <div class="g_spectacles">
 <p class="g_sp_e-intro">Le spectacle aborde le thème de l'écologie de façon ludique. C’est un conte théâtralisé avec une esthétique merveilleuse et intemporelle. Il existe trois versions du spectacle :</p>
-[a class="g_sp_theatre-d-ombres morph" url="theatre-d-ombres"]
+[a class="g_sp_theatre-d-ombres morph" url="{{ page.route() }}/theatre-d-ombres"]
 [img name="sp_theatre-d-ombres.avif" alt="Spectacle Grésilhette et la Salimonde - Théâtre d'ombres" /]
 [/a]
-[a class="g_sp_sieste-contee morph" url="sieste-contee"]
+[a class="g_sp_sieste-contee morph" url="{{ page.route() }}/sieste-contee"]
 [img name="sp_sieste-contee.avif" alt="La sieste contée - Grésilhette et la Salimonde" /]
 [/a]
-[a class="g_sp_projet-pedagogique morph" url="projet-pedagogique"]
+[a class="g_sp_projet-pedagogique morph" url="{{ page.route() }}/projet-pedagogique"]
 [img name="sp_projet-pedagogique.avif" alt="Le projet pédagogique - Grésilhette et la Salimonde" /]
 [/a]
 <p class="g_sp_e-fin">Ce conte s’inspire de la légende de la Salimonde : sorcière de la Montagne Noire qui vit dans une grotte. Une fois par an, au milieu de l'hiver, tout le monde l’entend. S'iels entendent des pleurs, les villageois·e·s savent alors qu'iels doivent encore rester bien au chaud. S’iels entendent une mélodie de flûte, iels savent alors que les beaux jours reviennent. Cette année là, la Salimonde pleure !</p>
