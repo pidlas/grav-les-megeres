@@ -3,6 +3,7 @@ title: 'Grésilhette et la Salimonde'
 menu: 'Grésilhette et la Salimonde'
 process:
   twig: true
+cache_enable: false
 ---
 <div class="encadre">
 

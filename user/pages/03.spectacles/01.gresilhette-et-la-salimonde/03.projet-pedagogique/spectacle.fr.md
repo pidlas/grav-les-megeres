@@ -3,8 +3,8 @@ title: 'Le projet pédagogique'
 visible: false
 routable: true
 process:
-    markdown: true
     twig: false
+cache_enable: false
 ---
 
 Le projet pédagogique accompagne les spectacles de la compagnie avec des outils concrets pour préparer, prolonger et approfondir l'expérience artistique. Il s'appuie sur l'expression orale, l'esprit critique, la coopération et la créativité.

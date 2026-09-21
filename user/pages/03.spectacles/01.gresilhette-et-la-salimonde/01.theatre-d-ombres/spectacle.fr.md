@@ -2,6 +2,7 @@
 title: 'Théâtre d''ombres'
 process:
     twig: false
+cache_enable: false
 ---
 
 Pendant notre enfance, notre adolescence et notre vie de jeunes adultes nous nous sommes rendu·e·s compte que nous avions des références communes dans plusieurs domaines artistiques. Nous avons décidé de réunir ses inspirations qui nous ressemblent et nous rassemblent. Pour cette version avec le théâtre d’ombres nous avons été influencées par les univers artistiques, politiques et sociaux de plusieurs artistes et plusieurs œuvres. Parmi elleux :
