@@ -1197,34 +1197,31 @@ figure.bio {
     grid-column: 1/2;
 }
 .g_co-item7,
-
 .g_co-item8 {
     display: flex;
-    grid-row: 1/2;
+    grid-row: 2/3;
     place-content: center;
+    margin-top:var(--space-m);
 }
 
 .g_co-item8 {
     grid-column: 2/3;
 }
 .g_co-item7 a,
-
 .g_co-item8 a {
     display: flex;
     justify-content: center;
 }
-.g_co-item12,
-.g_co-item13,
-
 .g_co-item9 {
     display: flex;
     flex-direction: column;
-    grid-column: span 2;
+    grid-row:3/4;
+    grid-column:1/3;
 }
 
 .g_co-item10 {
-    grid-column: 1 / span 2;
-    grid-row: 3/4;
+    grid-column:1/3;
+    grid-row:4/5;
 }
 
 .forme-masque {
@@ -1236,8 +1233,8 @@ figure.bio {
 }
 
 .g_co-item11 {
-    grid-column: 1 / span 2;
-    grid-row: 4/5;
+    grid-column:1/3;
+    grid-row:5/6;
 }
 
 .g_co-item11 img {
@@ -1251,11 +1248,25 @@ figure.bio {
     shape-outside: circle(45%) margin-box;
 }
 
+.g_co-item12{
+    grid-column:1/3;
+    grid-row:6/7;
+    display: flex;
+    flex-direction: column; /* Aligne le h2 et l'image verticalement */
+    align-items: center;    /* Centre horizontalement le h2 et l'image */
+    justify-content: center;/* Centre verticalement si la cellule est plus haute que son contenu */
+}
+
 .g_co-item12 img {
     aspect-ratio: 1;
     margin: var(--space-m) auto 0;
     object-fit: cover;
     width: 80%;
+}
+
+.g_co-item13{
+    grid-column:1/3;
+    grid-row:7/8;
 }
 
 .g_co-item13 figure {

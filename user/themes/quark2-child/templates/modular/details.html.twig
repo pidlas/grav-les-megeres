@@ -1,4 +1,36 @@
-<div class="g_compagnie2">    
-    {# Grav va injecter l'intégralité du code HTML et des textes du fichier .md ici d'un seul bloc #}
-    {{ page.content|raw }}
-</div>
+
+        {# 1. On nettoie et on sépare le contenu par les balises fermantes </p> #}
+        {% set paragraphes = page.content|split('</p>') %}
+        
+        <div class="g_compagnie2">    
+            <div class="g_co-item2">
+                {# On affiche le premier paragraphe (on réinjecte la balise fermante manquante) #}
+                {{ paragraphes[0]|raw }}</p>
+            </div>
+            <div class="g_co-item3">
+                {{ paragraphes[1]|raw }}</p>
+            </div>
+            
+            <div class="g_co-item4">
+                <div class="e_citation">
+                    <figure class="bio">
+                        <blockquote>
+                            {{ paragraphe[2]|raw }}</p>
+                        </blockquote>
+                        <figcaption>
+                            <span>{{ paragraphe[3]|raw }}</span>
+                        </figcaption>
+                    </figure>
+                </div>
+            </div>
+                        
+            <div class="g_co-item5">
+                {{ paragraphes[4]|raw }}</p>
+            </div>
+            
+            <div class="g_co-item6">
+                {{ paragraphes[5]|raw }}</p>
+                {{ paragraphes[6]|replace({'<p>': '<p class="signature">'})|raw }}</p>
+            </div>
+            
+        </div>
