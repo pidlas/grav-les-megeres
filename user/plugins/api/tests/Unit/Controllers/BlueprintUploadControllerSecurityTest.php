@@ -36,6 +36,9 @@ class BlueprintUploadControllerSecurityTest extends TestCase
         mkdir($this->tempDir . '/media', 0775, true);
         mkdir($this->tempDir . '/plugins/api', 0775, true);
         mkdir($this->tempDir . '/themes/quark', 0775, true);
+        foreach (['css', 'content', 'code'] as $dir) {
+            mkdir($this->tempDir . '/themes/quark/' . $dir, 0775, true);
+        }
 
         $this->config = new Config([
             'system' => ['pages' => ['theme' => 'quark']],
@@ -188,6 +191,81 @@ class BlueprintUploadControllerSecurityTest extends TestCase
     }
 
     #[Test]
+    public function delete_rejects_page_content(): void
+    {
+        mkdir($this->tempDir . '/pages/01.home', 0775, true);
+        file_put_contents($this->tempDir . '/pages/01.home/default.md', "---\ntitle: Home\n---\n");
+        $controller = $this->buildController('alice', ['media' => ['write' => true]]);
+
+        $this->expectException(ValidationException::class);
+
+        try {
+            $controller->delete($this->deleteRequest('alice', 'pages/01.home/default.md'));
+        } finally {
+            self::assertFileExists($this->tempDir . '/pages/01.home/default.md');
+        }
+    }
+
+    #[Test]
+    public function delete_rejects_theme_stylesheet(): void
+    {
+        file_put_contents($this->tempDir . '/themes/quark/custom.css', 'body{}');
+        $controller = $this->buildController('alice', ['media' => ['write' => true]]);
+
+        $this->expectException(ValidationException::class);
+
+        try {
+            $controller->delete($this->deleteRequest('alice', 'themes/quark/custom.css'));
+        } finally {
+            self::assertFileExists($this->tempDir . '/themes/quark/custom.css');
+        }
+    }
+
+    #[Test]
+    public function upload_rejects_page_content(): void
+    {
+        $controller = $this->buildController('alice', ['media' => ['write' => true]]);
+
+        $this->expectException(ValidationException::class);
+
+        try {
+            $controller->upload($this->uploadRequest('alice', 'user://media', '', 'page.md', "---\ntitle: x\n---\n"));
+        } finally {
+            self::assertFileDoesNotExist($this->tempDir . '/media/page.md');
+        }
+    }
+
+    #[Test]
+    public function delete_rejects_another_accounts_avatar_without_users_write(): void
+    {
+        mkdir($this->tempDir . '/accounts/avatars', 0775, true);
+        file_put_contents($this->tempDir . '/accounts/avatars/bob.png', 'png');
+        $controller = $this->buildController('alice', ['media' => ['write' => true]]);
+
+        $this->expectException(ForbiddenException::class);
+
+        try {
+            $controller->delete($this->deleteRequest('alice', 'accounts/avatars/bob.png'));
+        } finally {
+            self::assertFileExists($this->tempDir . '/accounts/avatars/bob.png');
+        }
+    }
+
+    #[Test]
+    public function delete_allows_the_callers_own_avatar(): void
+    {
+        mkdir($this->tempDir . '/accounts/avatars', 0775, true);
+        file_put_contents($this->tempDir . '/accounts/avatars/alice.png', 'png');
+        $controller = $this->buildController('alice', ['media' => ['write' => true]]);
+        $avatar = ['user/accounts/avatars/alice.png' => ['name' => 'alice.png', 'path' => 'user/accounts/avatars/alice.png']];
+
+        $response = $controller->delete($this->deleteRequest('alice', 'accounts/avatars/alice.png', $avatar));
+
+        self::assertSame(204, $response->getStatusCode());
+        self::assertFileDoesNotExist($this->tempDir . '/accounts/avatars/alice.png');
+    }
+
+    #[Test]
     public function symlinked_theme_upload_remains_allowed_for_safe_image(): void
     {
         $external = $this->tempDir . '-theme';
@@ -206,7 +284,311 @@ class BlueprintUploadControllerSecurityTest extends TestCase
         $this->rmrf($external);
     }
 
-    private function buildController(string $username, array $apiAccess): BlueprintUploadController
+    #[Test]
+    public function upload_rejects_stylesheet_without_field_opt_in(): void
+    {
+        $controller = $this->buildController('alice', ['media' => ['write' => true]], $this->themeBlueprint());
+
+        $this->expectException(ValidationException::class);
+
+        try {
+            $controller->upload($this->uploadRequest('alice', 'self@:css', 'themes/quark', 'custom.css', 'body{}'));
+        } finally {
+            self::assertFileDoesNotExist($this->tempDir . '/themes/quark/css/custom.css');
+        }
+    }
+
+    #[Test]
+    public function upload_allows_stylesheet_when_scope_blueprint_field_opts_in(): void
+    {
+        $controller = $this->buildController('alice', ['media' => ['write' => true]], $this->themeBlueprint());
+
+        $response = $controller->upload(
+            $this->uploadRequest('alice', 'self@:css', 'themes/quark', 'custom.css', 'body{}', ['field' => 'custom_css'])
+        );
+
+        self::assertSame(201, $response->getStatusCode());
+        self::assertFileExists($this->tempDir . '/themes/quark/css/custom.css');
+    }
+
+    #[Test]
+    public function upload_finds_dotted_field_nested_in_layout_containers(): void
+    {
+        $controller = $this->buildController('alice', ['media' => ['write' => true]], $this->themeBlueprint());
+
+        $response = $controller->upload(
+            $this->uploadRequest('alice', 'self@:content', 'themes/quark', 'intro.md', '# Hi', ['field' => 'header.intro'])
+        );
+
+        self::assertSame(201, $response->getStatusCode());
+        self::assertFileExists($this->tempDir . '/themes/quark/content/intro.md');
+    }
+
+    #[Test]
+    public function upload_finds_leading_dot_field_under_its_section(): void
+    {
+        $controller = $this->buildController('alice', ['media' => ['write' => true]], $this->themeBlueprint());
+
+        $response = $controller->upload(
+            $this->uploadRequest('alice', 'self@:css', 'themes/quark', 'theme.scss', '$a: 1;', ['field' => 'header.styles.sheet'])
+        );
+
+        self::assertSame(201, $response->getStatusCode());
+        self::assertFileExists($this->tempDir . '/themes/quark/css/theme.scss');
+    }
+
+    #[Test]
+    public function upload_rejects_stylesheet_for_field_without_allow_extensions(): void
+    {
+        $controller = $this->buildController('alice', ['media' => ['write' => true]], $this->themeBlueprint());
+
+        $this->expectException(ValidationException::class);
+
+        try {
+            $controller->upload(
+                $this->uploadRequest('alice', 'self@:css', 'themes/quark', 'custom.css', 'body{}', ['field' => 'logo'])
+            );
+        } finally {
+            self::assertFileDoesNotExist($this->tempDir . '/themes/quark/css/custom.css');
+        }
+    }
+
+    #[Test]
+    public function upload_rejects_stylesheet_for_unknown_field(): void
+    {
+        $controller = $this->buildController('alice', ['media' => ['write' => true]], $this->themeBlueprint());
+
+        $this->expectException(ValidationException::class);
+
+        try {
+            $controller->upload(
+                $this->uploadRequest('alice', 'self@:css', 'themes/quark', 'custom.css', 'body{}', ['field' => 'no_such_field'])
+            );
+        } finally {
+            self::assertFileDoesNotExist($this->tempDir . '/themes/quark/css/custom.css');
+        }
+    }
+
+    #[Test]
+    public function upload_rejects_stylesheet_when_destination_is_not_the_fields_own(): void
+    {
+        $controller = $this->buildController('alice', ['media' => ['write' => true]], $this->themeBlueprint());
+
+        $this->expectException(ValidationException::class);
+
+        try {
+            $controller->upload(
+                $this->uploadRequest('alice', 'self@:', 'themes/quark', 'custom.css', 'body{}', ['field' => 'custom_css'])
+            );
+        } finally {
+            self::assertFileDoesNotExist($this->tempDir . '/themes/quark/custom.css');
+        }
+    }
+
+    #[Test]
+    public function allow_extensions_never_lifts_dangerous_extensions(): void
+    {
+        $controller = $this->buildController('alice', ['media' => ['write' => true]], $this->themeBlueprint());
+
+        $this->expectException(ValidationException::class);
+
+        try {
+            $controller->upload(
+                $this->uploadRequest('alice', 'self@:code', 'themes/quark', 'evil.php', '<?php evil();', ['field' => 'code'])
+            );
+        } finally {
+            self::assertFileDoesNotExist($this->tempDir . '/themes/quark/code/evil.php');
+        }
+    }
+
+    #[Test]
+    public function allow_extensions_never_lifts_config_extensions(): void
+    {
+        $controller = $this->buildController('alice', ['media' => ['write' => true]], $this->themeBlueprint());
+
+        $this->expectException(ValidationException::class);
+
+        try {
+            $controller->upload(
+                $this->uploadRequest('alice', 'self@:code', 'themes/quark', 'settings.yaml', 'a: 1', ['field' => 'code'])
+            );
+        } finally {
+            self::assertFileDoesNotExist($this->tempDir . '/themes/quark/code/settings.yaml');
+        }
+    }
+
+    #[Test]
+    public function allow_extensions_does_not_rescue_a_config_double_extension(): void
+    {
+        $controller = $this->buildController('alice', ['media' => ['write' => true]], $this->themeBlueprint());
+
+        $this->expectException(ValidationException::class);
+
+        try {
+            $controller->upload(
+                $this->uploadRequest('alice', 'self@:css', 'themes/quark', 'x.yaml.css', 'a: 1', ['field' => 'custom_css'])
+            );
+        } finally {
+            self::assertFileDoesNotExist($this->tempDir . '/themes/quark/css/x.yaml.css');
+        }
+    }
+
+    #[Test]
+    public function field_opt_in_does_not_apply_without_scope(): void
+    {
+        $controller = $this->buildController('alice', ['media' => ['write' => true]], ['' => $this->themeFields()]);
+
+        $this->expectException(ValidationException::class);
+
+        try {
+            $controller->upload(
+                $this->uploadRequest('alice', 'user://media', '', 'custom.css', 'body{}', ['field' => 'media_css'])
+            );
+        } finally {
+            self::assertFileDoesNotExist($this->tempDir . '/media/custom.css');
+        }
+    }
+
+    #[Test]
+    public function field_opt_in_does_not_apply_for_a_scope_that_owns_no_blueprint(): void
+    {
+        $controller = $this->buildController('alice', ['media' => ['write' => true]], $this->themeBlueprint());
+
+        $this->expectException(ValidationException::class);
+
+        try {
+            $controller->upload(
+                $this->uploadRequest('alice', 'user://media', 'plugins/api', 'custom.css', 'body{}', ['field' => 'media_css'])
+            );
+        } finally {
+            self::assertFileDoesNotExist($this->tempDir . '/media/custom.css');
+        }
+    }
+
+    #[Test]
+    public function delete_allows_stylesheet_through_the_opted_in_field(): void
+    {
+        file_put_contents($this->tempDir . '/themes/quark/css/custom.css', 'body{}');
+        $controller = $this->buildController('alice', ['media' => ['write' => true]], $this->themeBlueprint());
+
+        $response = $controller->delete($this->deleteRequest(
+            'alice',
+            'user/themes/quark/css/custom.css',
+            [],
+            ['field' => 'custom_css', 'scope' => 'themes/quark']
+        ));
+
+        self::assertSame(204, $response->getStatusCode());
+        self::assertFileDoesNotExist($this->tempDir . '/themes/quark/css/custom.css');
+    }
+
+    #[Test]
+    public function delete_rejects_stylesheet_outside_the_fields_folder(): void
+    {
+        file_put_contents($this->tempDir . '/themes/quark/custom.css', 'body{}');
+        $controller = $this->buildController('alice', ['media' => ['write' => true]], $this->themeBlueprint());
+
+        $this->expectException(ValidationException::class);
+
+        try {
+            $controller->delete($this->deleteRequest(
+                'alice',
+                'themes/quark/custom.css',
+                [],
+                ['field' => 'custom_css', 'scope' => 'themes/quark']
+            ));
+        } finally {
+            self::assertFileExists($this->tempDir . '/themes/quark/custom.css');
+        }
+    }
+
+    #[Test]
+    public function delete_rejects_stylesheet_for_field_without_opt_in(): void
+    {
+        file_put_contents($this->tempDir . '/themes/quark/css/custom.css', 'body{}');
+        $controller = $this->buildController('alice', ['media' => ['write' => true]], $this->themeBlueprint());
+
+        $this->expectException(ValidationException::class);
+
+        try {
+            $controller->delete($this->deleteRequest(
+                'alice',
+                'themes/quark/css/custom.css',
+                [],
+                ['field' => 'logo', 'scope' => 'themes/quark']
+            ));
+        } finally {
+            self::assertFileExists($this->tempDir . '/themes/quark/css/custom.css');
+        }
+    }
+
+    /**
+     * @return array<string, array<string, mixed>>
+     */
+    private function themeBlueprint(): array
+    {
+        return ['themes/quark' => $this->themeFields()];
+    }
+
+    /**
+     * A theme blueprint with file fields nested in tabs, as a real one is.
+     *
+     * @return array<string, mixed>
+     */
+    private function themeFields(): array
+    {
+        return [
+            'tabs' => [
+                'type' => 'tabs',
+                'fields' => [
+                    'appearance' => [
+                        'type' => 'tab',
+                        'fields' => [
+                            'custom_css' => [
+                                'type' => 'file',
+                                'destination' => 'self@:css',
+                                'allow_extensions' => ['css'],
+                            ],
+                            'logo' => [
+                                'type' => 'file',
+                                'destination' => 'self@:css',
+                            ],
+                            'header.intro' => [
+                                'type' => 'file',
+                                'destination' => 'self@:content',
+                                'allow_extensions' => '.MD',
+                            ],
+                            'code' => [
+                                'type' => 'file',
+                                'destination' => 'self@:code',
+                                'allow_extensions' => ['php', 'yaml'],
+                            ],
+                            'header.styles' => [
+                                'type' => 'section',
+                                'fields' => [
+                                    '.sheet' => [
+                                        'type' => 'file',
+                                        'destination' => 'self@:css',
+                                        'allow_extensions' => ['scss'],
+                                    ],
+                                ],
+                            ],
+                            'media_css' => [
+                                'type' => 'file',
+                                'destination' => 'user://media',
+                                'allow_extensions' => ['css'],
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+        ];
+    }
+
+    /**
+     * @param array<string, array<string, mixed>> $blueprints Field trees keyed by scope.
+     */
+    private function buildController(string $username, array $apiAccess, array $blueprints = []): BlueprintUploadController
     {
         $user = TestHelper::createMockUser($username, [
             'access' => ['api' => ['access' => true] + $apiAccess],
@@ -222,7 +604,17 @@ class BlueprintUploadControllerSecurityTest extends TestCase
             'accounts' => TestHelper::createMockAccounts([$username => $user]),
         ]);
 
-        return new BlueprintUploadController(\Grav\Common\Grav::instance(), $this->config);
+        return new class (\Grav\Common\Grav::instance(), $this->config, $blueprints) extends BlueprintUploadController {
+            public function __construct($grav, $config, private readonly array $blueprints)
+            {
+                parent::__construct($grav, $config);
+            }
+
+            protected function scopeBlueprintFields(string $scope): ?array
+            {
+                return $this->blueprints[$scope] ?? null;
+            }
+        };
     }
 
     private function uploadRequest(
@@ -231,6 +623,7 @@ class BlueprintUploadControllerSecurityTest extends TestCase
         string $scope,
         string $filename,
         string $contents,
+        array $extra = [],
     ): ServerRequestInterface {
         $user = TestHelper::createMockUser($username, [
             'access' => ['api' => ['access' => true, 'media' => ['write' => true]]],
@@ -238,23 +631,24 @@ class BlueprintUploadControllerSecurityTest extends TestCase
 
         return new BlueprintUploadTestRequest(
             'POST',
-            ['destination' => $destination, 'scope' => $scope],
+            ['destination' => $destination, 'scope' => $scope] + $extra,
             ['file' => new BlueprintUploadTestFile($filename, $contents)],
             ['api_user' => $user],
         );
     }
 
-    private function deleteRequest(string $username, string $path): ServerRequestInterface
+    private function deleteRequest(string $username, string $path, array $avatar = [], array $extra = []): ServerRequestInterface
     {
         $user = TestHelper::createMockUser($username, [
             'access' => ['api' => ['access' => true, 'media' => ['write' => true]]],
+            'avatar' => $avatar,
         ]);
 
         return new BlueprintUploadTestRequest(
             'DELETE',
-            ['path' => $path],
+            ['path' => $path] + $extra,
             [],
-            ['api_user' => $user, 'json_body' => ['path' => $path]],
+            ['api_user' => $user, 'json_body' => ['path' => $path] + $extra],
         );
     }
 

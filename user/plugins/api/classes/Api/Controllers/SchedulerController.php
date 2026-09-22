@@ -240,6 +240,7 @@ class SchedulerController extends AbstractApiController
             page: $pagination['page'],
             perPage: $pagination['per_page'],
             baseUrl: $baseUrl,
+            query: $request->getQueryParams(),
         );
     }
 
@@ -366,10 +367,15 @@ class SchedulerController extends AbstractApiController
 
     /**
      * GET /systeminfo - Generate system info overview.
+     *
+     * Gated by api.system.read, not the scheduler permission: it reports PHP,
+     * disk and plugin data, the same kind of thing /system/info guards. Its
+     * only admin2 consumer is the System Health widget, which already requires
+     * api.system.read.
      */
     public function systemInfo(ServerRequestInterface $request): ResponseInterface
     {
-        $this->requirePermission($request, self::PERMISSION_READ);
+        $this->requirePermission($request, 'api.system.read');
 
         $reports = [];
 

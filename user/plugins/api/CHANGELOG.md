@@ -1,3 +1,61 @@
+# v1.0.38
+## 09/21/2026
+
+1. [](#new)
+    * Admin branding can now store a custom sidebar height for an uploaded logo.
+1. [](#improved)
+    * **A write signed in by the session cookie alone must come from your own site.** The API accepts a logged-in browser session as well as keys and tokens, and a browser attaches that cookie to anything sent to the host, including a form posted from another site. A cookie-only `POST`, `PUT`, `PATCH` or `DELETE` is now refused unless its `Origin` or `Referer` names this host or an origin in `cors.origins`; with neither header it must carry a JSON content type or a custom header. Keys and JWTs are untouched, reads are untouched, same-origin `fetch` calls pass as they are, and a public route treats a forged write as a guest. The audit log now records `jwt` as its own sign-in method instead of filing it under `session`.
+    * The OpenAPI spec (`openapi.yaml`) now documents every API route, up from about half, and the existing entries were corrected against the code, so it imports cleanly into Postman, Insomnia or an SDK generator.
+    * The Postman collection now includes a ready-made request for every route, generated from the spec with `npm run postman:sync`, alongside the existing test requests.
+    * Setup, password reset, invitations and user management now all apply the same password rule, at least 8 characters when the site sets none, and the password checklist on those screens shows it.
+    * Plugin custom fields now work for editors who can't manage packages, instead of falling back to plain text boxes.
+    * Plugin and theme details answer a repeat request with a quick "not changed" reply when nothing changed.
+    * Deleting an environment now needs a super user, since it also removes the system and security overrides stored in it.
+    * Direct install from a URL now only accepts http or https addresses, not paths to files already on the server.
+    * The backups list now uses the same date format as a newly created backup.
+1. [](#bugfix)
+    * **[security] Media upload rights no longer let an account delete page content or stylesheets.** The blueprint file endpoint now refuses `.md` and CSS files for uploads and deletes unless a developer allows those extensions for a specific field with `allow_extensions` in the field's blueprint, and inside `user/accounts/` only your own avatar can be removed without user management rights.
+    * **[security] Two-factor authentication can no longer be switched off through a normal profile save.** It now only changes through the 2FA screens, which ask for a code.
+    * **[security] Pending invitations are now only listed to accounts that can manage users.** Each one carries the token that accepts it, and read-only accounts could see them.
+    * Accepting an invitation now runs the normal sign-in check, so an invite without admin or API access creates the account but doesn't sign it in.
+    * Invitations now expire after at most 30 days, and the link returned on creation points at a real address.
+    * Resetting a forgotten password now applies the site's password rules; a reset link could set any password before.
+    * Turning 2FA on or off no longer reveals whether a username exists to someone who can't change it, and it now requires API access.
+    * Plugin tabs on the Users list now filter the list on sites that don't store accounts with Flex Objects.
+    * The invalid username message now describes the rules core actually enforces.
+    * Saving site-wide admin preferences no longer resets defaults that weren't part of the save.
+    * Plugin panels in the page editor now respect each plugin's permission and appear in priority order.
+    * A plugin dashboard widget that doesn't list its sizes no longer breaks the dashboard.
+    * Rearranging dashboard widgets no longer moves a widget whose position wasn't part of the save.
+    * Rate limiting now covers every request except live collaboration polling; plugin scripts, and pages whose path merely contains "fields" or "sync", no longer skip it.
+    * Custom logos and favicons now load on sites whose user folder isn't at the standard `user/` location.
+    * A licence key sent with an install is only kept when the install succeeds, so a mistyped package name no longer leaves one behind.
+    * Updating a package that isn't installed now says it wasn't found.
+    * Errors while removing a package no longer show raw colour codes.
+    * A disabled plugin's admin pages, widgets, panels, dialogs and reports no longer load, while its custom fields still do so its settings stay editable.
+    * The Audit Trail now accepts the same `admin.super` API key scope as other super-only screens, and demo accounts get a clear "hidden in demo mode" message.
+    * Next and previous page links on every list (pages, media, users, logs, audit, translations and more) now keep the active filters, search and sort, instead of dropping back to the unfiltered list.
+    * Invalid language codes and malformed edits in the Translations editor now return a clear error instead of a server error.
+    * Saving a filtered translation YAML view with a key from outside the filter now names that key instead of claiming the YAML couldn't be read.
+    * Importing from the Translation Strings plugin now reports bad language codes clearly and writes nothing until they all check out.
+    * The Translation Strings import preview no longer shows server file paths to demo accounts.
+    * Filtering pages with `root=false` now returns every page that isn't top-level, instead of none.
+    * Deleting a page's only translation no longer removes its child pages when the request asks to keep them.
+    * Comparing two language versions of a page now checks access to both.
+    * Sending a language code that isn't text to the page translation endpoints now returns a validation error instead of a server error.
+    * Searching site media no longer lists a folder's sort-order file as media.
+    * Browsing a media folder that doesn't exist now reports the requested page and page size.
+    * Renaming a media folder now reports its real file and folder counts.
+    * The Clear Cache menu's "Images Only", "Assets Only" and "Tmp Only" options now clear only what they say.
+    * A webhook's custom headers can no longer replace the signature headers Grav adds to every delivery.
+    * Creating a webhook with a malformed event list now returns a validation error instead of a server error.
+    * Dismissing a dashboard notification now only accepts real notification IDs.
+    * The System Health widget's data now needs the system read permission rather than the scheduler one.
+    * Deleting an environment that doesn't exist now reports "not found".
+    * The file browser's "use page media instead" error now uses the standard error format.
+    * User groups are now always read from and saved to the same file, so a listed group can always be edited or deleted.
+    * Reverting a configuration section with nothing to revert no longer notifies webhooks and other listeners.
+
 # v1.0.37
 ## 09/18/2026
 

@@ -171,6 +171,7 @@ class PagesController extends AbstractApiController
             perPage: $pagination['per_page'],
             baseUrl: $this->getApiBaseUrl() . '/pages',
             locatedAtIndex: $locatedAt,
+            query: $request->getQueryParams(),
         );
     }
 
@@ -226,6 +227,7 @@ class PagesController extends AbstractApiController
             perPage: $pagination['per_page'],
             baseUrl: $this->getApiBaseUrl() . '/pages',
             locatedAtIndex: $locatedAt,
+            query: $request->getQueryParams(),
         );
     }
 
@@ -913,7 +915,7 @@ class PagesController extends AbstractApiController
             if ($lang && $this->isMultiLangEnabled()) {
                 $this->fireEvent('onApiBeforePageDelete', ['page' => $page, 'lang' => $lang]);
 
-                $this->deleteLanguageFile($page, $lang);
+                $this->deleteLanguageFile($page, $lang, $includeChildren);
                 $this->clearPagesCache();
 
                 $this->fireAdminEvent('onAdminAfterDelete', ['object' => $page, 'page' => $page]);
@@ -1296,7 +1298,7 @@ class PagesController extends AbstractApiController
         $body = $this->getRequestBody($request);
         $this->requireFields($body, ['lang']);
 
-        $lang = (string) $body['lang'];
+        $lang = $body['lang'];
         $this->validateLanguageCode($lang);
 
         if (!$this->isMultiLangEnabled()) {
@@ -1533,9 +1535,10 @@ class PagesController extends AbstractApiController
     public function compare(ServerRequestInterface $request): ResponseInterface
     {
         // Account-wide gate up front (this endpoint reads a page that may not
-        // resolve at all); a page-level deny is applied below, once the source
-        // page is loaded. Both language variants share the same frontmatter
-        // rules, so checking the source covers the pair.
+        // resolve at all); a page-level deny is applied below to each side as
+        // it loads. Each translation carries its own frontmatter, and when the
+        // source doesn't resolve the target is the only page checked at all,
+        // so both sides need their own check.
         $this->requirePermission($request, self::PERMISSION_READ);
 
         $params = $request->getQueryParams();
@@ -1582,6 +1585,7 @@ class PagesController extends AbstractApiController
 
             $targetData = null;
             if ($targetPage) {
+                $this->assertPageNotDenied($request, $targetPage, 'read');
                 $translated = $targetPage->translatedLanguages();
                 $targetData = [
                     'lang' => $targetLang,
@@ -2264,8 +2268,10 @@ class PagesController extends AbstractApiController
                 'children_of' => $this->isDirectChildOf($page, $value),
                 // Root-level = direct child of the pages-root, resolved from the
                 // real hierarchy (see isDirectChildOf) so home-page children
-                // aren't mistaken for top-level pages.
-                'root' => filter_var($value, FILTER_VALIDATE_BOOLEAN) && $this->isDirectChildOf($page, '/'),
+                // aren't mistaken for top-level pages. Compared like the other
+                // boolean filters, so root=false means "non-root pages only"
+                // rather than `false && …`, which excluded every page.
+                'root' => $this->isDirectChildOf($page, '/') === filter_var($value, FILTER_VALIDATE_BOOLEAN),
                 default => true,
             };
 
@@ -2459,6 +2465,7 @@ class PagesController extends AbstractApiController
             perPage: $pagination['per_page'],
             baseUrl: $this->getApiBaseUrl() . '/pages',
             locatedAtIndex: $locatedAt,
+            query: $request->getQueryParams(),
         );
     }
 
@@ -2852,8 +2859,15 @@ class PagesController extends AbstractApiController
     /**
      * Validate that a language code is configured in the site.
      */
-    private function validateLanguageCode(string $lang): void
+    private function validateLanguageCode(mixed $lang): void
     {
+        // Codes arrive straight from the body or query string, so a JSON number
+        // or a `lang[]=` array can land here. Reject those as a 422 instead of
+        // letting a string type hint turn them into a TypeError (500).
+        if (!is_string($lang) || $lang === '') {
+            throw new ValidationException('Language code must be a non-empty string.');
+        }
+
         /** @var Language $language */
         $language = $this->grav['language'];
 
@@ -2913,7 +2927,7 @@ class PagesController extends AbstractApiController
     /**
      * Delete only a specific language file for a page, preserving other translations.
      */
-    private function deleteLanguageFile(PageInterface $page, string $lang): void
+    private function deleteLanguageFile(PageInterface $page, string $lang, bool $includeChildren = true): void
     {
         $this->validateLanguageCode($lang);
 
@@ -2922,8 +2936,15 @@ class PagesController extends AbstractApiController
             throw new NotFoundException("No translation found for language '{$lang}' at route: {$page->route()}");
         }
 
-        // If this is the only translation, delete the entire page directory
+        // If this is the only translation, delete the entire page directory.
+        // That removes the children too, so honour ?children=false exactly
+        // like a plain delete does instead of wiping the subtree regardless.
         if (count($translated) <= 1) {
+            if (!$includeChildren && $page->children()->count() > 0) {
+                throw new ValidationException(
+                    'This page has children. Use ?children=true to confirm deletion of the page and all its children.'
+                );
+            }
             Folder::delete($page->path());
             return;
         }

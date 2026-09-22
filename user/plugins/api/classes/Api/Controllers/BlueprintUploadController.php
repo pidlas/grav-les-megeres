@@ -9,6 +9,7 @@ use Grav\Common\Security;
 use Grav\Plugin\Api\Exceptions\ForbiddenException;
 use Grav\Plugin\Api\Exceptions\ValidationException;
 use Grav\Plugin\Api\Response\ApiResponse;
+use Grav\Plugin\Api\Services\BlueprintLoader;
 use Grav\Plugin\Api\Services\BlueprintPathResolver;
 use Grav\Plugin\Api\Services\UploadFieldSettings;
 use Psr\Http\Message\ResponseInterface;
@@ -49,6 +50,7 @@ class BlueprintUploadController extends AbstractApiController
 
     /**
      * Per-endpoint extension denylist on top of `security.uploads_dangerous_extensions`.
+     * Nothing lifts these, not even a field's `allow_extensions`.
      *
      * Not all of these are "code" in the classic sense, but every one is a
      * file Grav (or a sibling tool) parses as authoritative configuration if
@@ -57,13 +59,25 @@ class BlueprintUploadController extends AbstractApiController
      * where a future locator/scope edge case unexpectedly resolves into
      * `user/config/`, `user/env/<x>/config/`, or a plugin's own config dir.
      */
-    private const FORBIDDEN_EXTENSIONS = [
+    private const CONFIG_EXTENSIONS = [
         'yaml', 'yml',           // Grav account / config / blueprint
         'json',                  // generic config / data
         'twig',                  // template code
         'env',                   // env files
         'neon',                  // alt config format
         'lock',                  // composer/npm lockfiles
+    ];
+
+    /**
+     * Page content and stylesheets: refused by default, because anyone with
+     * `api.media.write` could otherwise write or delete them anywhere under
+     * `user/`. A blueprint `type: file` field may lift these, and only these,
+     * with `allow_extensions`, which the server reads from the blueprint itself
+     * (see liftedExtensions()), never from the request.
+     */
+    private const CONTENT_EXTENSIONS = [
+        'md', 'markdown',        // page content; Grav renders it as a page
+        'css', 'scss', 'sass', 'less', // theme and plugin styling
     ];
 
     private ?BlueprintPathResolver $resolver = null;
@@ -105,13 +119,28 @@ class BlueprintUploadController extends AbstractApiController
 
         $isAccountsDir = $this->resolver()->classifyTargetDir($targetDir) === 'accounts';
 
+        // A field's `allow_extensions`, read from the scope's own blueprint.
+        // Only looked up when a file actually carries a content/style extension.
+        $lifted = [];
+        foreach ($files as $file) {
+            if ($this->carriesContentExtension(basename($file->getClientFilename() ?? ''))) {
+                $lifted = $this->liftedExtensions(
+                    is_array($body) ? (string) ($body['field'] ?? '') : '',
+                    $scope,
+                    $destination,
+                    null
+                );
+                break;
+            }
+        }
+
         // Per-field upload settings (random_name, avoid_overwriting, accept,
         // filesize) ride in on the same body as destination/scope.
         $settings = is_array($body) ? UploadFieldSettings::fromParams($body) : UploadFieldSettings::none();
 
         $saved = [];
         foreach ($files as $file) {
-            $saved[] = $this->processUploadedFile($file, $targetDir, $isAccountsDir, $settings);
+            $saved[] = $this->processUploadedFile($file, $targetDir, $isAccountsDir, $settings, $lifted);
         }
 
         // Build a response payload describing each saved file in a Grav
@@ -180,8 +209,24 @@ class BlueprintUploadController extends AbstractApiController
                     "Deletes under user/accounts/ are restricted to avatar image files."
                 );
             }
+            // Upload only lets a caller into another account's folder with
+            // api.users.write (the users/<name> scope); delete has no scope, so
+            // without that permission it may only remove the caller's own avatar.
+            if (!$this->mayWriteUsersScope($request) && !$this->isOwnAvatar($request, $filename)) {
+                throw new ForbiddenException(
+                    "Deleting another account's files requires the 'api.users.write' permission."
+                );
+            }
         }
-        $this->assertSafeExtension($filename, false);
+        $lifted = $this->carriesContentExtension($filename)
+            ? $this->liftedExtensions(
+                (string) ($body['field'] ?? ''),
+                (string) ($body['scope'] ?? ''),
+                null,
+                $path
+            )
+            : [];
+        $this->assertSafeExtension($filename, false, $lifted);
 
         // Idempotent: a file that's already gone is indistinguishable from a
         // file we just deleted, so don't pollute the client with a 404 that
@@ -205,6 +250,27 @@ class BlueprintUploadController extends AbstractApiController
         }
 
         return ApiResponse::noContent();
+    }
+
+    /**
+     * Whether $filename is one of the files the caller's own avatar field points at.
+     */
+    private function isOwnAvatar(ServerRequestInterface $request, string $filename): bool
+    {
+        foreach ((array) $this->getUser($request)->get('avatar', []) as $key => $entry) {
+            $candidates = [(string) $key];
+            if (is_array($entry)) {
+                $candidates[] = (string) ($entry['name'] ?? '');
+                $candidates[] = (string) ($entry['path'] ?? '');
+            }
+            foreach ($candidates as $candidate) {
+                if ($candidate !== '' && basename($candidate) === $filename) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -254,6 +320,7 @@ class BlueprintUploadController extends AbstractApiController
         string $targetDir,
         bool $isAccountsDir,
         ?UploadFieldSettings $settings = null,
+        array $lifted = [],
     ): string {
         if ($file->getError() !== UPLOAD_ERR_OK) {
             throw new ValidationException('File upload failed.');
@@ -274,7 +341,7 @@ class BlueprintUploadController extends AbstractApiController
         // Extension policy first (the security floor), then the field's accept
         // allowlist. Both run against the original name; random_name/
         // avoid_overwriting are applied afterwards and preserve the extension.
-        $this->assertSafeExtension($filename, $isAccountsDir);
+        $this->assertSafeExtension($filename, $isAccountsDir, $lifted);
         $settings?->assertAccepted($filename);
 
         if ($settings !== null) {
@@ -314,13 +381,17 @@ class BlueprintUploadController extends AbstractApiController
      *
      *   1. `security.uploads_dangerous_extensions` (Grav-wide denylist: php, js, exe, ...)
      *   2. Per-endpoint denylist for known-config formats (yaml, json, twig, ...)
-     *   3. If target is `user/accounts/`, restrict to image extensions only —
+     *   3. Page content and stylesheets (md, css, ...), unless `$lifted` names
+     *      them: the extensions the owning field's blueprint allows
+     *   4. If target is `user/accounts/`, restrict to image extensions only —
      *      the directory doubles as Grav's authoritative account store, so
      *      anything non-image is a privesc surface (GHSA-6xx2-m8wv-756h).
      *
      * Returns the lowercased extension for callers that want it.
+     *
+     * @param string[] $lifted From liftedExtensions(); only ever CONTENT_EXTENSIONS entries.
      */
-    private function assertSafeExtension(string $filename, bool $isAccountsDir): string
+    private function assertSafeExtension(string $filename, bool $isAccountsDir, array $lifted = []): string
     {
         $extension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
         if ($extension === '') {
@@ -337,8 +408,13 @@ class BlueprintUploadController extends AbstractApiController
             if (in_array($part, $dangerous, true)) {
                 throw new ValidationException("File extension '.{$part}' is not allowed for security reasons.");
             }
-            if (in_array($part, self::FORBIDDEN_EXTENSIONS, true)) {
+            if (in_array($part, self::CONFIG_EXTENSIONS, true)) {
                 throw new ValidationException("File extension '.{$part}' is not allowed for blueprint uploads.");
+            }
+            if (in_array($part, self::CONTENT_EXTENSIONS, true) && !in_array($part, $lifted, true)) {
+                throw new ValidationException(
+                    "File extension '.{$part}' is not allowed for blueprint uploads unless the field's blueprint lists it in 'allow_extensions'."
+                );
             }
         }
 
@@ -349,6 +425,116 @@ class BlueprintUploadController extends AbstractApiController
         }
 
         return $extension;
+    }
+
+    /**
+     * Whether any dot-separated part of $filename is a content/style extension,
+     * i.e. whether the field's `allow_extensions` could matter at all.
+     */
+    private function carriesContentExtension(string $filename): bool
+    {
+        $parts = array_slice(explode('.', strtolower($filename)), 1);
+
+        return array_intersect($parts, self::CONTENT_EXTENSIONS) !== [];
+    }
+
+    /**
+     * The content/style extensions a blueprint field lets this request through.
+     *
+     * The opt-in is read from the blueprint that owns `$scope`, looked up on the
+     * server; the request only names the field. It applies when that field
+     * exists, is `type: file`, declares `allow_extensions`, and the request
+     * writes where the field writes: on upload the request's destination must be
+     * the field's own `destination`; on delete the file must sit in the folder
+     * that destination resolves to. Anything else (no field, no scope, a scope
+     * that owns no blueprint, an unknown field) lifts nothing.
+     *
+     * Only CONTENT_EXTENSIONS entries survive, so `allow_extensions: [php]` or
+     * `[yaml]` lifts nothing. Dangerous extensions, config formats, the
+     * accounts image-only rule, the config/env directory block and traversal
+     * guards are all enforced regardless.
+     *
+     * @return string[]
+     */
+    private function liftedExtensions(string $fieldName, string $scope, ?string $destination, ?string $deletePath): array
+    {
+        if ($fieldName === '' || $scope === '') {
+            return [];
+        }
+
+        try {
+            $fields = $this->scopeBlueprintFields($scope);
+        } catch (\Throwable) {
+            return [];
+        }
+        if ($fields === null) {
+            return [];
+        }
+
+        $field = BlueprintLoader::findField($fields, $fieldName);
+        if ($field === null || ($field['type'] ?? null) !== 'file') {
+            return [];
+        }
+
+        $fieldDestination = rtrim((string) ($field['destination'] ?? ''), '/');
+        if ($fieldDestination === '') {
+            return [];
+        }
+
+        if ($destination !== null && rtrim($destination, '/') !== $fieldDestination) {
+            return [];
+        }
+
+        if ($deletePath !== null) {
+            $parent = $this->resolver()->logicalParent($fieldDestination, $scope);
+            if ($parent === null || $this->logicalDir($deletePath) !== trim($parent, '/')) {
+                return [];
+            }
+        }
+
+        $allowed = $field['allow_extensions'] ?? [];
+        if (is_string($allowed)) {
+            $allowed = explode(',', $allowed);
+        }
+        if (!is_array($allowed)) {
+            return [];
+        }
+
+        $lifted = [];
+        foreach ($allowed as $extension) {
+            $extension = ltrim(strtolower(trim((string) $extension)), '.');
+            if (in_array($extension, self::CONTENT_EXTENSIONS, true)) {
+                $lifted[] = $extension;
+            }
+        }
+
+        return array_values(array_unique($lifted));
+    }
+
+    /**
+     * Field tree of the blueprint that owns `$scope`, or null when the scope
+     * owns none. A seam so tests can supply a blueprint without booting Grav.
+     *
+     * @return array<string, mixed>|null
+     */
+    protected function scopeBlueprintFields(string $scope): ?array
+    {
+        return (new BlueprintLoader($this->grav))->fieldsForScope($scope);
+    }
+
+    /**
+     * User-rooted folder of a delete `path`, in the same form logicalParent()
+     * returns (no `user/` prefix, no surrounding slashes).
+     */
+    private function logicalDir(string $path): string
+    {
+        $path = ltrim($path, '/');
+        if (str_starts_with($path, 'user/')) {
+            $path = substr($path, 5);
+        }
+        $dir = dirname($path);
+
+        return $dir === '.' ? '' : trim($dir, '/');
     }
 
     /**

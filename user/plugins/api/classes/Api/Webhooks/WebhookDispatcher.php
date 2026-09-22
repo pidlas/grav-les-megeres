@@ -125,15 +125,11 @@ class WebhookDispatcher
         // Generate HMAC signature
         $signature = hash_hmac('sha256', $jsonPayload, $webhook['secret'] ?? '');
 
-        $headers = array_merge(
-            [
-                'Content-Type' => 'application/json',
-                'X-Grav-Signature' => $signature,
-                'X-Grav-Event' => $payload['event'],
-                'X-Grav-Delivery' => 'dlv_' . bin2hex(random_bytes(8)),
-                'User-Agent' => 'Grav-Webhook/1.0',
-            ],
-            $webhook['headers'] ?? []
+        $headers = self::deliveryHeaders(
+            $webhook['headers'] ?? [],
+            $signature,
+            (string) $payload['event'],
+            'dlv_' . bin2hex(random_bytes(8)),
         );
 
         $delivery = [
@@ -174,6 +170,70 @@ class WebhookDispatcher
         $this->manager->recordDelivery($webhook['id'], $delivery);
 
         return $delivery;
+    }
+
+    /**
+     * Headers for one delivery. The signing headers go on last so a webhook's
+     * own `headers` config can never replace them: receivers trust
+     * X-Grav-Signature to prove the body came from this site. Custom headers
+     * may still override Content-Type and User-Agent.
+     *
+     * @param mixed $custom The webhook's stored `headers` value.
+     * @return array<string, string>
+     */
+    public static function deliveryHeaders($custom, string $signature, string $event, string $deliveryId): array
+    {
+        return array_merge(
+            [
+                'Content-Type' => 'application/json',
+                'User-Agent' => 'Grav-Webhook/1.0',
+            ],
+            self::customHeaders($custom),
+            [
+                'X-Grav-Signature' => $signature,
+                'X-Grav-Event' => $event,
+                'X-Grav-Delivery' => $deliveryId,
+            ]
+        );
+    }
+
+    /**
+     * Header names Grav sets itself on every delivery. A webhook's custom
+     * headers may not reuse them, in any letter case: cURL would send both
+     * copies and a receiver could read the forged one.
+     */
+    public const RESERVED_HEADERS = ['x-grav-signature', 'x-grav-event', 'x-grav-delivery'];
+
+    /**
+     * Filter a webhook's stored custom headers down to what is safe to send:
+     * string name/value pairs, no reserved names, and no CR/LF that would let
+     * a value inject extra header lines.
+     *
+     * @param mixed $headers
+     * @return array<string, string>
+     */
+    public static function customHeaders($headers): array
+    {
+        if (!is_array($headers)) {
+            return [];
+        }
+
+        $clean = [];
+        foreach ($headers as $name => $value) {
+            if (!is_string($name) || !is_scalar($value)) {
+                continue;
+            }
+            $value = (string) $value;
+            if (in_array(strtolower(trim($name)), self::RESERVED_HEADERS, true)
+                || preg_match('/[\r\n:]/', $name)
+                || preg_match('/[\r\n]/', $value)
+            ) {
+                continue;
+            }
+            $clean[$name] = $value;
+        }
+
+        return $clean;
     }
 
     /**

@@ -19,8 +19,8 @@ use RocketTheme\Toolbox\File\YamlFile;
  *            `ui.defaults`; user overrides under `admin_next.preferences` in
  *            the account YAML. A user override of `null` removes that key.
  *
- *   Tier C — Per-user synced (currently `menubarLinks`). No site default;
- *            same per-user storage as Tier B.
+ *   Tier A2 — Site-only behavioral settings (auto-save, collab, menubar
+ *            links) under `ui.settings`. Not user-overridable.
  *
  * Device-local UI state (sidebar collapse, page list view mode, etc.) is NOT
  * managed here; the SPA keeps that in localStorage.
@@ -35,6 +35,8 @@ class PreferencesResolver
     private const VALID_EDITOR_MODE = ['normal', 'expert'];
     private const VALID_EDITOR_KEYMAP = ['default', 'vim'];
     private const VALID_LOGO_MODE = ['default', 'text', 'custom'];
+    private const LOGO_HEIGHT_MIN = 16;
+    private const LOGO_HEIGHT_MAX = 44;
     private const VALID_PAGES_VIEW_MODE = ['tree', 'list', 'miller'];
     private const VALID_ACCOUNTS_VIEW_MODE = ['cards', 'table'];
     /** '' = follow whatever the Flex directory blueprint declares. */
@@ -135,6 +137,9 @@ class PreferencesResolver
             'text' => 'Grav',
             'logoLight' => '',
             'logoDark' => '',
+            // Height of a custom logo in the sidebar, in CSS pixels. 0 = the
+            // built-in 28px. Capped so it still fits the 48px sidebar header.
+            'logoHeight' => 0,
             // Custom labelling shown pre-auth on the sign-in screen and in the
             // browser tab. Empty = fall back to the built-in "Grav Admin" copy.
             'title' => '',
@@ -256,13 +261,26 @@ class PreferencesResolver
     }
 
     /**
-     * Persist site-wide defaults. Replaces the entire `ui.defaults` block.
+     * Persist site-wide defaults. Patch semantics, like saveSiteSettings():
+     * keys in the payload are written over the stored `ui.defaults`, keys left
+     * out keep their saved value, and a `null` value removes that key so it
+     * falls back to the built-in default. Replacing the whole block instead
+     * silently reset every default a caller didn't resend.
      *
      * @param array<string, mixed> $payload
      */
     public function saveSitePreferences(array $payload): void
     {
-        $normalized = $this->normalizePreferences($payload, $this->defaultPreferences(), strict: true);
+        $ui = $this->readSiteUiBlock();
+        $current = is_array($ui['defaults'] ?? null) ? $ui['defaults'] : [];
+        foreach ($payload as $key => $value) {
+            if ($value === null) {
+                unset($current[$key]);
+            } else {
+                $current[$key] = $value;
+            }
+        }
+        $normalized = $this->normalizePreferences($current, $this->defaultPreferences(), strict: true);
         $this->writeSiteUiKey('defaults', $normalized);
     }
 
@@ -296,8 +314,8 @@ class PreferencesResolver
      *
      * Semantics: keys with `null` values are removed from the override map
      * (i.e. "reset to site default"). Keys not present in the payload are
-     * left alone. Pass an explicit empty array to clear an override list
-     * (e.g. `menubarLinks: []`).
+     * left alone. Only Tier B keys are accepted; site-only keys such as
+     * `menubarLinks` are dropped (they are written via saveSiteSettings()).
      *
      * @param array<string, mixed> $payload
      */
@@ -385,7 +403,26 @@ class PreferencesResolver
         }
         // Strip any leading slashes / path traversal; we only store basenames.
         $filename = basename($filename);
-        return '/user/media/admin-next/' . $filename;
+        return '/' . $this->userFolderUrlPath() . '/media/admin-next/' . $filename;
+    }
+
+    /**
+     * The user folder's path relative to the site root (normally `user`), as
+     * the `user://` stream resolves it. A custom GRAV_USER_PATH or a multisite
+     * setup maps it elsewhere (e.g. `user/sites/blog`), so a hardcoded
+     * `/user/` pointed logos at files that don't exist. The site's base path
+     * is NOT included: Admin Next prefixes its own `serverUrl` onto these.
+     */
+    private function userFolderUrlPath(): string
+    {
+        $locator = $this->grav['locator'] ?? null;
+        $relative = $locator ? $locator->findResource('user://', false) : null;
+        // An absolute result means the folder lives outside the webroot and
+        // has no public URL; keep the conventional path rather than leak it.
+        if (!is_string($relative) || $relative === '' || str_starts_with($relative, '/') || preg_match('#^[A-Za-z]:[\\\\/]#', $relative)) {
+            return 'user';
+        }
+        return trim(str_replace('\\', '/', $relative), '/');
     }
 
     /**
@@ -509,11 +546,17 @@ class PreferencesResolver
             $showPoweredBy = is_scalar($showPoweredBy) ? (bool) $showPoweredBy : $defaults['showPoweredBy'];
         }
 
+        $logoHeight = $input['logoHeight'] ?? $defaults['logoHeight'];
+        $logoHeight = is_numeric($logoHeight) && (int) $logoHeight > 0
+            ? max(self::LOGO_HEIGHT_MIN, min(self::LOGO_HEIGHT_MAX, (int) $logoHeight))
+            : 0;
+
         return [
             'mode' => $mode,
             'text' => substr($text, 0, 64),
             'logoLight' => $this->sanitizeLogoPath($input['logoLight'] ?? ''),
             'logoDark' => $this->sanitizeLogoPath($input['logoDark'] ?? ''),
+            'logoHeight' => $logoHeight,
             'title' => substr($title, 0, 64),
             'subtitle' => substr($subtitle, 0, 128),
             'showPoweredBy' => $showPoweredBy,

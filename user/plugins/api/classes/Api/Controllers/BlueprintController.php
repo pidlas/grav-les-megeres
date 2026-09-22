@@ -10,6 +10,7 @@ use Grav\Common\User\Interfaces\UserInterface;
 use Grav\Plugin\Api\Exceptions\NotFoundException;
 use Grav\Plugin\Api\Exceptions\ValidationException;
 use Grav\Plugin\Api\Response\ApiResponse;
+use Grav\Plugin\Api\Services\BlueprintLoader;
 use Grav\Plugin\Api\Services\ConfigScopes;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -415,13 +416,9 @@ class BlueprintController extends AbstractApiController
         // return that single file, dropping the rest of the blueprints://
         // cascade; a site override using `extends@: parent@` then has no parent
         // left to extend and core throws "Parent blueprint missing".
-        $blueprintUri = 'blueprints://user/account.yaml';
+        $blueprintUri = $this->blueprintLoader()->accountUri();
 
-        if (!$this->grav['locator']->findResource($blueprintUri)) {
-            $blueprintUri = 'system://blueprints/user/account.yaml';
-        }
-
-        if (!$this->grav['locator']->findResource($blueprintUri)) {
+        if ($blueprintUri === null) {
             throw new NotFoundException('User account blueprint not found.');
         }
 
@@ -700,34 +697,27 @@ class BlueprintController extends AbstractApiController
     {
         $this->ensurePagesEnabled();
 
-        /** @var Pages $pages */
-        $pages = $this->grav['pages'];
-
-        try {
-            $blueprint = $pages->blueprints($template);
-        } catch (\RuntimeException) {
+        // An orphan template (one with no blueprint of its own, e.g. a page
+        // left on a template the current theme doesn't define after a theme
+        // switch) resolves to an empty blueprint. Core only falls back to
+        // `default` when the lookup throws, so the loader mirrors
+        // admin-classic and falls back itself, keeping the editor on the
+        // standard page form rather than a blank pane.
+        $blueprint = $this->blueprintLoader()->page($template);
+        if ($blueprint === null) {
             return null;
-        }
-
-        // An orphan template — one with no blueprint of its own, e.g. a page
-        // left on a template that the current theme doesn't define after a
-        // theme switch — resolves to an empty blueprint with no fields. Grav
-        // core only falls back to `default` when the lookup *throws*, which a
-        // missing blueprint file does not: it returns the empty blueprint
-        // instead. Mirror admin-classic and fall back to the default page
-        // blueprint so the editor always shows the standard page form rather
-        // than a blank pane.
-        if (!$blueprint->fields()) {
-            try {
-                $blueprint = $pages->blueprints('default');
-            } catch (\RuntimeException) {
-                return null;
-            }
         }
 
         $this->injectSecurityTab($request, $blueprint, $user);
 
         return $blueprint;
+    }
+
+    private ?BlueprintLoader $blueprintLoader = null;
+
+    private function blueprintLoader(): BlueprintLoader
+    {
+        return $this->blueprintLoader ??= new BlueprintLoader($this->grav);
     }
 
     /**
@@ -750,21 +740,10 @@ class BlueprintController extends AbstractApiController
      */
     private function loadConfigBlueprint(string $file): Blueprint
     {
-        $blueprint = new Blueprint($file);
-        $blueprint->load();
-
-        try {
-            $blueprint->init();
-        } catch (Throwable $e) {
-            // A third-party provider that throws must not take the whole form
-            // down — serve what did resolve, but log it, because the original
-            // bug here was one nothing recorded anywhere.
-            $this->grav['log']->warning(sprintf(
-                'API: blueprint "%s" failed to resolve its dynamic directives: %s',
-                $file,
-                $e->getMessage()
-            ));
-        }
+        // Loading (load + init, logging a provider that throws) is shared with
+        // the blueprint-upload endpoint, which reads the same blueprints back
+        // to check a file field's own settings.
+        $blueprint = $this->blueprintLoader()->config($file);
 
         $this->clearGatedIgnores($blueprint);
 

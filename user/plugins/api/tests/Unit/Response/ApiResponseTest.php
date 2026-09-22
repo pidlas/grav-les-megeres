@@ -172,4 +172,29 @@ class ApiResponseTest extends TestCase
         $body = (string) $response->getBody();
         self::assertEmpty($body);
     }
+
+    #[Test]
+    public function pagination_links_keep_the_request_query(): void
+    {
+        $response = ApiResponse::paginated([], 120, 2, 50, '/api/v1/audit/events', query: [
+            'event' => 'page.update',
+            'actor' => 'admin',
+            'page' => 2,
+            'per_page' => 50,
+        ]);
+        $body = json_decode((string) $response->getBody(), true);
+
+        foreach (['self', 'first', 'prev', 'next', 'last'] as $name) {
+            $this->assertStringEndsWith('&event=page.update&actor=admin', $body['links'][$name], $name);
+        }
+        $this->assertSame('/api/v1/audit/events?page=3&per_page=50&event=page.update&actor=admin', $body['links']['next']);
+    }
+
+    #[Test]
+    public function pagination_links_without_a_query_carry_only_paging(): void
+    {
+        $body = json_decode((string) ApiResponse::paginated([], 120, 1, 50, '/api/v1/users')->getBody(), true);
+
+        $this->assertSame('/api/v1/users?page=2&per_page=50', $body['links']['next']);
+    }
 }

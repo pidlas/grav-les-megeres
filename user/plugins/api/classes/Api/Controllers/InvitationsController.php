@@ -9,13 +9,13 @@ use Grav\Common\User\DataUser\User as DataUser;
 use Grav\Common\User\Interfaces\UserCollectionInterface;
 use Grav\Common\User\Interfaces\UserInterface;
 use Grav\Common\Utils;
-use Grav\Plugin\Api\Auth\JwtAuthenticator;
 use Grav\Plugin\Api\Exceptions\ApiException;
 use Grav\Plugin\Api\Exceptions\ConflictException;
 use Grav\Plugin\Api\Exceptions\NotFoundException;
 use Grav\Plugin\Api\Exceptions\ValidationException;
 use Grav\Plugin\Api\Invitations\InviteStore;
 use Grav\Plugin\Api\Response\ApiResponse;
+use Grav\Plugin\Api\Services\PasswordPolicyService;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
@@ -28,12 +28,15 @@ use Psr\Http\Message\ServerRequestInterface;
  * the access the admin pre-set — never more. Because the invitee never picks
  * their own access, they cannot make themselves a super admin.
  *
- * Admin endpoints require api.users.write (list requires api.users.read).
+ * Admin endpoints, the list included, require api.users.write.
  * The accept/validate endpoints live under /auth/ so they are public.
  */
 class InvitationsController extends AbstractApiController
 {
     use ResolvesAdminBaseUrl;
+
+    /** Longest an invite may stay valid: 30 days. */
+    private const MAX_EXPIRATION = 2592000;
 
     private ?InviteStore $store = null;
 
@@ -44,10 +47,14 @@ class InvitationsController extends AbstractApiController
 
     /**
      * GET /invitations — list pending (non-expired) invites.
+     *
+     * Needs api.users.write, like resend and revoke: each record carries its
+     * token, and the token alone accepts the invite with the access it was
+     * issued with, so a read-only user must not be able to list them.
      */
     public function index(ServerRequestInterface $request): ResponseInterface
     {
-        $this->requirePermission($request, 'api.users.read');
+        $this->requirePermission($request, 'api.users.write');
 
         $store = $this->store();
         $store->purgeExpired();
@@ -113,12 +120,13 @@ class InvitationsController extends AbstractApiController
             ));
         }
 
-        // Expiration: clamp to a sane window; default 7 days.
+        // Expiration: clamp to a sane window (5 minutes to 30 days); default 7 days.
         $default = (int) $this->config->get('plugins.api.invitations.expiration', 604800);
         $expiration = (int) ($body['expiration'] ?? $default);
         if ($expiration < 300) {
             $expiration = $default;
         }
+        $expiration = min($expiration, self::MAX_EXPIRATION);
 
         $store = $this->store();
 
@@ -170,7 +178,7 @@ class InvitationsController extends AbstractApiController
 
         return ApiResponse::created(
             data: $payload,
-            location: $this->getApiBaseUrl() . '/invitations/' . $token,
+            location: $this->getApiBaseUrl() . '/auth/invite/' . $token,
             headers: $this->invalidationHeaders(['invitations:list']),
         );
     }
@@ -280,24 +288,12 @@ class InvitationsController extends AbstractApiController
         if ($length < 3 || $length > 64 || !DataUser::isValidUsername($username)) {
             throw new ValidationException(
                 'Invalid username format.',
-                [['field' => 'username', 'message' => 'Username must be 3-64 characters and contain only letters, numbers, periods, hyphens, and underscores (and cannot start with a period).']],
+                [['field' => 'username', 'message' => 'Username must be 3-64 characters, cannot start with a period or contain "..", and cannot contain \\ / ? * : ; { } or a line break.']],
             );
         }
 
-        // Password policy — mirror SetupController.
-        $pwdRegex = (string) $this->config->get('system.pwd_regex', '');
-        if ($pwdRegex !== '' && !@preg_match('#^(?:' . $pwdRegex . ')$#', $password)) {
-            throw new ValidationException(
-                'Password does not meet the required policy.',
-                [['field' => 'password', 'message' => 'Password does not meet the required policy.']],
-            );
-        }
-        if ($pwdRegex === '' && strlen($password) < 8) {
-            throw new ValidationException(
-                'Password is too short.',
-                [['field' => 'password', 'message' => 'Password must be at least 8 characters.']],
-            );
-        }
+        // Password policy — the same check setup and password reset apply.
+        PasswordPolicyService::assertValid($this->config, $password);
 
         /** @var UserCollectionInterface $accounts */
         $accounts = $this->grav['accounts'];
@@ -338,9 +334,10 @@ class InvitationsController extends AbstractApiController
 
         $store->remove($token);
 
-        // Auto-login the new user (same token pair as /auth/setup).
-        $jwt = new JwtAuthenticator($this->grav, $this->config);
-        $response = $this->issueTokenPair($jwt, $user);
+        // Auto-login the new user through the same gate a password login runs,
+        // so an invite whose access grants no API or admin login creates the
+        // account but hands back no tokens (403), exactly like /auth/token would.
+        $response = ApiResponse::create($this->finalizeAuthenticatedUser($user, $request));
 
         return $response->withHeader('X-Invalidates', 'users:list');
     }

@@ -100,16 +100,22 @@ class SystemController extends AbstractApiController
      * Refuses to delete the env that Grav resolved for the current request, and
      * refuses to act on legacy user/<name>/ layouts. See EnvironmentService for
      * the full safety rules.
+     *
+     * Super only, unlike create: the folder can hold `system` and `security`
+     * overrides that only a super user may write (ConfigController's
+     * SUPER_WRITE_SCOPES), and deleting it reverts them just as surely.
      */
     public function deleteEnvironment(ServerRequestInterface $request): ResponseInterface
     {
-        $this->requirePermission($request, 'api.config.write');
+        $this->requireSuper($request);
 
         $name = (string) $this->getRouteParam($request, 'name');
 
         $envService = new EnvironmentService($this->grav);
         try {
             $envService->deleteEnvironment($name);
+        } catch (\OutOfBoundsException $e) {
+            throw new NotFoundException($e->getMessage());
         } catch (\InvalidArgumentException $e) {
             throw new ValidationException($e->getMessage());
         }
@@ -222,14 +228,25 @@ class SystemController extends AbstractApiController
         $query = $request->getQueryParams();
         $scope = $query['scope'] ?? 'standard';
 
-        $allowedScopes = ['all', 'standard', 'images', 'assets', 'tmp'];
-        if (!in_array($scope, $allowedScopes, true)) {
+        // API scope => core Cache::clearCache() argument. Core names the partial
+        // clears `*-only` and treats anything it doesn't recognise as a standard
+        // clear, so passing `images` straight through quietly cleared the wrong
+        // thing.
+        $scopeMap = [
+            'all' => 'all',
+            'standard' => 'standard',
+            'images' => 'images-only',
+            'assets' => 'assets-only',
+            'tmp' => 'tmp-only',
+        ];
+        if (!is_string($scope) || !isset($scopeMap[$scope])) {
+            $shown = is_string($scope) ? $scope : '(non-string)';
             throw new ValidationException(
-                "Invalid cache scope '{$scope}'. Allowed: " . implode(', ', $allowedScopes),
+                "Invalid cache scope '{$shown}'. Allowed: " . implode(', ', array_keys($scopeMap)),
             );
         }
 
-        $results = $this->grav['cache']->clearCache($scope);
+        $results = $this->grav['cache']->clearCache($scopeMap[$scope]);
 
         return ApiResponse::create([
             'scope' => $scope,
@@ -285,7 +302,7 @@ class SystemController extends AbstractApiController
 
         $logFile = $this->grav['locator']->findResource('log://' . $requested);
         if (!$logFile || !file_exists($logFile)) {
-            return ApiResponse::paginated([], 0, $pagination['page'], $pagination['per_page'], $this->getApiBaseUrl() . '/system/logs');
+            return ApiResponse::paginated([], 0, $pagination['page'], $pagination['per_page'], $this->getApiBaseUrl() . '/system/logs', query: $request->getQueryParams());
         }
 
         $content = file_get_contents($logFile);
@@ -344,7 +361,7 @@ class SystemController extends AbstractApiController
         $total = count($entries);
         $paged = array_slice($entries, $pagination['offset'], $pagination['limit']);
 
-        return ApiResponse::paginated($paged, $total, $pagination['page'], $pagination['per_page'], $this->getApiBaseUrl() . '/system/logs');
+        return ApiResponse::paginated($paged, $total, $pagination['page'], $pagination['per_page'], $this->getApiBaseUrl() . '/system/logs', query: $request->getQueryParams());
     }
 
     /**
@@ -604,7 +621,11 @@ class SystemController extends AbstractApiController
             $items[] = [
                 'filename' => $b->filename ?? basename($b->path ?? ''),
                 'title' => $b->title ?? null,
-                'date' => $b->date ?? null,
+                // ISO 8601 like POST /system/backups returns. Core's `date` is
+                // RFC 2822, so format from the DateTime it keeps alongside.
+                'date' => ($b->time ?? null) instanceof \DateTimeInterface
+                    ? $b->time->format('c')
+                    : ($b->date ?? null),
                 'size' => $b->size ?? 0,
             ];
         }

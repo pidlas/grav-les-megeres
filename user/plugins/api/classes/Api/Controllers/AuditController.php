@@ -6,6 +6,7 @@ namespace Grav\Plugin\Api\Controllers;
 
 use Grav\Framework\Psr7\Response;
 use Grav\Plugin\Api\Audit\AuditStore;
+use Grav\Plugin\Api\Exceptions\ForbiddenException;
 use Grav\Plugin\Api\Response\ApiResponse;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -31,7 +32,7 @@ class AuditController extends AbstractApiController
      */
     public function status(ServerRequestInterface $request): ResponseInterface
     {
-        $this->requirePermission($request, 'api.super');
+        $this->requireAuditAccess($request);
 
         $available = AuditStore::available();
         $enabled = $available && (bool) $this->config->get('plugins.api.audit.enabled', false);
@@ -62,7 +63,7 @@ class AuditController extends AbstractApiController
      */
     public function events(ServerRequestInterface $request): ResponseInterface
     {
-        $this->requirePermission($request, 'api.super');
+        $this->requireAuditAccess($request);
         $this->assertEnabled();
 
         $pagination = $this->getPagination($request, 50);
@@ -76,6 +77,7 @@ class AuditController extends AbstractApiController
             $pagination['page'],
             $pagination['per_page'],
             $this->getApiBaseUrl() . '/audit/events',
+            query: $request->getQueryParams(),
         );
     }
 
@@ -84,7 +86,7 @@ class AuditController extends AbstractApiController
      */
     public function facets(ServerRequestInterface $request): ResponseInterface
     {
-        $this->requirePermission($request, 'api.super');
+        $this->requireAuditAccess($request);
         $this->assertEnabled();
 
         return ApiResponse::ok((new AuditStore())->facets());
@@ -95,7 +97,7 @@ class AuditController extends AbstractApiController
      */
     public function export(ServerRequestInterface $request): ResponseInterface
     {
-        $this->requirePermission($request, 'api.super');
+        $this->requireAuditAccess($request);
         $this->assertEnabled();
 
         $format = strtolower((string) ($request->getQueryParams()['format'] ?? 'csv'));
@@ -126,6 +128,29 @@ class AuditController extends AbstractApiController
     }
 
     // ---------------------------------------------------------------------
+
+    /**
+     * The one gate for every audit route: the shared requireSuper(), so a scoped
+     * API key needs the same `admin.super` scope here as on every other
+     * super-only endpoint (it used to need `api.super` here and `admin.super`
+     * elsewhere). Demo accounts are refused up front with a reason that fits a
+     * read: on a public demo the log is other visitors' IPs and user agents.
+     *
+     * requireSuper() also admits an account that holds classic `admin.super`
+     * plus `api.access` without `api.super`. The audit log has always been
+     * `api.super` only, so that is re-checked here rather than widened.
+     */
+    private function requireAuditAccess(ServerRequestInterface $request): void
+    {
+        $this->denyIfDemo($request, 'The audit trail is hidden in demo mode.');
+        $this->requireSuper($request);
+
+        // @scope-cap-exempt: requireSuper() on the line above already applied the
+        // cap; this only narrows the accepted accounts to api.super.
+        if (!$this->isSuperAdmin($this->getUser($request))) {
+            throw new ForbiddenException('The audit trail requires super admin.');
+        }
+    }
 
     /**
      * @param ServerRequestInterface $request

@@ -159,6 +159,8 @@ curl -X POST https://yoursite.com/api/v1/auth/revoke \
 
 If a user has an active Grav admin session, the API recognizes it automatically. This enables the current admin UI (or a future SPA admin) to call the API from the browser without separate authentication — no API key or JWT needed.
 
+**Writes on a session must come from your own site.** A `POST`, `PUT`, `PATCH` or `DELETE` signed in by the session cookie alone is refused with a `403` unless its `Origin` (or `Referer`) names this host or an origin listed in `cors.origins`. A request with neither header has to carry a JSON content type or a custom header such as `X-Requested-With`, which a form on another site cannot send. Same-origin `fetch` calls pass as they are. API keys and JWTs are never asked, and on a public route a forged write is simply treated as a guest.
+
 ### Which method should I use?
 
 | Use Case | Method | Why |
@@ -359,7 +361,7 @@ curl -X POST https://yoursite.com/api/v1/config/system/revert \
   -d '{"reset": true}'
 ```
 
-A `{"keys": [...]}` payload drops just those paths; `{"reset": true}` removes the active layer's file outright. The response is the same shape as a read, reflecting the post-revert state.
+A `{"keys": [...]}` payload drops just those paths; `{"reset": true}` removes the active layer's file outright. The response has the same structure as a read, reflecting the post-revert state, plus `meta.reverted` saying whether anything changed.
 
 #### Custom config scopes
 
@@ -707,6 +709,19 @@ curl -s "https://yoursite.com/api/v1/blueprints/plugins/email" \
 
 Streams resolve through Grav's locator so symlinked theme/plugin folders (common in dev setups) work cleanly — the response returns a *logical* user-rooted path (`user/themes/quark2/images/logo/foo.png`) independent of realpath, so a subsequent `DELETE /blueprint-upload` round-trips through the symlink to remove the actual file. `..` traversal and absolute paths are rejected, filenames are sanitized, and the dangerous-extension allowlist is checked. `DELETE` is idempotent — a missing file returns `204 No Content`.
 
+Page content (`md`, `markdown`) and stylesheets (`css`, `scss`, `sass`, `less`) are refused by default, on upload and delete. A developer can allow them for one field by listing them in that field's blueprint:
+
+```yaml
+custom_css:
+  type: file
+  label: Custom stylesheet
+  destination: 'self@:css'
+  accept: ['.css']
+  allow_extensions: [css]
+```
+
+The client sends the field's name as `field` alongside `scope`, and the server looks the field up in the blueprint that owns the scope (the plugin or theme config blueprint, the page template's blueprint, or the account blueprint). The request can't grant the permission itself: the field must exist, be `type: file`, declare `allow_extensions`, and the upload must go to that field's own `destination`. `allow_extensions` only lifts those six extensions; dangerous and config-type extensions (`php`, `yaml`, `json`, `twig` and the rest), the image-only rule for `user/accounts/` and the config directory block always apply.
+
 ## Response Format
 
 ### Success
@@ -791,7 +806,7 @@ rate_limit:
     - /sync/   # default — exempt collab endpoints from the per-user bucket
 ```
 
-`excluded_paths` exempts matching path prefixes from the bucket entirely — useful for high-frequency authenticated traffic (e.g. the sync plugin's polling, which fires ~90 req/min per active editor and would otherwise trip the global anti-abuse limit). Auth and per-route permissions still apply, so the bypass is gated by normal authentication rather than being a free pass.
+`excluded_paths` exempts matching path prefixes (matched from the start of the route path) from the bucket entirely. The only default is `/sync/`: an editor in a shared editing session polls it about 90 times a minute, which would use up the limit on its own. Nothing else is exempt, including the plugin scripts Admin2 loads. Auth and per-route permissions still apply, so the bypass is gated by normal authentication rather than being a free pass.
 
 ## CORS
 
@@ -1443,6 +1458,10 @@ A complete OpenAPI 3.0 specification is included at [`openapi.yaml`](openapi.yam
 - **Swagger UI** for browsable documentation
 - **Any OpenAPI-compatible tool** for client SDK generation
 
+`openapi.yaml` is the source of truth. `OpenApiCoverageTest` fails when a core route is missing from it (or it still lists a removed one), and `npm run lint:openapi` validates it.
+
+For Postman you can also import [`grav-api.postman_collection.json`](grav-api.postman_collection.json) directly. It has a request for every route with `base_url`, `api_key` and `grav_environment` variables already wired. The collection doubles as the Newman test suite: its hand-written requests carry the tests, and `npm run postman:sync` adds a request, generated from the spec, for every route none of them call. Generated requests skip themselves under `npm run test:api`, since many of them change or delete data.
+
 ## Development
 
 ### Running Tests
@@ -1491,6 +1510,7 @@ grav-plugin-api/
 │   │   ├── AuthenticatorInterface.php
 │   │   ├── ApiKeyAuthenticator.php
 │   │   ├── JwtAuthenticator.php
+│   │   ├── SameOriginGuard.php
 │   │   ├── SessionAuthenticator.php
 │   │   └── ApiKeyManager.php
 │   ├── Controllers/

@@ -164,6 +164,7 @@ final class TranslationOverrideStore
      * source.
      *
      * @return array{count: int, dropped: array<int, string>, unknown: array<int, string>, removed: int}
+     * @throws \UnexpectedValueException when a scoped save names keys outside the scope
      * @throws \RuntimeException on unparseable YAML
      */
     public function replace(string $lang, string $yaml, ?string $namespace = null): array
@@ -222,8 +223,10 @@ final class TranslationOverrideStore
             }
         }
 
+        // UnexpectedValueException (still a RuntimeException) so a caller can tell
+        // "these keys are outside your scope" apart from "that YAML is broken".
         if ($outOfScope !== []) {
-            throw new \RuntimeException(sprintf(
+            throw new \UnexpectedValueException(sprintf(
                 'These keys are outside the %s scope you are editing: %s',
                 $namespace,
                 implode(', ', array_slice($outOfScope, 0, 5))

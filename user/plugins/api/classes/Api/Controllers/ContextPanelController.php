@@ -25,20 +25,40 @@ use RocketTheme\Toolbox\Event\Event;
  *     'priority'      => 10,                  // sort order (higher = earlier)
  *     'width'         => 900,                 // panel width in pixels
  *     'badgeEndpoint' => '/my-plugin/badge',  // optional: returns { count: N }
+ *     'authorize'     => 'api.pages.read',    // optional — string or array (any-of)
  *   ]
+ *
+ * `authorize` follows the same string-or-array semantics as floating widgets
+ * and editor toolbar buttons. Panels without it are visible to every
+ * authenticated user.
  */
 class ContextPanelController extends AbstractApiController
 {
     /**
-     * GET /context-panels — Collect context panel registrations from plugins.
+     * GET /context-panels — Collect context panel registrations from plugins,
+     * filtered by the current user's permissions.
      */
     public function items(ServerRequestInterface $request): ResponseInterface
     {
         $this->requirePermission($request, 'api.access');
 
-        $event = new Event(['panels' => [], 'user' => $this->getUser($request)]);
+        $user = $this->getUser($request);
+        $event = new Event(['panels' => [], 'user' => $user]);
         $this->grav->fireEvent('onApiContextPanels', $event);
 
-        return ApiResponse::create($event['panels']);
+        $filtered = [];
+        foreach ((array) $event['panels'] as $panel) {
+            if (!is_array($panel) || !$this->userPassesAuthorize($user, $panel['authorize'] ?? null, $request)) {
+                continue;
+            }
+            // Strip the authorize field — it's a server-side annotation, not client data
+            unset($panel['authorize']);
+            $filtered[] = $panel;
+        }
+        // Sort by priority descending (higher first), like /settings/panels;
+        // usort is stable, so equal priorities keep registration order.
+        usort($filtered, fn($a, $b) => ($b['priority'] ?? 0) <=> ($a['priority'] ?? 0));
+
+        return ApiResponse::create($filtered);
     }
 }

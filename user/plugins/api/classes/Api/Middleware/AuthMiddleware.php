@@ -9,7 +9,9 @@ use Grav\Common\Grav;
 use Grav\Plugin\Api\Auth\ApiKeyAuthenticator;
 use Grav\Plugin\Api\Auth\AuthenticatorInterface;
 use Grav\Plugin\Api\Auth\JwtAuthenticator;
+use Grav\Plugin\Api\Auth\SameOriginGuard;
 use Grav\Plugin\Api\Auth\SessionAuthenticator;
+use Grav\Plugin\Api\Exceptions\ForbiddenException;
 use Grav\Plugin\Api\Exceptions\UnauthorizedException;
 use Psr\Http\Message\ServerRequestInterface;
 
@@ -31,6 +33,13 @@ class AuthMiddleware
         foreach ($this->authenticators as $authenticator) {
             $user = $authenticator->authenticate($request);
             if ($user !== null) {
+                if ($this->isForgeableWrite($authenticator, $request)) {
+                    throw new ForbiddenException(
+                        'This request was signed in by the session cookie alone and did not come from this site. '
+                        . 'Send it from a page on this host, add its origin to the API\'s CORS origins, or authenticate with an API key or token.'
+                    );
+                }
+
                 return $this->attachUser($request, $authenticator, $user);
             }
         }
@@ -51,11 +60,38 @@ class AuthMiddleware
         foreach ($this->authenticators as $authenticator) {
             $user = $authenticator->authenticate($request);
             if ($user !== null) {
+                // A public route still answers, as it would for anybody: the
+                // cookie is just not taken as proof of who is asking.
+                if ($this->isForgeableWrite($authenticator, $request)) {
+                    return $request;
+                }
+
                 return $this->attachUser($request, $authenticator, $user);
             }
         }
 
         return $request;
+    }
+
+    /**
+     * A write whose only credential is the session cookie, arriving from
+     * somewhere that is not this site (CSRF). Keys and JWTs are never asked:
+     * the check belongs to the authenticator that won, not to which headers
+     * happen to be missing, so webhooks and token callers are untouched.
+     */
+    private function isForgeableWrite(AuthenticatorInterface $authenticator, ServerRequestInterface $request): bool
+    {
+        if (!$authenticator instanceof SessionAuthenticator) {
+            return false;
+        }
+
+        $guard = new SameOriginGuard([
+            (string) $this->config->get('system.custom_base_url', ''),
+            (string) $this->config->get('plugins.login.site_host', ''),
+            ...array_values((array) $this->config->get('plugins.api.cors.origins', [])),
+        ]);
+
+        return !$guard->allows($request);
     }
 
     /**
@@ -71,7 +107,13 @@ class AuthMiddleware
         AuthenticatorInterface $authenticator,
         \Grav\Common\User\Interfaces\UserInterface $user,
     ): ServerRequestInterface {
-        $request = $request->withAttribute('api_user', $user);
+        $request = $request
+            ->withAttribute('api_user', $user)
+            ->withAttribute('api_auth_method', match (true) {
+                $authenticator instanceof ApiKeyAuthenticator => 'apikey',
+                $authenticator instanceof JwtAuthenticator => 'jwt',
+                default => 'session',
+            });
 
         $scopes = [];
         if ($authenticator instanceof ApiKeyAuthenticator) {

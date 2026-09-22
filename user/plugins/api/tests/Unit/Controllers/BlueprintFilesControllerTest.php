@@ -101,23 +101,31 @@ class BlueprintFilesControllerTest extends TestCase
     #[Test]
     public function self_literal_returns_page_media_sentinel(): void
     {
+        // A ValidationException (problem+json 422), not a 422 inside the data
+        // envelope; admin2 falls back to page media on the status alone.
         $controller = $this->buildController('alice');
-        $response = $controller->list($this->listRequest('alice', '@self', ''));
-
-        self::assertSame(422, $response->getStatusCode());
-        $body = $this->jsonBody($response);
-        self::assertSame('PAGE_MEDIA_ONLY', $body['data']['error']);
+        try {
+            $controller->list($this->listRequest('alice', '@self', ''));
+            self::fail('Expected ValidationException');
+        } catch (ValidationException $e) {
+            self::assertSame(422, $e->getStatusCode());
+            self::assertSame('PAGE_MEDIA_ONLY', $e->getValidationErrors()[0]['message']);
+        }
     }
 
     #[Test]
     public function self_at_literal_returns_page_media_sentinel(): void
     {
+        // A ValidationException (problem+json 422), not a 422 inside the data
+        // envelope; admin2 falls back to page media on the status alone.
         $controller = $this->buildController('alice');
-        $response = $controller->list($this->listRequest('alice', 'self@', ''));
-
-        self::assertSame(422, $response->getStatusCode());
-        $body = $this->jsonBody($response);
-        self::assertSame('PAGE_MEDIA_ONLY', $body['data']['error']);
+        try {
+            $controller->list($this->listRequest('alice', 'self@', ''));
+            self::fail('Expected ValidationException');
+        } catch (ValidationException $e) {
+            self::assertSame(422, $e->getStatusCode());
+            self::assertSame('PAGE_MEDIA_ONLY', $e->getValidationErrors()[0]['message']);
+        }
     }
 
     #[Test]

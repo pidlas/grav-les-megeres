@@ -28,50 +28,13 @@ class RateLimitMiddleware
         $limit = (int) $this->config->get('plugins.api.rate_limit.requests', 120);
         $window = (int) $this->config->get('plugins.api.rate_limit.window', 60);
 
-        if (!$enabled) {
+        if (!$enabled || $this->isExcluded($request)) {
             return [
                 'limited' => false,
                 'limit' => $limit,
                 'remaining' => $limit,
                 'reset' => time() + $window,
             ];
-        }
-
-        // Path-fragment exclusions. Used to keep high-frequency or static API
-        // surfaces out of the per-user bucket so a single editor session doesn't
-        // trip the global anti-abuse limit. Matched with str_contains, so a
-        // fragment hits anywhere in the path.
-        //
-        // Defaults:
-        //  - /sync/         collab polling (presence/pull fire continuously)
-        //  - the component-script routes below: immutable per-plugin-version JS
-        //    assets (custom fields, widgets, panels, plugin/report/modal scripts)
-        //    that the admin-next SPA fetches in bulk on every editor load. They're
-        //    static downloads, not API actions, so they shouldn't burn the budget.
-        //
-        // Operators can override via plugins.api.rate_limit.excluded_paths.
-        $excluded = (array) $this->config->get('plugins.api.rate_limit.excluded_paths', [
-            '/sync/',
-            '/field/',
-            '/fields',
-            '/widget-script',
-            '/panel-script',
-            '/page-script',
-            '/report-script/',
-            '/modal-script/',
-            '/custom-fields',
-        ]);
-        $path = $request->getUri()->getPath();
-        foreach ($excluded as $prefix) {
-            if (!is_string($prefix) || $prefix === '') continue;
-            if (str_contains($path, $prefix)) {
-                return [
-                    'limited' => false,
-                    'limit' => $limit,
-                    'remaining' => $limit,
-                    'reset' => time() + $window,
-                ];
-            }
         }
 
         $identifier = $this->getIdentifier($request);
@@ -84,6 +47,57 @@ class RateLimitMiddleware
         $file = $storageDir . '/' . md5($identifier) . '.json';
 
         return $this->checkLimit($file, $limit, $window);
+    }
+
+    /**
+     * Whether this request skips the per-user bucket.
+     *
+     * Only `plugins.api.rate_limit.excluded_paths` exempts anything, and its sole
+     * default is `/sync/`: an editor in a shared session polls it every second
+     * plus presence and page-saved checks, roughly 90 requests a minute, which
+     * would use up the 120 budget on its own. Nothing else gets a pass; the
+     * plugin scripts admin2 loads are a handful per page, cached with an ETag,
+     * and the client backs off on a 429.
+     *
+     * Entries are path prefixes, matched against the route path after the API
+     * base (`/sync/`) or the full request path (`/api/v1/sync/`). They used to be
+     * a str_contains() fragment match, so any path merely containing `/sync/`
+     * (e.g. a page route `/pages/sync/notes`) skipped rate limiting entirely.
+     */
+    protected function isExcluded(ServerRequestInterface $request): bool
+    {
+        $path = $request->getUri()->getPath();
+        $routePath = $this->apiRoutePath($path);
+
+        $excluded = (array) $this->config->get('plugins.api.rate_limit.excluded_paths', ['/sync/']);
+        foreach ($excluded as $prefix) {
+            if (!is_string($prefix) || $prefix === '') {
+                continue;
+            }
+            if (($routePath !== null && str_starts_with($routePath, $prefix)) || str_starts_with($path, $prefix)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * The route path after `<site base>/<api route>/<version>`, e.g.
+     * `/gpm/plugins/foo/fields`, or null when the request isn't under the API base.
+     */
+    protected function apiRoutePath(string $path): ?string
+    {
+        $base = '/' . trim((string) $this->config->get('plugins.api.route', '/api'), '/')
+            . '/' . trim((string) $this->config->get('plugins.api.version_prefix', 'v1'), '/');
+
+        $pos = strpos($path, $base . '/');
+        if ($pos === false) {
+            return null;
+        }
+        // Anything before the API base must be the site's own base path (a
+        // subdirectory install), never part of the route.
+        return substr($path, $pos + strlen($base));
     }
 
     protected function getIdentifier(ServerRequestInterface $request): string

@@ -11,6 +11,7 @@ use Grav\Plugin\Api\Auth\ApiKeyAuthenticator;
 use Grav\Plugin\Api\Auth\AuthenticatorInterface;
 use Grav\Plugin\Api\Auth\JwtAuthenticator;
 use Grav\Plugin\Api\Auth\SessionAuthenticator;
+use Grav\Plugin\Api\Exceptions\ForbiddenException;
 use Grav\Plugin\Api\Exceptions\UnauthorizedException;
 use Grav\Plugin\Api\Middleware\AuthMiddleware;
 use Grav\Plugin\Api\Tests\Unit\TestHelper;
@@ -141,6 +142,96 @@ class AuthMiddlewareTest extends TestCase
         } catch (UnauthorizedException) {
             self::assertSame($guest, $grav['user']);
         }
+    }
+
+    #[Test]
+    public function a_cookie_only_write_from_another_site_is_refused(): void
+    {
+        $middleware = $this->withAuthenticators($this->sessionFor($this->user('editor')));
+
+        $this->expectException(ForbiddenException::class);
+        $middleware->processRequest(TestHelper::createMockRequest('POST', '/', ['Origin' => 'https://evil.example']));
+    }
+
+    #[Test]
+    public function a_cookie_only_write_from_this_site_goes_through(): void
+    {
+        $user = $this->user('editor');
+        $middleware = $this->withAuthenticators($this->sessionFor($user));
+
+        $request = $middleware->processRequest(TestHelper::createMockRequest('POST', '/', ['Origin' => 'https://localhost']));
+
+        self::assertSame($user, $request->getAttribute('api_user'));
+        self::assertSame('session', $request->getAttribute('api_auth_method'));
+    }
+
+    #[Test]
+    public function a_token_caller_is_never_asked_where_it_came_from(): void
+    {
+        $user = $this->user('editor');
+        $jwt = new class ($user) implements AuthenticatorInterface {
+            public function __construct(private readonly UserInterface $user) {}
+            public function authenticate(ServerRequestInterface $request): ?UserInterface { return $this->user; }
+        };
+        $middleware = $this->withAuthenticators($jwt, $this->sessionFor($user));
+
+        $request = $middleware->processRequest(TestHelper::createMockRequest('POST', '/', ['Origin' => 'https://evil.example']));
+
+        self::assertSame($user, $request->getAttribute('api_user'));
+    }
+
+    #[Test]
+    public function a_public_route_treats_a_forged_write_as_a_guest(): void
+    {
+        $grav = $this->grav();
+        $guest = $this->user('');
+        $grav['user'] = $guest;
+        $middleware = $this->withAuthenticators($this->sessionFor($this->user('editor')));
+
+        $request = $middleware->processOptional(TestHelper::createMockRequest('POST', '/', ['Origin' => 'https://evil.example']));
+
+        self::assertNull($request->getAttribute('api_user'));
+        self::assertSame($guest, $grav['user']);
+    }
+
+    #[Test]
+    public function a_cors_origin_the_operator_allowed_may_write_with_the_cookie(): void
+    {
+        $user = $this->user('editor');
+        $middleware = $this->withAuthenticators($this->sessionFor($user), ['cors' => ['origins' => ['https://app.example.com']]]);
+
+        $request = $middleware->processRequest(TestHelper::createMockRequest('PATCH', '/', ['Origin' => 'https://app.example.com']));
+
+        self::assertSame($user, $request->getAttribute('api_user'));
+    }
+
+    private function sessionFor(UserInterface $user): SessionAuthenticator
+    {
+        return new class ($user) extends SessionAuthenticator {
+            public function __construct(private readonly UserInterface $as) {}
+            public function authenticate(ServerRequestInterface $request): ?UserInterface { return $this->as; }
+        };
+    }
+
+    /**
+     * @param AuthenticatorInterface|array<string, mixed> ...$parts authenticators in chain order, then optional api config
+     */
+    private function withAuthenticators(AuthenticatorInterface|array ...$parts): AuthMiddleware
+    {
+        $api = ['auth' => ['api_keys_enabled' => false, 'jwt_enabled' => false, 'session_enabled' => false]];
+        $chain = [];
+        foreach ($parts as $part) {
+            if (is_array($part)) {
+                $api += $part;
+            } else {
+                $chain[] = $part;
+            }
+        }
+
+        $middleware = new AuthMiddleware(Grav::instance(), new Config(['plugins' => ['api' => $api]]));
+        (new \ReflectionProperty(AuthMiddleware::class, 'authenticators'))->setValue($middleware, $chain);
+
+        return $middleware;
     }
 
     private function grav(): Grav

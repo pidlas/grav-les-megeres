@@ -52,7 +52,8 @@ final class AuditContext
         // array); it's absent for JWT/session. So presence, not contents, is
         // the signal. A `false` default distinguishes "absent" from "set to []".
         $keyAuth = $request->getAttribute('api_key_scopes', false) !== false;
-        self::$data['auth_method'] = $keyAuth ? 'apikey' : 'session';
+        // Newer requests say outright; the scopes attribute is the older signal.
+        self::$data['auth_method'] = (string) ($request->getAttribute('api_auth_method') ?? ($keyAuth ? 'apikey' : 'session'));
 
         if ($user !== null) {
             self::setActor($user);

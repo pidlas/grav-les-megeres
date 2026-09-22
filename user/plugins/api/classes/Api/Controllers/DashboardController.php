@@ -7,6 +7,7 @@ namespace Grav\Plugin\Api\Controllers;
 use Grav\Common\GPM\GPM;
 use Grav\Common\HTTP\Response;
 use Grav\Common\User\DataUser\User as DataUser;
+use Grav\Plugin\Api\Exceptions\ValidationException;
 use Grav\Plugin\Api\FlexBackend;
 use Grav\Plugin\Api\Response\ApiResponse;
 use Grav\Plugin\Api\Services\ExposureProbe;
@@ -137,7 +138,15 @@ class DashboardController extends AbstractApiController
     {
         $this->requirePermission($request, 'api.system.write');
 
-        $id = $this->getRouteParam($request, 'id');
+        $id = (string) $this->getRouteParam($request, 'id');
+        // Every ID we can show is either a getgrav.org number (`201`) or a
+        // plugin slug (`login-lockout`, `api-support.welcome`). Anything else
+        // can't match a notification, and storing it would let a caller grow
+        // the per-user status file with arbitrary keys.
+        if (!self::isValidNotificationId($id)) {
+            throw new ValidationException('Invalid notification ID.');
+        }
+
         $user = $this->getUser($request);
         $username = $user->get('username');
 
@@ -154,6 +163,15 @@ class DashboardController extends AbstractApiController
         $file->save();
 
         return ApiResponse::noContent();
+    }
+
+    /**
+     * Letters, digits, `.`, `_` and `-`, starting with a letter or digit, at
+     * most 64 characters.
+     */
+    public static function isValidNotificationId(string $id): bool
+    {
+        return (bool) preg_match('/^[A-Za-z0-9][A-Za-z0-9._-]{0,63}\z/', $id);
     }
 
     /**

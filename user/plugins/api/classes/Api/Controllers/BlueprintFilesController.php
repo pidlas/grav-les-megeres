@@ -34,7 +34,7 @@ class BlueprintFilesController extends AbstractApiController
     private ?MediaSerializer $serializer = null;
 
     /**
-     * GET /blueprint-files?folder=<stream-or-token>&scope=<scope>&accept=<csv>&preview_images=1
+     * GET /blueprint-files?folder=<stream-or-token>&scope=<scope>&accept=<csv>
      */
     public function list(ServerRequestInterface $request): ResponseInterface
     {
@@ -53,11 +53,12 @@ class BlueprintFilesController extends AbstractApiController
         $resolver->assertSafe($folder);
 
         // `@self` / `self@` literals are page-media — the client has that already.
+        // A plain ValidationException so this 422 is problem+json like every
+        // other one; admin2 falls back on the status alone.
         if ($resolver->isSelfLiteral($folder)) {
-            return ApiResponse::create([
-                'error' => 'PAGE_MEDIA_ONLY',
-                'message' => 'Use /pages/{route}/media for @self / self@ folders.',
-            ], 422);
+            throw new ValidationException('Use /pages/{route}/media for @self / self@ folders.', [
+                ['field' => 'folder', 'message' => 'PAGE_MEDIA_ONLY'],
+            ]);
         }
 
         $abs = $resolver->resolve($folder, $scope, $this->getUser($request), $this->mayWriteUsersScope($request));
@@ -97,6 +98,7 @@ class BlueprintFilesController extends AbstractApiController
                 'scope' => $scope !== '' ? $scope : null,
                 'exists' => is_dir($abs),
             ],
+            query: $request->getQueryParams(),
         );
     }
 

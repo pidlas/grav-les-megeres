@@ -13,6 +13,7 @@ use Grav\Plugin\Api\Exceptions\TooManyRequestsException;
 use Grav\Plugin\Api\Exceptions\UnauthorizedException;
 use Grav\Plugin\Api\Exceptions\ValidationException;
 use Grav\Plugin\Api\Response\ApiResponse;
+use Grav\Plugin\Api\Services\PasswordPolicyService;
 use Grav\Plugin\Login\Login;
 use Grav\Plugin\Login\TwoFactorAuth\TwoFactorAuth;
 use Psr\Http\Message\ResponseInterface;
@@ -434,6 +435,11 @@ class AuthController extends AbstractApiController
         if (!hash_equals($goodToken, $token) || time() > (int) $expire) {
             throw new ValidationException($invalidMessage);
         }
+
+        // The same password policy setup and invite-accept enforce. Checked only
+        // once the link has proven valid, so a policy error never tells a token
+        // prober anything, and the reset token stays usable for a retry.
+        PasswordPolicyService::assertValid($this->config, $password);
 
         // Match the login plugin's reset sequence exactly (Controller::taskReset).
         unset($user->hashed_password, $user->reset);

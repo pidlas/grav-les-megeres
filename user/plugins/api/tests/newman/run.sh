@@ -128,6 +128,7 @@ ${NEWMAN_BIN} run "${PROJECT_DIR}/grav-api.postman_collection.json" \
   --env-var "page_route=${GRAV_PAGE_ROUTE:-typography}" \
   --env-var "lang=${GRAV_LANG:-en}" \
   --env-var "package_slug=${GRAV_PACKAGE_SLUG:-form}" \
+  --env-var "newman_suite=1" \
   --insecure \
   --reporters cli \
   --color on \

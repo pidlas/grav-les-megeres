@@ -260,6 +260,29 @@ class UsersControllerCustomFieldsTest extends TestCase
     }
 
     #[Test]
+    public function a_self_edit_cannot_switch_two_factor_off(): void
+    {
+        $user = TestHelper::createMockUser('user1', [
+            'access'        => ['api' => ['access' => true]],
+            'twofa_enabled' => true,
+            'twofa_secret'  => 'JBSWY3DPEHPK3PXP',
+        ], true, $this->accountBlueprint());
+
+        $controller = $this->buildController($user);
+
+        // Turning 2FA off must go through POST /2fa/disable, which checks a code.
+        $controller->update($this->makeRequest($user, 'user1', [
+            'fullname'      => 'User One',
+            'twofa_enabled' => false,
+            'twofa_secret'  => '',
+        ]));
+
+        $this->assertSame('User One', $user->get('fullname'));
+        $this->assertTrue($user->get('twofa_enabled'), 'twofa_enabled must not change through PATCH.');
+        $this->assertSame('JBSWY3DPEHPK3PXP', $user->get('twofa_secret'), 'twofa_secret must not change through PATCH.');
+    }
+
+    #[Test]
     public function the_save_response_echoes_the_custom_field_back(): void
     {
         $user = TestHelper::createMockUser('user1', [

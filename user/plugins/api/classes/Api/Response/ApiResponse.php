@@ -77,6 +77,13 @@ class ApiResponse
 
     /**
      * Create a paginated response with meta and links.
+     *
+     * Pass the request's query parameters as `$query` so every link keeps the
+     * active filters, search and sort; only `page` and `per_page` change from
+     * link to link. Without it, "next" on a filtered list paged through the
+     * whole unfiltered set.
+     *
+     * @param array<string, mixed> $query
      */
     public static function paginated(
         array $data,
@@ -88,6 +95,7 @@ class ApiResponse
         array $headers = [],
         array $extraMeta = [],
         ?int $locatedAtIndex = null,
+        array $query = [],
     ): ResponseInterface {
         $totalPages = $perPage > 0 ? (int) ceil($total / $perPage) : 1;
 
@@ -109,22 +117,25 @@ class ApiResponse
             $meta = array_merge($meta, $extraMeta);
         }
 
+        unset($query['page'], $query['per_page']);
+        $link = static fn (int $to): string => $baseUrl . '?' . http_build_query(['page' => $to, 'per_page' => $perPage] + $query);
+
         $body = [
             'data' => $data,
             'meta' => $meta,
             'links' => [
-                'self' => $baseUrl . '?' . http_build_query(['page' => $page, 'per_page' => $perPage]),
+                'self' => $link($page),
             ],
         ];
 
         if ($page > 1) {
-            $body['links']['first'] = $baseUrl . '?' . http_build_query(['page' => 1, 'per_page' => $perPage]);
-            $body['links']['prev'] = $baseUrl . '?' . http_build_query(['page' => $page - 1, 'per_page' => $perPage]);
+            $body['links']['first'] = $link(1);
+            $body['links']['prev'] = $link($page - 1);
         }
 
         if ($page < $totalPages) {
-            $body['links']['next'] = $baseUrl . '?' . http_build_query(['page' => $page + 1, 'per_page' => $perPage]);
-            $body['links']['last'] = $baseUrl . '?' . http_build_query(['page' => $totalPages, 'per_page' => $perPage]);
+            $body['links']['next'] = $link($page + 1);
+            $body['links']['last'] = $link($totalPages);
         }
 
         return self::json($status, $headers, $body);

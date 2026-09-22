@@ -110,6 +110,32 @@ class PagesControllerFilterTest extends TestCase
         self::assertFalse($this->filterMatches(['visible' => false, 'template' => 'blog'], ['visible' => 'true', 'template' => 'blog']));
     }
 
+    /**
+     * A page whose parent is (or isn't) the virtual pages-root.
+     */
+    private function rootFilterMatches(bool $isTopLevel, string $value): bool
+    {
+        $parent = $this->createMock(PageInterface::class);
+        $parent->method('root')->willReturn($isTopLevel);
+
+        $page = $this->createMock(PageInterface::class);
+        $page->method('parent')->willReturn($parent);
+
+        $method = new ReflectionMethod(PagesController::class, 'matchesFilters');
+
+        return $method->invoke($this->createController(), $page, ['root' => $value]);
+    }
+
+    #[Test]
+    public function rootFilterHonoursBothStates(): void
+    {
+        self::assertTrue($this->rootFilterMatches(true, 'true'));
+        self::assertFalse($this->rootFilterMatches(false, 'true'));
+        // root=false used to be `false && …`, which dropped every page.
+        self::assertTrue($this->rootFilterMatches(false, 'false'));
+        self::assertFalse($this->rootFilterMatches(true, 'false'));
+    }
+
     #[Test]
     public function numericBooleanFormsAreAccepted(): void
     {

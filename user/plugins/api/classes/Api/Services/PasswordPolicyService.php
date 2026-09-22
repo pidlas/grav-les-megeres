@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Grav\Plugin\Api\Services;
 
 use Grav\Common\Config\Config;
+use Grav\Plugin\Api\Exceptions\ValidationException;
 
 /**
  * Builds a structured password policy from Grav's single `system.pwd_regex`
@@ -17,22 +18,76 @@ use Grav\Common\Config\Config;
  *   3. Opaque fallback — one generic "must match policy" rule
  *
  * The combined regex is always returned unchanged for server-side validation.
+ *
+ * With no pwd_regex set, the API still refuses passwords shorter than
+ * FALLBACK_MIN_LENGTH (see assertValid()), so build() reports that floor as
+ * the policy instead of an empty one. The client checklist then matches what
+ * the server will accept.
  */
 class PasswordPolicyService
 {
+    /** Minimum length enforced when `system.pwd_regex` is empty. */
+    public const FALLBACK_MIN_LENGTH = 8;
+
     public static function build(Config $config): array
     {
         $regex = (string) $config->get('system.pwd_regex', '');
 
         $rules = self::configuredRules($config);
         if ($rules === null) {
-            $rules = self::parseRules($regex);
+            $rules = $regex === '' ? [self::lengthRule(self::FALLBACK_MIN_LENGTH)] : self::parseRules($regex);
         }
 
         return [
             'regex' => $regex,
-            'min_length' => self::extractMinLength($regex),
+            'min_length' => $regex === '' ? self::FALLBACK_MIN_LENGTH : self::extractMinLength($regex),
             'rules' => $rules,
+        ];
+    }
+
+    /**
+     * Enforce the password policy on a new password: the full `system.pwd_regex`
+     * when one is set, otherwise the FALLBACK_MIN_LENGTH floor. One check shared
+     * by setup, invite-accept, password reset and user create/update, so no
+     * path that sets a password can skip the policy the others apply.
+     *
+     * @throws ValidationException (422) naming the `password` field
+     */
+    public static function assertValid(Config $config, string $password, string $field = 'password'): void
+    {
+        $regex = (string) $config->get('system.pwd_regex', '');
+
+        if ($regex !== '') {
+            // Anchored and UTF-8 aware like core's blueprint `pattern` rule, so
+            // the regex admin-classic applies to the account form means the same
+            // here. The group keeps a top-level `|` inside the anchors. An invalid
+            // regex makes preg_match() return false, which fails closed.
+            if (!@preg_match('`^(?:' . $regex . ')$`u', $password)) {
+                throw new ValidationException(
+                    'Password does not meet the required policy.',
+                    [['field' => $field, 'message' => 'Password does not meet the required policy.']],
+                );
+            }
+            return;
+        }
+
+        if (mb_strlen($password) < self::FALLBACK_MIN_LENGTH) {
+            throw new ValidationException(
+                'Password is too short.',
+                [['field' => $field, 'message' => sprintf('Password must be at least %d characters.', self::FALLBACK_MIN_LENGTH)]],
+            );
+        }
+    }
+
+    /**
+     * @return array{id:string,label:string,pattern:string}
+     */
+    private static function lengthRule(int $min): array
+    {
+        return [
+            'id' => 'length',
+            'label' => sprintf('At least %d characters', $min),
+            'pattern' => '.{' . $min . ',}',
         ];
     }
 
@@ -74,11 +129,7 @@ class PasswordPolicyService
 
         $min = self::extractMinLength($regex);
         if ($min > 0) {
-            $rules[] = [
-                'id' => 'length',
-                'label' => sprintf('At least %d characters', $min),
-                'pattern' => '.{' . $min . ',}',
-            ];
+            $rules[] = self::lengthRule($min);
         }
 
         $lookaheads = [];

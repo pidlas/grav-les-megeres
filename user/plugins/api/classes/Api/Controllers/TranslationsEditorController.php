@@ -239,7 +239,8 @@ class TranslationsEditorController extends AbstractApiController
             count($rows),
             $page,
             $perPage,
-            $this->getApiBaseUrl() . '/i18n/keys'
+            $this->getApiBaseUrl() . '/i18n/keys',
+            query: $request->getQueryParams(),
         );
     }
 
@@ -274,7 +275,12 @@ class TranslationsEditorController extends AbstractApiController
         $lang = (string) $this->getRouteParam($request, 'lang');
         $params = $request->getQueryParams();
         $store = $this->store();
-        $overrides = $store->overrides($lang);
+        try {
+            $overrides = $store->overrides($lang);
+        } catch (\InvalidArgumentException $e) {
+            // Same 422 the PATCH and PUT give for a bad language code.
+            throw new ValidationException($e->getMessage());
+        }
 
         $namespace = isset($params['namespace']) ? (string) $params['namespace'] : null;
         if ($namespace !== null) {
@@ -328,6 +334,11 @@ class TranslationsEditorController extends AbstractApiController
         if (!is_array($set) || !is_array($unset)) {
             throw new ValidationException('`set` must be an object and `unset` an array of keys.');
         }
+        // A JSON list decodes to an array too. Its integer keys would reach
+        // buildRow(string) below and fail under strict_types, so reject it here.
+        if ($set !== [] && array_is_list($set)) {
+            throw new ValidationException('`set` must be an object of key => value, not a list.');
+        }
         if ($set === [] && $unset === []) {
             throw new ValidationException('Nothing to do: provide `set` and/or `unset`.');
         }
@@ -339,8 +350,10 @@ class TranslationsEditorController extends AbstractApiController
         }
 
         $sourceLang = $this->queryLang($request, 'source_lang');
+        // A numeric key like "5" in an otherwise valid object also decodes to an
+        // int; the store skips those, so the echo skips them too.
         $touched = array_values(array_unique(array_merge(
-            array_keys($set),
+            array_filter(array_keys($set), 'is_string'),
             array_values(array_filter($unset, 'is_string'))
         )));
 
@@ -386,6 +399,12 @@ class TranslationsEditorController extends AbstractApiController
             $result = $this->store()->replace($lang, $body['yaml'], $namespace);
         } catch (\InvalidArgumentException $e) {
             throw new ValidationException($e->getMessage());
+        } catch (\UnexpectedValueException $e) {
+            // Out-of-scope keys in a scoped save: the YAML parsed fine, so say
+            // which keys are the problem instead of calling it a parse error.
+            throw new ValidationException($e->getMessage(), [
+                ['field' => 'yaml', 'message' => $e->getMessage()],
+            ]);
         } catch (\RuntimeException $e) {
             throw new ValidationException('That YAML could not be parsed.', [
                 ['field' => 'yaml', 'message' => $e->getMessage()],
@@ -440,7 +459,16 @@ class TranslationsEditorController extends AbstractApiController
     {
         $this->requirePermission($request, 'api.translations.read');
 
-        $report = $this->importer()->report();
+        try {
+            $report = $this->importer()->report();
+        } catch (\InvalidArgumentException $e) {
+            throw $this->badImportLanguage($e);
+        }
+
+        // An absolute server path, hidden from demo accounts like every other.
+        if ($this->isDemoUser($request)) {
+            $report['config_path'] = self::DEMO_REDACTED;
+        }
 
         // The per-key detail is for a preview list, not a data dump — a site
         // with thousands of overrides shouldn't ship them all just to render a
@@ -475,6 +503,17 @@ class TranslationsEditorController extends AbstractApiController
             throw new ValidationException(
                 'The translation-strings plugin has no overrides configured, so there is nothing to import.'
             );
+        }
+
+        // Check every language code before writing anything. The store rejects
+        // a bad one mid-import, which would leave the earlier languages written
+        // and end in a 500 rather than a message the site owner can act on.
+        try {
+            foreach (array_keys($importer->read()) as $lang) {
+                $this->store()->path((string) $lang);
+            }
+        } catch (\InvalidArgumentException $e) {
+            throw $this->badImportLanguage($e);
         }
 
         $result = $importer->import();
@@ -776,6 +815,19 @@ class TranslationsEditorController extends AbstractApiController
     private function store(): TranslationOverrideStore
     {
         return $this->store ??= new TranslationOverrideStore($this->grav, $this->sourceIndex());
+    }
+
+    /**
+     * A language code in the translation-strings config that the override store
+     * refuses. It is the site's own config at fault, not the request, but a 422
+     * naming the code tells the owner what to fix where a 500 told them nothing.
+     */
+    private function badImportLanguage(\InvalidArgumentException $e): ValidationException
+    {
+        return new ValidationException(
+            'The translation-strings plugin config has a language the editor cannot store: '
+            . $e->getMessage() . '. Correct the language code in that plugin\'s settings and try again.'
+        );
     }
 
     private function importer(): TranslationStringsImporter

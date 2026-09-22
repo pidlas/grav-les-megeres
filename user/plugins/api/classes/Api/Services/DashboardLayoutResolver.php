@@ -24,6 +24,9 @@ class DashboardLayoutResolver
 {
     public const SITE_CONFIG_FILE = 'admin-next.yaml';
     public const VALID_SIZES = ['xs', 'sm', 'md', 'lg', 'xl'];
+    /** Fallbacks for plugin widgets that don't declare their sizes. */
+    private const DEFAULT_WIDGET_SIZES = ['sm', 'md', 'lg'];
+    private const DEFAULT_WIDGET_SIZE = 'md';
 
     public function __construct(
         private readonly Grav $grav,
@@ -137,9 +140,37 @@ class DashboardLayoutResolver
                 continue;
             }
             $widget['source'] = 'plugin';
-            $items[] = $widget;
+            $items[] = $this->normalizeWidgetSizes($widget);
         }
         return $items;
+    }
+
+    /**
+     * Give a plugin widget a usable `sizes` list and `defaultSize`. Both are
+     * optional for plugins, but resolve() indexes them unconditionally, so a
+     * widget that left them out 500'd the whole dashboard. Missing or invalid
+     * values fall back to what most core widgets use: sm/md/lg, default md.
+     *
+     * @param array<string, mixed> $widget
+     * @return array<string, mixed>
+     */
+    private function normalizeWidgetSizes(array $widget): array
+    {
+        $sizes = is_array($widget['sizes'] ?? null)
+            ? array_values(array_intersect(self::VALID_SIZES, $widget['sizes']))
+            : [];
+        if ($sizes === []) {
+            $sizes = self::DEFAULT_WIDGET_SIZES;
+        }
+
+        $default = $widget['defaultSize'] ?? null;
+        if (!is_string($default) || !in_array($default, $sizes, true)) {
+            $default = in_array(self::DEFAULT_WIDGET_SIZE, $sizes, true) ? self::DEFAULT_WIDGET_SIZE : $sizes[0];
+        }
+
+        $widget['sizes'] = $sizes;
+        $widget['defaultSize'] = $default;
+        return $widget;
     }
 
     /**
@@ -366,12 +397,18 @@ class DashboardLayoutResolver
                 continue;
             }
             $size = $entry['size'] ?? null;
-            $widgets[] = [
+            $normalized = [
                 'id' => $entry['id'],
                 'visible' => array_key_exists('visible', $entry) ? (bool) $entry['visible'] : true,
                 'size' => is_string($size) && in_array($size, self::VALID_SIZES, true) ? $size : null,
-                'order' => isset($entry['order']) ? (int) $entry['order'] : 0,
             ];
+            // Only store an order that was actually sent. A stored 0 wins over
+            // the priority-based order in resolve(), so defaulting a missing
+            // order to 0 pinned the widget to the top.
+            if (isset($entry['order']) && is_numeric($entry['order'])) {
+                $normalized['order'] = (int) $entry['order'];
+            }
+            $widgets[] = $normalized;
         }
         $out['widgets'] = $widgets;
         return $out;

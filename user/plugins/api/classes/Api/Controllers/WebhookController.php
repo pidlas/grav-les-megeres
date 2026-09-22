@@ -65,9 +65,12 @@ class WebhookController extends AbstractApiController
 
         $this->validateWebhookUrl($body['url']);
 
-        // Validate events if provided
+        // Validate events and headers if provided
         if (isset($body['events'])) {
             $this->validateEvents($body['events']);
+        }
+        if (isset($body['headers'])) {
+            $this->validateHeaders($body['headers']);
         }
 
         $webhook = $this->manager->create($body);
@@ -113,6 +116,10 @@ class WebhookController extends AbstractApiController
 
         if (isset($body['events'])) {
             $this->validateEvents($body['events']);
+        }
+
+        if (isset($body['headers'])) {
+            $this->validateHeaders($body['headers']);
         }
 
         $webhook = $this->manager->update($id, $body);
@@ -167,6 +174,7 @@ class WebhookController extends AbstractApiController
             page: $pagination['page'],
             perPage: $pagination['per_page'],
             baseUrl: $baseUrl,
+            query: $request->getQueryParams(),
         );
     }
 
@@ -221,12 +229,45 @@ class WebhookController extends AbstractApiController
         }
     }
 
-    private function validateEvents(array $events): void
+    /**
+     * @param mixed $events Untyped on purpose: a JSON string or object here must
+     *                      be a 422, not a TypeError 500.
+     */
+    private function validateEvents($events): void
     {
+        if (!is_array($events) || !array_is_list($events)) {
+            throw new ValidationException("'events' must be an array of event names.");
+        }
+
         foreach ($events as $event) {
-            if (!in_array($event, self::VALID_EVENTS, true)) {
+            if (!is_string($event) || !in_array($event, self::VALID_EVENTS, true)) {
                 $valid = implode(', ', self::VALID_EVENTS);
-                throw new ValidationException("Invalid event '{$event}'. Valid events: {$valid}");
+                $shown = is_string($event) ? $event : '(non-string)';
+                throw new ValidationException("Invalid event '{$shown}'. Valid events: {$valid}");
+            }
+        }
+    }
+
+    /**
+     * Custom headers must be a name => value object. The dispatcher drops
+     * anything unsafe at send time regardless; rejecting it here tells the
+     * caller instead of silently sending less than they configured.
+     *
+     * @param mixed $headers
+     */
+    private function validateHeaders($headers): void
+    {
+        if (!is_array($headers) || ($headers !== [] && array_is_list($headers))) {
+            throw new ValidationException("'headers' must be an object of header names to values.");
+        }
+
+        foreach ($headers as $name => $value) {
+            $name = (string) $name;
+            if (in_array(strtolower(trim($name)), WebhookDispatcher::RESERVED_HEADERS, true)) {
+                throw new ValidationException("Header '{$name}' is set by Grav on every delivery and cannot be overridden.");
+            }
+            if (!is_scalar($value) || preg_match('/[\r\n:]/', $name) || preg_match('/[\r\n]/', (string) $value)) {
+                throw new ValidationException("Invalid custom header '{$name}'.");
             }
         }
     }

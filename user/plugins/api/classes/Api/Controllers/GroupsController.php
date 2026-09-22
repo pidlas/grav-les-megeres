@@ -21,9 +21,11 @@ use Psr\Http\Message\ServerRequestInterface;
  * User Groups CRUD.
  *
  * Groups are stored in `user/config/groups.yaml` as a keyed map. We prefer the
- * Flex `user-groups` directory when it's available (richer search/index), and
- * fall back to direct YAML I/O when Flex is disabled or the directory hasn't
- * been registered yet.
+ * Flex `user-groups` directory for reads when it's available (richer
+ * search/index), and fall back to direct YAML I/O when Flex is disabled or the
+ * directory hasn't been registered yet. Both read the same base file (it is the
+ * Flex directory's SimpleStorage), and so do the writes, so a group that show()
+ * finds is always one update()/delete() can act on.
  *
  * All write operations require `admin.super` — matching the security@ gate on
  * the account blueprint's groups/access sections.
@@ -73,6 +75,7 @@ class GroupsController extends AbstractApiController
             page: $pagination['page'],
             perPage: $pagination['per_page'],
             baseUrl: $this->getApiBaseUrl() . '/groups',
+            query: $request->getQueryParams(),
         );
     }
 
@@ -108,6 +111,7 @@ class GroupsController extends AbstractApiController
             page: $pagination['page'],
             perPage: $pagination['per_page'],
             baseUrl: $this->getApiBaseUrl() . '/groups',
+            query: $request->getQueryParams(),
         );
     }
 
@@ -245,15 +249,32 @@ class GroupsController extends AbstractApiController
     }
 
     /**
-     * Load groups from in-memory config (which Grav populates from
-     * user/config/groups.yaml on bootstrap, with env overlays applied).
+     * Load groups straight from the base user/config/groups.yaml: the file the
+     * Flex `user-groups` directory stores to, and the one saveGroupsArray()
+     * writes. Not `$this->config->get('groups')`: that has env overlays merged
+     * in, so a group from an overlay was found here but not by Flex, and saving
+     * the merged array baked overlay-only groups into the base file.
      *
      * @return array<string, array<string, mixed>>
      */
     private function loadGroupsArray(): array
     {
-        $raw = $this->config->get('groups', []);
+        $file = $this->groupsFilePath();
+        if ($file === null || !is_file($file)) {
+            return [];
+        }
+
+        $raw = Yaml::parse((string) file_get_contents($file));
         return is_array($raw) ? $raw : [];
+    }
+
+    private function groupsFilePath(): ?string
+    {
+        /** @var \RocketTheme\Toolbox\ResourceLocator\UniformResourceLocator $locator */
+        $locator = $this->grav['locator'];
+        $userConfig = $locator->findResource('user://config', true);
+
+        return $userConfig ? $userConfig . '/groups.yaml' : null;
     }
 
     /**
@@ -266,14 +287,11 @@ class GroupsController extends AbstractApiController
     private function saveGroupsArray(array $groups): void
     {
         $grav = Grav::instance();
-        /** @var \RocketTheme\Toolbox\ResourceLocator\UniformResourceLocator $locator */
-        $locator = $grav['locator'];
 
-        $userConfig = $locator->findResource('user://config', true);
-        if (!$userConfig) {
+        $filePath = $this->groupsFilePath();
+        if ($filePath === null) {
             throw new \RuntimeException('Base user/config directory not found.');
         }
-        $filePath = $userConfig . '/groups.yaml';
 
         file_put_contents($filePath, Yaml::dump($groups, 99, 2));
 

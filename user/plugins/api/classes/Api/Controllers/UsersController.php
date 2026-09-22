@@ -10,6 +10,7 @@ use Grav\Common\User\DataUser\User as DataUser;
 use Grav\Common\User\Interfaces\UserCollectionInterface;
 use Grav\Common\User\Interfaces\UserInterface;
 use Grav\Common\Utils;
+use Grav\Framework\Collection\ArrayCollection;
 use Grav\Framework\Flex\FlexDirectory;
 use Grav\Framework\Flex\Interfaces\FlexCollectionInterface;
 use Grav\Plugin\Api\Auth\ApiKeyManager;
@@ -20,6 +21,7 @@ use Grav\Plugin\Api\Exceptions\ValidationException;
 use Grav\Plugin\Api\FlexBackend;
 use Grav\Plugin\Api\Response\ApiResponse;
 use Grav\Plugin\Api\Serializers\UserSerializer;
+use Grav\Plugin\Api\Services\PasswordPolicyService;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use RocketTheme\Toolbox\Event\Event;
@@ -59,8 +61,11 @@ class UsersController extends AbstractApiController
      */
     private const RESERVED_ACCOUNT_FIELDS = [
         // Applied explicitly, with permission gating, in create()/update().
-        'email', 'fullname', 'title', 'language', 'content_editor', 'twofa_enabled',
+        'email', 'fullname', 'title', 'language', 'content_editor',
         'state', 'access', 'groups',
+        // Two-factor state only changes through the /2fa endpoints, which
+        // check a code; a plain PATCH must never switch it on or off.
+        'twofa_enabled', 'twofa_secret',
         // Credentials / identity — never mass-assigned through the sweep.
         'password', 'hashed_password', 'username',
         // Server-managed bookkeeping.
@@ -710,6 +715,7 @@ class UsersController extends AbstractApiController
             page: $pagination['page'],
             perPage: $pagination['per_page'],
             baseUrl: $this->getApiBaseUrl() . '/users',
+            query: $request->getQueryParams(),
         );
     }
 
@@ -815,6 +821,7 @@ class UsersController extends AbstractApiController
             page: $pagination['page'],
             perPage: $pagination['per_page'],
             baseUrl: $this->getApiBaseUrl() . '/users',
+            query: $request->getQueryParams(),
         );
     }
 
@@ -828,7 +835,8 @@ class UsersController extends AbstractApiController
         $search = isset($query['search']) ? trim((string) $query['search']) : '';
         $filters = $this->getListFilters($request);
 
-        $allUsers = [];
+        /** @var array<string, UserInterface> $matched */
+        $matched = [];
         foreach ($this->getAllUsernames() as $username) {
             $user = $this->grav['accounts']->load($username);
             if (!$user->exists()) {
@@ -837,6 +845,18 @@ class UsersController extends AbstractApiController
             if ($search !== '' && !$this->userMatchesSearch($user, $search)) {
                 continue;
             }
+            $matched[(string) $user->username] = $user;
+        }
+
+        // Plugin Users-tab filter, at the same point as indexViaFlex() (after
+        // search, before permission/group filtering and pagination) and with
+        // the same payload. Without it a plugin tab showed every account here.
+        if ($filters['filter'] !== '') {
+            $matched = $this->applyPluginListFilter($request, $filters['filter'], $matched);
+        }
+
+        $allUsers = [];
+        foreach ($matched as $user) {
             if (!$this->userMatchesFilters($user, $filters)) {
                 continue;
             }
@@ -856,7 +876,50 @@ class UsersController extends AbstractApiController
             page: $pagination['page'],
             perPage: $pagination['per_page'],
             baseUrl: $this->getApiBaseUrl() . '/users',
+            query: $request->getQueryParams(),
         );
+    }
+
+    /**
+     * Fire `onApiUserListFilter` for the filesystem account store.
+     *
+     * The event carries the same keys as on Flex (`filter`, `collection`,
+     * `query`, `user`), but `collection` is a Grav ArrayCollection of
+     * UserInterface keyed by username, since there is no Flex collection to
+     * hand over. It supports filter(), matching() and iteration; a plugin that
+     * calls Flex-only methods should check for FlexCollectionInterface first.
+     *
+     * The plugin may assign back any iterable of users. Only accounts that were
+     * already in the list are kept, so a tab can narrow the listing but never
+     * add accounts to it.
+     *
+     * @param array<string, UserInterface> $users
+     * @return array<string, UserInterface>
+     */
+    private function applyPluginListFilter(ServerRequestInterface $request, string $filter, array $users): array
+    {
+        $event = $this->fireEvent('onApiUserListFilter', [
+            'filter' => $filter,
+            'collection' => new ArrayCollection($users),
+            'query' => $request->getQueryParams(),
+            'user' => $this->getUser($request),
+        ]);
+
+        $narrowed = $event['collection'] ?? null;
+        if (!is_iterable($narrowed)) {
+            return $users;
+        }
+
+        $keep = [];
+        foreach ($narrowed as $user) {
+            if ($user instanceof UserInterface) {
+                $keep[(string) $user->username] = true;
+            }
+        }
+
+        // Filter the original list rather than trusting the returned one, so
+        // the username sort order is kept too.
+        return array_intersect_key($users, $keep);
     }
 
     public function show(ServerRequestInterface $request): ResponseInterface
@@ -896,15 +959,15 @@ class UsersController extends AbstractApiController
 
         // Validate username format. Delegate the character rules to the core
         // helper (Grav\Common\User\DataUser\User::isValidUsername) so the API
-        // accepts exactly what admin-classic does: letters, numbers, periods,
-        // hyphens and underscores, while still blocking path traversal,
-        // leading dots and filesystem-dangerous characters. Keep a 3-64 length
+        // accepts exactly what admin-classic does: anything except path
+        // traversal (`..`), a leading dot and the filesystem-dangerous
+        // characters \ / ? * : ; { } and line breaks. Keep a 3-64 length
         // bound for a friendlier message and to match the admin-next UI hint.
         $length = mb_strlen((string) $username);
         if ($length < 3 || $length > 64 || !DataUser::isValidUsername((string) $username)) {
             throw new ValidationException(
                 'Invalid username format.',
-                [['field' => 'username', 'message' => 'Username must be 3-64 characters and contain only letters, numbers, periods, hyphens, and underscores (and cannot start with a period).']],
+                [['field' => 'username', 'message' => 'Username must be 3-64 characters, cannot start with a period or contain "..", and cannot contain \\ / ? * : ; { } or a line break.']],
             );
         }
 
@@ -915,6 +978,11 @@ class UsersController extends AbstractApiController
         if ($existing->exists()) {
             throw new ConflictException("User '{$username}' already exists.");
         }
+
+        // The same password policy setup, invite-accept and password reset
+        // apply. The blueprint check further down covers pwd_regex, but not the
+        // minimum length enforced when no regex is set.
+        PasswordPolicyService::assertValid($this->config, (string) $body['password']);
 
         // Create new user
         $user = $accounts->load($username);
@@ -1022,7 +1090,11 @@ class UsersController extends AbstractApiController
         // Privilege-sensitive fields are gated on api.users.write. Without this
         // split a self-edit (api.access only) could PATCH `access` and grant
         // itself api.super / admin.super — see GHSA-r945-h4vm-h736.
-        $selfFields  = ['email', 'fullname', 'title', 'language', 'content_editor', 'twofa_enabled'];
+        // `twofa_enabled` is deliberately absent: turning 2FA off must go through
+        // POST /users/{username}/2fa/disable, which checks a code for a self-edit.
+        // Accepting it here let an account owner skip that check. It is ignored,
+        // not rejected, so clients that send back the whole user still work.
+        $selfFields  = ['email', 'fullname', 'title', 'language', 'content_editor'];
         $adminFields = ['state', 'access'];
         // `groups` is marked `security@: admin.super` in the account blueprint:
         // group membership can confer access, so only super admins may change it
@@ -1077,6 +1149,7 @@ class UsersController extends AbstractApiController
         // Hash password if provided
         $passwordChanged = isset($body['password']) && $body['password'] !== '';
         if ($passwordChanged) {
+            PasswordPolicyService::assertValid($this->config, (string) $body['password']);
             $user->set('hashed_password', Authentication::create($body['password']));
         }
 
@@ -1306,13 +1379,19 @@ class UsersController extends AbstractApiController
     public function generate2fa(ServerRequestInterface $request): ResponseInterface
     {
         $username = $this->getRouteParam($request, 'username');
-        $user = $this->loadUserOrFail($username);
 
-        // Self or admin
+        // Self or admin. Checked before the account is loaded so a caller who
+        // may not manage users gets the same 403 whether or not the username
+        // exists. Self still needs api.access, like every other self-service
+        // route (the auth middleware does not enforce it).
         $currentUser = $this->getUser($request);
         if ($currentUser->username !== $username) {
             $this->requirePermission($request, 'api.users.write');
+        } else {
+            $this->requirePermission($request, 'api.access');
         }
+
+        $user = $this->loadUserOrFail($username);
         $this->requireNotSuperTarget($request, $user);
 
         if (!class_exists(\Grav\Plugin\Login\TwoFactorAuth\TwoFactorAuth::class)) {
@@ -1355,12 +1434,17 @@ class UsersController extends AbstractApiController
     public function enable2fa(ServerRequestInterface $request): ResponseInterface
     {
         $username = $this->getRouteParam($request, 'username');
-        $user = $this->loadUserOrFail($username);
 
+        // Ownership first: loading the account before this check answered 404
+        // for an unknown username and 403 for a real one, so any caller could
+        // probe which accounts exist.
         $currentUser = $this->getUser($request);
         if ($currentUser->username !== $username) {
             throw new ForbiddenException('Only the account owner can enable 2FA.');
         }
+        $this->requirePermission($request, 'api.access');
+
+        $user = $this->loadUserOrFail($username);
 
         $body = $this->getRequestBody($request);
         $this->requireFields($body, ['code']);
@@ -1402,7 +1486,6 @@ class UsersController extends AbstractApiController
     public function disable2fa(ServerRequestInterface $request): ResponseInterface
     {
         $username = $this->getRouteParam($request, 'username');
-        $user = $this->loadUserOrFail($username);
 
         $currentUser = $this->getUser($request);
         $isSelf = $currentUser->username === $username;
@@ -1418,6 +1501,15 @@ class UsersController extends AbstractApiController
         if (!$isSelf && !$isAdmin) {
             throw new ForbiddenException('You do not have permission to disable 2FA for this user.');
         }
+        if (!$isAdmin) {
+            // The self path needs api.access, like every other self-service
+            // route (the auth middleware does not enforce it).
+            $this->requirePermission($request, 'api.access');
+        }
+
+        // Loaded only after the checks above, so a caller without authority
+        // cannot tell an existing username (403) from a missing one (404).
+        $user = $this->loadUserOrFail($username);
         $this->requireNotSuperTarget($request, $user);
 
         if ($isSelf && !$isAdmin) {

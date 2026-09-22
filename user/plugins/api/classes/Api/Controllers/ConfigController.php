@@ -187,18 +187,26 @@ class ConfigController extends AbstractApiController
 
         $filePath = $this->resolveConfigFile($scope, $targetEnv);
 
+        // Whether anything on disk actually changed. Reverting a layer that has
+        // no file (or keys it doesn't override) is a harmless no-op, but it must
+        // not fire onApiConfigUpdated: webhooks and audit listeners would record
+        // a config change that never happened.
+        $changed = false;
+
         if ($reset) {
             // Nuke the active layer's file entirely → falls back to the parent layer.
             if ($filePath && is_file($filePath)) {
                 unlink($filePath);
+                $changed = true;
             }
         } elseif ($filePath) {
             // The file already IS the persisted delta — drop each requested key,
             // prune empties, and rewrite, or remove the file if nothing remains.
-            $delta = is_file($filePath) ? Yaml::parse((string) file_get_contents($filePath)) : [];
-            if (!is_array($delta)) {
-                $delta = [];
+            $original = is_file($filePath) ? Yaml::parse((string) file_get_contents($filePath)) : [];
+            if (!is_array($original)) {
+                $original = [];
             }
+            $delta = $original;
             $differ = new ConfigDiffer($this->grav);
             foreach ($keys as $key) {
                 if (is_string($key) && $key !== '') {
@@ -208,21 +216,25 @@ class ConfigController extends AbstractApiController
             if ($delta === []) {
                 if (is_file($filePath)) {
                     unlink($filePath);
+                    $changed = true;
                 }
-            } else {
+            } elseif ($delta !== $original) {
                 $dir = dirname($filePath);
                 if (!is_dir($dir) && !@mkdir($dir, 0775, true) && !is_dir($dir)) {
                     throw new \RuntimeException(sprintf('Unable to create directory "%s"', $dir));
                 }
                 file_put_contents($filePath, Yaml::dump($delta));
+                $changed = true;
             }
         }
 
-        // Refresh in-memory config + clear cache so the next read is correct.
         $effective = $this->effectiveConfig($scope, $targetEnv);
-        $this->config->set($configKey, $effective);
-        $this->grav['cache']->clearCache('standard');
-        $this->fireEvent('onApiConfigUpdated', ['scope' => $scope, 'data' => $effective]);
+        if ($changed) {
+            // Refresh in-memory config + clear cache so the next read is correct.
+            $this->config->set($configKey, $effective);
+            $this->grav['cache']->clearCache('standard');
+            $this->fireEvent('onApiConfigUpdated', ['scope' => $scope, 'data' => $effective]);
+        }
 
         $tags = ['config:update:' . $scope];
         if (str_starts_with($scope, 'plugins/')) {
@@ -232,7 +244,7 @@ class ConfigController extends AbstractApiController
         }
 
         $etag = $this->generateEtag($this->configEtagBasis($scope, $targetEnv));
-        $meta = $this->overrideMeta($scope, $targetEnv);
+        $meta = $this->overrideMeta($scope, $targetEnv) + ['reverted' => $changed];
         return $this->respondWithEtag(
             ConfigSecretMasker::mask($effective, $this->loadBlueprint($scope)),
             200,

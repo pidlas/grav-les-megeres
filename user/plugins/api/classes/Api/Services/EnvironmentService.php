@@ -201,8 +201,9 @@ class EnvironmentService
      * Refuses to delete the env Grav resolved for the current request so the
      * running session can't have its config yanked out from under it.
      *
-     * Throws \InvalidArgumentException on validation failures and \RuntimeException
-     * on filesystem failures.
+     * Throws \InvalidArgumentException on validation failures, \OutOfBoundsException
+     * when no user/env/<name>/ folder exists, and \RuntimeException on filesystem
+     * failures.
      */
     public function deleteEnvironment(string $name): void
     {
@@ -229,7 +230,9 @@ class EnvironmentService
                     . "Remove it manually so unrelated files are not deleted."
                 );
             }
-            throw new \InvalidArgumentException("Environment '{$name}' does not exist.");
+            // OutOfBounds (not InvalidArgument) so the controller can answer 404
+            // for a well-formed name that simply isn't there.
+            throw new \OutOfBoundsException("Environment '{$name}' does not exist.");
         }
 
         // Guard against symlink escape: the resolved path must still live under

@@ -212,7 +212,7 @@ class MediaController extends AbstractApiController
     }
 
     /**
-     * PUT /pages/{route}/media/{filename}/meta - Save a page media file's
+     * PATCH /pages/{route}/media/{filename}/meta - Save a page media file's
      * editable metadata. Only configured fields present in the body are written;
      * every other key in the sidecar (EXIF, dimensions, upload info) is kept.
      */
@@ -338,12 +338,16 @@ class MediaController extends AbstractApiController
 
         // Verify directory exists
         if (!is_dir($currentPath)) {
-            // Return empty result for non-existent paths
+            // Return empty result for non-existent paths, echoing the requested
+            // page/per_page like any other empty listing would.
+            $pagination = $this->getPagination($request);
             $baseUrl = $this->getApiBaseUrl() . '/media';
-            return ApiResponse::paginated([], 0, 1, 20, $baseUrl, 200, [], [
+            return ApiResponse::paginated([], 0, $pagination['page'], $pagination['per_page'], $baseUrl, 200, [], [
                 'path' => $relativePath,
                 'folders' => [],
-            ]);
+            ],
+            query: $request->getQueryParams()
+        );
         }
 
         $result = $this->scanMediaDirectoryWithFolders($currentPath, $relativePath);
@@ -425,6 +429,7 @@ class MediaController extends AbstractApiController
                 'folders' => $result['folders'],
                 'ordered' => is_file($currentPath . '/' . self::MEDIA_ORDER_FILE),
             ],
+            query: $request->getQueryParams(),
         );
     }
 
@@ -581,7 +586,7 @@ class MediaController extends AbstractApiController
     }
 
     /**
-     * PUT /media/meta?path=... - Save a site media file's editable metadata.
+     * PATCH /media/meta?path=... - Save a site media file's editable metadata.
      */
     public function saveSiteMediaMeta(ServerRequestInterface $request): ResponseInterface
     {
@@ -907,12 +912,14 @@ class MediaController extends AbstractApiController
             throw new ValidationException('Unable to rename folder.');
         }
 
-        $name = basename($to);
+        // Same counts the folder listing reports, so a client can patch the
+        // renamed entry in place without a refetch.
+        [$childrenCount, $fileCount] = $this->countFolderEntries($toAbsolute);
         $data = [
-            'name' => $name,
+            'name' => basename($to),
             'path' => $to,
-            'children_count' => 0,
-            'file_count' => 0,
+            'children_count' => $childrenCount,
+            'file_count' => $fileCount,
         ];
 
         return ApiResponse::ok(
@@ -1408,7 +1415,7 @@ class MediaController extends AbstractApiController
      * `media_metadata.fields` schema (via {@see getMetadataFieldDefs()}): only
      * admin-defined keys are accepted and each field's `type` drives which
      * operators are legal. Unknown fields are ignored leniently; malformed
-     * clauses and unsupported operators are rejected with a 400. Filtering rides
+     * clauses and unsupported operators are rejected with a 422 (ValidationException). Filtering rides
      * the existing `api.media.read` permission and adds no path or file input.
      *
      * Supported params:
@@ -1869,8 +1876,9 @@ class MediaController extends AbstractApiController
 
                 $name = $item->getFilename();
 
-                // Skip hidden and metadata files
-                if (str_starts_with($name, '.') || str_ends_with($name, '.meta.yaml')) {
+                // Skip hidden and metadata files, and the manual-order sidecar
+                // (the folder listing hides it too; it isn't a media file).
+                if (str_starts_with($name, '.') || str_ends_with($name, '.meta.yaml') || $name === self::MEDIA_ORDER_FILE) {
                     continue;
                 }
 
@@ -1927,6 +1935,7 @@ class MediaController extends AbstractApiController
                 'folders' => [],
                 'search' => $queryParams['search'],
             ],
+            query: $request->getQueryParams(),
         );
     }
 
@@ -1993,21 +2002,7 @@ class MediaController extends AbstractApiController
                 $folderPath = $relativePath !== '' ? $relativePath . '/' . $name : $name;
                 $childPath = $absolutePath . '/' . $name;
 
-                // Count immediate children
-                $childrenCount = 0;
-                $fileCount = 0;
-                if (is_dir($childPath)) {
-                    foreach (new \DirectoryIterator($childPath) as $child) {
-                        if ($child->isDot() || str_starts_with($child->getFilename(), '.')) {
-                            continue;
-                        }
-                        if ($child->isDir()) {
-                            $childrenCount++;
-                        } elseif (!str_ends_with($child->getFilename(), '.meta.yaml') && $child->getFilename() !== self::MEDIA_ORDER_FILE) {
-                            $fileCount++;
-                        }
-                    }
-                }
+                [$childrenCount, $fileCount] = $this->countFolderEntries($childPath);
 
                 $folders[] = [
                     'name' => $name,
@@ -2028,6 +2023,35 @@ class MediaController extends AbstractApiController
         usort($folders, fn(array $a, array $b) => strnatcasecmp($a['name'], $b['name']));
 
         return ['files' => $files, 'folders' => $folders];
+    }
+
+    /**
+     * Count a folder's immediate subfolders and media files, skipping hidden
+     * entries, `.meta.yaml` sidecars and the manual-order sidecar.
+     *
+     * @return array{0: int, 1: int} [children_count, file_count]
+     */
+    private function countFolderEntries(string $absolutePath): array
+    {
+        $childrenCount = 0;
+        $fileCount = 0;
+        if (!is_dir($absolutePath)) {
+            return [0, 0];
+        }
+
+        foreach (new \DirectoryIterator($absolutePath) as $child) {
+            $name = $child->getFilename();
+            if ($child->isDot() || str_starts_with($name, '.')) {
+                continue;
+            }
+            if ($child->isDir()) {
+                $childrenCount++;
+            } elseif (!str_ends_with($name, '.meta.yaml') && $name !== self::MEDIA_ORDER_FILE) {
+                $fileCount++;
+            }
+        }
+
+        return [$childrenCount, $fileCount];
     }
 
     /**
