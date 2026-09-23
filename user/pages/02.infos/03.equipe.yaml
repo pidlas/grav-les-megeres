@@ -1,0 +1,88 @@
+ae550adbfde24f25246b3755917f636f:
+  nom: 'Suzie Idlas'
+  role: "Responsable Communication\nMetteuse en scène, Commédienne"
+  slug: suzie
+  image:
+    user/flex-objects/equipe/webJolie_si.avif:
+      name: webJolie_si.avif
+      type: image/avif
+      size: 90031
+      path: user/flex-objects/equipe/webJolie_si.avif
+      url: /user/flex-objects/equipe/webJolie_si.avif
+f9a772563f40f1ff599151c8a4ab062f:
+  nom: 'Sabine Rance'
+  role: "Responsable Communication\nMetteuse en scène, Comédienne"
+  slug: sabine
+  image:
+    user/flex-objects/equipe/webJolie_sr.avif:
+      name: webJolie_sr.avif
+      type: image/avif
+      size: 77692
+      path: user/flex-objects/equipe/webJolie_sr.avif
+      url: /user/flex-objects/equipe/webJolie_sr.avif
+21d8261c806af3cb7c91573de6938a9a:
+  nom: 'Estelle Doumeng'
+  role: Comédienne
+  slug: estelle
+  image:
+    user/flex-objects/equipe/webJolie_ed.avif:
+      name: webJolie_ed.avif
+      type: image/avif
+      size: 46458
+      path: user/flex-objects/equipe/webJolie_ed.avif
+      url: /user/flex-objects/equipe/webJolie_ed.avif
+5d0f0f74202efe8d6e70f13d9779eff1:
+  nom: 'Anne Spielmann'
+  role: "Metteuse en scène,  Comédienne\nPlasticienne, Scénographe"
+  slug: anne
+  image:
+    user/flex-objects/equipe/webJolie_as.avif:
+      name: webJolie_as.avif
+      type: image/avif
+      size: 31347
+      path: user/flex-objects/equipe/webJolie_as.avif
+      url: /user/flex-objects/equipe/webJolie_as.avif
+0b022710c653b3f8676732623df11e18:
+  nom: 'Delphine Verniol'
+  role: Présidente
+  slug: delphine
+  image:
+    user/flex-objects/equipe/webJolie_dv.avif:
+      name: webJolie_dv.avif
+      type: image/avif
+      size: 51074
+      path: user/flex-objects/equipe/webJolie_dv.avif
+      url: /user/flex-objects/equipe/webJolie_dv.avif
+e6069c3940833c3f113303b173057090:
+  nom: 'Marie Diel'
+  role: Trésorière
+  slug: marie
+  image:
+    user/flex-objects/equipe/webJolie_md.avif:
+      name: webJolie_md.avif
+      type: image/avif
+      size: 63839
+      path: user/flex-objects/equipe/webJolie_md.avif
+      url: /user/flex-objects/equipe/webJolie_md.avif
+721f94901231f9def057806d0b4c7a48:
+  nom: 'Juliette Gaubert'
+  role: Graphiste
+  slug: juliette
+  image:
+    user/flex-objects/equipe/webJolie_jg.avif:
+      name: webJolie_jg.avif
+      type: image/avif
+      size: 53874
+      path: user/flex-objects/equipe/webJolie_jg.avif
+      url: /user/flex-objects/equipe/webJolie_jg.avif
+6c8b345932baab9fb4066d9c458906e6:
+  nom: 'Philippe Guerrini'
+  role: Informaticien
+  slug: philippe
+  image:
+    user/flex-objects/equipe/webJolie_pi.avif:
+      name: webJolie_pi.avif
+      type: image/avif
+      size: 78716
+      path: user/flex-objects/equipe/webJolie_pi.avif
+      url: /user/flex-objects/equipe/webJolie_pi.avif

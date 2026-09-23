@@ -1316,6 +1316,12 @@ figure.bio {
     margin-top: 1.125rem;
 }
 
+.g_sp_spectacles {
+    display:flex;
+    justify-content:center;
+    flex-direction:column;
+}
+
 .g_sp_theatre-d-ombres {
     margin-top: var(--space-m);
     position: relative;
@@ -2141,17 +2147,13 @@ th.sep {
     }
 
     .g_spectacles {
-        display: grid;
-        grid-auto-flow: row;
-        grid-template-columns: auto 12.5rem 12.5rem 12.5rem auto;
+        display: flex;
         justify-content: center;
         justify-items: center;
-        row-gap: var(--space-m);
     }
 
-    .g_sp_e-intro {
-        grid-column: 1/6;
-        grid-row: 1/2;
+    .g_sp_spectacles {
+        flex-direction:row;
     }
 
     .g_sp_theatre-d-ombres {
@@ -2171,21 +2173,6 @@ th.sep {
         grid-column: 4/5;
         grid-row: 2/3;
         position: relative;
-    }
-
-    .g_sp_e-fin {
-        grid-column: 1/6;
-        grid-row: 3/4;
-    }
-
-    .g_sp_e-pitch {
-        grid-column: 1/6;
-        grid-row: 4/5;
-    }
-
-    .g_sp_e-presentation {
-        grid-column: 1/6;
-        grid-row: 5/6;
     }
 
     .g_sp_e-generique {
@@ -2245,7 +2232,7 @@ th.sep {
         justify-self: center;
     }
 
-    .g_equipe .item9 {
+    /*.g_equipe .item9 {
         grid-column: 1;
         grid-row: 4;
         justify-self: center;
@@ -2255,7 +2242,7 @@ th.sep {
         grid-column: 2;
         grid-row: 4;
         justify-self: center;
-    }
+    }*/
 
     footer {
         grid-template-columns: repeat(2, minmax(0, 1fr));

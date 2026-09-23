@@ -1,0 +1,10 @@
+nom: 'SUZIE IDLAS'
+role: "Responsable communication, Metteuse en scène, Comédienne"
+slug: 'suzie'
+classe_sup: ''
+image:
+  user/pages/02.infos/03.equipe/webJolie_si.avif:
+    name: webJolie_si.avif
+    type: image/avif
+    size: 15000
+    path: user/pages/02.infos/03.equipe/webJolie_si.avif

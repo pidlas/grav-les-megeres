@@ -1,0 +1,60 @@
+---
+title: 'Notre équipe'
+menu: 'Notre équipe'
+membres:
+  - nom: 'SUZIE IDLAS'
+    role: 'Responsable Communication<br/>Metteuse en scène, comédienne'
+    slug: 'suzie'
+    image: 'webJolie_si.avif'
+    alt: 'Suzie Idlas, la responsable communication'
+    classe_sup: ''
+
+  - nom: 'SABINE RANCE'
+    role: 'Responsable Artistique<br/>Metteuse en scène, comédienne'
+    slug: 'sabine'
+    image: 'webJolie_sr.avif'
+    alt: 'Sabine Rance, la responsable artistique'
+    classe_sup: ''
+
+  - nom: 'ESTELLE DOUMENG'
+    role: 'Comédienne'
+    slug: 'estelle'
+    image: 'webJolie_ed.avif'
+    alt: 'Estelle Doumeng, comédienne'
+    classe_sup: 'posImage'
+
+  - nom: 'ANNE SPIELMANN'
+    role: 'Metteuse en scène, comédienne<br/>Plasticienne, scénographe'
+    slug: 'anne'
+    image: 'webJolie_as.avif'
+    alt: 'Anne Spielmann, plasticienne'
+    classe_sup: ''
+
+  - nom: 'DELPHINE VERNIOL'
+    role: 'Présidente'
+    slug: 'delphine'
+    image: 'webJolie_dv.avif'
+    alt: 'Delphine Verniol, la présidente'
+    classe_sup: ''
+
+  - nom: 'MARIE DIEL'
+    role: 'Trésorière'
+    slug: 'marie'
+    image: 'webJolie_md.avif'
+    alt: 'Marie Diel, la trésorière'
+    classe_sup: ''
+
+  - nom: 'JULIETTE GAUBERT'
+    role: 'Graphiste'
+    slug: 'juliette'
+    image: 'webJolie_jg.avif'
+    alt: 'Juliette Gaubert, la graphiste'
+    classe_sup: ''
+
+  - nom: 'PHILIPPE GUERRINI'
+    role: 'Informaticien'
+    slug: 'philippe'
+    image: 'webJolie_pi.avif'
+    alt: "Philippe Guerrini, l'informaticien"
+    classe_sup: ''
+---

@@ -1,0 +1,70 @@
+{% extends 'main-layout.html.twig' %}
+
+{% block content %}
+<main>
+    <section class="page-equipe">
+        
+        {# Habillage commun du haut #}
+        <div class="conteneur-champignons">
+            <img src="{{ url('theme://images/i_champignons.svg') }}" class="champignons" alt="" loading="lazy">
+            <h1>{{ page.title }}</h1>
+            {% if page.header.subtitle %}<p class="sous-titre">{{ page.header.subtitle | raw }}</p>{% endif %}
+        </div>
+
+        <div class="page-content">
+            {# Récupération de la collection Flex-Objects #}
+            {% set directory = grav.flex.directory('equipe') %}
+            
+            {% if directory %}
+                {% set liste_membres = directory.getCollection() %}
+                
+                {# DEFINITION COMPLÈTE ET STRICTE DE L'ORDRE ET DE LA CLASSE ITEM DE CHAQUE MEMBRE #}
+                {% set configuration_equipe = [
+                    {'slug': 'suzie',    'class_item': 'item1'},
+                    {'slug': 'sabine',   'class_item': 'item2'},
+                    {'slug': 'estelle',  'class_item': 'item3'},
+                    {'slug': 'anne',     'class_item': 'item6'},
+                    {'slug': 'delphine', 'class_item': 'item7'},
+                    {'slug': 'marie',    'class_item': 'item8'},
+                    {'slug': 'juliette', 'class_item': 'item9'},
+                    {'slug': 'philippe', 'class_item': 'item10'}
+                ] %}
+
+                {# Une seule et unique liste globale g_equipe pour préserver votre grille CSS #}
+                <ul class="g_equipe">
+                    {% for config in configuration_equipe %}
+                        {% for membre in liste_membres %}
+                            {% if membre.slug is defined and membre.slug == config.slug %}
+                                
+                                <li class="tan item {{ config.class_item }}">
+                                    {{ membre.nom }}
+                                    
+                                    {% if membre.role is not empty %}
+                                        <p class="coco gras">{{ membre.role|nl2br|raw }}</p>
+                                    {% endif %}
+
+                                    <div class="anime_hover {{ membre.classe_sup }}">
+                                        <p class="montre coco">Plus sur {{ membre.nom | capitalize | split(' ')|first }}</p>
+                                        <a href="equipe/{{ membre.slug }}">
+                                            {% if membre.image is not empty %}
+                                                {% set photo = membre.image|first %}
+                                                <img src="{{ url(photo.path) }}" alt="{{ membre.nom }}" class="img-menu-spectacle" loading="lazy">
+                                            {% endif %}
+                                        </a>
+                                    </div>
+                                </li>
+                                
+                            {% endif %}
+                        {% endfor %}
+                    {% endfor %}
+                </ul>
+
+            {% else %}
+                <p>Erreur : Le répertoire Flex 'equipe' n'est pas initialisé.</p>
+            {% endif %}
+
+            {{ page.content | raw }}
+        </div>      
+    </section>
+</main>
+{% endblock %}

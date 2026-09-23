@@ -5,3 +5,4 @@ directories:
   - 'blueprints://flex-objects/partenaires.yaml'
   - 'blueprints://flex-objects/actualites.yaml'
   - 'blueprints://flex-objects/galerie-liens.yaml'
+  - 'blueprints://flex-objects/equipe.yaml'

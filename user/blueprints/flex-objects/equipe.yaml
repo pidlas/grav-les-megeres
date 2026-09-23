@@ -1,0 +1,70 @@
+type: flex-objects
+
+title: Equipe
+description: 'Gestion conviviale des membres de la compagnie'
+
+config:
+  data:
+    storage:
+      className: 'Grav\Framework\Flex\Storage\FolderStorage'
+      options:
+        formatter:
+          class: 'Grav\Framework\File\Formatter\YamlFormatter'
+        folder: 'user/pages/02.infos/03.equipe'
+    media:
+      per_object: true
+
+  admin:
+    router:
+      path: /equipe
+    menu:
+      list:
+        route: /equipe
+        title: Equipe
+        icon: 'fa fa-users'
+    list:
+      title: 'Liste des Membres'
+      ordering:
+        nom: asc
+      fields:
+        nom:
+          title: 'Nom du membre'
+          link: edit
+        role:
+          title: Rôle
+
+form:
+  fields:
+    nom:
+      type: text
+      label: 'Identifiant / Nom du membre'
+      help: 'Obligatoire. Ce nom sert à lister le membre dans le tableau.'
+      validate:
+        required: true
+        
+    role:
+      type: textarea
+      label: 'Rôle et compétences dans la compagnie'
+      help: 'Appuyez sur Entrée pour aller à la ligne entre vos deux rôles.'
+      rows: 2              # 🛠️ Fixé sur 2 lignes de saisie pour vos rédacteurs
+      placeholder: "Metteuse en scène\nComédienne"
+
+    slug:
+      type: text
+      label: 'Identifiant URL (Slug)'
+      placeholder: 'suzie'
+
+    classe_sup:
+      type: text
+      label: 'Classe CSS supplémentaire'
+      placeholder: 'posImage'
+
+    image:
+      type: file
+      label: 'Photo du membre'
+      multiple: false
+      destination: 'flex-objects/equipe'
+      accept:
+        - 'image/*'
+        - '.avif'
+        - 'image/avif'

@@ -87,6 +87,10 @@ main section p:first-of-type,
     margin-top: var(--space-m);
 }
 
+.g_equipe p {
+    margin-top:0 !important;
+}
+
 /* Les boutons pour afficher les PDF dans gresilhette-et-la-salimonde */
 .btn-pdf{
     width:300px;
