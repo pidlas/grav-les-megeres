@@ -1,5 +1,7 @@
 ---
-title: 'Marie Diel'
+title: "Marie Diel | Trésorière de l'association et actrice du développement de la Compagnie Les Mégères de l'Humus"
+metadata:
+    description: "Portrait de Marie Diel, trésorière de l'association et actrice du développement des Mégères de l'Humus."
 visible: false
 routable: true
 # Vos nouvelles variables uniques :

@@ -1,0 +1,139 @@
+{% extends 'main-layout.html.twig' %}
+
+{% block content %}
+<main>
+    <section class="{{ page.slug}}">
+
+        {# ========================================================================= #}
+        {# SECTION TÉLÉPHONE (Flex-Objects - Rendu strict d'origine)                #}
+        {# ========================================================================= #}
+        {% set directory = grav.get('flex').directory('contact_equipe') %}
+        {% set poles = directory ? directory.collection() : null %}
+
+        {% if poles and not poles.isEmpty() %}
+        <div class="telephone">
+            {# On récupère le nom du fichier choisi, sinon on utilise le nom par défaut de secours #}
+            {% set tel_icone_name = page.header.telephone.icone | default('iconeTel.avif') %}
+            {% set img_tel = page.media[tel_icone_name] %}
+            
+            {% if img_tel %}
+                <p><img src="{{ img_tel.url }}" width="50px" alt="Téléphone"></p>
+            {% endif %}
+            
+            <table class="com">
+                {% for groupe in poles %}
+                    <thead>
+                        <tr>
+                            <th colspan="2" class="tresgras {% if loop.index > 1 %}sep{% endif %}">
+                                {{ groupe.nom }}
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if groupe.type == 'fusionne' %}
+                            {% for membre in groupe.membres %}
+                                <tr>
+                                    <td>{{ membre.nom }}</td>
+                                    {% if loop.first %}
+                                        <td rowspan="{{ groupe.membres|length }}">{{ groupe.tel_commun }}</td>
+                                    {% else %}
+                                        <td></td>
+                                    {% endif %}
+                                </tr>
+                            {% endfor %}
+                        {% else %}
+                            {% for membre in groupe.membres %}
+                                <tr>
+                                    <td>{{ membre.nom }}</td>
+                                    <td>{{ membre.tel }}</td>
+                                </tr>
+                            {% endfor %}
+                        {% endif %}
+                    </tbody>
+                {% endfor %}
+            </table>
+        </div>
+        {% endif %}
+
+        {# ========================================================================= #}
+        {# SECTION EMAIL                                                             #}
+        {# ========================================================================= #}
+        {% set email_data = page.header.email %}
+        {% if email_data and email_data.adresse %}
+        <div class="infos-contact">
+            {# Chargement depuis le média de la page #}
+            {% set mail_icone_name = email_data.icone | default('iconeMail.avif') %}
+            {% set img_mail = page.media[mail_icone_name] %}
+            {% if img_mail %}
+                <img src="{{ img_mail.url }}" width="50px" alt="Email">
+            {% endif %}
+            <span>
+                <a href="mailto:{{ email_data.adresse }}?subject={{ email_data.sujet|url_encode }}">
+                    {{ email_data.texte|default('Nous écrire') }}
+                </a>
+            </span>
+        </div>
+        {% endif %}
+
+        {# ========================================================================= #}
+        {# SECTION RÉSEAUX SOCIAUX (Génère le conteneur pour vos ::before CSS)      #}
+        {# ========================================================================= #}
+        {% set fb_data = page.header.reseaux.facebook %}
+        {% if fb_data and fb_data.url %}
+        <div class="infos-contact fb">
+            <a href="{{ fb_data.url }}" target="_blank" rel="noopener noreferrer">
+                Cie Les Mégères de l'Humus
+            </a>
+        </div>
+        {% endif %}
+
+        {% set insta_data = page.header.reseaux.instagram %}
+        {% if insta_data and insta_data.url %}
+        <div class="infos-contact insta">
+            <a href="{{ insta_data.url }}" target="_blank" rel="noopener noreferrer">
+                @lesmegeresdelhumus
+            </a>
+        </div>
+        {% endif %}
+
+        {# ========================================================================= #}
+        {# SECTION ADRESSE                                                           #}
+        {# ========================================================================= #}
+        {% set adresse_data = page.header.adresse %}
+        {% if adresse_data and adresse_data.lignes %}
+        <div class="adresse">
+            {# Chargement depuis le média de la page #}
+            {% set adr_icone_name = adresse_data.icone | default('iconeAdresse.avif') %}
+            {% set img_adr = page.media[adr_icone_name] %}
+            {% if img_adr %}
+                <p><img src="{{ img_adr.url }}" width="50px" alt="Adresse"></p>
+            {% endif %}
+            {% for ligne in adresse_data.lignes %}
+                <p>{{ ligne.value|default(ligne) }}</p>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        {# ========================================================================= #}
+        {# SECTION ASSOCIATION                                                       #}
+        {# ========================================================================= #}
+        {% set asso_data = page.header.association %}
+        {% if asso_data and asso_data.details %}
+        <div class="association">
+            {# Chargement depuis le média de la page #}
+            {% set asso_icone_name = asso_data.icone | default('connect.avif') %}
+            {% set img_asso = page.media[asso_icone_name] %}
+            {% if img_asso %}
+                <p><img src="{{ img_asso.url }}" width="40px" alt="Association"></p>
+            {% endif %}
+            <p>
+                {% for detail in asso_data.details %}
+                    {{ detail.value|default(detail) }}{% if not loop.last %}<br>{% endif %}
+                {% endfor %}
+            </p>
+        </div>
+        {% endif %}
+        
+    </section>
+</main>
+{% endblock %}

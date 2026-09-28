@@ -1,0 +1,22 @@
+1590164c56402004e43fca5a40de96ec:
+  title: 'Grésilhette et la Salimonde'
+  menu: 'Grésilhette et la Salimonde'
+  spectacle:
+    age_duree: 'Spectacle jeune public dès 6 ans - 40 minutes'
+    video:
+      mp4: teaser-gresilhette-salimonde.mp4
+      webm: teaser-gresilhette-salimonde.webm
+    dossier_pdf: dossier-prez_compressed.pdf
+    dossier_img: btn-prez.avif
+  titre_occitan: 'La langue occitane dans le spectacle'
+  titre_extrait: Extrait
+  occitan_paragraphes:
+    -
+      texte_fr: "L'intégration de la langue occitane dans le spectacle est venue comme une évidence. Langue interdite pendant des années, elle symbolise aujourd'hui la richesse culturelle du territoire de la Salimonde. "
+      texte_oc: "L'integracion de la lenga occitana dins l'espectacle es venguda coma una evidéncia. Lenga interdita pendent d'annadas, simbolisa uéi la riquesa culturala del territòri de la Salimonda. "
+    -
+      texte_fr: "Les deux comédiennes délivrent sur scène un chant révolutionnaire occitan acapella. Médium séculaire de communication, le chant apporte une agréable sensation de fraîcheur. Il permet aux spectateur·ice·s de faire une pause sans entracte. Fermer les yeux, reprendre sa respiration, sourire.\n\n"
+      texte_oc: "Las doas comedianes desliuran sus l'empont un cant revolucionari occitan a capella. Mejan secular de comunicacion, lo cant mena una agradiva sensacion de frescura. Permet als espectators de faire una pausa sens entracte. Tampar los uèlhs, fornar prene le buf, faire riseta. "
+    -
+      texte_fr: '"Grésilhette et la Salimonde" vous invite à renouer avec vos racines.'
+      texte_oc: '"Gresilhette e La Salimonda" vos convida a tornar trapar las rasigas vèstras.'

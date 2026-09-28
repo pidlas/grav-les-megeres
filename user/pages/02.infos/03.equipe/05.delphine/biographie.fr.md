@@ -1,5 +1,7 @@
 ---
-title: 'Delphine Verniol'
+title: "Delphine Verniol | Présidente de l'association et soutien essentiel de la Compagnie Les Mégères de l'Humus"
+metadata:
+    description: "Découvrez le parcours de Delphine Verniol, présidente de l'association et soutien essentiel des Mégères de l'Humus."
 visible: false
 routable: true
 # Vos nouvelles variables uniques :

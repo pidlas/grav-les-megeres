@@ -4,13 +4,6 @@
 <main>
     <section class="{{ page.slug }}">
 
-        {# Habillage commun du haut #}
-        <div class="conteneur-champignons">
-            <img src="{{ url('theme://images/i_champignons.svg') }}" class="champignons" alt="" loading="lazy">
-            <h1>{{ page.title }}</h1>
-            {% if page.header.subtitle %}<p class="sous-titre">{{ page.header.subtitle | raw }}</p>{% endif %}
-        </div>
-
         {# Rendu de l'introduction rédigée en Markdown #}
         <div class="page-content">
             {{ page.content | raw }}

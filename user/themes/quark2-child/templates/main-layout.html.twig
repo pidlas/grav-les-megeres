@@ -1,18 +1,46 @@
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
-    <meta charset="UTF-8">
-    <title>{{ page.title }}</title>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ 
+    {# 1. TITRE D'ONGLET SEO #}
+    {% block head_title %}
+    <title>{% if page.title %}{{ page.title|e }}{% else %}{{ site.title|e }}{% endif %}</title>
+    {% endblock %}
+ 
+    {# 2. BALISES MÉTADONNÉES SEO #}
+    {% block head_meta %}
+    {# Correction cruciale de la clé d'accès à la description et aux robots #}
+    <meta name="description" content="{% if page.header.metadata.description %}{{ page.header.metadata.description|e }}{% else %}{{ site.metadata.description|e }}{% endif %}" />
+    <meta name="robots" content="{% if page.header.metadata.robots %}{{ page.header.metadata.robots|e }}{% else %}index, follow{% endif %}" />
+    
+    {# URL Canonique absolue #}
+    <link rel="canonical" href="{{ page.url(true, true)|e }}" />
+    {% endblock %}
+ 
+        {# 3. BALISES POUR LES RÉSEAUX SOCIAUX (OPENGRAPH) #}
+    {% block head_opengraph %}
+    <meta property="og:site_name" content="{{ site.title|e }}" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="{% if page.title %}{{ page.title|e }}{% else %}{{ site.title|e }}{% endif %}" />
+    <meta property="og:description" content="{% if page.header.metadata.description %}{{ page.header.metadata.description|e }}{% else %}{{ site.metadata.description|e }}{% endif %}" />
+    <meta property="og:url" content="{{ page.url(true, true)|e }}" />
+    {# FORCE L'URL ABSOLUE DE L'IMAGE #}
+    <meta property="og:image" content="{{ uri.rootUrl(true) ~ url('theme://images/logohumous-notext-blue.png', false) }}" />
+    <meta property="og:image:alt" content="Logo de la compagnie {{ site.title|e }}" />
+    {% endblock %}
+ 
+    {# 4. VOS FEUILLES DE STYLE EXISTANTES #}
     <link rel="stylesheet" href="{{ url('theme://css/style.css') }}" type="text/css" />
     <link rel="stylesheet" href="{{ url('theme://css/custom.css') }}" type="text/css" />
     <link rel="stylesheet" href="{{ url('theme://css/all.min.css') }}" type="text/css" />
     <link rel="stylesheet" href="{{ url('theme://css/video.css') }}" type="text/css" />
     <link rel="stylesheet" href="{{ url('theme://css/audio.css') }}" type="text/css" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    {# Injection automatique du SEO de Grav si disponible #}
-    {% block meta %}{% endblock %}
 
-    {# --- AJOUT CYBLÉ SUR LA PAGE SPECTACLE --- #}
+    {# 5. VOTRE AJOUT CIBLÉ SUR LA PAGE SPECTACLE GRÉSILHETTE #}
     {% if page.slug == 'gresilhette-et-la-salimonde' %}
     <style>
         .encadre:before, 
@@ -22,23 +50,84 @@
         }
     </style>
     {% endif %}
+
+    {# 6. DONNÉES STRUCTURÉES (SCHEMA.ORG) CONCATÉNÉES EN TEXTE PUR #}
+    {% block head_jsonld %}
+    {% set absolute_root = uri.rootUrl(true) %}
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "Organization",
+          "@id": "{{ absolute_root }}/#organization",
+          "name": "{{ site.title|e }}",
+          "url": "{{ absolute_root }}",
+          "logo": "{{ absolute_root }}{{ url('theme://images/logohumous-notext-blue.png', false) }}",
+          "email": "compagnie@lesmegeresdelhumus.fr",
+          "sameAs": [
+            "https://facebook.com",
+            "https://instagram.com"
+          ],
+          "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "7 rue du 19 mars 1962",
+            "postalCode": "11170",
+            "addressLocality": "Moussoulens",
+            "addressCountry": "FR"
+          }
+        },
+        {
+          "@type": "WebSite",
+          "@id": "{{ absolute_root }}/#website",
+          "url": "{{ absolute_root }}",
+          "name": "{{ site.title|e }}",
+          "publisher": {
+            "@id": "{{ absolute_root }}/#organization"
+          },
+          "inLanguage": "fr"
+        }
+      ]
+    }
+    </script>
+    {% endblock %}
+
+    {# Laissez ce bloc ici, vide, comme réceptacle de secours pour les plugins Grav #}
+    {% block meta %}{% endblock %}
 </head>
+
 <body>
+
     <div class="wrapper">
         {# 1. En-tête du site #}
         {% include 'partials/header.html.twig' %}
+        <main>
+            <section class="{{ page.slug }}">
+                {# Habillage commun du haut - UNIVERSEL ET SANS CONFIGURATION #}
+                <div class="conteneur-champignons">
+                    <img src="{{ url('theme://images/i_champignons.svg') }}" class="champignons" alt="" loading="lazy">
+                            
+                    {# 1. SOLUTION FINALE INFALLIBLE : On force Grav à charger la page de l'URL actuelle #}
+                    {% set vraie_page_url = page.find(uri.path) %}
+                            
+                    {# 2. Extraction du titre depuis cette page absolue (gère l'accueil, les classiques et modular.fr.md) #}
+                    {% set titre_brut = vraie_page_url.title | default(page.title) %}
+                            
+                    {# 3. Votre filtre Split + Trim avec l'index [0] présent #}
+                    {% set titre_decoupe = titre_brut|split('|') %}
+                    <h1>{{ titre_decoupe[0]|trim }}</h1>
+                           
+                    {# 4. Affichage du sous-titre optionnel #}
+                    {% set sous_titre = vraie_page_url.header.subtitle | default(page.header.subtitle) %}
+                        {% if sous_titre %}
+                            <p class="sous-titre">{{ sous_titre | raw }}</p>
+                        {% endif %}
+                    </div>
+                </section>                
+            </main>
         {# 2. CAS DE LA PAGE D'ACCUEIL (Présence de slides) #}
         {% if page.header.slides %}
-            <main>
-                <section>
-                    {# A. On affiche d'abord les champignons et le titre de l'accueil #}
-                    <div class="conteneur-champignons">
-                        <img src="{{ url('theme://images/i_champignons.svg') }}" class="champignons" alt="" loading="lazy">
-                        <h1>{{ page.title }}</h1>
-                    </div>
-                </section>
-            </main>
-            {# B. On affiche le Diaporama juste en dessous #}
+            {# On affiche le Diaporama juste en dessous #}
             {% include 'partials/diaporama.html.twig' %}
             <main>
                 <section>

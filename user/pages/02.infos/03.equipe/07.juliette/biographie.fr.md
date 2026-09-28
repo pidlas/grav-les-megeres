@@ -1,5 +1,7 @@
 ---
-title: 'Juliette Gaubert'
+title: "Juliette Gaubert | graphiste et créatrice de l'univers visuel de la Compagnie Les Mégères de l'Humus"
+metadata:
+    description: "Découvrez Juliette Gaubert, graphiste et créatrice de l'univers visuel des Mégères de l'Humus."
 visible: false
 routable: true
 # Vos nouvelles variables uniques :

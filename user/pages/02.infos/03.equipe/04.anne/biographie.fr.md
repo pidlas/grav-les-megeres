@@ -1,5 +1,7 @@
 ---
-title: 'Anne Spielmann'
+title: "Anne Spielmann | Plasticienne, Scénographe, Metteuse en scène, artiste complice de la Compagnie Les Mégères de l'Humus"
+metadata:
+    description: "Portrait d'Anne Spielmann, plasticienne, scénographe, metteuse en scène et artiste complice des Mégères de l'Humus."
 visible: false
 routable: true
 # Vos nouvelles variables uniques :

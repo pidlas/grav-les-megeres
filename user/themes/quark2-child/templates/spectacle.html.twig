@@ -4,13 +4,6 @@
 <main>
     <section class="{{ page.slug }}">
 
-        {# Habillage commun du haut #}
-        <div class="conteneur-champignons">
-            <img src="{{ url('theme://images/i_champignons.svg') }}" class="champignons" alt="" loading="lazy">
-            <h1>{{ page.title }}</h1>
-            {% if page.header.subtitle %}<p class="sous-titre">{{ page.header.subtitle | raw }}</p>{% endif %}
-        </div>
-
         <div class="page-content">
             {# 1. Menu des 3 images en rond (commun) #}
             <div class="p_theatre-d-ombres">

@@ -2,14 +2,8 @@
 
 {% block content %}
 <main>
-    <section>
-        {# Habillage commun du haut #}
-            <div class="conteneur-champignons">
-                <img src="{{ url('theme://images/i_champignons.svg') }}" class="champignons" alt="" loading="lazy">
-                <h1>{{ page.title }}</h1>
-                {% if page.header.subtitle %}<p class="sous-titre">{{ page.header.subtitle | raw }}</p>{% endif %}
-            </div>
-        
+    <section class="{{ page.slug }}">
+
         {# 1. Affichage de la première liste (Infos Légales) #}
         {% if page.header.infos_legales %}
             <ul class="first-of-type">

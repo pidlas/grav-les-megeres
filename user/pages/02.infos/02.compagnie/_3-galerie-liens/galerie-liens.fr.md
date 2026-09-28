@@ -1,5 +1,5 @@
 ---
-title: _3-galerie-liens
+title: Galerie liens
 item_data:
   type: select
   label: "Emplacement de l'élément (Item)"

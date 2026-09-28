@@ -1,0 +1,70 @@
+type: flex-objects
+
+title: 'Equipe de Contact'
+description: 'Gestion conviviale des membres et poles de contact du site'
+
+config:
+  data:
+    storage:
+      className: 'Grav\Framework\Flex\Storage\FolderStorage'
+      options:
+        formatter:
+          class: 'Grav\Framework\File\Formatter\YamlFormatter'
+        folder: 'user/pages/06.contact'
+    media:
+      per_object: true
+
+  admin:
+    router:
+      path: /contact-equipe
+    menu:
+      list:
+        route: /contact-equipe
+        title: 'Équipe de Contact'
+        priority: 1
+        icon: fa fa-users
+    list:
+      title: 'Liste des Poles de Contact'
+      fields:
+        nom:
+          title: 'Nom du pole (ex: Diffusion)'
+          link: edit
+        type:
+          title: "Type d'affichage"
+
+form:
+  fields:
+    nom:
+      type: text
+      label: 'Nom du pole / groupe'
+      help: 'Exemple: Diffusion, Responsables communication et artistique...'
+      validate:
+        required: true
+
+    type:
+      type: select
+      label: "Type d'affichage des numeros"
+      default: classique
+      options:
+        classique: 'Un numero par personne (Affichage standard)'
+        fusionne: 'Un numero fusionne pour tout le groupe (Rowspan)'
+
+    tel_commun:
+      type: text
+      label: 'Numero de telephone fusionne'
+      help: "A remplir uniquement si le type d'affichage est positionne sur Rowspan."
+      placeholder: '06 95 19 25 35'
+
+    membres:
+      type: list
+      label: 'Membres rattaches a ce pole'
+      btn_add: 'Ajouter un membre'
+      fields:
+        .nom:
+          type: text
+          label: 'Nom et Prenom'
+          validate:
+            required: true
+        .tel:
+          type: text
+          label: 'Telephone individuel'

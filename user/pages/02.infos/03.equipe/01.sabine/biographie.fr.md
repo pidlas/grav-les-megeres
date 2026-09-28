@@ -1,5 +1,7 @@
 ---
-title: 'Sabine Rance'
+title: "Sabine Rance | Metteuse en scène, autrice, comédienne et cofondatrice de la Compagnie Les Mégères de l'Humus"
+metadata:
+    description: "Découvrez le parcours de Sabine Rance, cofondatrice des Mégères de l'Humus, metteuse en scène, autrice et comédienne."
 visible: false
 routable: true
 # Vos nouvelles variables uniques :

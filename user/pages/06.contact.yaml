@@ -1,0 +1,19 @@
+1fe0853c1c7d0bb099ccf0954c67c525:
+  type: classique
+  nom: Diffusion
+  membres:
+    -
+      tel: '06 16 24 21 32'
+      nom: 'Maëlle Prévôt'
+    -
+      tel: '06 25 59 25 20'
+      nom: 'Yaniss Moutaoukil'
+4d5e3c1e1cd6eeba81626db873f8b179:
+  type: fusionne
+  nom: 'Responsables Communication & Artistique'
+  tel_commun: '06 95 19 25 35'
+  membres:
+    -
+      nom: 'Suzie Idlas'
+    -
+      nom: 'Sabine Rance'

@@ -1,0 +1,129 @@
+# user/blueprints/flex-objects/gresilhette-et-la-salimonde.yaml
+
+type: flex-objects
+title: Grésilhette et la Salimonde
+description: Gestion des médias, vidéos et informations du spectacle Grésilhette et la Salimonde
+
+config:
+  data:
+    storage:
+      className: 'Grav\Framework\Flex\Storage\FolderStorage'
+      options:
+        formatter:
+          class: 'Grav\Framework\File\Formatter\YamlFormatter'
+        # Pointe directement vers le dossier physique de la page de ce spectacle
+        folder: 'user/pages/03.spectacles/01.gresilhette-et-la-salimonde' 
+    media:
+      per_object: true
+
+  admin:
+    router:
+      path: /gresilhette-salimonde
+    menu:
+      list:
+        route: /gresilhette-salimonde
+        title: Page Grésilhette
+        priority: 2
+        icon: fa fa-ticket
+    list:
+      title: Fiche du Spectacle
+      fields:
+        title:
+          title: Titre de la page
+          link: edit
+
+form:
+  fields:
+    # Informations de base de la page Grav
+    title:
+      type: text
+      label: Titre de la page
+      validate:
+        required: true
+
+    menu:
+      type: text
+      label: Titre dans le menu du site
+
+    subtitle:
+      type: text
+      label: Sous-titre (Optionnel)
+
+    # Section spécifique de votre en-tête "spectacle:"
+    spectacle.age_duree:
+      type: text
+      label: Âge et Durée du spectacle
+      placeholder: "Ex: Spectacle jeune public dès 6 ans - 40 mn"
+      
+    #spectacle.video.mp4:
+    #  type: text
+    #  label: Nom du fichier Vidéo MP4
+    #  placeholder: "Ex: teaser-gresilhette-salimonde.mp4"
+
+    #spectacle.video.webm:
+    #  type: text
+    #  label: Nom du fichier Vidéo WebM
+    #  placeholder: "Ex: teaser-gresilhette-salimonde.webm"
+    # SÉLECTEUR VIDÉO MP4 VIA FILEPICKER
+    spectacle.video.mp4:
+      type: filepicker
+      label: Sélectionner le teaser vidéo MP4
+      folder: 'page://03.spectacles/01.gresilhette-et-la-salimonde' # <-- Chemin explicite et ultra-stable
+      preview_images: false
+      accept:
+        - .mp4
+
+    # SÉLECTEUR VIDÉO WEBM VIA FILEPICKER
+    spectacle.video.webm:
+      type: filepicker
+      label: Sélectionner le teaser vidéo WebM
+      folder: 'page://03.spectacles/01.gresilhette-et-la-salimonde'
+      preview_images: false
+      accept:
+        - .webm
+    # SÉLECTEUR DE PDF VIA FILEPICKER
+    spectacle.dossier_pdf:
+      type: filepicker
+      label: Sélectionner le dossier artistique (PDF)
+      folder: 'page://03.spectacles/01.gresilhette-et-la-salimonde'
+      accept:
+        - .pdf
+
+    # SÉLECTEUR D'IMAGE AVIF VIA FILEPICKER
+    spectacle.dossier_img:
+      type: filepicker
+      label: Sélectionner l'image du bouton (AVIF)
+      folder: 'page://03.spectacles/01.gresilhette-et-la-salimonde'
+      preview_images: true
+      accept:
+        - .avif
+
+    # SECTION OCCITAN DYNAMIQUE
+    titre_occitan:
+      type: text
+      label: Titre de la section Occitan
+      default: "L'intégration de la langue occitane dans le spectacle"
+
+    occitan_paragraphes:
+      type: list
+      label: Paragraphes de la section Occitane
+      btn_add: Ajouter un paragraphe (Alterné)
+      fields:
+        .texte_fr:
+          type: textarea
+          label: Paragraphe en Français
+          rows: 3
+        .texte_oc:
+          type: textarea
+          label: Paragraphe en Occitan (S'affichera en gras)
+          rows: 3
+
+    traduction_signature:
+      type: text
+      label: Signature de la traduction
+      placeholder: "Ex: L'Alan Roch"
+
+    # SECTION EXTRAIT
+    titre_extrait:
+      type: text
+      label: Titre de la section Extrait

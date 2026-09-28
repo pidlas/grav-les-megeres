@@ -1,5 +1,8 @@
 ---
-title: 'Le projet pédagogique'
+title: "Le Projet Pédagogique | théâtre et conte autour d'enjeux écologiques par la Compagnie Les Mégères de l'Humus"
+metadata:
+    description: "Un accompagnement pédagogique pour écoles et structures jeunesse autour du théâtre, du conte et des enjeux écologiques."
+---
 visible: false
 routable: true
 process:

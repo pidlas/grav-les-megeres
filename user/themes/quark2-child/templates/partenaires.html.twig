@@ -2,16 +2,10 @@
 
 {% block content %}
     <main>
-        <section>
-            {# Habillage commun du haut #}
-            <div class="conteneur-champignons">
-                <img src="{{ url('theme://images/i_champignons.svg') }}" class="champignons" alt="" loading="lazy">
-                <h1>{{ page.title }}</h1>
-                {% if page.header.subtitle %}<p class="sous-titre">{{ page.header.subtitle | raw }}</p>{% endif %}
-            </div>
+        <section class="{{ page.slug }}">
 
-            {# Récupération de la liste des Partenaires depuis Flex-Objects #}
-            {% set liste_partenaires = grav.flex.directory('partenaires').getIndex() %}
+            {# 👇 On récupère la Collection complète #}
+            {% set liste_partenaires = grav.flex.directory('partenaires').getCollection() %}
 
             {% if liste_partenaires is not empty %}
                 {# 1. Votre liste globale d'origine brute #}
@@ -29,9 +23,17 @@
                                     <a href="{{ partenaire.url }}" target="_blank" rel="noopener noreferrer">
                                 {% endif %}
 
-                                {% if partenaire.logo is not empty %}
-                                    {% set logo_data = partenaire.logo|first %}
-                                    <img src="{{ url(logo_data.path) }}" alt="{{ alt_text }}" class="partenaire-logo-pro" loading="lazy">
+                                {# 👇 BLOC MODIFIÉ POUR LE FILEPICKER ET LE STOCKAGE PAGE #}
+                                {% if partenaire.image is not empty %}
+                                    {# On va chercher l'image par son nom texte directement dans les médias de la page courante #}
+                                    {% set logo_media = page.media[partenaire.image] %}
+                                    
+                                    {% if logo_media %}
+                                        <img src="{{ logo_media.url }}" alt="{{ alt_text }}" class="partenaire-logo-pro" loading="lazy">
+                                    {% else %}
+                                        {# Sécurité : Si l'image n'est pas trouvée, on affiche le texte pour éviter un trou #}
+                                        <h3 class="partenaire-titre-pro">{{ alt_text }}</h3>
+                                    {% endif %}
                                 {% else %}
                                     <h3 class="partenaire-titre-pro">{{ alt_text }}</h3>
                                 {% endif %}

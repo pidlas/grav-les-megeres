@@ -1,0 +1,95 @@
+title: Page Contact
+'@extends': default
+
+form:
+  fields:
+    tabs:
+      type: tabs
+      active: 1
+      fields:
+        infos_permanentes:
+          type: tab
+          title: 'Infos Permanentes'
+          fields:
+
+            # --- SECTION TÉLÉPHONE ---
+            section_tel:
+              type: section
+              title: 'Configuration Téléphone'
+              underline: true
+            header.telephone.icone:
+              type: filepicker
+              label: 'Icône Téléphone'
+              preview_images: true
+            
+            # --- SECTION EMAIL ---
+            section_email:
+              type: section
+              title: 'Configuration Email'
+              underline: true
+            header.email.icone:
+              type: filepicker
+              label: 'Icône Email'
+              preview_images: true
+            header.email.texte:
+              type: text
+              label: 'Texte du lien'
+              default: 'Nous écrire'
+            header.email.adresse:
+              type: text
+              label: 'Adresse Email de réception'
+              placeholder: 'compagnie@lesmegeresdelhumus.fr'
+            header.email.sujet:
+              type: text
+              label: 'Sujet du mail pré-rempli'
+              default: 'Message du site'
+
+            # --- SECTION RÉSEAUX SOCIAUX ---
+            section_reseaux:
+              type: section
+              title: 'Réseaux Sociaux (URL)'
+              underline: true
+            header.reseaux.facebook.url:
+              type: text
+              label: 'Lien complet vers votre page Facebook'
+              placeholder: 'https://facebook.com...'
+            header.reseaux.instagram.url:
+              type: text
+              label: 'Lien complet vers votre compte Instagram'
+              placeholder: 'https://instagram.com...'
+
+            # --- SECTION ADRESSE ---
+            section_adresse:
+              type: section
+              title: 'Adresse Postale'
+              underline: true
+            header.adresse.icone:
+              type: filepicker
+              label: 'Icône Adresse'
+              preview_images: true
+            header.adresse.lignes:
+              type: list
+              label: 'Lignes de l''adresse'
+              btn_add: 'Ajouter une ligne'
+              fields:
+                .value:
+                  type: text
+                  label: 'Ligne'
+
+            # --- SECTION ASSOCIATION ---
+            section_asso:
+              type: section
+              title: 'Informations Association'
+              underline: true
+            header.association.icone:
+              type: filepicker
+              label: 'Icône Association'
+              preview_images: true
+            header.association.details:
+              type: list
+              label: 'Détails administratifs'
+              btn_add: 'Ajouter une ligne (SIRET, APE...)'
+              fields:
+                .value:
+                  type: text
+                  label: 'Information'

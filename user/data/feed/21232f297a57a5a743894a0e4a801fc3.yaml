@@ -1,5 +1,10 @@
-last_checked: 1790168439
+last_checked: 1790572108
 data:
+  -
+    title: 'Grav 2.2 Released: The Fastest Flat-File CMS Is Now 2x Faster'
+    url: 'https://getgrav.org/blog/grav-2-2-released'
+    date: '2026-09-24T09:00:00+00:00'
+    summary: ''
   -
     title: 'KahunaCart Is Out'
     url: 'https://getgrav.org/blog/kahunacart-released'
@@ -44,9 +49,4 @@ data:
     title: 'Forum Pro: Bringing the Community Home'
     url: 'https://getgrav.org/blog/grav-2-forum-pro'
     date: '2026-06-20T12:30:00+00:00'
-    summary: ''
-  -
-    title: 'The New getgrav.org'
-    url: 'https://getgrav.org/blog/new-getgrav-org'
-    date: '2026-06-20T12:00:00+00:00'
     summary: ''

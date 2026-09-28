@@ -1,17 +1,8 @@
 ---
-title: 'Grésilhette et la Salimonde'
+title: "Grésilette et la Salimonde | Spectacle jeune public - Écologie - Les Mégères de l'Humus"
+metadata:
+    description: "Grésilhette et la Salimonde: un conte théâtral jeune public autour de l'écologie, en diffusion dans l'Aude et en Occitanie."
 menu: 'Grésilhette et la Salimonde'
-
-spectacle:
-  age_duree: "Spectacle jeune public dès 6 ans - 40 mn"
-  video:
-    mp4: "teaser-gresilhette-salimonde.mp4"
-    webm: "teaser-gresilhette-salimonde.webm"
-  dossier_pdf: "dossier-prez_compressed.pdf"
-  dossier_img: "btn-prez.avif"
-
-titre_occitan: "La langue occitane dans le spectacle"
-titre_extrait: "Extrait"
 ---
 
 Le spectacle aborde le thème de l'écologie de façon ludique. C’est un conte théâtralisé avec une esthétique merveilleuse et intemporelle. Il existe trois versions du spectacle :
@@ -27,23 +18,7 @@ On sillone les sentiers de la montagne en compagnie de l'enfant. Grâce à sa sp
 
 Écriture, mise en scène : Suzie Idlas et Sabine Rance  
 Interprétation : Estelle Doumeng et Suzie Idlas  
-Accompagnement : Anne Spielman  
-
----SECTION_OCCITAN---
-
-L'intégration de la langue occitane dans le spectacle est venue comme une évidence. Langue interdite pendant des années, elle symbolise aujourd'hui la richesse culturelle du territoire de la Salimonde.
-
-<p class="tresgras">L'integracion de la lenga occitana dins l'espectacle es venguda coma una evidéncia. Lenga interdita pendent d'annadas, simbolisa uéi la riquesa culturala del territòri de la Salimonda.</p>
-
-Les deux comédiennes délivrent sur scène un chant révolutionnaire occitan acapella. Médium séculaire de communication, le chant apporte une agréable sensation de fraîcheur. Il permet aux spectateur·ice·s de faire une pause sans entracte. Fermer les yeux, reprendre sa respiration, sourire.
-
-<p class="tresgras">Las doas comedianes desliuran sus l'empont un cant revolucionari occitan a capella. Mejan secular de comunicacion, lo cant mena una agradiva sensacion de frescura. Permet als espectators de faire una pausa sens entracte. Tampar los uèlhs, fornar prene le buf, faire riseta.</p>
-
-"Grésilhette et la Salimonde" vous invite à renouer avec vos racines.
-
-<p class="tresgras">"Gresilhette e La Salimonda" vos convida a tornar trapar las rasigas vèstras.</p>
-
-<p class="traduction">traduction : L'Alan Roch</p>
+Accompagnement : Anne Spielman
 
 ---SECTION_EXTRAIT---
 

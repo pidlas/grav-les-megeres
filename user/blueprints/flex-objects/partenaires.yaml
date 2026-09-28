@@ -6,11 +6,11 @@ description: Gestion conviviale des partenaires du site
 config:
   data:
     storage:
-      className: 'Grav\Framework\Flex\Storage\FolderStorage'
+      className: 'Grav\Framework\Flex\Storage\FolderStorage' # 👈 Adapté au fichier de liste
       options:
         formatter:
           class: 'Grav\Framework\File\Formatter\YamlFormatter'
-        folder: 'user/pages/02.infos/04.partenaires'
+        folder: 'user/pages/02.infos/04.partenaires' 
     media:
       per_object: true
 
@@ -21,6 +21,7 @@ config:
       list:
         route: /partenaires
         title: Partenaires
+        priority: 3
         icon: fa fa-handshake-o
     list:
       title: Liste des Partenaires
@@ -49,11 +50,18 @@ form:
       validate:
         type: url
 
-    # 👇 LE SEUL CONFIGURATION QUI MARCHE POUR DU GLISSER-DÉPOSER HORS PAGES
-    logo:
-      type: file
-      label: 'Logo du partenaire'
+    image:
+      #type: file
+      type: filepicker
+      label: Choisir le logo du partenaire
+      folder: 'page://02.infos/04.partenaires'
+      preview_images: true
+      #label: 'Logo du partenaire'
       multiple: false
-      destination: 'flex-objects/partenaires' # Stockage relatif géré par le moteur Flex
+      #destination: 'data/flex-objects/partenaires'
+      random_name: false
+      avoid_overwriting: false
       accept:
-        - image/*
+        - 'image/*'
+        - '.avif'
+        - 'image/avif'

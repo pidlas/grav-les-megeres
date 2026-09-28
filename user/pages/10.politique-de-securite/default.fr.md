@@ -1,5 +1,7 @@
 ---
-title: 'Politique de sécurité'
+title: "Politique de sécurité | Pour le signalement des vulnérabilités du site à la Compagnie Les Mégères de l'Humus"
+metadata:
+    description: "Modalités de signalement des vulnérabilités et engagement de traitement de la sécurité du site."
 visible: false
 ---
 <p class="p_first">Merci de signaler toute vulnérabilité de sécurité à l'adresse

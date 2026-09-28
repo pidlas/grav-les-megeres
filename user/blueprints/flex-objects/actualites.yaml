@@ -10,7 +10,7 @@ config:
       options:
         formatter:
           class: 'Grav\Framework\File\Formatter\YamlFormatter'
-        folder: 'user/pages/02.infos/01.actualites' # <-- Pointe directement dans votre dossier de page
+        folder: 'user/pages/02.infos/01.actualites/' # <-- Pointe directement dans votre dossier de page
     media:
       per_object: true
 
@@ -21,6 +21,7 @@ config:
       list:
         route: /actualites
         title: Actualités
+        priority: 6
         icon: fa fa-newspaper-o
     list:
       title: Liste des catégories d'Actualités
@@ -40,9 +41,15 @@ form:
         required: true
 
     image_principale:
-      type: text
-      label: Nom de l'image principale
-      placeholder: "Ex: actu-event.webp"
+      #type: text
+      type: filepicker
+      #label: Nom de l'image principale
+      label: Choisir l'image principale
+      folder: 'page://02.infos/01.actualites'
+      preview_images: true
+      accept:
+        - .avif
+      #placeholder: "Ex: actu-event.webp"
 
     image_alt:
       type: text
@@ -65,8 +72,14 @@ form:
           label: Résumé / Description
           rows: 3
         .miniature:
-          type: text
-          label: Nom de la miniature (Optionnel)
+          #type: text
+          #label: Nom de la miniature (Optionnel)
+          type: filepicker
+          label: Choisir la miniature
+          folder: 'page://02.infos/01.actualites'
+          preview_images: true
+          accept:
+            - .avif
         .miniature_alt:
           type: text
           label: Texte alternatif de la miniature

@@ -20,7 +20,8 @@ config:
     menu:
       list:
         route: /equipe
-        title: Equipe
+        title: Équipe
+        priority: 4
         icon: 'fa fa-users'
     list:
       title: 'Liste des Membres'
@@ -60,10 +61,13 @@ form:
       placeholder: 'posImage'
 
     image:
-      type: file
-      label: 'Photo du membre'
+      #type: file
+      type: filepicker
+      label: 'Choisir la photo du membre'
       multiple: false
-      destination: 'flex-objects/equipe'
+      folder: 'page://02.infos/03.equipe'
+      preview_images: true
+      #destination: 'flex-objects/equipe'
       accept:
         - 'image/*'
         - '.avif'

@@ -1,72 +1,67 @@
 {% extends 'main-layout.html.twig' %}
 
 {% block content %}
+
+{# --- CHARGEMENT DU BLOC FLEX QUEL QUE SOIT LE HASH --- #}
+{% set collection = grav.flex.directory('gresilhette-et-la-salimonde').getCollection() %}
+{% set gresilhette_flex = collection.first() %}
+
+{# Sécurité : si gresilhette_flex est vide, on cherche directement dans l'en-tête de la page d'origine #}
+{% if gresilhette_flex is empty %}
+    {% set gresilhette_flex = page.header %}
+{% endif %}
+
 {# --- TRAITEMENT ET DÉCOUPE DES BLOCS SÉCURISÉS --- #}
 {% set contenu_traite = page.content %}
 
-{# Étape 1 : Isolation du bloc principal avant l'occitan #}
-{% set split_occitan = contenu_traite|split('---SECTION_OCCITAN---') %}
-{% set bloc_principal = split_occitan[0] | default('') %}
+{# Il n'y a plus d'Occitan dans le texte, on coupe directement à l'Extrait #}
+{% set split_extrait = contenu_traite|split('---SECTION_EXTRAIT---') %}
 
-{# Étape 2 : Séparation de l'occitan et de l'extrait #}
-{% set reste = split_occitan[1] | default('') %}
-{% set split_extrait = reste|split('---SECTION_EXTRAIT---') %}
-
-{% set bloc_occitan = split_extrait[0] | default('') %}
+{% set bloc_principal = split_extrait[0] | default('') %}
 {% set bloc_extrait = split_extrait[1] | default('') %}
 
-{# --- PRÉPARATION DES GRILLES ET CONTENUS COMPLEXES (Vos shortcodes d'origine) --- #}
-{% set grid_html %}
-    <p class="g_sp_spectacles">
-        [a class="g_sp_theatre-d-ombres morph" url="gresilhette-et-la-salimonde/theatre-d-ombres"]
-            {{ page.media['sp_theatre-d-ombres.avif'].html('Spectacle Grésilhette et la Salimonde - Théâtre d\'ombres') | raw }}
-        [/a]
-        [a class="g_sp_sieste-contee morph" url="gresilhette-et-la-salimonde/sieste-contee"]
-            {{ page.media['sp_sieste-contee.avif'].html('La sieste contée - Grésilhette et la Salimonde') | raw }}
-        [/a]
-        [a class="g_sp_projet-pedagogique morph" url="gresilhette-et-la-salimonde/projet-pedagogique"]
-            {{ page.media['sp_projet-pedagogique.avif'].html('Le projet pédagogique - Grésilhette et la Salimonde') | raw }}
-        [/a]
-    </p>
-{% endset %}
 
+{# --- PRÉPARATION DES GRILLES ET CONTENUS COMPLEXES (Vos shortcodes d'origine) --- #}
+{# 👇 COMPACTÉ SUR UNE SEULE LIGNE : Empêche le Markdown d'injecter des <p> parasites #}
+{% set grid_html %}<p class="g_sp_spectacles">[a class="g_sp_theatre-d-ombres morph" url="gresilhette-et-la-salimonde/theatre-d-ombres"]{{ page.media['sp_theatre-d-ombres.avif'].html('Spectacle Grésilhette et la Salimonde - Théâtre d\'ombres') | raw }}[/a][a class="g_sp_sieste-contee morph" url="gresilhette-et-la-salimonde/sieste-contee"]{{ page.media['sp_sieste-contee.avif'].html('La sieste contée - Grésilhette et la Salimonde') | raw }}[/a][a class="g_sp_projet-pedagogique morph" url="gresilhette-et-la-salimonde/projet-pedagogique"]{{ page.media['sp_projet-pedagogique.avif'].html('Le projet pédagogique - Grésilhette et la Salimonde') | raw }}[/a]</p>{% endset %}
+
+
+{# 👇 RECONSTRUCTION DYNAMIQUE ET SÉCURISÉE DU BLOC PDF AVEC LE FILEPICKER #}
 {% set pdf_html %}
-    [a url="gresilhette-et-la-salimonde/dossier-prez_compressed.pdf" title="Visualiser le dossier artistique Grésilhette et la Salimonde de la compagnie Les Mégères de l'Humus"]
-        {{ page.media[page.header.spectacle.dossier_img].html('', '', 'btn-pdf') | raw }}
-    [/a]
+    {% set fichier_pdf = gresilhette_flex.spectacle.dossier_pdf ? page.media[gresilhette_flex.spectacle.dossier_pdf|trim] : null %}
+    {% set bouton_img = gresilhette_flex.spectacle.dossier_img ? page.media[gresilhette_flex.spectacle.dossier_img|trim] : null %}
+    
+    {% if bouton_img and fichier_pdf %}
+        [a url="{{ fichier_pdf.url }}" title="Visualiser le dossier artistique Grésilhette et la Salimonde de la compagnie Les Mégères de l'Humus"]
+            {{ bouton_img.html('', '', 'btn-pdf') | raw }}
+        [/a]
+    {% endif %}
 {% endset %}
 
 {# On force l'interprétation des shortcodes contenus dans nos variables #}
-{% set grid_html_traite = grid_html | shortcode %}
-{% set pdf_html_traite = pdf_html | shortcode %}
-
+{% set grid_html_traite = grid_html | shortcodes %}
+{% set pdf_html_traite = pdf_html | shortcodes %}
 
 {# ================================================================== #}
 {#                       RENDU DE LA PAGE HTML                        #}
 {# ================================================================== #}
 
 <main>
-    <section>
-        {# Habillage commun du haut #}
-        <div class="conteneur-champignons">
-            <img src="{{ url('theme://images/i_champignons.svg') }}" class="champignons" alt="" loading="lazy">
-            <h1>{{ page.title }}</h1>
-            {% if page.header.subtitle %}<p class="sous-titre">{{ page.header.subtitle | raw }}</p>{% endif %}
-        </div>
-        
+    <section class="{{ page.slug }}">
+
         {# --- 1. DIV : BLOC PRINCIPAL SPECTACLE --- #}
         <div class="encadre">
             <div class="gresilhette-et-la-salimonde">
-                <h2 class="coco">{{ page.header.spectacle.age_duree }}</h2>
+                <h2 class="coco">{{ gresilhette_flex.spectacle.age_duree }}</h2>
 
                 {# --- LECTEUR VIDÉO COMPLET D'ORIGINE --- #}
                 <div class="wrapper-video">
                     <video id="video" controls preload="auto" loading="metadata" width="640" height="360">
-                        {% if page.media[page.header.spectacle.video.mp4] %}
-                            <source src="{{ page.media[page.header.spectacle.video.mp4].url }}" type="video/mp4" />
+                        {% if gresilhette_flex.spectacle.video.mp4 and page.media[gresilhette_flex.spectacle.video.mp4|trim] %}
+                            <source src="{{ page.media[gresilhette_flex.spectacle.video.mp4|trim].url }}" type="video/mp4" />
                         {% endif %}
-                        {% if page.media[page.header.spectacle.video.webm] %}
-                            <source src="{{ page.media[page.header.spectacle.video.webm].url }}" type="video/webm" />
+                        {% if gresilhette_flex.spectacle.video.webm and page.media[gresilhette_flex.spectacle.video.webm|trim] %}
+                            <source src="{{ page.media[gresilhette_flex.spectacle.video.webm|trim].url }}" type="video/webm" />
                         {% endif %}
                         Votre navigateur ne prend pas en charge la lecture vidéo HTML5.
                     </video>
@@ -99,52 +94,62 @@
                     {% set intro_texte = parties_spectacle[0] | default('') %}
                     {% set suite_texte = parties_spectacle[1] | default('') %}
                 
-                    {# 2. RENDU DE L'INTRO : Un affichage pur et direct, sans aucune manipulation de chaîne #}
+                    {# 2. RENDU DE L'INTRO #}
                     {{ intro_texte | trim | shortcodes | markdown | raw }}
 
+                    {# 3. RENDU DE LA GRILLE #}
+                    {{ grid_html_traite | raw }}
                 
-                    {# 3. RENDU DE LA GRILLE : AUCUNE DIV AUTOUR, ET PAS DE FILTRE MARKDOWN. #}
-                    {# On l'écrit sur une seule ligne Twig compacte pour éviter que Grav ne recrée un espace #}
-                    {{ grid_html | trim | shortcodes | raw }}
-                
-                    {# 4. RENDU DE LA SUITE : On injecte d'abord le bouton PDF à la place du repère textuel #}
-                    {% set suite_html = suite_texte | replace({'[dossier-artistique]': pdf_html}) %}
+                    {# 4. RENDU DE LA SUITE #}
+                    {% set suite_html = suite_texte | replace({'[dossier-artistique]': pdf_html_traite}) %}
                        
-                    {# Puis on applique la classe sur le générique final #}
                     {% set suite_html = suite_html | replace({
                         '<p>Écriture, mise en scène': '<p class="p_terra g_sp_e-generique">Écriture, mise en scène'
                     }) %}
                        
-                    {# On applique enfin les shortcodes et le markdown pour rendre le lien actif et afficher l'image #}
                     {{ suite_html | trim | shortcodes | markdown | raw }}
-
                 </div>
                 {# fin div g_spectacles #}
             </div>
         </div>
 
-        {# --- 2. BLOC : OCCITAN --- #}
-        {% if bloc_occitan|trim is not empty %}
+        {# --- 2. BLOC : OCCITAN (GÉRÉ PAR FLEX OBJECT) --- #}
+        {% if gresilhette_flex.getProperty('titre_occitan') %}
         <div class="encadre-lenga">
             <div class="la-lenga-occitana">
-                {# On appelle la variable occitan avec sa classe #}
-                <h2 class="display-title">{{ page.header.titre_occitan }}</h2>
-                {{ bloc_occitan | shortcodes | markdown | raw }}
-            </div>
-        </div>
-        {% endif %}
+                <h2 class="display-title">{{ gresilhette_flex.getProperty('titre_occitan') }}</h2>
         
-        {# --- 3. BLOC : EXTRAIT --- #}
-        {% if bloc_extrait|trim is not empty %}
-        <div class="encadre-extrait">
-            <div class="extrait">
-                {# On appelle la variable extrait avec sa classe #}
-                <h2 class="display-title">{{ page.header.titre_extrait }}</h2>
-                {{ bloc_extrait | shortcodes | markdown | raw }}
+                {# On boucle sur les paragraphes saisis dans l'admin #}
+                {% for bloc in gresilhette_flex.getProperty('occitan_paragraphes') %}
+                    {% if bloc.texte_fr is not empty %}
+                        <p>{{ bloc.texte_fr | markdown | raw }}</p>
+                    {% endif %}
+                   
+                    {% if bloc.texte_oc is not empty %}
+                        {# La classe "tresgras" s'applique automatiquement ici #}
+                        <p class="tresgras">{{ bloc.texte_oc | markdown(false) | raw }}</p>
+                    {% endif %}
+                {% endfor %}
+       
+                {# Affichage de la ligne de traduction avec sa classe spécifique #}
+                {% if gresilhette_flex.getProperty('traduction_signature') %}
+                    <p class="traduction">traduction : {{ gresilhette_flex.getProperty('traduction_signature') }}</p>
+                {% endif %}
             </div>
         </div>
         {% endif %}
 
+        {# --- 3. BLOC : EXTRAIT --- #}
+        {% if bloc_extrait|trim is not empty %}
+        <div class="encadre-extrait">
+            <div class="extrait">
+                {# <h2 class="display-title">{{ page.header.titre_extrait }}</h2> #}
+                <h2 class="display-title">{{ gresilhette_flex.getProperty('titre_extrait') }}</h2>
+                {{ bloc_extrait | shortcodes | markdown | raw }}
+            </div>
+        </div>
+        {% endif %}
+        
     </section>
 </main>
 {% endblock %}

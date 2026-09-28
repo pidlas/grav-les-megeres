@@ -6,3 +6,5 @@ directories:
   - 'blueprints://flex-objects/actualites.yaml'
   - 'blueprints://flex-objects/galerie-liens.yaml'
   - 'blueprints://flex-objects/equipe.yaml'
+  - 'blueprints://flex-objects/contact_equipe.yaml'
+  - 'blueprints://flex-objects/gresilhette-et-la-salimonde.yaml'

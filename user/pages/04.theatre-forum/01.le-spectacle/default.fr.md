@@ -1,5 +1,7 @@
 ---
-title: 'Le spectacle'
+title: "Le spectacle | du Théâtre Forum pour enffant, ados et jeunes adultes par la Compagnie Les Mégères de l'Humus"
+metadata:
+    description: "Interventions théâtre forum pour enfants, ados et jeunes adultes autour des relations, discriminations et du vivre-ensemble. Séances de théâtre forum pour adultes en milieu associatif, culturel ou professionnel, avec interventions dans l'Aude et en Occitanie."
 menu: 'Le spectacle'
 ---
 

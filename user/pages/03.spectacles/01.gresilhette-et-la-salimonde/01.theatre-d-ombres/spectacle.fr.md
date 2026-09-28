@@ -1,5 +1,8 @@
 ---
-title: 'Théâtre d''ombres'
+title: "Le Théâtre d'Ombres | Forme visuelle et Poétique proprosée en milieu scolaire en Occitanie avec la Compagnie Les Mégères de l'Humus"
+metadata:
+    description: "Une forme visuelle et poétique de Grésilhette et la Salimonde, proposée en milieu scolaire et culturel dans l'Aude."
+---
 process:
     twig: false
 cache_enable: false

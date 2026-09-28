@@ -1,5 +1,8 @@
 ---
-title: 'Philippe Guerrini'
+title: "Philippe Guerrini | artisan de la partie technique et soutien numérique de la Compagnie Les Mégères de l'Humus"
+metadata:
+    description: "Portrait de Philippe Guerrini, artisan de la partie technique et soutien numérique des Mégères de l'Humus."
+---
 visible: false
 routable: true
 # Vos nouvelles variables uniques :

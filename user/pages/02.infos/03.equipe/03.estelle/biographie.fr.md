@@ -1,5 +1,7 @@
 ---
-title: 'Estelle Doumeng'
+title: "Estelle Doumeng | comédienne de la Compagnie Les Mégères de l'Humus"
+metadata:
+    description: "Découvrez Estelle Doumeng, comédienne associée aux créations et spectacles des Mégères de l'Humus."
 visible: false
 routable: true
 # Vos nouvelles variables uniques :

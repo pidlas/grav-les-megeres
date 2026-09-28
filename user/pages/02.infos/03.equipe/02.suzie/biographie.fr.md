@@ -1,5 +1,7 @@
 ---
-title: 'Suzie Idlas'
+title: "Suzie Idlas | Metteuse en scène, autrice, comédienne, conteuse, cofondatrice de la Compagnie Les Mégères de l'Humus"
+metadata:
+    description: "Portrait de Suzie Idlas, cofondatrice des Mégères de l'Humus, comédienne, conteuse, autrice et metteuse en scène."
 visible: false
 routable: true
 # Vos nouvelles variables uniques :

@@ -1,6 +1,8 @@
 ---
-title: 'Stages de théâtre'
-menu: 'Stages'
+title: "Stages de théâtre | en Occitanie avec la Compagnie Les Mégères de l'Humus"
+metadata:
+    description: "Stages de théâtre pour débutants ou confirmés: corps, voix, improvisation et création, avec sessions organisées dans l'Aude."
+menu: 'Stages de théâtre'
 ---
 
 <div class="img-centre">

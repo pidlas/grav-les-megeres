@@ -22,7 +22,8 @@ config:
       list:
         route: /galerie-liens
         title: Galerie Compagnie
-        icon: fa fa-picture-o
+        priority: 5
+        icon: fa fa-link
     list:
       title: Liste des Éléments
       fields:
@@ -45,8 +46,8 @@ form:
       options:
         item7: "Item 7 : Rapport d'activités 2024 (Haut gauche)"
         item8: "Item 8 : Rapport d'activités 2025 (Haut droit)"
-        item10: "Item 10 : Bloc Masque de Gorgone (Milieu)"
-        item11: "Item 11 : Bloc Les Érinyes (Milieu)"
+        item10: "Item 10 : Bloc Masque de Gorgone (Milieu gauche)"
+        item11: "Item 11 : Bloc Les Érinyes (Milieu droit)"
         item12: "Item 12 : Bloc Peinture Oreste (Bas)"
         item13: "Item 13 : Bloc L'Humus & Légende (Pied de page)"
 
@@ -57,12 +58,26 @@ form:
         required: true
 
     image_name:
-      type: text
-      label: 'Nom exact du fichier image .avif'
+      #type: text
+      #label: 'Nom exact du fichier image .avif'
+      type: filepicker
+      label: Choisir l'image
+      folder: 'page://02.infos/02.compagnie/_3-galerie-liens'
+      preview_images: true
+      accept:
+        - 'image/*'
+        - '.avif'
+        - 'image/avif'
 
     pdf_name:
-      type: text
-      label: 'Nom exact du fichier PDF (Optionnel)'
+      #type: text
+      #label: 'Nom exact du fichier PDF (Optionnel)'
+      type: filepicker
+      label: Choisir le fichier PDF
+      folder: 'page://02.infos/02.compagnie/_3.galerie-liens'
+      preview_images: true
+      accept:
+        - .pdf
 
     legende:
       type: textarea

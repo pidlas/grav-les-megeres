@@ -1,6 +1,8 @@
 ---
-title: 'Nos partenaires'
-menu: 'Partenaires'
+title: "Nos Partenaires | Culturels et Institutionnels - Les Mégères de l'Humus"
+metadata:
+    description: "Découvrez les partenaires qui soutiennent les actions artistiques et culturelles des Mégères de l'Humus dans l'Aude."
+menu: 'Nos Partenaires'
 ---
 
 L'association *Les Mégères de l'Humus* reçoit, ou a reçu, depuis le début de sa création, le soutien financier de plusieurs collectivités territoriales listées ci-dessus. 

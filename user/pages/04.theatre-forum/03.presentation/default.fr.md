@@ -1,5 +1,7 @@
 ---
-title: 'Le théâtre forum'
+title: "Le Théâtre forum | Une pratique participative pour ouvrir le dialogue avec la Compagnie Les Mégères de l'Humus"
+metadata:
+    description: "Découvrez l'approche théâtre forum des Mégères de l'Humus: une pratique participative pour ouvrir le dialogue et agir collectivement."
 menu: 'Le théâtre forum'
 ---
 

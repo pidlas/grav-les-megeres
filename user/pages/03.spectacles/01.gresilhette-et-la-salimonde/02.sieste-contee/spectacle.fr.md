@@ -1,5 +1,7 @@
 ---
-title: 'La sieste contée'
+title: "La Sieste Contée | Une Sieste Sensible et Immersive pour Structures Culturelles par la Compagnie Les Mégères de l'Humus"
+metadata:
+    description: "Une sieste contée sensible et immersive issue de Grésilhette et la Salimonde, adaptable aux publics jeunesse et famille."
 process:
     twig: false
 cache_enable: false
