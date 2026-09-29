@@ -16,7 +16,7 @@ pages:
   append_url_extension: null
   redirect_default_code: '302'
   redirect_default_route: 1
-  custom_base_url: 'http://grav.local'
+  custom_base_url: null
   media:
     descriptions: true
 cache:

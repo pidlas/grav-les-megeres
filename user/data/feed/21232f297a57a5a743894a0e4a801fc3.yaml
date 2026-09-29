@@ -1,5 +1,10 @@
-last_checked: 1790572108
+last_checked: 1790662203
 data:
+  -
+    title: 'Meet Helpdesk Pro and Mailroom'
+    url: 'https://getgrav.org/blog/helpdesk-pro-and-mailroom'
+    date: '2026-09-28T12:10:00+00:00'
+    summary: ''
   -
     title: 'Grav 2.2 Released: The Fastest Flat-File CMS Is Now 2x Faster'
     url: 'https://getgrav.org/blog/grav-2-2-released'
@@ -44,9 +49,4 @@ data:
     title: 'Grav 2.0 Released!'
     url: 'https://getgrav.org/blog/grav-2-stable-released'
     date: '2026-06-20T13:00:00+00:00'
-    summary: ''
-  -
-    title: 'Forum Pro: Bringing the Community Home'
-    url: 'https://getgrav.org/blog/grav-2-forum-pro'
-    date: '2026-06-20T12:30:00+00:00'
     summary: ''

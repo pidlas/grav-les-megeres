@@ -20,3 +20,5 @@ streams:
           - user/themes/quark2-child
           - user/themes/quark2
 
+# Ajout du favicon pour le thème enfant
+favicon: /user/themes/quark2-child/images/favicon/favicon-48x48.png

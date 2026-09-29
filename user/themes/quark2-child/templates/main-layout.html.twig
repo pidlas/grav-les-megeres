@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="fr">
 
@@ -21,7 +22,7 @@
     <link rel="canonical" href="{{ page.url(true, true)|e }}" />
     {% endblock %}
  
-        {# 3. BALISES POUR LES RÉSEAUX SOCIAUX (OPENGRAPH) #}
+    {# 3. BALISES POUR LES RÉSEAUX SOCIAUX (OPENGRAPH) #}
     {% block head_opengraph %}
     <meta property="og:site_name" content="{{ site.title|e }}" />
     <meta property="og:type" content="website" />
@@ -33,12 +34,17 @@
     <meta property="og:image:alt" content="Logo de la compagnie {{ site.title|e }}" />
     {% endblock %}
  
-    {# 4. VOS FEUILLES DE STYLE EXISTANTES #}
+    {# 4. FEUILLES DE STYLE #}
     <link rel="stylesheet" href="{{ url('theme://css/style.css') }}" type="text/css" />
     <link rel="stylesheet" href="{{ url('theme://css/custom.css') }}" type="text/css" />
     <link rel="stylesheet" href="{{ url('theme://css/all.min.css') }}" type="text/css" />
     <link rel="stylesheet" href="{{ url('theme://css/video.css') }}" type="text/css" />
     <link rel="stylesheet" href="{{ url('theme://css/audio.css') }}" type="text/css" />
+
+    <link rel="icon" type="image/png" href="{{ url('theme://images/favicon/favicon-48x48.png') }}" />
+    <link rel="icon" type="image/svg+xml" href="{{ url('theme://images/favicon/favicon.svg') }}" />
+    <link rel="shortcut icon" href="{{ url('theme://images/favicon/favicon.ico') }}" />
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ url('theme://images/favicon/apple-touch-icon.png') }}" />
 
     {# 5. VOTRE AJOUT CIBLÉ SUR LA PAGE SPECTACLE GRÉSILHETTE #}
     {% if page.slug == 'gresilhette-et-la-salimonde' %}
@@ -94,6 +100,7 @@
 
     {# Laissez ce bloc ici, vide, comme réceptacle de secours pour les plugins Grav #}
     {% block meta %}{% endblock %}
+
 </head>
 
 <body>

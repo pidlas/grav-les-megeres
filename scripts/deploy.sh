@@ -75,7 +75,6 @@ RSYNC_EXCLUDES=(
   "/cache/"
   "**/cache/"
   "/images/"
-  "**/images/"
   ".htaccess"
   "/media/"
   "config/themes/quark2.yaml"
