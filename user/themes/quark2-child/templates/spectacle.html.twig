@@ -50,7 +50,10 @@
                     {% if page.media['montage-inspiration.avif'] %}
                         {{ page.media['montage-inspiration.avif'].html('Photos donnant de l\'inspiration', 'Inspiration', 'forme-montage') | raw }}
                     {% endif %}
-                    {{ page.content | raw }}
+                    <div class="content-list">
+                        {# On remplace la balise <ul> générée par Grav par votre balise personnalisée #}
+                        {{ page.content|replace({'<ul>': '<ul class="jolie-ombres slide-list">'})|raw }}
+                    </div>
                 </div>
             {% elseif page.slug == 'sieste-contee' %}
                 <div class="sieste-wrapper">
@@ -73,7 +76,7 @@
             {% set configuration_fiches = {
                 'theatre-d-ombres': {'pdf': 'fiche-theatre-d-ombres.pdf', 'img': 'btn-tech-ombres.avif'},
                 'sieste-contee': {'pdf': 'fiche-sieste-contee.pdf', 'img': 'btn-tech-sieste.avif'},
-                'projet-pedagogique': {'pdf': 'fiche-fiche-projet-pedagogique.pdf', 'img': 'btn-tech-projet.avif'}
+                'projet-pedagogique': {'pdf': 'fiche-projet-pedagogique.pdf', 'img': 'btn-tech-projet.avif'}
             } %}
 
             {% set fiche = configuration_fiches[page.slug] %}

@@ -4,8 +4,7 @@ metadata:
     description: "Portrait d'Anne Spielmann, plasticienne, scénographe, metteuse en scène et artiste complice des Mégères de l'Humus."
 visible: false
 routable: true
-# Vos nouvelles variables uniques :
-personne_image: 'webRigolote_as.avif'
+personne_image: webRigolote_as.avif
 image_alt: 'Anne Spielmann, plasticienne, scénographe, metteuse en scène, comédienne'
 citation: "Puisque ces mystères me dépassent, feignons d'en être l'organisateur."
 citation_auteur: 'Les Mariés de la Tour Eiffel, Jean Cocteau'
@@ -13,7 +12,7 @@ citation_auteur: 'Les Mariés de la Tour Eiffel, Jean Cocteau'
 
 Originaire de Nancy, Anne obtient, par amour de la bidouille, en 1985 un master d’Arts Plastiques à l’université de Strasbourg.
 
-Ensuite, elle s’initie à la pratique théâtrale avec *Yoshi Oida*, *Claire Heggen*, *Anna Prucnal* et *Jeanne Biras* entre autres. Étiquettée comme Conceptrice de théâtre d’objet, Anne intervient depuis près de 40 ans dans la création et la réalisation de spectacles essentiellement visuels pour tous publics.
+Ensuite, elle s’initie à la pratique théâtrale avec [a url="https://yoshioida.com/"]Yoshi Oida[/a], [a url="https://claireheggen.theatredumouvement.fr/"]Claire Heggen, le théâtre du mouvement[/a], [a url="https://fr.wikipedia.org/wiki/Anna_Prucnal"]Anna Prucnal[/a] et [a url="https://fr.wikipedia.org/wiki/Jeanne_Biras"]Jeanne Biras[/a] entre autres. Étiquetée comme Conceptrice de théâtre d’objet, Anne intervient depuis près de 40 ans dans la création et la réalisation de spectacles essentiellement visuels pour tous publics.
 
 Anne partage le goût du jeu avec les enfants, ainsi que la poésie, l'intelligence, la joie de surprendre et l'humour.
 

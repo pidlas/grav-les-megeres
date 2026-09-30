@@ -1,0 +1,51 @@
+title: Page Accueil
+'@extends': default
+
+context: blueprints://pages
+
+form:
+  fields:
+    tabs:
+      type: tabs
+      active: 1
+      fields:
+        # Conserve l'onglet de gestion du contenu standard de Grav
+        content:
+          type: tab
+
+        # Ajoute votre nouvel onglet personnalisé pour le diaporama
+        diaporama:
+          type: tab
+          title: 'Gestion du Diaporama'
+          fields:
+            
+            # --- SECTION DIAPORAMA ---
+            section_slides:
+              type: section
+              title: 'Configuration des Diapositives (Slides)'
+              underline: true
+
+            header.slides:
+              type: list
+              label: 'Liste des diapositives'
+              btn_add: 'Ajouter une diapositive'
+              fields:
+                .titre:
+                  type: text
+                  label: 'Titre de la diapositive'
+                  placeholder: 'Ex: À propos'
+                  validate:
+                    required: true
+
+                .lien:
+                  type: text
+                  label: 'Lien de redirection (URL ou Page Grav)'
+                  placeholder: 'Ex: /infos/compagnie'
+
+                .image:
+                  type: filepicker
+                  label: 'Image de fond'
+                  preview_images: true
+                  description: 'Sélectionnez une image (ex: .avif, .jpg, .png)'
+                  validate:
+                    required: true

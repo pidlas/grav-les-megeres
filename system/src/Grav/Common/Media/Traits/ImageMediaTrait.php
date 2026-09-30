@@ -55,6 +55,9 @@ trait ImageMediaTrait
     /** @var bool */
     protected $watermark;
 
+    /** @var array|null The watermark() arguments queued on this image, if any */
+    protected $watermarked;
+
     /** @var bool */
     protected $progressive;
 
@@ -83,6 +86,65 @@ trait ImageMediaTrait
 
     /** @var string */
     protected $sizes = '100vw';
+
+    /**
+     * The canvas a URL resize action allocates, and the size it leaves the image at.
+     *
+     * The query-string numbers are not the canvas. A single dimension or a
+     * percentage is derived from the current aspect ratio (`forceResize=46000`
+     * on a square source is 46000x46000), and zoomCrop() enlarges to cover the
+     * box before it crops (`zoomCrop=46000,1` also builds 46000x46000), so a
+     * ceiling on width*height of the request lets both through.
+     *
+     * Floats, so an absurd request cannot overflow an int. Returns null when a
+     * dimension is not a whole number or a percentage.
+     *
+     * @param string $action One of $magic_resize_actions
+     * @param array $args The comma-separated query arguments
+     * @param int $width Current image width
+     * @param int $height Current image height
+     * @return array{0:float,1:float,2:float}|null [canvas pixels, resulting width, resulting height]
+     */
+    public static function urlResizeCanvas(string $action, array $args, int $width, int $height): ?array
+    {
+        $positions = static::$magic_resize_actions[$action] ?? null;
+        if ($positions === null || $width < 1 || $height < 1) {
+            return null;
+        }
+
+        $count = count($positions);
+        $w = $args[$positions[$count - 2]] ?? null;
+        $h = $args[$positions[$count - 1]] ?? null;
+
+        if ($h === null && preg_match('/^(\d+(?:\.\d+)?)%$/', (string) $w, $matches)) {
+            $w = $width * (float) $matches[1] / 100;
+            $h = $height * (float) $matches[1] / 100;
+        } else {
+            foreach ([$w, $h] as $value) {
+                if ($value !== null && !ctype_digit((string) $value)) {
+                    return null;
+                }
+            }
+            $w = (float) $w;
+            $h = (float) $h;
+        }
+
+        if ($w <= 0 && $h <= 0) {
+            [$w, $h] = [(float) $width, (float) $height];
+        } elseif ($h <= 0) {
+            $h = ceil($w * $height / $width);
+        } elseif ($w <= 0) {
+            $w = ceil($h * $width / $height);
+        }
+
+        $pixels = $w * $h;
+        if ($action === 'zoomCrop') {
+            $scale = max($w / $width, $h / $height);
+            $pixels = max($pixels, ceil($width * $scale) * ceil($height * $scale));
+        }
+
+        return [$pixels, $w, $h];
+    }
 
 
     /**
@@ -158,7 +220,10 @@ trait ImageMediaTrait
         } else {
             $max_width = min($max_width, $base->get('width'));
 
-            for ($width = $min_width; $width < $max_width; $width += $step) {
+            for ($width = $min_width; $width <= $max_width; $width += $step) {
+                if ($width >= $base->get('width')) {
+                    continue;
+                }
                 $widths[] = $width;
             }
         }
@@ -207,11 +272,41 @@ trait ImageMediaTrait
                     $derivative->quality($this->quality);
                 }
 
+                // Same for a watermark asked for before the derivatives were.
+                if ($this->watermarked && method_exists($derivative, 'queueWatermark')) {
+                    $derivative->queueWatermark($this->watermarked);
+                }
+
                 $this->addAlternative($ratio, $derivative);
             }
         }
 
         return $this;
+    }
+
+    /**
+     * Queues a watermark on this image and on each alternative. The stamp is
+     * sized and placed when the image is processed, so every image is stamped
+     * at its own final size.
+     *
+     * @param array $args [stamp image, position, scale from 0 to 1]
+     * @return void
+     */
+    protected function queueWatermark(array $args)
+    {
+        if (!$this->image) {
+            $this->image();
+        }
+
+        $this->transformed = true;
+        $this->watermarked = $args;
+        $this->image->watermark(...$args);
+
+        foreach ($this->alternatives as $medium) {
+            if (method_exists($medium, 'queueWatermark')) {
+                $medium->queueWatermark($args);
+            }
+        }
     }
 
     /**
@@ -497,7 +592,8 @@ trait ImageMediaTrait
             $this->image->merge(ImageFile::open($overlay));
         }
 
-        if ($this->watermark) {
+        // `watermark_all`, unless this image already has a watermark of its own.
+        if ($this->watermark && !$this->watermarked) {
             $this->watermark();
         }
 

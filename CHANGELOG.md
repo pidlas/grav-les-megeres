@@ -1,3 +1,107 @@
+# v2.2.2
+## 09/28/2026
+
+1. [](#improved)
+    * The `.htaccess` and Caddy configs now let browsers keep the Admin panel's bundled files for a year, since their names change whenever they do. On Apache, copy the new block from `webserver-configs/htaccess.txt` into an existing site's `.htaccess` to get it ([getgrav/grav-plugin-admin2#181](https://github.com/getgrav/grav-plugin-admin2/issues/181))
+2. [](#bugfix)
+    * Upgrading Grav from the admin on Windows, for example under Laragon, no longer deletes `index.php` and leaves the site showing a 404 page ([forum](https://getgrav.org/forum/general/laragon-grav-update-issue-t9436))
+    * An upgrade no longer blocks most of the Twig sandbox, such as `date`, `max` and `batch`, on sites whose `security.twig_sandbox` lists only add entries. Sites an earlier upgrade already did this to get those defaults back.
+    * A fresh install now records the current upgrade level, so its first upgrade no longer reruns fixes meant for older installs.
+    * [security] Updated the bundled DOM sanitizer to 1.0.18, which closes several ways a crafted stylesheet could hide an external resource reference using CSS escapes, such as a backslash-newline line continuation ([GHSA-94fv-h7hv-365q](https://github.com/rhukster/dom-sanitizer/security/advisories/GHSA-94fv-h7hv-365q)).
+    * Commands run by the scheduler, such as a plugin's `bin/plugin` worker, now run in the same environment as the scheduler, so a site started with `bin/grav scheduler --env <host>` no longer runs its jobs without the settings in `user/env/<host>/config`.
+    * With `pages.media_route_urls` enabled, page files whose names contain a space or an accented character, such as `foo bar.pdf` or `bär.png`, no longer return a 404 ([#4332](https://github.com/getgrav/grav/issues/4332))
+    * An image used more than once in Markdown no longer picks up the query parameters, `#fragment` or style of the earlier uses, and keeps its retina `srcset` after an earlier use was cropped or resized. Thanks @wakqasahmed ([#3567](https://github.com/getgrav/grav/issues/3567), [#4333](https://github.com/getgrav/grav/pull/4333))
+    * The content XSS check now also flags a `javascript:` link with a space after the colon, and no longer misses a link when the text elsewhere contains an encoded character it could not decode. Thanks @manus-pi
+    * The private key file `user/config/security-private.php` is now created readable only by the site's own user, instead of being locked down a moment after it is written. Thanks @shxtterme
+    * Modular sections on Flex-stored pages now re-run their Twig on every request, the same as regular pages already did, so one visitor's output is never reused for another.
+    * On Apache, the file-type rules for `images/`, `assets/`, `user/`, `system/` and `vendor/` now also apply when a path follows the file name. Upgrading adds the rule to an existing site's `.htaccess`. Thanks @ma4ter
+    * [security] With image URL actions turned on, the image pixel limit now measures the image each resize actually produces, including one-dimension, percentage and zoomCrop resizes. Thanks @manus-pi
+    * [security] A form defined in page frontmatter now reads `config-*@` values through the same filter as page Twig, so it can only show configuration that page Twig may read. Thanks @manus-use and @Hama1cco
+    * [security] Dynamic-data directives in a form defined in page frontmatter now go through the allowed-callable check when the form builds its defaults and validates, not only when it first loads.
+    * [security] Renaming a field while a page-authored Flex form is merged no longer lets it skip the allowed-callable check. Thanks @manus-use
+
+# v2.2.1
+## 09/25/2026
+
+1. [](#bugfix)
+    * The `.htaccess` files under `user/` no longer use mod_rewrite, so hosts that broke on them, such as some shared Apache setups, serve the admin, theme files and images again. Upgrading replaces the copies Grav wrote and leaves edited ones alone ([#4309](https://github.com/getgrav/grav/issues/4309))
+
+# v2.2.0
+## 09/24/2026
+
+1. [](#improved)
+    * Rebuilding the pages cache no longer writes a compiled file for every page, so the first request after a cache clear is much faster on large sites.
+    * A pages rebuild no longer loads a compiled file for every page into OPcache, so large sites stop pushing the rest of Grav's cached code out of memory.
+    * A pages rebuild reuses the page headers it read last time, so rebuilding after editing one page stays as quick as before.
+    * Checking whether pages changed now looks only at the page folders and files Grav already knows about instead of scanning the whole pages folder, which makes requests on large sites faster.
+    * Only one request at a time checks whether pages changed, and the others keep using the last result meanwhile.
+    * When the pages cache has to be rebuilt, one request rebuilds it and the others wait and use its result instead of all rebuilding at once.
+    * Saving or deleting a page through Grav now updates the pages cache on the next request instead of waiting for the change check, and plugins can do the same by calling `Pages::markChanged()`.
+    * That change notice is kept in a small file rather than the cache, so a page saved from the command line is picked up by the website even when the two use different cache drivers.
+    * A new `pages.frontmatter.native_yaml` setting reads page frontmatter with the much faster YAML extension when the server has it installed. It is off by default because the extension reads unquoted dates and `yes`/`no` differently.
+    * Translations are now prepared one language at a time, when a request first needs that language, so the first request after a cache clear no longer reads every language that core and the plugins ship.
+    * Editing a language file now rebuilds only that language instead of every language.
+    * The pages cache is smaller because it no longer keeps a second, raw copy of every page's frontmatter.
+    * Listing every page, which the sitemap and `@page.descendants` collections do, is several times faster on large sites.
+    * Page ETags are calculated with a much faster hash.
+    * Configuration and translation caches built by a request are loaded into OPcache after the response has been sent, instead of making that request wait.
+    * Rebuilding the pages cache after an edit no longer reads the pages and folders that did not change, so on large sites it takes about half the time it did before.
+    * With `pages.lazy_index` on, lists of pages such as menus, taxonomy pages, `@page.descendants` collections and the sitemap load their pages in a few batches instead of one at a time.
+    * `pages.lazy_index` now defaults to `auto`, which uses the page index on sites with 1,000 pages or more and the classic pages cache on smaller ones, so large sites load pages faster and use far less memory without any setup.
+    * Plugin classes load faster because Grav now asks only the plugin autoloaders that can have the class, in the same order as before.
+    * A modular page can set `cache_modules: true` to cache its modules' output, while modules with their own Twig or a form, logged-in visitors and form submissions are always rendered fresh.
+    * A new `session.lazy` setting, off by default, starts the session only when a visitor needs one, so anonymous page views can go out without a session cookie and be cached by a proxy or CDN.
+    * CSS minification now uses wikimedia/minify, which understands modern CSS and is about 15 to 25 times faster on real stylesheets.
+1. [](#bugfix)
+    * Sites on Apache older than 2.4.8, common on Plesk and CentOS 7 hosts, no longer answer 500 for everything under `user/` after upgrading, and upgrading fixes the `.htaccess` files earlier releases wrote there ([grav-plugin-admin2#179](https://github.com/getgrav/grav-plugin-admin2/issues/179))
+    * Plugins' `onShutdown` work runs again after Admin Next saves on sites with `session.read_and_close` on, when another plugin had already finished the response.
+    * Deleting or renaming a page folder is now picked up without clearing the cache.
+    * The `file` change check no longer counts files that only contain `.md` somewhere in their name, such as `page.md.bak`, or whose name merely ends in `yaml`.
+    * Searching Flex pages now matches a page's route as well as its title, slug and menu.
+    * `calc()` inside `@media`, `@supports` and `@container` conditions keeps its spacing when CSS is minified, so browsers no longer drop those blocks.
+    * A stylesheet with a quote that is never closed is now served unminified instead of losing the rules that follow it.
+
+# v2.1.12
+## 09/23/2026
+
+1. [](#bugfix)
+    * SVG fills that point at a gradient on the same page, such as `fill: url(#linear-gradient)`, keep working with CSS pipelining on. Thanks @wakqasahmed [#2784](https://github.com/getgrav/grav/issues/2784)
+    * CSS pipelining no longer breaks `url()` values that aren't file paths, such as `about:blank` or `blob:` links, and now correctly rewrites paths written as `URL(...)` or with spaces inside the brackets.
+
+
+# v2.1.11
+## 09/23/2026
+
+1. [](#bugfix)
+    * Files under `.well-known/` are now served when running Grav with the built-in PHP server (`bin/grav server`), matching the shipped web server configs. Thanks @wakqasahmed [#4016](https://github.com/getgrav/grav/issues/4016)
+    * Themes whose stylesheets use `@import`, such as Learn2, look right again with CSS pipelining and minification on. 2.1.10 could move a block of the theme's styles to the top of the combined file along with the import. Thanks @Gazoo [#4330](https://github.com/getgrav/grav/issues/4330)
+
+# v2.1.10
+## 09/22/2026
+
+1. [](#improved)
+    * The shipped web server configs now block running PHP and other scripts in `images/` and `assets/`, and upgrading adds the same rule to an existing site's `.htaccess`.
+    * Uploaded filenames are now rejected when any extension in the name is a dangerous one, not just the last, so `evil.php.jpg` can't run as PHP on servers that map PHP with `AddHandler`.
+    * PHP-executable extensions are now always treated as dangerous uploads, even if a site's config drops them from the list.
+    * `webserver-configs/htaccess.txt` now blocks `tmp/` like the root `.htaccess` does.
+    * File uploads sent with `PUT` or `PATCH` now drop any folder path from the filename, as PHP already does for `POST` uploads.
+    * Image derivatives now include the maximum width you ask for. Thanks @wakqasahmed [#2429](https://github.com/getgrav/grav/issues/2429)
+1. [](#bugfix)
+    * Multipart `PATCH` requests are now parsed, instead of being skipped because of a typo in the method check.
+    * A page whose `summary:` header is text rather than summary settings no longer crashes when its summary is read. Grav reads `summary` in a header as settings (`enabled`, `size`, `format`), and a site that used it for a page's lede broke the page's Markdown version (`.md` or `Accept: text/markdown`), which is what AI crawlers ask for. The text is now ignored as settings and the site's own summary settings apply.
+    * A stylesheet the CSS minifier can't handle no longer breaks the page. Its group is served unminified instead, in the original order, and cached like any other bundle. Thanks @wakqasahmed and @sridharkalaibala [#4305](https://github.com/getgrav/grav/issues/4305)
+    * A script the JS minifier can't handle no longer changes the order scripts load in, for the same reason. Thanks @wakqasahmed [#4313](https://github.com/getgrav/grav/issues/4313)
+    * Space-separated `rgb()` and `hsl()` colours are no longer mangled or dropped when CSS minification is on. Thanks @onetrev [#4305](https://github.com/getgrav/grav/issues/4305)
+    * Visiting a real folder such as `/user/pages` no longer sends the browser into an endless redirect loop. Thanks @3e33 [#4325](https://github.com/getgrav/grav/issues/4325)
+    * Watermarks now land in the right place on resized, cropped and derivative images, including retina files, instead of being placed for the original size or missed entirely. Thanks @phmg701 [#4322](https://github.com/getgrav/grav/issues/4322)
+    * Watermarks now follow the position set in configuration, and an unknown position or a bare `?watermark` no longer breaks the image. [#4322](https://github.com/getgrav/grav/issues/4322)
+
+# v2.1.9
+## 09/21/2026
+
+1. [](#bugfix)
+    * The bundled `robots.txt` no longer blocks pipelined CSS and JS. `Disallow: /assets/` was removed, because it beat the shorter `Allow: *.css$` rules and stopped Google from rendering pages on sites with the asset pipeline turned on. The CSS and JS rules now start with `/`, also match URLs with a query string, and explicitly allow assets under `system/` and `user/plugins/`. Upgrades never replace `robots.txt`, so existing sites need to apply this change by hand.
+
 # v2.1.8
 ## 09/18/2026
 

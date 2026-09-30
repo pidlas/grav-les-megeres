@@ -10,6 +10,7 @@
 namespace Grav\Common;
 
 use Composer\Autoload\ClassLoader;
+use Grav\Common\Config\CompiledBase;
 use Grav\Common\Config\Config;
 use Grav\Common\Config\Setup;
 use Grav\Common\Helpers\Exif;
@@ -318,7 +319,8 @@ class Grav extends Container
 
         // Handle ETag and If-None-Match headers.
         if ($response->getHeaderLine('ETag') === '1') {
-            $etag = md5($body);
+            // xxh128 gives the same 32 hex characters as md5 at a fraction of the cost on a large page.
+            $etag = hash('xxh128', (string)$body);
             $response = $response->withHeader('ETag', '"' . $etag . '"');
 
             $search = trim((string) $this['request']->getHeaderLine('If-None-Match'), '"');
@@ -545,7 +547,8 @@ class Grav extends Container
         // thing into memory, defeating the point of streaming, and file downloads
         // don't need a content ETag.
         if ($response->getHeaderLine('ETag') === '1' && !$this->isStreamedBody($body)) {
-            $etag = md5($body);
+            // xxh128 gives the same 32 hex characters as md5 at a fraction of the cost on a large page.
+            $etag = hash('xxh128', (string)$body);
             $response = $response->withHeader('ETag', '"' . $etag . '"');
 
             $search = trim((string) $this['request']->getHeaderLine('If-None-Match'), '"');
@@ -797,9 +800,14 @@ class Grav extends Container
             @ignore_user_abort(true);
         }
 
-        // Close the session allowing new requests to be handled.
+        // Close the session allowing new requests to be handled. A failure here must
+        // not cost every plugin its onShutdown work, so it is logged and skipped.
         if (isset($this['session'])) {
-            $this['session']->close();
+            try {
+                $this['session']->close();
+            } catch (\Throwable $e) {
+                $this['log']->error('Session close failed during shutdown: ' . $e->getMessage());
+            }
         }
 
         /** @var Config $config */
@@ -861,6 +869,10 @@ class Grav extends Container
 
         // Run any time consuming tasks.
         $this->fireEvent('onShutdown');
+
+        // Compile the configuration and language caches written by this request into OPcache
+        // now that the response is out.
+        CompiledBase::precompilePending();
     }
 
     /**
@@ -1016,24 +1028,29 @@ class Grav extends Container
                 // developer-controlled arguments and are unaffected by this toggle.
                 if ($config->get('system.images.url_actions', false)) {
                     $max_pixels = (int) $config->get('system.images.max_pixels', 25000000);
+                    // Only raster images allocate a canvas. Track their size
+                    // through the chain of actions, so each one is measured
+                    // against what the previous ones left.
+                    $raster = $medium instanceof ImageMedium;
+                    $size = $raster ? @getimagesize((string) $medium->get('filepath')) : false;
+                    $width = (int) ($size[0] ?? 0);
+                    $height = (int) ($size[1] ?? 0);
                     foreach ($uri->query(null, true) as $action => $params) {
                         if (in_array($action, ImageMedium::$magic_actions, true)) {
                             $args = explode(',', (string) $params);
-                            // Reject request-derived resize dimensions above the
-                            // total-pixel ceiling. The GD/Imagick output buffer is
-                            // allocated as width*height*4 bytes outside PHP's
-                            // memory_limit, so an unbounded request exhausts RAM.
-                            // The output width/height are the last two positions in
-                            // each $magic_resize_actions entry (crop is x,y,w,h).
-                            if ($max_pixels > 0 && isset(ImageMedium::$magic_resize_actions[$action])) {
-                                $positions = ImageMedium::$magic_resize_actions[$action];
-                                $w_pos = $positions[count($positions) - 2] ?? null;
-                                $h_pos = $positions[count($positions) - 1] ?? null;
-                                $width = ($w_pos !== null && isset($args[$w_pos]) && is_numeric($args[$w_pos])) ? (int) $args[$w_pos] : 0;
-                                $height = ($h_pos !== null && isset($args[$h_pos]) && is_numeric($args[$h_pos])) ? (int) $args[$h_pos] : 0;
-                                if ($width > 0 && $height > 0 && ($width * $height) > $max_pixels) {
+                            // Reject resize actions whose canvas is above the
+                            // total-pixel ceiling. The GD/Imagick buffer is allocated
+                            // as width*height*4 bytes outside PHP's memory_limit, so
+                            // an unbounded request exhausts RAM. The canvas is
+                            // measured, not the query numbers: `forceResize=46000`
+                            // and `zoomCrop=46000,1` both allocate 46000x46000.
+                            if ($max_pixels > 0 && $raster && isset(ImageMedium::$magic_resize_actions[$action])) {
+                                $canvas = ImageMedium::urlResizeCanvas($action, $args, $width, $height);
+                                if ($canvas === null || $canvas[0] > $max_pixels) {
                                     return false;
                                 }
+                                $width = (int) $canvas[1];
+                                $height = (int) $canvas[2];
                             }
                             call_user_func_array([&$medium, $action], $args);
                         }
@@ -1057,7 +1074,16 @@ class Grav extends Container
                 if (in_array(ltrim((string) $extension, '.'), $config->get('system.media.unsupported_inline_types', []), true)) {
                     $download = false;
                 }
-                Utils::download($page->path() . DIRECTORY_SEPARATOR . $uri->basename(), $download);
+                // The basename is still percent-encoded, so decode it the way the
+                // media lookup above does, or a file that is not in the media
+                // collection (a retina `@2x` file) 404s when its name has a space
+                // or a non-ASCII character. Decoding can yield a `/` from `%2F`,
+                // so anything that is not a bare file name is refused.
+                // getgrav/grav#4332.
+                $filename = rawurldecode((string) $uri->basename());
+                if ($filename !== '' && strpbrk($filename, "/\\\0") === false) {
+                    Utils::download($page->path() . DIRECTORY_SEPARATOR . $filename, $download);
+                }
             }
         }
 

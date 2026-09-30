@@ -6,8 +6,8 @@ $vendorDir = dirname(__DIR__);
 $baseDir = dirname($vendorDir);
 
 return array(
-    'tubalmartin\\CssMin\\' => array($vendorDir . '/tubalmartin/cssmin/src'),
     'donatj\\UserAgent\\' => array($vendorDir . '/donatj/phpuseragentparser/src/UserAgent'),
+    'Wikimedia\\Minify\\' => array($vendorDir . '/wikimedia/minify/src'),
     'Whoops\\' => array($vendorDir . '/filp/whoops/src/Whoops'),
     'Twig\\' => array($baseDir . '/system/src/Twig', $vendorDir . '/twig/twig/src'),
     'Symfony\\Polyfill\\Php84\\' => array($vendorDir . '/symfony/polyfill-php84'),

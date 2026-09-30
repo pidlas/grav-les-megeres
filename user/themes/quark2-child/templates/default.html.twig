@@ -3,11 +3,32 @@
 {% block content %}
 <main>
     <section class="{{ page.slug }}">
-
         <div class="page-content">
-            {{ page.content | twig | raw }}
+            {# 1. On récupère le contenu HTML brut produit par Grav #}
+            {% set html = page.content | raw %}
+
+            {# 2. Remplacement des paragraphes <p> par des <div class="img-centre"> #}
+            {% set html_traite = html
+
+                | regex_replace('|<p>\\s*(<img[^>]+>)\\s*</p>|', '<div class="img-centre">$1</div>')
+                | regex_replace('|<p>\\s*(<img[^>]+>\\s*<img[^>]+>)\\s*</p>|', '<div class="img-centre">$1</div>')
+            %}
+
+            {# 3. SOLUTION : Regex ultra-souple pour cibler le nom du fichier n'importe où dans le <img ...> #}
+            {% set html_traite = html_traite
+
+                | regex_replace('|<img([^>]*ateliers[^>]*\\.avif[^>]*)>|', '<img class="photo-stages-ateliers"$1>')
+                | regex_replace('|<img([^>]*stages[^>]*\\.avif[^>]*)|', '<img class="photo-stages-ateliers"$1')
+                | regex_replace('|<img([^>]*les-stages-[^>]*\\.avif[^>]*)>|', '<img class="affiche-stage"$1>')
+            %}
+
+            {# 4. AJOUT : On applique le remplacement des listes <ul> sur le HTML déjà traité par les étapes précédentes #}
+            <div class="content-list">
+                {# On remplace la balise <ul> générée par Grav par votre balise personnalisée #}
+                {{ html_traite|replace({'<ul>': '<ul class="jolie-ombres">'})|raw }}
+            </div>
+            
         </div>
-        
     </section>
 </main>
 {% endblock %}

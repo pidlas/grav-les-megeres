@@ -4,7 +4,7 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInit0ccc9e2aeb213cdf9742b3add442b956
+class ComposerStaticInit91c4570dd1637b5f82fad3da69e78cad
 {
     public static $files = array (
         '6e3fae29631ef280660b3cdad06f25a8' => __DIR__ . '/..' . '/symfony/deprecation-contracts/function.php',
@@ -28,16 +28,13 @@ class ComposerStaticInit0ccc9e2aeb213cdf9742b3add442b956
     );
 
     public static $prefixLengthsPsr4 = array (
-        't' =>
-        array (
-            'tubalmartin\\CssMin\\' => 19,
-        ),
         'd' =>
         array (
             'donatj\\UserAgent\\' => 17,
         ),
         'W' =>
         array (
+            'Wikimedia\\Minify\\' => 17,
             'Whoops\\' => 7,
         ),
         'T' =>
@@ -131,13 +128,13 @@ class ComposerStaticInit0ccc9e2aeb213cdf9742b3add442b956
     );
 
     public static $prefixDirsPsr4 = array (
-        'tubalmartin\\CssMin\\' =>
-        array (
-            0 => __DIR__ . '/..' . '/tubalmartin/cssmin/src',
-        ),
         'donatj\\UserAgent\\' =>
         array (
             0 => __DIR__ . '/..' . '/donatj/phpuseragentparser/src/UserAgent',
+        ),
+        'Wikimedia\\Minify\\' =>
+        array (
+            0 => __DIR__ . '/..' . '/wikimedia/minify/src',
         ),
         'Whoops\\' =>
         array (
@@ -416,6 +413,13 @@ class ComposerStaticInit0ccc9e2aeb213cdf9742b3add442b956
             'Gregwar\\Cache' =>
             array (
                 0 => __DIR__ . '/..' . '/getgrav/cache',
+            ),
+        ),
+        'C' =>
+        array (
+            'CSSMin' =>
+            array (
+                0 => __DIR__ . '/..' . '/wikimedia/minify/src',
             ),
         ),
     );
@@ -736,6 +740,7 @@ class ComposerStaticInit0ccc9e2aeb213cdf9742b3add442b956
         'Grav\\Common\\Helpers\\Exif' => __DIR__ . '/../..' . '/system/src/Grav/Common/Helpers/Exif.php',
         'Grav\\Common\\Helpers\\FileReader' => __DIR__ . '/../..' . '/system/src/Grav/Common/Helpers/FileReader.php',
         'Grav\\Common\\Helpers\\LogViewer' => __DIR__ . '/../..' . '/system/src/Grav/Common/Helpers/LogViewer.php',
+        'Grav\\Common\\Helpers\\PluginAutoloader' => __DIR__ . '/../..' . '/system/src/Grav/Common/Helpers/PluginAutoloader.php',
         'Grav\\Common\\Helpers\\Truncator' => __DIR__ . '/../..' . '/system/src/Grav/Common/Helpers/Truncator.php',
         'Grav\\Common\\Helpers\\YamlLinter' => __DIR__ . '/../..' . '/system/src/Grav/Common/Helpers/YamlLinter.php',
         'Grav\\Common\\Inflector' => __DIR__ . '/../..' . '/system/src/Grav/Common/Inflector.php',
@@ -1437,6 +1442,7 @@ class ComposerStaticInit0ccc9e2aeb213cdf9742b3add442b956
         'Negotiation\\Exception\\InvalidMediaType' => __DIR__ . '/..' . '/willdurand/negotiation/src/Negotiation/Exception/InvalidMediaType.php',
         'Negotiation\\LanguageNegotiator' => __DIR__ . '/..' . '/willdurand/negotiation/src/Negotiation/LanguageNegotiator.php',
         'Negotiation\\Negotiator' => __DIR__ . '/..' . '/willdurand/negotiation/src/Negotiation/Negotiator.php',
+        'Net_URL2' => __DIR__ . '/..' . '/pear/net_url2/Net/URL2.php',
         'Normalizer' => __DIR__ . '/..' . '/symfony/polyfill-intl-normalizer/Resources/stubs/Normalizer.php',
         'Nyholm\\Psr7Server\\ServerRequestCreator' => __DIR__ . '/..' . '/nyholm/psr7-server/src/ServerRequestCreator.php',
         'Nyholm\\Psr7Server\\ServerRequestCreatorInterface' => __DIR__ . '/..' . '/nyholm/psr7-server/src/ServerRequestCreatorInterface.php',
@@ -2363,27 +2369,36 @@ class ComposerStaticInit0ccc9e2aeb213cdf9742b3add442b956
         'Whoops\\Util\\Misc' => __DIR__ . '/..' . '/filp/whoops/src/Whoops/Util/Misc.php',
         'Whoops\\Util\\SystemFacade' => __DIR__ . '/..' . '/filp/whoops/src/Whoops/Util/SystemFacade.php',
         'Whoops\\Util\\TemplateHelper' => __DIR__ . '/..' . '/filp/whoops/src/Whoops/Util/TemplateHelper.php',
+        'Wikimedia\\Minify\\CSSMin' => __DIR__ . '/..' . '/wikimedia/minify/src/CSSMin.php',
+        'Wikimedia\\Minify\\Cli' => __DIR__ . '/..' . '/wikimedia/minify/src/Cli.php',
+        'Wikimedia\\Minify\\IdentityMinifierState' => __DIR__ . '/..' . '/wikimedia/minify/src/IdentityMinifierState.php',
+        'Wikimedia\\Minify\\IndexMap' => __DIR__ . '/..' . '/wikimedia/minify/src/IndexMap.php',
+        'Wikimedia\\Minify\\IndexMapOffset' => __DIR__ . '/..' . '/wikimedia/minify/src/IndexMapOffset.php',
+        'Wikimedia\\Minify\\JavaScriptMapperState' => __DIR__ . '/..' . '/wikimedia/minify/src/JavaScriptMapperState.php',
+        'Wikimedia\\Minify\\JavaScriptMinifier' => __DIR__ . '/..' . '/wikimedia/minify/src/JavaScriptMinifier.php',
+        'Wikimedia\\Minify\\JavaScriptMinifierState' => __DIR__ . '/..' . '/wikimedia/minify/src/JavaScriptMinifierState.php',
+        'Wikimedia\\Minify\\MapperState' => __DIR__ . '/..' . '/wikimedia/minify/src/MapperState.php',
+        'Wikimedia\\Minify\\MappingsGenerator' => __DIR__ . '/..' . '/wikimedia/minify/src/MappingsGenerator.php',
+        'Wikimedia\\Minify\\MinifierState' => __DIR__ . '/..' . '/wikimedia/minify/src/MinifierState.php',
+        'Wikimedia\\Minify\\ParseError' => __DIR__ . '/..' . '/wikimedia/minify/src/ParseError.php',
+        'Wikimedia\\Minify\\Utils' => __DIR__ . '/..' . '/wikimedia/minify/src/Utils.php',
         'donatj\\UserAgent\\Bots' => __DIR__ . '/..' . '/donatj/phpuseragentparser/src/UserAgent/Bots.php',
         'donatj\\UserAgent\\Browsers' => __DIR__ . '/..' . '/donatj/phpuseragentparser/src/UserAgent/Browsers.php',
         'donatj\\UserAgent\\Platforms' => __DIR__ . '/..' . '/donatj/phpuseragentparser/src/UserAgent/Platforms.php',
         'donatj\\UserAgent\\UserAgent' => __DIR__ . '/..' . '/donatj/phpuseragentparser/src/UserAgent/UserAgent.php',
         'donatj\\UserAgent\\UserAgentInterface' => __DIR__ . '/..' . '/donatj/phpuseragentparser/src/UserAgent/UserAgentInterface.php',
         'donatj\\UserAgent\\UserAgentParser' => __DIR__ . '/..' . '/donatj/phpuseragentparser/src/UserAgent/UserAgentParser.php',
-        'tubalmartin\\CssMin\\Colors' => __DIR__ . '/..' . '/tubalmartin/cssmin/src/Colors.php',
-        'tubalmartin\\CssMin\\Command' => __DIR__ . '/..' . '/tubalmartin/cssmin/src/Command.php',
-        'tubalmartin\\CssMin\\Minifier' => __DIR__ . '/..' . '/tubalmartin/cssmin/src/Minifier.php',
-        'tubalmartin\\CssMin\\Utils' => __DIR__ . '/..' . '/tubalmartin/cssmin/src/Utils.php',
         '©' => __DIR__ . '/..' . '/symfony/cache/Traits/ValueWrapper.php',
     );
 
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInit0ccc9e2aeb213cdf9742b3add442b956::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInit0ccc9e2aeb213cdf9742b3add442b956::$prefixDirsPsr4;
-            $loader->fallbackDirsPsr4 = ComposerStaticInit0ccc9e2aeb213cdf9742b3add442b956::$fallbackDirsPsr4;
-            $loader->prefixesPsr0 = ComposerStaticInit0ccc9e2aeb213cdf9742b3add442b956::$prefixesPsr0;
-            $loader->classMap = ComposerStaticInit0ccc9e2aeb213cdf9742b3add442b956::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInit91c4570dd1637b5f82fad3da69e78cad::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInit91c4570dd1637b5f82fad3da69e78cad::$prefixDirsPsr4;
+            $loader->fallbackDirsPsr4 = ComposerStaticInit91c4570dd1637b5f82fad3da69e78cad::$fallbackDirsPsr4;
+            $loader->prefixesPsr0 = ComposerStaticInit91c4570dd1637b5f82fad3da69e78cad::$prefixesPsr0;
+            $loader->classMap = ComposerStaticInit91c4570dd1637b5f82fad3da69e78cad::$classMap;
 
         }, null, ClassLoader::class);
     }

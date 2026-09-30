@@ -4,10 +4,9 @@ metadata:
     description: "Découvrez Estelle Doumeng, comédienne associée aux créations et spectacles des Mégères de l'Humus."
 visible: false
 routable: true
-# Vos nouvelles variables uniques :
-personne_image: 'webRigolote_ed.avif'
+personne_image: webRigolote_ed.avif
 image_alt: 'Estelle Doumeng, comédienne'
-citation: "Exister, c’est oser se jeter dans le monde."
+citation: 'Exister, c’est oser se jeter dans le monde.'
 citation_auteur: 'Simone de Beauvoir'
 ---
 
@@ -26,4 +25,4 @@ L'étude du mouvement lui a permis de rejoindre des projets en comédie musicale
 Elle travaille avec plusieurs Compagnies de théâtre en Occitanie en jouant un spectacle jeune public qui parle de l’identité de genre avec
 lequel elle est partie en tournée en France et au Maroc.
 
-Aujourd’hui Estelle travaille sur un spectacle poétique en cours de création et a rejoint en 2025 la compagnie *Les Mégères de l'Humus* avec lesquelles elle a la joie de partager une histoire contée.
+Aujourd’hui Estelle travaille sur un spectacle poétique en cours de création et a rejoint en 2025 la Compagnie *Les Mégères de l'Humus* avec laquelle elle a la joie de partager une histoire contée.

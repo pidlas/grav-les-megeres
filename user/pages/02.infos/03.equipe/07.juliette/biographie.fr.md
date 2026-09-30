@@ -4,10 +4,9 @@ metadata:
     description: "Découvrez Juliette Gaubert, graphiste et créatrice de l'univers visuel des Mégères de l'Humus."
 visible: false
 routable: true
-# Vos nouvelles variables uniques :
-personne_image: 'webRigolote_jg.avif'
+personne_image: webRigolote_jg.avif
 image_alt: 'Juliette Gaubert, graphiste'
-citation: "Si y’a un problème, y’a une solution. Quand y’a pas de solution, y’a pas de problème."
+citation: 'Si y’a un problème, y’a une solution. Quand y’a pas de solution, y’a pas de problème.'
 citation_auteur: 'Juliette Gaubert'
 ---
 
@@ -17,14 +16,13 @@ En 2009, son bac en poche, elle s’inscrit à l’université Toulouse II Jean-
 
 Durant ces 3 ans, elle suivra son cursus entre l’université de Toulouse et celle de Florence, Italie, ou elle sera inscrite en *design industriel*.
 
-De 2012 à 2014, Juliette continue son cursus entre l’université Toulouse II Jean-Jaurès et l’EINA, centre universitaire de design et d'art
-de Barcelone, Espagne. Elle y obtient son Master en *Design Transdisciplinaire Cultures et Territoires*.
+De 2012 à 2014, Juliette continue son cursus entre l’[a url="https://www.univ-tlse2.fr/"]Université Toulouse II Jean-Jaurès[/a] et l’[a url="https://www.eina.cat/en"]EINA[/a], centre universitaire de design et d'art de Barcelone, Espagne. Elle y obtient son Master en *Design Transdisciplinaire Cultures et Territoires*.
 
 ===
 
-En 2015, Juliette déménage à Berlin. Elle se réoriente et passe un DEU Community Manager et une formation Designer UX en 2021.
+En 2015, Juliette déménage à Berlin. Elle se réoriente et passe un Diplôme Universitaire Community Manager et une formation Designer UX en 2021.
 
 À partir de 2018, en parallèle de son travail, elle replonge dans son amour du lycée : le théâtre. Elle s’investit pleinement au sein du
-<a data-type="external" href="https://theaterimnu.de/fr/accueil" target="_blank" rel="noopener noreferrer">Theater Im Nu</a><span class="lien-e-seul"></span>.
+[a url="https://theaterimnu.de/fr/accueil"]Theater Im Nu[/a].
 
 Elle est notamment comédienne et accessoiriste sur les créations *Un fil à la Patte* et *Grenouille&copy;, conte sanglant pour cyborgs*. Elle est aussi bénévole sur toutes les éditions du festival de la compagnie, le *Lampenfieber*.

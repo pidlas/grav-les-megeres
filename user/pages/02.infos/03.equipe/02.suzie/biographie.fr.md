@@ -4,8 +4,7 @@ metadata:
     description: "Portrait de Suzie Idlas, cofondatrice des Mégères de l'Humus, comédienne, conteuse, autrice et metteuse en scène."
 visible: false
 routable: true
-# Vos nouvelles variables uniques :
-personne_image: 'webRigolote_si.avif'
+personne_image: webRigolote_si.avif
 image_alt: 'Suzie Idlas, responsable communication, metteuse en scène, autrice, comédienne'
 citation: 'Je veux juste la Terre que j’adore.'
 citation_auteur: 'Testament, Vita Sackville West'
@@ -13,7 +12,7 @@ citation_auteur: 'Testament, Vita Sackville West'
 
 Suzie est comédienne et conteuse. En 2011 elle passe son baccalauréat Littéraire en option lourde Théâtre au Lycée René Cassin à Arpajon (91).
 
-Depuis 2009, elle joue dans plusieurs créations entre l’île de France, Toulouse et l'Aude. En 2015, elle se forme à la langue des signes à l'[International Visual Theatre](https://ivt.fr/) à Paris et en 2020 à l'art de conter au [Théâtre de la parole](https://www.theatredelaparole.be/) à Bruxelles.
+Depuis 2009, elle joue dans plusieurs créations entre l’île de France, Toulouse et l'Aude. En 2015, elle se forme à la langue des signes à l'[a url="https://ivt.fr"]International Visual Theatre[/a] à Paris et en 2020 à l'art de conter au [a url="https://www.theatredelaparole.be/"]Théâtre de la parole[/a] à Bruxelles.
 
 Suzie est aussi autrice. Elle écrit un recueil de poésies *l’Esquisse Folle* qui retrace son parcours de jeune adulte dans un monde patriarcal.
 

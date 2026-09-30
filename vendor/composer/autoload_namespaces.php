@@ -12,4 +12,5 @@ return array(
     'PHPExif' => array($vendorDir . '/miljar/php-exif/lib'),
     'JShrink' => array($vendorDir . '/tedivm/jshrink/src'),
     'Gregwar\\Cache' => array($vendorDir . '/getgrav/cache'),
+    'CSSMin' => array($vendorDir . '/wikimedia/minify/src'),
 );
