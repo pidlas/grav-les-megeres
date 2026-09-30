@@ -1,3 +1,8 @@
+---
+title: 'Stages de théâtre'
+menu: 'Stages de théâtre'
+---
+
 ![Un stage de théâtre de la Compagnie Les Mégères de l'Humus](stages.avif)
 
 Ces stages sont pensés pour progresser en confiance, découvrir différents langages scéniques et vivre une aventure collective. La compagnie intervient auprès de publics débutants ou déjà pratiquants.
