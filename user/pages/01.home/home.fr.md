@@ -17,7 +17,7 @@ slides:
         image: gresilhette-et-salimonde.avif
     -
         titre: 'Ta grand-mère sous le figuier'
-        lien: /spectacles/tagrand-mere
+        lien: /spectacles/ta-grand-mere-sous-le-figuier
         image: ta-grand-mere-sous-le-figuier.avif
     -
         titre: 'Théâtre Forum'
