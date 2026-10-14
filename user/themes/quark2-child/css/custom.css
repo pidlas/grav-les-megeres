@@ -23,6 +23,11 @@ footer {
     z-index: 10; /* Assure qu'il reste accessible s'il passe sous un autre bloc */
 }
 
+.sous-titre-page{
+    text-align: center;
+    font-size: clamp(1rem, 1vw + 0.4rem, 2rem);
+}
+
 /* Assure que le diaporama reste dans le flux normal */
 fieldset.visually-hidden {
     position: relative;
@@ -85,6 +90,10 @@ img.text-image-loaded {
 main section p:first-of-type,
 .page-content p:first-of-type {
     margin-top: var(--space-m);
+}
+
+.marge-haute {
+    margin-top: var(--space-l);
 }
 
 .g_equipe p {

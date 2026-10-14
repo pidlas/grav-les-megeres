@@ -1,0 +1,9 @@
+profiles:
+  -
+    name: 'Default Site Backup'
+    root: /
+    schedule: true
+    schedule_at: '5 10 * * *'
+    schedule_environment: null
+    exclude_paths: "/backup\n/cache\n/images\n/logs\n/tmp"
+    exclude_files: ".DS_Store\n.git\n.svn\n.hg\n.idea\n.vscode\nnode_modules"

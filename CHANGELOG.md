@@ -1,3 +1,42 @@
+# v2.2.6
+## 10/09/2026
+
+1. [](#bugfix)
+    * With the logs or cache folder moved by `GRAV_LOG_PATH` or `GRAV_CACHE_PATH`, the cache and backup jobs write their output to the moved logs folder, a job's `output:` can be a `log://` path, and `bin/grav cache-cleanup` and the GPM permission check find the moved cache folder. Thanks @onetrev [#4344](https://github.com/getgrav/grav/issues/4344)
+    * Scheduler history files older than the `retention_days` setting are now deleted, instead of collecting forever [#4344](https://github.com/getgrav/grav/issues/4344)
+
+# v2.2.5
+## 10/06/2026
+
+1. [](#improved)
+    * Twig in page content can use the `guard` tag to check that a function, filter or test exists before calling it [#4341](https://github.com/getgrav/grav/issues/4341)
+2. [](#bugfix)
+    * Folder settings in a `.env` file, such as `GRAV_BACKUP_PATH` and `GRAV_TMP_PATH`, now apply on hosts that turn off PHP's `putenv()` for web requests, and no longer write an error to the log on every request [#4344](https://github.com/getgrav/grav/issues/4344)
+    * An SVG with only a viewBox now reports its real width and height, a viewBox separated by commas is understood, and a relative width such as `100%` is no longer read as 100 pixels [#4347](https://github.com/getgrav/grav/issues/4347)
+    * A redirect with a status code followed by a query string, such as `/new[301]?a=1&b=2`, is now sent with that status code and without the `[301]` in the address, instead of as a 302 to an address containing it [#3320](https://github.com/getgrav/grav/issues/3320) [#4343](https://github.com/getgrav/grav/issues/4343)
+    * A page's group permissions now deny every letter after a `-` up to the next `+`, so `-c+r-ud`, which the Admin saves for create, update and delete denied, no longer allows delete [#4340](https://github.com/getgrav/grav/issues/4340)
+    * Query parameters reach the Admin and API on web servers that rewrite to `index.php` without passing the query string on, such as an nginx `try_files` line missing `?$query_string`, so switching the editor to another language no longer loads the default language's page [#4338](https://github.com/getgrav/grav/discussions/4338)
+    * A form field directive written in page frontmatter can now only check whether its Flex object exists; directives in blueprint files are unchanged
+    * The current page address no longer includes the visitor's HTTP Basic username and password when it is printed or turned into an array, and `Uri::user()` and `Uri::password()` are empty for the current request
+
+# v2.2.4
+## 10/01/2026
+
+1. [](#bugfix)
+    * A page's Markdown version (`<route>.md`) and `llms-full.txt` include the full page again on sites running the Archives plugin, instead of only a title and navigation links [#4339](https://github.com/getgrav/grav/issues/4339)
+    * An uploaded SVG whose doctype declares entities is no longer emptied by the sanitizer (rhukster/dom-sanitizer 1.0.19)
+    * A multisite that keeps each site in `user/env/<host>/` loads its theme, plugin and media files again. The bundled server configs protect `config/`, `accounts/` and `data/` inside each env folder the same way they protect them in `user/`, and the upgrade updates an existing `.htaccess`, and the `user/env/.htaccess` an earlier upgrade added, to match. Sites on nginx, Caddy, lighttpd or IIS need to copy the new rules from `webserver-configs/` by hand [#4335](https://github.com/getgrav/grav/issues/4335)
+    * Saving a page whose blueprint has a list containing only an `elements` field no longer fails with an error, and the fields inside each element now belong to their list item instead of the top of the blueprint, where they could clash with a field of the same name (rockettheme/toolbox 2.0.1) [#4337](https://github.com/getgrav/grav/issues/4337)
+
+# v2.2.3
+## 09/29/2026
+
+1. [](#improved)
+    * Updated Twig to 3.30 (through Grav's getgrav/Twig fork), which brings upstream's fixes since 3.29, among them faster object attribute reads and macros declared by a parent template, a `for` loop variable that was undefined inside a nested loop's sequence, and the spread operator now rejected outside sequences, mappings and call arguments.
+    * Theme and plugin templates now compile without any of the Twig sandbox's checks, which only ever apply to Twig in page content, so pages render faster (about half the Twig time on a busy listing template, within a few percent of running with no sandbox at all). Twig in page content, and any template rendered with the sandbox switched on, is checked exactly as before. That includes a theme template that was already loaded when a `{% sandbox %}` block or a sandboxed include reaches it, along with its blocks, macros and parent: it renders from a separately compiled copy with every check in place, so it gives the same output, and blocks the same things, as before. This uses a new opt-in feature of Grav's Twig fork (getgrav/Twig), so it needs that fork's matching commit.
+2. [](#bugfix)
+    * Grav's Twig now refuses a template loaded by a different Twig environment when one is passed to `include()` or `{% include %}`, the same as Twig itself does, instead of rendering it with the other environment's settings. A template object from Grav's own environment passed on its own now renders instead of failing with a type error.
+
 # v2.2.2
 ## 09/28/2026
 

@@ -1,3 +1,16 @@
+# v1.1.17
+## 10/09/2026
+
+1. [](#bugfix)
+    * On phones the menu button now lines up with the logo, at the top of the page and once the header shrinks on scroll [#28](https://github.com/getgrav/grav-theme-quark2/issues/28)
+
+# v1.1.16
+## 10/01/2026
+
+1. [](#bugfix)
+    * The 404 and other error pages now sit in the same white content card as regular pages. Thanks @Mikanoshi and @Jah-yee [#26](https://github.com/getgrav/grav-theme-quark2/issues/26)
+    * The "Back home" button on error pages can now be translated instead of always showing English. Thanks @Mikanoshi [#26](https://github.com/getgrav/grav-theme-quark2/issues/26)
+
 # v1.1.15
 ## 09/28/2026
 

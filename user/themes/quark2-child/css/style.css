@@ -166,10 +166,7 @@ h2:not(.display-title) {
 
 .radio-title {
     font-size: clamp(0.5rem, 2vw + 0.2rem, 1.5rem);
-    /* Utilisation de votre couleur claire et vive pour le texte */
-    color: #f7ae56 !important; 
-    
-    /* Une légère ombre pour donner du relief au titre */
+    color: #f7ae56; 
     text-shadow: 0.0625rem 0.0625rem 0.1875rem rgba(0, 0, 0, 0.5);
     margin: 0;
 }
@@ -253,14 +250,7 @@ p.traduction {
     margin-top: var(--space-s);
 }
 
-.reglement-interieur p {
-    border-left: 0.75rem solid #f7ae56;
-    border-radius: 0.5rem;
-    margin-bottom: 2rem;
-    padding-left: 1.875rem;
-}
 .niv1 a,
-
 .sous-titre {
     color: #382b4c;
 }
@@ -428,16 +418,16 @@ button.box {
 .box .ligne:nth-child(3) {
     transform: rotate(0deg);
     transition:
-        transform 0.4s ease-in-out,
-        top 0.4s ease-in-out 0.4s;
+    transform 0.4s ease-in-out,
+    top 0.4s ease-in-out 0.4s;
 }
 
 .box.active .ligne:first-child {
     top: 0.625rem;
     transform: rotate(45deg);
     transition:
-        top 0.4s ease-in-out,
-        transform 0.4s ease-in-out 0.4s;
+    top 0.4s ease-in-out,
+    transform 0.4s ease-in-out 0.4s;
 }
 
 .box.active .ligne:nth-child(2) {
@@ -450,7 +440,6 @@ button.box {
     transform: rotate(-45deg);
 }
 #hamburger,
-
 #hamburger.menu-petit-ecran {
     left: 1.25rem;
     margin: 0;
@@ -462,7 +451,6 @@ button.box {
 
 @media (hover: none) and (pointer: coarse) {
     #hamburger,
-
     #hamburger.menu-petit-ecran {
         left: max(1.25rem, env(safe-area-inset-left));
         top: max(1.25rem, env(safe-area-inset-top));
@@ -497,7 +485,6 @@ nav.navbar.responsive {
     z-index: 4500;
 }
 nav.navbar.responsive .menu,
-
 nav.navbar.responsive .rs {
     border-radius: 0.5rem;
     display: flex;
@@ -510,7 +497,6 @@ nav.navbar.responsive .menu {
     justify-content: flex-start;
 }
 .navbar.responsive .menu > .menu-trigger,
-
 .navbar.responsive .menu > a {
     font-size: clamp(0.98rem, 4.6vw, 1.15rem);
     justify-content: flex-start;
@@ -518,12 +504,11 @@ nav.navbar.responsive .menu {
     min-height: var(--menu-item-min-height);
     padding: 2.5rem var(--menu-inline-padding) 0;
     transition:
-        background-color 0.18s ease,
-        color 0.18s ease;
+    background-color 0.18s ease,
+    color 0.18s ease;
     width: fit-content;
 }
 .navbar.responsive .menu > .menu-trigger:focus-visible,
-
 .navbar.responsive .menu > a:focus-visible {
     background: hsla(0, 0%, 100%, 0.25);
     outline: 2px solid #382b4c;
@@ -545,7 +530,6 @@ nav.navbar.responsive .menu {
     flex-direction: column;
 }
 nav.navbar.responsive.submenu-active .menu:not(.is-open),
-
 nav.navbar.responsive.submenu-active .rs {
     display: none;
 }
@@ -559,9 +543,9 @@ nav.navbar.responsive.submenu-active .rs {
     min-height: var(--menu-subitem-min-height);
     padding: var(--menu-subitem-padding);
     transition:
-        background-color 0.18s ease,
-        color 0.18s ease,
-        border-top-color 0.18s ease;
+    background-color 0.18s ease,
+    color 0.18s ease,
+    border-top-color 0.18s ease;
     width: 100%;
 }
 
@@ -586,8 +570,8 @@ nav.navbar.responsive.submenu-active .rs {
     box-shadow: none;
     height: var(--menu-social-icon-size);
     transition:
-        background-color 0.18s ease,
-        color 0.18s ease;
+    background-color 0.18s ease,
+    color 0.18s ease;
     width: var(--menu-social-icon-size);
 }
 
@@ -597,7 +581,6 @@ nav.navbar.responsive.submenu-active .rs {
     outline-offset: 2px;
 }
 .box.active,
-
 .menu {
     background-color: #e4896a;
 }
@@ -614,7 +597,6 @@ nav.navbar.responsive.submenu-active .rs {
     background-color: rgba(228, 137, 106, 0.8);
 }
 .menu > .menu-trigger,
-
 .menu > a {
     align-items: center;
     color: #000;
@@ -638,12 +620,12 @@ nav.navbar.responsive.submenu-active .rs {
     outline: 2px solid #382b4c;
     outline-offset: 2px;
 }
+
 .menu.is-open > .menu-trigger,
 .menu.is-open > a,
 .menu > .menu-trigger:focus-visible,
 .menu > .menu-trigger:hover,
 .menu > a:focus-visible,
-
 .menu > a:hover {
     background: hsla(0, 0%, 100%, 0.18);
     border-radius: 0.5rem;
@@ -668,7 +650,6 @@ nav.navbar.responsive.submenu-active .rs {
 }
 .menu.is-hovered .niv1,
 .menu.is-open .niv1,
-
 .menu:focus-within .niv1 {
     display: flex;
     flex-direction: column;
@@ -705,7 +686,6 @@ nav.navbar.responsive.submenu-active .rs {
     width: min(7.5rem, 18vw);
 }
 .rs,
-
 .rs a {
     align-items: center;
     display: flex;
@@ -716,8 +696,8 @@ nav.navbar.responsive.submenu-active .rs {
     background: #e4896a;
     border-radius: 50%;
     box-shadow:
-        0.25rem 0.25rem 0.5rem #c2745a,
-        -0.25rem -0.25rem 0.5rem #ff9e7a;
+    0.25rem 0.25rem 0.5rem #c2745a,
+    -0.25rem -0.25rem 0.5rem #ff9e7a;
     height: 1.875rem;
     width: 1.875rem;
 }
@@ -726,8 +706,8 @@ nav.navbar.responsive.submenu-active .rs {
     background: #7e4c3a;
     border-radius: 3.125rem;
     box-shadow:
-        inset 0.3125rem 0.3125rem 0.625rem #c2745a,
-        inset -0.3125rem -0.3125rem 0.625rem #ff9e7a;
+    inset 0.3125rem 0.3125rem 0.625rem #c2745a,
+    inset -0.3125rem -0.3125rem 0.625rem #ff9e7a;
 }
 
 .mobile-only {
@@ -737,8 +717,8 @@ nav.navbar.responsive.submenu-active .rs {
     min-height: var(--menu-item-min-height);
     padding: 2.5rem var(--menu-inline-padding) 0;
     transition:
-        background-color 0.18s ease,
-        color 0.18s ease;
+    background-color 0.18s ease,
+    color 0.18s ease;
     width: fit-content;
 }
 
@@ -759,19 +739,16 @@ main:focus-visible {
     outline-offset: 2px;
 }
 .conteneur-champignons,
-
 .conteneur-feuilles {
     margin-top: var(--space-m);
     width: 100%;
 }
 .conteneur-champignons img,
-
 .conteneur-feuilles img {
     display: block;
     margin: 0 auto;
 }
 .champignons,
-
 .feuilles {
     height: auto;
     max-width: 100%;
@@ -786,16 +763,16 @@ main:focus-visible {
 }
 
 .actus-list {
-    display: grid;
+    display:grid;
     gap: 0.9375rem;
     margin-top: var(--space-m);
 }
 
 .actu-item {
+    display:grid;
     background: hsla(0, 0%, 100%, 0.55);
     border: 1px solid rgba(56, 43, 76, 0.2);
     border-radius: 0.625rem;
-    display: grid;
     gap: 0.625rem;
     grid-auto-rows: minmax(auto, max-content);
     grid-template-columns: 1fr;
@@ -875,20 +852,25 @@ main:focus-visible {
 .button-container .card {
     height: clamp(6.25rem, 68vh, 20rem);
 }
+
+.button-container .card .description a {
+    pointer-events: none;
+    color: inherit;
+    text-decoration: none;
+}
+
 .button-active a:active,
 .button-container a,
 .button-container a:hover,
-
 .button-container a:visited {
     color: #a9411e;
 }
 
 .card {
+    display:flex;
     align-items: flex-end;
-    background-size: cover;
     box-shadow: 0.3125rem 0.3125rem 1.875rem rgba(0, 0, 0, 0.1);
     cursor: pointer;
-    display: flex;
     filter: opacity(0.6);
     flex-basis: 5%;
     margin: 0 0.3125rem;
@@ -896,7 +878,9 @@ main:focus-visible {
     overflow: hidden;
     transition: 0.6s cubic-bezier(0.28, -0.03, 0, 0.99);
     border-radius:1rem;
-    background-position:49.5%;
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center top;
 }
 
 .card:hover {
@@ -910,8 +894,8 @@ input .description {
 }
 
 input:checked + label.card {
-    cursor: not-allowed;
-    display: flex;
+    display:flex;
+    cursor:pointer;
     filter: none;
     flex-grow: 1;
     transform: none;
@@ -924,13 +908,12 @@ input:checked + label .description {
     justify-content: left;
     opacity: 1;
     transform: translateY(0);
-    padding-left:1.25rem /* Aligner le texte proprement avec le dégradé */
+    padding-left:1.25rem;
 }
 
 input:checked + label .row {
-    width: 100%; /* Important : prend toute la largeur pour un rendu uniforme */
-    backdrop-filter: none; /* On supprime l'ancien flou */
-    /* Dégradé qui part de votre couleur sombre opaque (#382b4c) vers le transparent */
+    width: 100%;
+    backdrop-filter: none;
     background: linear-gradient(
         to top, 
         rgba(56, 43, 76, 0.95) 0%, 
@@ -938,8 +921,8 @@ input:checked + label .row {
         transparent 100%
     );
 }
-.description,
 
+.description,
 .row {
     display: flex;
     width: 100%;
@@ -952,12 +935,25 @@ input:checked + label .row {
     transition: all 0.3s ease;
 }
 
+/* --- LE GRAND CONTENEUR GLOBAL --- */
+.page_equipe {
+  display: flex;
+  flex-direction: column;
+  gap: 3rem; /* Espace vertical entre vos 3 sections de l'assoce */
+}
+
+/* --- LE STYLE CSS DE VOS <ul> (Remplace votre ancien .g_equipe seul) --- */
 .g_equipe {
-    display: grid;
-    grid-template-columns: repeat(1, minmax(255px, 1fr));
-    margin-top: 3.125rem;
-    place-items: center;
-    row-gap: 2.5rem;
+  display: grid;
+  grid-template-columns: 1fr; /* Mobile-first : 1 seule colonne */
+  grid-template-rows:auto;
+  align-content:start;
+  gap: 1.25rem;
+  justify-items: center; /* Aligne le contenu au centre de chaque cellule */
+  justify-content: center; /* Aligne la ligne de la grille au centre de la page */
+  list-style: none; /* Supprime les puces de la liste <ul> */
+  padding: 0;
+  margin: 0;
 }
 
 .anime_hover.posImage {
@@ -988,35 +984,18 @@ input:checked + label .row {
 }
 
 .anime_hover {
+    display:flex;
+    position:relative;
     align-items: center;
     border-radius: 26%;
-    display: flex;
     margin-top: var(--space-xs);
     overflow: hidden;
-    position: relative;
     width: fit-content;
 }
 
-.montre {
-    display: none;
-    font-size: 0.875rem;
-    font-weight: bolder;
-    height: 2.5rem;
-    justify-content: center;
-    left: 50%;
-    position: absolute;
-    top: 50%;
-    transform: translate(-50%, -50%);
-    width: 80%;
-}
-
-.montre i {
-    padding-left: 0.5rem;
-}
-
 .anime_hover:hover .montre {
+    display:flex;
     align-items: center;
-    display: flex;
 }
 
 .anime_hover:hover img {
@@ -1026,27 +1005,33 @@ input:checked + label .row {
 }
 
 .montre {
+    display:flex;
+    position:absolute;
     align-items: center;
     background: rgba(56, 43, 76, 0.65);
     border-radius: 0;
-    bottom: 0;
+    bottom:0;
+    left:0;
+    top:auto;
     color: #fffefc;
-    display: flex;
     font-size: 0.75rem;
+    font-weight:bolder;
     height: auto;
     justify-content: center;
-    left: 0;
     padding: 0.35rem 0.5rem;
-    top: auto;
     transform: none;
     width: 100%;
+}
+
+.montre i {
+    padding-left: 0.5rem;
 }
 
 .g_bio {
     align-items: center;
 }
-.e_photo,
 
+.e_photo,
 .g_bio {
     display: flex;
     flex-direction: column;
@@ -1064,8 +1049,8 @@ input:checked + label .row {
     opacity: 0;
     transform: scale(0.6);
     transition:
-        opacity 0.6s ease-out,
-        transform 0.6s ease-out;
+    opacity 0.6s ease-out,
+    transform 0.6s ease-out;
 }
 
 .fade-zoom.loaded {
@@ -1076,8 +1061,8 @@ input:checked + label .row {
 .e_debut_bio {
     position: relative;
 }
-.e_citation,
 
+.e_citation,
 .e_debut_bio {
     display: flex;
     flex-direction: column;
@@ -1122,8 +1107,8 @@ figure.bio {
 }
 
 .g_compagnie {
+    display:grid;
     align-items: center;
-    display: grid;
     width: 100%;
 }
 
@@ -1146,8 +1131,8 @@ figure.bio {
 }
 
 .g_compagnie2 {
+    display:grid;
     align-items: center;
-    display: grid;
     justify-content: center;
     width: 100%;
 }
@@ -1185,8 +1170,8 @@ figure.bio {
 }
 
 .g_compagnie3 {
+    display:grid;
     align-items: center;
-    display: grid;
     grid-template-columns: 50% 50%;
     justify-content: center;
     margin-top: var(--space-m);
@@ -1196,6 +1181,7 @@ figure.bio {
 .g_co-item7 {
     grid-column: 1/2;
 }
+
 .g_co-item7,
 .g_co-item8 {
     display: flex;
@@ -1207,11 +1193,13 @@ figure.bio {
 .g_co-item8 {
     grid-column: 2/3;
 }
+
 .g_co-item7 a,
 .g_co-item8 a {
     display: flex;
     justify-content: center;
 }
+
 .g_co-item9 {
     display: flex;
     flex-direction: column;
@@ -1249,12 +1237,12 @@ figure.bio {
 }
 
 .g_co-item12{
+    display:flex;
     grid-column:1/3;
     grid-row:6/7;
-    display: flex;
-    flex-direction: column; /* Aligne le h2 et l'image verticalement */
-    align-items: center;    /* Centre horizontalement le h2 et l'image */
-    justify-content: center;/* Centre verticalement si la cellule est plus haute que son contenu */
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
 }
 
 .g_co-item12 img {
@@ -1264,7 +1252,7 @@ figure.bio {
     width: 80%;
 }
 
-.g_co-item13{
+.g_co-item13 {
     grid-column:1/3;
     grid-row:7/8;
 }
@@ -1283,14 +1271,13 @@ figure.bio {
 }
 .g_compagnie img,
 .g_compagnie2 img,
-
 .g_compagnie3 img {
     border-radius: 0.5rem;
 }
 
 .g_partenaires {
+    display:grid;
     align-items: center;
-    display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     justify-content: center;
     justify-items: center;
@@ -1309,65 +1296,26 @@ figure.bio {
     width: 9.375rem;
 }
 
-.g_spectacles {
+.spectacle-gresilhette {
+    display:flex;
     align-items: center;
-    display: flex;
     flex-direction: column;
     margin-top: 1.125rem;
 }
 
-.g_sp_spectacles {
+.versions-spectacle {
     display:flex;
-    justify-content:center;
     flex-direction:column;
+    justify-content:center;
+    align-items:center;
 }
 
-.g_sp_theatre-d-ombres {
+.images-spectacle {
     margin-top: var(--space-m);
     position: relative;
 }
 
-.g_sp_theatre-d-ombres:after {
-    bottom: 0.625rem;
-    color: #fff;
-    content: "\f25a";
-    font-family: 'Font Awesome 6 Free';
-    font-size: 1.5rem;
-    font-weight: 900;
-    left: 50%;
-    opacity: 1;
-    pointer-events: none;
-    position: absolute;
-    transform: translateX(-50%);
-    transition: opacity 0.2s;
-    z-index: 2;
-}
-
-.g_sp_sieste-contee {
-    position: relative;
-}
-
-.g_sp_sieste-contee:after {
-    bottom: 0.625rem;
-    color: #fff;
-    content: "\f25a";
-    font-family: 'Font Awesome 6 Free';
-    font-size: 1.5rem;
-    font-weight: 900;
-    left: 50%;
-    opacity: 1;
-    pointer-events: none;
-    position: absolute;
-    transform: translateX(-50%);
-    transition: opacity 0.2s;
-    z-index: 2;
-}
-
-.g_sp_projet-pedagogique {
-    position: relative;
-}
-
-.g_sp_projet-pedagogique:after {
+.images-spectacle:after {
     bottom: 0.625rem;
     color: #fff;
     content: "\f25a";
@@ -1385,38 +1333,23 @@ figure.bio {
 
 .p_projet-pedagogique,
 .p_sieste-contee,
-.p_theatre-d-ombres {
+.p_theatre-d-ombres,
+.p_les-scolaires,
+.p_le-tout-public {
+    display:flex;
+    position:relative;
     align-items: flex-end;
-    display: flex;
     justify-content: center;
     margin-top: var(--space-l);
-    position: relative;
 }
 
 .sigean-sieste-contee{
+    display:block;
     margin: var(--space-m) auto 0;
     border: 0.3125rem solid #e4896a;
     border-radius: 2rem;
     box-shadow: -0.5rem 0.5rem 0.75rem rgba(0, 0, 0, 0.3);
     padding: 0.625rem;
-}
-
-.image-wrapper.morph img {
-    aspect-ratio: 1/1;
-    border-radius: 50%;
-    filter: grayscale(0) blur(0);
-    height: auto;
-    object-fit: cover;
-    transition: all 0.5s ease;
-    width: 10rem;
-}
-
-.image-wrapper.morph:hover img {
-    aspect-ratio: 1/1;
-    border-radius: 50%;
-    height: auto;
-    transform: rotate(1turn);
-    width: 12.5rem;
 }
 
 .g_art-tech > a {
@@ -1438,9 +1371,9 @@ figure.bio {
     position: absolute;
     z-index: 1;
 }
-.g_sp_projet-pedagogique.morph img,
-.g_sp_sieste-contee.morph img,
-.g_sp_theatre-d-ombres.morph img{
+
+.images-spectacle.morph img,
+.image-wrapper.morph img{
     aspect-ratio: 1/1;
     border-radius: 50%;
     filter: grayscale(0) blur(0);
@@ -1450,9 +1383,8 @@ figure.bio {
     width: 10rem;
 }
 
-.g_sp_projet-pedagogique:hover img,
-.g_sp_sieste-contee:hover img,
-.g_sp_theatre-d-ombres:hover img{
+.images-spectacle:hover img,
+.image-wrapper.morph:hover img{
     aspect-ratio: 1/1;
     border-radius: 50%;
     height: auto;
@@ -1463,7 +1395,6 @@ figure.bio {
 /*.image-wrapper.morph:hover img {
     box-shadow: none;
     filter: none;
-    transform: none;
 }*/
 
 .image-wrapper:after {
@@ -1471,7 +1402,7 @@ figure.bio {
     color: #fff;
     content: "\f25a";
     font-family: 'Font Awesome 6 Free';
-    font-size: 1.5rem;
+    font-size: 1rem;
     font-weight: 900;
     left: 50%;
     opacity: 1;
@@ -1482,11 +1413,6 @@ figure.bio {
     z-index: 2;
 }
 
-.image-wrapper:after {
-    bottom: 1.875rem;
-    font-size: 1rem;
-}
-
 .jolie-ombres li:before {
     color: #e4896a;
     content: "◦ ";
@@ -1495,15 +1421,12 @@ figure.bio {
 }
 
 .slide-list li {
-    /*opacity: 0;
-    transform: translateX(-100%);*/
     opacity: 0;
     transform: translateY(2rem);
     transition: opacity 0.6s cubic-bezier(0.25, 1, 0.5, 1), transform 0.6s cubic-bezier(0.25, 1, 0.5, 1);
 }
 
 .slide-list li.animate-in {
-    /*animation: slideIn 0.5s forwards;*/
     opacity: 1;
     transform: translateY(0);
 }
@@ -1545,8 +1468,8 @@ figure.bio {
 }
 
 footer {
+    display:grid;
     align-items: center;
-    display: grid;
     grid-area: footer;
     grid-template-columns: 1fr;
     justify-content: center;
@@ -1575,9 +1498,9 @@ footer p {
     background-image: linear-gradient(0deg, #71007f, #004afe, #028124, #ffed03, #ff8e00, #e60000);
     border-color: rgba(221, 238, 207, 0.52);
     box-shadow:
-        inset 0 1px 0 rgba(250, 255, 244, 0.18),
-        inset 0 0 0 1px rgba(20, 32, 24, 0.18),
-        0 16px 1.875rem rgba(7, 16, 10, 0.28);
+    inset 0 1px 0 rgba(250, 255, 244, 0.18),
+    inset 0 0 0 1px rgba(20, 32, 24, 0.18),
+    0 16px 1.875rem rgba(7, 16, 10, 0.28);
     cursor: pointer;
     display: inline-flex;
 }
@@ -1595,8 +1518,8 @@ footer p {
 .accueil-intro {
     margin: 0;
 }
-.accueil-intro,
 
+.accueil-intro,
 section {
     display: grid;
     grid-template-columns: 1fr;
@@ -1611,12 +1534,14 @@ section {
     overflow-wrap: anywhere;
     word-break: break-word;
 }
+
 .encadre,
 .encadre-extrait,
 .encadre-lenga {
     margin-top: var(--space-m);
     position: relative;
 }
+
 .encadre-extrait:before,
 .encadre-lenga:before,
 .encadre:before {
@@ -1636,12 +1561,12 @@ section {
 }
 
 .gresilhette-et-la-salimonde {
+    position:relative;
     align-items: center;
     background-color: #fffefc;
     display: flex;
     flex-direction: column;
     padding: 1.25rem;
-    position: relative;
     z-index: 2;
 }
 
@@ -1696,8 +1621,8 @@ section {
     shape-image-threshold: 0.5;
     shape-outside: circle(45%) padding-box;
 }
-.affiche-cours,
 
+.affiche-cours,
 .photo-cours {
     display: inline-block;
     width: min(350px, 33%);
@@ -1720,6 +1645,11 @@ section {
     text-align: center;
 }
 
+.img-centre {
+    display: flex;
+    justify-content: center;
+}
+
 .affiche-stage {
     display: block;
     margin: 2rem auto 0;
@@ -1736,11 +1666,6 @@ section {
     width: 80%;
 }
 
-.img-centre {
-    display: flex;
-    justify-content: center;
-}
-
 .contact p {
     text-align: center;
 }
@@ -1753,10 +1678,10 @@ section {
 }
 .adresse,
 .association,
-
 .telephone {
     margin-top: 2rem;
 }
+
 .infos-contact:not(.fb):not(.insta){
     margin-top: var(--space-l);
 }
@@ -1795,8 +1720,8 @@ th.sep {
     color: #1877f2;
     content: "\f09a";
 }
-.fb:before,
 
+.fb:before,
 .insta:before {
     font-family: 'Font Awesome 6 Brands';
     font-size: 2.25rem;
@@ -1938,12 +1863,10 @@ th.sep {
         font-size: clamp(1.3rem, 5vw, 1.8rem);
     }
     nav.navbar:not(.responsive) .menu,
-
     nav.navbar:not(.responsive) .rs {
         display: none;
     }
     #hamburger,
-
     #hamburger.menu-petit-ecran {
         display: flex;
         left: 1.25rem;
@@ -1954,7 +1877,6 @@ th.sep {
         z-index: 3000;
     }
     .g_co-item7 img,
-
     .g_co-item8 img {
         width: 85%;
     }
@@ -1995,7 +1917,6 @@ th.sep {
         width: 100%;
     }
     #hamburger,
-
     #hamburger.menu-petit-ecran {
         display: flex;
         left: 1.25rem;
@@ -2009,7 +1930,6 @@ th.sep {
 
 @media screen and (max-width: 620px) and (orientation: portrait) {
     #hamburger,
-
     #hamburger.menu-petit-ecran {
         display: flex;
         left: 1.25rem;
@@ -2042,7 +1962,6 @@ th.sep {
     }
     .d_projet-pedagogique,
     .d_sieste-contee,
-
     .d_theatre-d-ombres {
         max-width: 9rem;
     }
@@ -2073,8 +1992,6 @@ th.sep {
     }
 
     input:checked + label.card {
-        background-repeat: no-repeat;
-        background-size: cover;
         flex: 0 0 min(68vw, 10.8rem);
     }
 
@@ -2094,8 +2011,6 @@ th.sep {
     }
 
     input:checked + label.card {
-        background-repeat: no-repeat;
-        background-size: cover;
         flex: 1 0 min(58vw, 18rem);
         min-width: 13rem;
     }
@@ -2116,7 +2031,6 @@ th.sep {
         max-width: var(--content-max-tablet);
     }
     .g_co-item7 img,
-
     .g_co-item8 img {
         width: min(80%, 20rem);
     }
@@ -2146,38 +2060,23 @@ th.sep {
         grid-row: 3;
     }
 
-    .g_spectacles {
-        display: flex;
+    .spectacle-gresilhette {
+        display:grid;
         justify-content: center;
         justify-items: center;
+        row-gap: var(--space-m);
     }
 
-    .g_sp_spectacles {
+    .versions-spectacle {
         flex-direction:row;
     }
 
-    .g_sp_theatre-d-ombres {
-        grid-column: 2/3;
-        grid-row: 2/3;
-        margin-top: 0;
-        position: relative;
-    }
-
-    .g_sp_sieste-contee {
-        grid-column: 3/4;
-        grid-row: 2/3;
-        position: relative;
-    }
-
-    .g_sp_projet-pedagogique {
-        grid-column: 4/5;
-        grid-row: 2/3;
+    .images-spectacle {
+        margin-top:0;
         position: relative;
     }
 
     .g_sp_e-generique {
-        grid-column: 1/6;
-        grid-row: 6/7;
         text-align: center;
     }
     .p_projet-pedagogique,
@@ -2189,59 +2088,9 @@ th.sep {
         justify-content: center;
     }
 
-    .g_equipe {
-        column-gap: 1.25rem;
+    .g_equipe{
         grid-template-columns: repeat(2, minmax(0, 1fr));
-        justify-items: stretch;
     }
-
-    .g_equipe .item1 {
-        grid-column: 1;
-        grid-row: 1;
-        justify-self: center;
-    }
-
-    .g_equipe .item2 {
-        grid-column: 2;
-        grid-row: 1;
-        justify-self: center;
-    }
-
-    .g_equipe .item3 {
-        grid-column: 1;
-        grid-row: 2;
-        justify-self: center;
-    }
-
-    .g_equipe .item6 {
-        grid-column: 2;
-        grid-row: 2;
-        justify-self: center;
-    }
-
-    .g_equipe .item7 {
-        grid-column: 1;
-        grid-row: 3;
-        justify-self: center;
-    }
-
-    .g_equipe .item8 {
-        grid-column: 2;
-        grid-row: 3;
-        justify-self: center;
-    }
-
-    /*.g_equipe .item9 {
-        grid-column: 1;
-        grid-row: 4;
-        justify-self: center;
-    }
-
-    .g_equipe .item10 {
-        grid-column: 2;
-        grid-row: 4;
-        justify-self: center;
-    }*/
 
     footer {
         grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -2261,6 +2110,7 @@ th.sep {
         justify-content: flex-start;
         padding: 0 7%;
     }
+
     .conteneur-champignons,
     .conteneur-feuilles,
     h1,
@@ -2268,15 +2118,15 @@ th.sep {
     h3 {
         margin-top: var(--space-m);
     }
+
     .menu-petit-ecran,
     button.hamburger.box,
-
     nav.navbar .mobile-only {
         display: none;
     }
+
     .menu,
     .rs,
-
     nav.navbar {
         display: flex;
     }
@@ -2286,6 +2136,7 @@ th.sep {
         gap: 0;
         justify-content: center;
     }
+
     .menu,
 
     .rs {
@@ -2295,8 +2146,8 @@ th.sep {
     nav.navbar .menu {
         border-left: 1px solid rgba(56, 43, 76, 0.18);
     }
-    .menu > .menu-trigger,
 
+    .menu > .menu-trigger,
     .menu > a {
         font-size: clamp(0.78rem, 1vw + 0.1rem, 1.15rem);
     }
@@ -2304,6 +2155,7 @@ th.sep {
     .menu .niv1 {
         font-size: clamp(0.78rem, 1.1vw, 0.95rem);
     }
+
     .accueil-intro,
 
     section {
@@ -2322,8 +2174,6 @@ th.sep {
     }
 
     input:checked + label.card {
-        background-repeat: no-repeat;
-        background-size: cover;
         flex-basis: min(58vw, 18rem);
         flex-shrink: 0;
         height: 67vh;
@@ -2334,50 +2184,32 @@ th.sep {
         grid-template-columns: 1fr 1fr;
     }
 
-    .g_equipe {
-        column-gap: 1.25rem;
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-        justify-items: stretch;
+    /* A. Les Fondatrices et les Comédiens passent en FLEXBOX */
+    .g_fondatrices, 
+    .g_comediens {
+        display: flex !important;
+        justify-content: center;
+        /* 👈 L'ÉCARTEMENT : C'est cette valeur qui écarte vos deux photos 
+        pour les placer "à cheval" au-dessus des 4 permanents.*/
+        gap: 20rem; 
+        max-width: var(--content-max-desktop);
+        margin: 3.125rem auto;
+    }
+  
+    /* B. Les Permanents restent en GRID stricte à 4 colonnes */
+    .g_permanents {
+        display: grid !important; /* On s'assure qu'il reste en Grid */
+        grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+        max-width: var(--content-max-desktop);
+        margin: 3.125rem 0 auto;
+        justify-items: center;
+        column-gap:3.125rem;
     }
 
-    .g_equipe .item1 {
-        grid-column: 1;
-        grid-row: 1;
-    }
-
-    .g_equipe .item2 {
-        grid-column: 3;
-        grid-row: 1;
-    }
-
-    .g_equipe .item3 {
-        grid-column: 1;
-        grid-row: 2;
-    }
-
-    .g_equipe .item6 {
-        grid-column: 3;
-        grid-row: 2;
-    }
-
-    .g_equipe .item7 {
-        grid-column: 1;
-        grid-row: 3;
-    }
-
-    .g_equipe .item8 {
-        grid-column: 2;
-        grid-row: 3;
-    }
-
-    .g_equipe .item9 {
-        grid-column: 3;
-        grid-row: 3;
-    }
-
-    .g_equipe .item10 {
-        grid-column: 2;
-        grid-row: 4;
+    /* C. Nettoyage PC pour tous vos items */
+    .g_equipe .item {
+        grid-column: auto !important; /* Supprime les anciennes consignes de colonnes */
+        width: 15.625rem;             /* Conserve la largeur de vos photos */
     }
 
     .g_partenaires {
@@ -2385,14 +2217,13 @@ th.sep {
         flex-wrap: nowrap;
         justify-content: flex-start;
     }
+
     .encadre,
     .encadre-extrait,
     .encadre-lenga {
         margin-top: var(--space-l);
     }
-    .g_sp_projet-pedagogique:after,
-    .g_sp_sieste-contee:after,
-    .g_sp_theatre-d-ombres:after,
+    .images-spectacle:after,
     .image-wrapper:after {
         content: "";
     }
@@ -2414,9 +2245,9 @@ th.sep {
     footer .e_faire-un-don {
         white-space: nowrap;
     }
+
     .d_projet-pedagogique,
     .d_sieste-contee,
-
     .d_theatre-d-ombres {
         max-width: 11rem;
     }
@@ -2446,50 +2277,10 @@ th.sep {
     .button-container {
         max-width: 93%;
     }
-    .accueil-intro,
 
+    .accueil-intro,
     section {
         max-width: var(--content-max-desktop);
-    }
-
-    .g_equipe {
-        align-items: center;
-        display: grid;
-        grid-auto-flow: row;
-        grid-template-columns: repeat(4, minmax(0, 1fr));
-        justify-content: center;
-        justify-items: stretch;
-        grid-row-gap: 6.25rem;
-        margin-top: 3.125rem;
-    }
-
-    .g_equipe .item1 {
-        grid-column: 1 / span 2;
-        grid-row: 1;
-        justify-self: center;
-    }
-
-    .g_equipe .item2 {
-        grid-column: 3 / span 2;
-        grid-row: 1;
-        justify-self: center;
-    }
-
-    .g_equipe .item3 {
-        grid-column: 1 / span 2;
-        grid-row: 2;
-        justify-self: center;
-    }
-
-    .g_equipe .item6 {
-        grid-column: 3 / span 2;
-        grid-row: 2;
-        justify-self: center;
-    }
-
-    .g_equipe .item10 {
-        grid-column: 4;
-        grid-row: 3;
     }
 
     .g_bio img {
@@ -2531,7 +2322,6 @@ th.sep {
         width: 96%;
     }
     .accueil-intro,
-
     section {
         margin: var(--space-m) auto 0;
     }
@@ -2604,16 +2394,13 @@ th.sep {
         grid-row: 6/7;
         text-align: center;
     }
-    .g_sp_projet-pedagogique,
-    .g_sp_sieste-contee,
-    .g_sp_theatre-d-ombres,
+    .images-spectacle,
     .image-wrapper {
         display: inline-block;
         position: relative;
     }
-    .g_sp_projet-pedagogique:after,
-    .g_sp_sieste-contee:after,
-    .g_sp_theatre-d-ombres:after,
+
+    .images-spectacle:after,
     footer {
         grid-template-columns: repeat(5, minmax(0, 1fr));
         justify-content: space-evenly;
@@ -2633,18 +2420,6 @@ th.sep {
     .button-container {
         max-width: 90%;
     }
-}
-
-/* La carte active montre qu'elle est entièrement cliquable */
-input:checked + label.card {
-    cursor: pointer !important;
-}
-
-/* On s'assure que le lien d'origine ne perturbe pas le clic global */
-.button-container .card .description a {
-    pointer-events: none; /* Désactive le comportement natif du petit lien */
-    color: inherit;
-    text-decoration: none;
 }
 
 /* ==========================================================================

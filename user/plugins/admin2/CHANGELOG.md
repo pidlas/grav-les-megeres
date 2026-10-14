@@ -1,3 +1,74 @@
+# v2.1.31
+## 10/13/2026
+
+1. [](#improved)
+    * The page editor's address now carries the content language, like `?lang=fr-fr`. A copied link, or an "Edit this page" link, opens that translation instead of whichever language is remembered in the visitor's browser, as it did in Grav 1.7. Switching language adds a history entry, so Back returns to the previous language. Thanks @fdruide [getgrav/grav-admin-next#37](https://github.com/getgrav/grav-admin-next/pull/37)
+
+# v2.1.30
+## 10/13/2026
+
+1. [](#bugfix)
+    * Creating a translation of a page that only exists in another language keeps the page's template, instead of falling back to the default template. Thanks @fdruide [#193](https://github.com/getgrav/grav-plugin-admin2/issues/193) [getgrav/grav-admin-next#35](https://github.com/getgrav/grav-admin-next/pull/35)
+    * Moving pages in the Tree and Columns views now works across levels, such as moving a child page up next to its parent. Move mode has drop zones at the start and end of every folder and inside pages that have no children, and it no longer adds order numbers to pages that don't have one. Thanks @Gleydar [getgrav/grav-admin-next#36](https://github.com/getgrav/grav-admin-next/issues/36)
+    * The Pages list view refreshes after a page changes, instead of staying on "Loading pages...", and Move mode is no longer offered there because a flat list can't show where a page moves
+2. [](#improved)
+    * A media file's details dialog shows a dropdown for metadata fields that a plugin defines as a select
+    * Image watermark settings (image, position, scale and watermark all) can be edited under Configuration, Images
+
+# v2.1.29
+## 10/09/2026
+
+1. [](#bugfix)
+    * A custom field in a nested list can read and watch values in its parent row, and a field in any list can read the rest of the form, with `getValue()`. Thanks @Sogl [getgrav/grav-admin-next#29](https://github.com/getgrav/grav-admin-next/issues/29)
+    * The install modal lists every plugin and theme in the GPM repository, including those past the first 500
+    * A number field with `step: any`, such as a latitude, accepts decimal values instead of marking them invalid
+    * Red text is readable in dark mode: field errors, error banners and delete actions use a lighter red, and Delete buttons keep their deep red fill
+    * Buttons, links, tabs and menu items show a focus ring again while you move around with the keyboard (Tab or the arrow keys), and lose it at the next mouse click. Clicking never leaves a ring behind, and shortcut keys such as a screenshot hotkey don't turn the rings on
+    * Confirm dialogs can be answered from the keyboard: focus moves into the dialog when it opens (Cancel for a delete, so Tab then Enter confirms), the focused button has a visible outline so you can see what Enter will do, Tab stays inside it, and focus goes back where it was when it closes
+    * On a multi-language site, the columns view preview shows the page in the language you picked instead of always the default one. Thanks @fdruide [getgrav/grav-admin-next#32](https://github.com/getgrav/grav-admin-next/issues/32)
+    * On a multi-language site, publishing, deleting and duplicating a page from the pages list or the editor act on the language you're viewing: Delete removes only that translation instead of every language, and Publish and Delete are hidden on a page that has no translation in that language yet. Thanks @fdruide [getgrav/grav-admin-next#33](https://github.com/getgrav/grav-admin-next/issues/33)
+
+# v2.1.28
+## 10/06/2026
+
+1. [](#improved)
+    * Updated Spanish translation, with about 140 new strings from the Translation Portal. Thanks @pmoreno-rodriguez [#187](https://github.com/getgrav/grav-plugin-admin2/issues/187)
+    * The page editor now warns when a module's template isn't in the theme, since the page it belongs to shows a "template not found" error until the template exists [getgrav/grav-plugin-api#55](https://github.com/getgrav/grav-plugin-api/issues/55)
+    * Custom fields from plugins and themes can read other values in the form with `getValue()`, scoped to their own row inside a list, and can be told when a value they watch changes, so a field's options can follow a sibling field. See the custom field docs for `watch` and `formChanged()`. Thanks @Sogl [getgrav/grav-admin-next#29](https://github.com/getgrav/grav-admin-next/issues/29)
+2. [](#bugfix)
+    * Saving a page that was changed elsewhere after you opened it, by an API client, an AI agent or another admin, now stops with "Page was modified elsewhere" instead of silently overwriting those changes. Thanks @onetrev [#189](https://github.com/getgrav/grav-plugin-admin2/issues/189)
+    * A file field whose blueprint allows any file with `accept: ['*']` uploads again, and a file the field refuses now shows a message instead of doing nothing [#192](https://github.com/getgrav/grav-plugin-admin2/issues/192)
+    * Clicking a checkbox's label in a section now toggles the box, and the box lines up with its label [#191](https://github.com/getgrav/grav-plugin-admin2/issues/191)
+    * A collapsed list item is titled by its first field in blueprint order, instead of whichever field happened to be filled first, and a closed collapsible section's header is evenly padded. Thanks @onetrev [#190](https://github.com/getgrav/grav-plugin-admin2/issues/190)
+    * In page media reorder mode, dropping an item past the last one, or in the gap between two, now moves it there [getgrav/grav-admin-next#31](https://github.com/getgrav/grav-admin-next/issues/31)
+    * Previewing a page in a language other than the default now opens that translation at its own address, such as `/fr/typographie`, instead of the default language or a 404, and previewing the home page in another language works too. Thanks @fdruide [#188](https://github.com/getgrav/grav-plugin-admin2/issues/188)
+    * A `selectunique` field in a plugin or theme blueprint now shows as a select that leaves out the values other rows of the list already use, instead of a plain text box [getgrav/grav-admin-next#30](https://github.com/getgrav/grav-admin-next/issues/30)
+    * When the server sends back a page in another language than the one selected, the editor now explains that and keeps Save off, instead of pointing at a "Save as" button that isn't there [getgrav/grav#4338](https://github.com/getgrav/grav/discussions/4338)
+
+# v2.1.27
+## 10/01/2026
+
+1. [](#improved)
+    * Dark mode now uses dark greys instead of near-black by default, which is easier on the eyes. A new Dark shade setting under Appearance, for each user and as a site default, lets you keep the previous near-black look (Onyx) or pick Midnight, a deep blue-black.
+    * A new Help text setting under Appearance, for each user and as a site default, lets you show field help in a tooltip behind a small info icon next to the label (the default) or below the label. Plugins can follow the setting with a new `<grav-help>` element, described in the admin-next docs
+    * The dashboard's Page Views chart now shows the views and date for any day you point at, anywhere in the chart rather than only on its small dots, and the arrow keys step through the days.
+    * The media manager's filter buttons, sort menu and column headers, root breadcrumb, search label and Delete button now follow the admin language. Thanks @pmoreno-rodriguez [getgrav/grav-admin-next#26](https://github.com/getgrav/grav-admin-next/pull/26)
+    * A Changelog link beside "Update available" on plugins and themes shows what the new version changes before you update. Thanks @pmoreno-rodriguez [getgrav/grav-admin-next#27](https://github.com/getgrav/grav-admin-next/issues/27)
+2. [](#bugfix)
+    * Users can now generate and revoke their own API keys on their profile page, as the API already allowed [#182](https://github.com/getgrav/grav-plugin-admin2/issues/182)
+    * Custom fields from plugins and themes now show the new value after a save or revert on the Configuration page, instead of keeping their old one [#184](https://github.com/getgrav/grav-plugin-admin2/issues/184)
+    * The Taxonomy field in the page editor no longer stays blank on sites that use a number, such as a year, as a tag or category, which includes every site running the Archives plugin [#186](https://github.com/getgrav/grav-plugin-admin2/issues/186)
+    * Editing one taxonomy type no longer rewrites the others, so a single value such as `category: blog` stays as written
+
+# v2.1.26
+## 09/29/2026
+
+1. [](#improved)
+    * On sites with many languages, page rows in the column view now show the current language and a translated count, such as 3/7, instead of one badge per language that squeezed the page title out of view.
+    * The column view's page preview has a Translations section listing which languages a page is translated into and which are still missing, and clicking a language switches to it.
+    * The Page Info and Translations cards in the page editor sidebar can be collapsed, and the admin remembers your choice on that device.
+    * The check that sends visitors to first-run setup when a site has no accounts is now much cheaper on every frontend page. It stops as soon as it finds one account file and only asks the accounts service for a full count when there is none, which matters on sites where a plugin also keeps accounts in a database. The answer is also worked out once per request.
+
 # v2.1.25
 ## 09/28/2026
 

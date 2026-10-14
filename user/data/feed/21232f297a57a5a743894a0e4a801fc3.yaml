@@ -1,5 +1,10 @@
-last_checked: 1790868473
+last_checked: 1791986312
 data:
+  -
+    title: 'KahunaCart, One Month In'
+    url: 'https://getgrav.org/blog/kahunacart-one-month-in'
+    date: '2026-10-13T12:00:00+00:00'
+    summary: ''
   -
     title: 'Meet Helpdesk Pro and Mailroom'
     url: 'https://getgrav.org/blog/helpdesk-pro-and-mailroom'
@@ -44,9 +49,4 @@ data:
     title: 'Why I Built Riffle'
     url: 'https://getgrav.org/blog/why-i-built-riffle'
     date: '2026-07-21T14:00:00+00:00'
-    summary: ''
-  -
-    title: 'Grav 2.0 Released!'
-    url: 'https://getgrav.org/blog/grav-2-stable-released'
-    date: '2026-06-20T13:00:00+00:00'
     summary: ''

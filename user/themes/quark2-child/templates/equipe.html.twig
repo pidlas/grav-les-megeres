@@ -4,63 +4,102 @@
 <main>
     <section class="{{ page.slug }}">
 
-        <div class="page-content">
             {# Récupération de la collection Flex-Objects #}
             {% set directory = grav.flex.directory('equipe') %}
             
             {% if directory %}
                 {% set liste_membres = directory.getCollection() %}
                 
-                {# DEFINITION COMPLÈTE ET STRICTE DE L'ORDRE ET DE LA CLASSE ITEM DE CHAQUE MEMBRE #}
-                {% set configuration_equipe = [
-                    {'slug': 'suzie',    'class_item': 'item1'},
-                    {'slug': 'sabine',   'class_item': 'item2'},
-                    {'slug': 'estelle',  'class_item': 'item3'},
-                    {'slug': 'anne',     'class_item': 'item6'},
-                    {'slug': 'delphine', 'class_item': 'item7'},
-                    {'slug': 'marie',    'class_item': 'item8'},
-                    {'slug': 'juliette', 'class_item': 'item9'},
-                    {'slug': 'philippe', 'class_item': 'item10'}
-                ] %}
-
-                {# Une seule et unique liste globale g_equipe pour préserver votre grille CSS #}
-                <ul class="g_equipe">
-                    {% for config in configuration_equipe %}
-                        {% for membre in liste_membres %}
-                            {% if membre.slug is defined and membre.slug == config.slug %}
+                <div class="page_equipe">
+                
+                    {# ==========================================================================
+                       GROUPE 1 : LES FONDATRICES (Suzie et Sabine)
+                       ========================================================================== #}
+                    <ul class="g_equipe g_fondatrices">
+                        {% for membre in liste_membres if membre.slug in ['suzie', 'sabine'] %}
+                            <li class="tan item">
+                                {{ membre.nom }}
                                 
-                                <li class="tan item {{ config.class_item }}">
-                                    {{ membre.nom }}
-                                    
-                                    {% if membre.role is not empty %}
-                                        <p class="coco gras">{{ membre.role|nl2br|raw }}</p>
-                                    {% endif %}
+                                {% if membre.role is not empty %}
+                                    <p class="coco gras">{{ membre.role|nl2br|raw }}</p>
+                                {% endif %}
 
-                                    <div class="anime_hover {{ membre.classe_sup }}">
-                                        <p class="montre coco">Plus sur {{ membre.nom | capitalize | split(' ')|first }}</p>
-                                        <a href="equipe/{{ membre.slug }}">
-                                            {# BLOC MODIFIÉ POUR LE FILEPICKER #}
-                                            {% if membre.image is not empty %}
-                                                {% set photo_media = page.media[membre.image] %}
-                                                {% if photo_media %}
-                                                    <img src="{{ photo_media.url }}" alt="{{ membre.nom }}" class="img-menu-spectacle" loading="lazy">
-                                                {% endif %}
+                                <div class="anime_hover {{ membre.classe_sup }}">
+                                    <p class="montre coco">Plus sur {{ membre.nom | capitalize | split(' ')|first }}</p>
+                                    <a href="equipe/{{ membre.slug }}">
+                                        {% if membre.image is not empty %}
+                                            {% set photo_media = page.media[membre.image] %}
+                                            {% if photo_media %}
+                                                <img src="{{ photo_media.url }}" alt="{{ membre.nom }}" class="img-menu-spectacle" loading="lazy">
                                             {% endif %}
-                                        </a>
-                                    </div>
-                                </li>
-                                
-                            {% endif %}
+                                        {% endif %}
+                                    </a>
+                                </div>
+                            </li>
                         {% endfor %}
-                    {% endfor %}
-                </ul>
+                    </ul>
+
+                    {# ==========================================================================
+                       GROUPE 2 : LES COMÉDIENS (Muriel et Anne)
+                       ========================================================================== #}
+                    <ul class="g_equipe g_comediens">
+                        {% for membre in liste_membres if membre.slug in ['muriel', 'anne'] %}
+                            <li class="tan item">
+                                {{ membre.nom }}
+                                
+                                {% if membre.role is not empty %}
+                                    <p class="coco gras">{{ membre.role|nl2br|raw }}</p>
+                                {% endif %}
+
+                                <div class="anime_hover {{ membre.classe_sup }}">
+                                    <p class="montre coco">Plus sur {{ membre.nom | capitalize | split(' ')|first }}</p>
+                                    <a href="equipe/{{ membre.slug }}">
+                                        {% if membre.image is not empty %}
+                                            {% set photo_media = page.media[membre.image] %}
+                                            {% if photo_media %}
+                                                <img src="{{ photo_media.url }}" alt="{{ membre.nom }}" class="img-menu-spectacle" loading="lazy">
+                                            {% endif %}
+                                        {% endif %}
+                                    </a>
+                                </div>
+                            </li>
+                        {% endfor %}
+                    </ul>
+
+                    {# ==========================================================================
+                       GROUPE 3 : LES PERMANENTS (Delphine, Marie, Juliette, Philippe)
+                       ========================================================================== #}
+                    <ul class="g_equipe g_permanents">
+                        {% for membre in liste_membres if membre.slug in ['delphine', 'marie', 'juliette', 'philippe'] %}
+                            <li class="tan item">
+                                {{ membre.nom }}
+                                
+                                {% if membre.role is not empty %}
+                                    <p class="coco gras">{{ membre.role|nl2br|raw }}</p>
+                                {% endif %}
+
+                                <div class="anime_hover {{ membre.classe_sup }}">
+                                    <p class="montre coco">Plus sur {{ membre.nom | capitalize | split(' ')|first }}</p>
+                                    <a href="equipe/{{ membre.slug }}">
+                                        {% if membre.image is not empty %}
+                                            {% set photo_media = page.media[membre.image] %}
+                                            {% if photo_media %}
+                                                <img src="{{ photo_media.url }}" alt="{{ membre.nom }}" class="img-menu-spectacle" loading="lazy">
+                                            {% endif %}
+                                        {% endif %}
+                                    </a>
+                                </div>
+                            </li>
+                        {% endfor %}
+                    </ul>
+
+                </div>{# fermeture balise .page_equipe #}
 
             {% else %}
                 <p>Erreur : Le répertoire Flex 'equipe' n'est pas initialisé.</p>
             {% endif %}
-
             {{ page.content | raw }}
-        </div>      
+
     </section>
 </main>
 {% endblock %}

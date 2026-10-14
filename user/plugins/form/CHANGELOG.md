@@ -1,3 +1,23 @@
+# v9.1.35
+## 10/13/2026
+
+1. [](#improved)
+    * The Spanish translation covers the Cap widget and the Turnstile and reCAPTCHA settings. Thanks @pmoreno-rodriguez [#660](https://github.com/getgrav/grav-plugin-form/pull/660)
+
+# v9.1.34
+## 10/09/2026
+
+1. [](#improved)
+    * The Cap and Debug settings in the Form plugin's configuration can now be translated, and the Spanish translation is more complete. Thanks @pmoreno-rodriguez [#659](https://github.com/getgrav/grav-plugin-form/pull/659)
+
+# v9.1.33
+## 10/07/2026
+
+1. [](#improved)
+    * The Cap checkbox widget's labels can now be translated, and a site can change them in its own language files without overriding the template. Thanks @bago [#657](https://github.com/getgrav/grav-plugin-form/pull/657)
+1. [](#bugfix)
+    * A page with a Cap captcha no longer crashes Safari 17 and older. The widget solves on one worker per CPU core and hands them all the same compiled solver, and Safari 17.6 kills the page when several workers run it at once, so a page with an invisible Cap form reloaded in a loop and ended on "A problem repeatedly occurred". Safari 17 and older, and every browser on iOS 17 and older, now solve on a single worker, which takes a second or two
+
 # v9.1.32
 ## 09/28/2026
 

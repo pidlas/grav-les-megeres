@@ -23,7 +23,7 @@
 
 {# --- PRÉPARATION DES GRILLES ET CONTENUS COMPLEXES (Vos shortcodes d'origine) --- #}
 {# 👇 COMPACTÉ SUR UNE SEULE LIGNE : Empêche le Markdown d'injecter des <p> parasites #}
-{% set grid_html %}<p class="g_sp_spectacles">[a class="g_sp_theatre-d-ombres morph" url="gresilhette-et-la-salimonde/theatre-d-ombres"]{{ page.media['sp_theatre-d-ombres.avif'].html('Spectacle Grésilhette et la Salimonde - Théâtre d\'ombres') | raw }}[/a][a class="g_sp_sieste-contee morph" url="gresilhette-et-la-salimonde/sieste-contee"]{{ page.media['sp_sieste-contee.avif'].html('La sieste contée - Grésilhette et la Salimonde') | raw }}[/a][a class="g_sp_projet-pedagogique morph" url="gresilhette-et-la-salimonde/projet-pedagogique"]{{ page.media['sp_projet-pedagogique.avif'].html('Le projet pédagogique - Grésilhette et la Salimonde') | raw }}[/a]</p>{% endset %}
+{% set grid_html %}<p class="versions-spectacle">[a class="images-spectacle morph" url="gresilhette-et-la-salimonde/theatre-d-ombres"]{{ page.media['sp_theatre-d-ombres.avif'].html('Spectacle Grésilhette et la Salimonde - Théâtre d\'ombres') | raw }}[/a][a class="images-spectacle morph" url="gresilhette-et-la-salimonde/sieste-contee"]{{ page.media['sp_sieste-contee.avif'].html('La sieste contée - Grésilhette et la Salimonde') | raw }}[/a][a class="images-spectacle morph" url="gresilhette-et-la-salimonde/projet-pedagogique"]{{ page.media['sp_projet-pedagogique.avif'].html('Le projet pédagogique - Grésilhette et la Salimonde') | raw }}[/a]</p>{% endset %}
 
 
 {# 👇 RECONSTRUCTION DYNAMIQUE ET SÉCURISÉE DU BLOC PDF AVEC LE FILEPICKER #}
@@ -87,8 +87,8 @@
                         </button>
                     </div>
                 </div>
-                {# Début div g_spectacles #}
-                <div class="g_spectacles">
+                {# Début div spectacle-gresilhette #}
+                <div class="spectacle-gresilhette">
                     {# 1. On coupe le bloc principal au niveau du tag [versions-grid] #}
                     {% set parties_spectacle = bloc_principal | split('[versions-grid]') %}
                     {% set intro_texte = parties_spectacle[0] | default('') %}

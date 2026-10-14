@@ -13,11 +13,13 @@ use Grav\Common\Page\Interfaces\PageInterface;
 use Grav\Common\Page\Markdown\Excerpts;
 use Grav\Common\Utils;
 use Grav\Plugin\Api\Services\FrontmatterReader;
+use Grav\Plugin\Api\Services\ModularTemplates;
 
 class PageSerializer implements SerializerInterface
 {
     public function __construct(
         private ?MediaSerializer $mediaSerializer = null,
+        private ?ModularTemplates $modularTemplates = null,
     ) {}
 
     public function serialize(object $resource, array $options = []): array
@@ -123,9 +125,23 @@ class PageSerializer implements SerializerInterface
             unset($data['header']);
         }
 
+        // Whether a module's template is missing on this site, so its parent
+        // page shows core's "template not found" heading (#55). It costs a Twig
+        // lookup for a module whose type is not registered, so page lists leave
+        // it out (`include_template_state` false); the lookup is made once per
+        // template name however many modules use it. An ordinary page is never
+        // flagged: an unknown type falls back to the theme's default template,
+        // and headless sites use types no theme knows.
+        if ($options['include_template_state'] ?? true) {
+            $data['template_missing'] = $this->templateMissing($resource);
+        }
+
         if ($includeTranslations) {
-            $data['translated_languages'] = $resource->translatedLanguages();
-            $data['untranslated_languages'] = $resource->untranslatedLanguages();
+            // Both lists ask the same question about drafts, so a language whose
+            // translation is unpublished counts as translated and is never in both
+            // (#57). Positional, since a page class may name these arguments its own way.
+            $data['translated_languages'] = $resource->translatedLanguages(false);
+            $data['untranslated_languages'] = $resource->untranslatedLanguages(true);
 
             // Disambiguate Grav's translated_languages response: when the page
             // has an untyped base file (e.g. default.md), Grav reports every
@@ -134,7 +150,10 @@ class PageSerializer implements SerializerInterface
             // tell whether each language is backed by an EXPLICIT file
             // (default.<lang>.md) or by the implicit default.md fallback.
             $pagePath = $resource->path();
-            $template = $resource->template();
+            // Modules report their template as `modular/<name>`, but the file
+            // on disk is `<name>.md` / `<name>.<lang>.md`, so only the last
+            // segment names the file.
+            $template = $resource->template() ? basename((string) $resource->template()) : '';
             $data['has_default_file'] = $pagePath && $template
                 ? is_file($pagePath . '/' . $template . '.md')
                 : false;
@@ -162,6 +181,7 @@ class PageSerializer implements SerializerInterface
         }
 
         if ($renderContent) {
+            $this->initTwig();
             $data['content_html'] = $resource->content();
         }
 
@@ -187,6 +207,23 @@ class PageSerializer implements SerializerInterface
         }
 
         return $data;
+    }
+
+    /**
+     * Whether `$resource` is a module that core cannot find a template for. The
+     * template is the one core renders with: `Page::template()`, which is the
+     * `template` header when there is one and the file's name otherwise.
+     */
+    private function templateMissing(PageInterface $resource): bool
+    {
+        if (!$resource->isModule()) {
+            return false;
+        }
+
+        $template = $resource->template();
+
+        return is_string($template) && $template !== ''
+            && ($this->modularTemplates ??= new ModularTemplates(Grav::instance()))->isMissing($template);
     }
 
     /**
@@ -416,6 +453,8 @@ class PageSerializer implements SerializerInterface
     {
         $max = ($summarySize !== null && $summarySize > 0) ? $summarySize : 300;
 
+        $this->initTwig();
+
         try {
             // Page::summary(size, textOnly: true) is documented to return text, but
             // core short-circuits to full rendered HTML when summaries are disabled
@@ -435,6 +474,26 @@ class PageSerializer implements SerializerInterface
         $text = trim(preg_replace('/\s+/', ' ', $text) ?? $text);
 
         return Utils::truncate($text, $max, true, ' ', '…');
+    }
+
+    /**
+     * Build Twig's environment before a page renders its content.
+     *
+     * The API router answers inside RequestProcessor, ahead of TwigProcessor,
+     * so on an API request nothing has called Twig::init() yet. Page::content()
+     * and summary() run content Twig and shortcodes, and modules render through
+     * Twig unconditionally, all of which need that environment: without it they
+     * fail on a null Twig. init() does nothing once it has run, so this is safe
+     * to call per page. Core's Security::detectXssInEditorContent() does the
+     * same for saves.
+     */
+    private function initTwig(): void
+    {
+        $grav = Grav::instance();
+
+        if (isset($grav['twig'])) {
+            $grav['twig']->init();
+        }
     }
 
     /**

@@ -25,6 +25,8 @@ ICU:
     DELETE: Delete
     DONE: Done
     EDIT: Edit
+    HELP: Help
+    HELP_FOR_LABEL: Help for {label}
     LOADING: Loading...
     NO_CHANGES: No changes to save
     RETRY: Retry
@@ -98,6 +100,9 @@ ICU:
       PRESET_COMPACT: Compact
       PRESET_COMPACT_DESC: All widgets at the smallest size each supports.
     PAGES:
+      DROP_INSIDE: Drop a page here to move it inside {title}
+      SHOW_DROP_INSIDE: Move pages inside {title}
+      MOVE_UNNUMBERED_KEEPS_NAME_ORDER: "{title} has no order number, so it stays sorted by name"
       TITLE: Pages
       SEARCH_PLACEHOLDER: Search pages...
       NO_PAGES: No pages found
@@ -110,7 +115,6 @@ ICU:
       STATS_TOTAL: "{n} total"
       STATS_PUBLISHED: "{n} published"
       STATS_UNPUBLISHED: "{n} unpublished"
-      REORDER_SAME_PARENT: Can only reorder pages under the same parent. Use Tree view for cross-parent moves.
       MOVED: Moved "{title}"
       REORDERED: Reordered "{title}"
       MOVE_FAILED: Failed to move page
@@ -139,8 +143,6 @@ ICU:
       CHUNK_SIZE_HELP: Rows to fetch per request as you scroll. Larger values load slower the first time but reduce follow-up requests.
       LOADING_CHUNK: Loading rows {from}–{to}…
       LOADED_OF: '{n, plural, one {# loaded} other {# loaded}} of {total}'
-      REORDER_LOADING: Still loading the full list — try again in a moment.
-      REORDER_LOADING_ALL: Loading every chunk so reorder can affect the whole list…
       NO_MATCH: No pages match your search
       SEARCH_MATCH_COUNT: '{n, plural, one {# match} other {# matches}} across all pages'
       SEARCH_SHOWING: Showing {shown} of {total} matches
@@ -150,7 +152,6 @@ ICU:
       HEADER_TEMPLATE: Template
       HEADER_STATUS: Status
       HEADER_MODIFIED: Modified
-      HEADER_PARENT: Parent
       PUBLISHED: Published
       DRAFT: Draft
       PUBLISH: Publish
@@ -227,6 +228,7 @@ ICU:
         PAGE_DELETED: Page deleted
         PAGE_COPIED: Page copied
         PAGE_CHANGED_ELSEWHERE_SAVE_TO: Page changed elsewhere — save to overwrite or reload
+        PAGE_WAS_MODIFIED_ELSEWHERE_PLEASE: Page was modified elsewhere. Please reload.
         LOADING_PAGE: Loading page...
         FOLDER_NAME: Folder Name
         THE_FOLDER_NAME_ON_DISK_URL_SLUG: The folder name on disk (URL slug)
@@ -238,6 +240,8 @@ ICU:
         CREATE_LANGUAGE: Create {language}
         EDIT_PAGE: Edit Page
         FALLBACK_NOTICE: No {active} translation exists. Viewing {effective} fallback. Use "Save as {active}" to create a translation you can edit.
+        FALLBACK_NOTICE_UNRESOLVED: The server returned the {effective} version of this page instead of {active}, and did not report {active} as missing. Saving is off here so the {effective} file is not overwritten. If every page does this, the web server is probably not passing query strings on to Grav.
+        TEMPLATE_MISSING_NOTICE: The template **{template}** for this module wasn't found in the theme, so the page it belongs to shows a "template not found" error. Pick a template under **Page Template** on the Advanced tab, or add the template to the theme.
         PUBLISH_ON: Publish on
         UNPUBLISH_ON: Unpublish on
         RESET_FROM: Reset from {language}
@@ -551,6 +555,9 @@ ICU:
       NO_NOTIFICATIONS: No notifications
     POPULARITY_WIDGET:
       LAST_14_DAYS: Last 14 days
+      TODAY: Today
+      VIEWS: '{count, plural, one {# view} other {# views}}'
+      CHART_LABEL: Page views per day for the last 14 days
       THIS_WEEK: This Week
       THIS_MONTH: This Month
     RECENT_PAGES_WIDGET:
@@ -638,10 +645,21 @@ ICU:
         ORDER_SAVE_FAILED: Failed to save the new order
       MEDIA_TOOLBAR:
         SEARCH_MEDIA: Search media...
+        SEARCHING_FOR: 'Search: "{query}"'
         GRID_VIEW: Grid view
         LIST_VIEW: List view
         NEW_FOLDER: New folder
         FOLDER: Folder
+        FILTER_ALL: All
+        FILTER_IMAGES: Images
+        FILTER_VIDEO: Video
+        FILTER_AUDIO: Audio
+        FILTER_DOCS: Docs
+        SORT_NAME: Name
+        SORT_SIZE: Size
+        SORT_DATE: Date
+        SORT_TYPE: Type
+        DELETE_SELECTED: '{count, plural, one {Delete # file} other {Delete # files}}'
       MEDIA_GRAV_ADMIN: Media — Grav Admin
       MANAGE_SITE_WIDE_MEDIA_FILES: Manage site-wide media files
       PAGE_MEDIA:
@@ -1191,6 +1209,11 @@ ICU:
       CHOOSE_BETWEEN_LIGHT_AND_DARK_APPEARANCE: Choose between light and dark appearance
       ACCENT_COLOR: Accent Color
       PRIMARY_COLOR_USED_FOR_BUTTONS_LINKS: Primary color used for buttons, links, and highlights
+      DARK_SHADE: Dark Shade
+      DARK_SHADE_DESC: How dark mode looks. It only takes effect while dark mode is on.
+      DARK_SHADE_GRAPHITE: Graphite
+      DARK_SHADE_ZINC: Onyx
+      DARK_SHADE_MIDNIGHT: Midnight
       SATURATION: Saturation
       CURRENT_COLOR: Color
       COPY_COLOR: Copy this color
@@ -1201,6 +1224,10 @@ ICU:
       FONT_SIZE_NORMAL: Normal
       FONT_SIZE_LARGE: Large
       FONT_SIZE_XLARGE: X-Large
+      HELP_TEXT: Help Text
+      HELP_TEXT_DESC: Where the short explanation for each field goes. In a tooltip, hover the info icon next to a label, or tap it on a phone, to read it.
+      HELP_MODE_INLINE: Below the label
+      HELP_MODE_TOOLTIP: In a tooltip
       DEFAULT_SETTINGS_FOR_THE_PAGE_BROWSER: Default settings for the page browser
       DEFAULT_VIEW: Default View
       HOW_PAGES_ARE_DISPLAYED_BY_DEFAULT: How pages are displayed by default
@@ -1261,8 +1288,10 @@ ICU:
       DEFAULT_APPEARANCE: Default Appearance
       DEFAULT_COLOR_APPEARANCE_DESC: Default color appearance for new users.
       DEFAULT_PRIMARY_COLOR_DESC: Default primary color for buttons, links, and highlights.
+      DEFAULT_DARK_SHADE_DESC: Default dark shade for new users. It only takes effect while dark mode is on.
       DEFAULT_TYPEFACE_DESC: Default typeface for the admin UI.
       DEFAULT_TEXT_SIZE_DESC: Default text size for the admin UI.
+      DEFAULT_HELP_TEXT_DESC: Default place for field help text for new users, below the label or in a tooltip.
       DEFAULT_PAGES: Default Pages
       DEFAULT_LANGUAGE: Default Language
       DEFAULT_INTERFACE_LANGUAGE_DESC: Default interface language for new users.
@@ -1556,6 +1585,7 @@ ICU:
     WIDGET_HOST:
       UNKNOWN_WIDGET: "Unknown widget: {id}"
     UPDATE_AVAILABLE_VERSION: "Update available: v{version}"
+    UPDATE_CHANGELOG_TITLE: "Changes in v{version}"
     UPDATE_TO_VERSION: Update to v{version}
     2FA_ENABLED: 2FA Enabled
     2FA_SECRET: 2FA Secret
@@ -1846,6 +1876,22 @@ ICU:
     IMAGES_CLS_AUTO_SIZES_HELP: Automatically add 'width' and 'height' attributes to images to address CLS
     IMAGES_CLS_RETINA_SCALE: Retina Scale Factor
     IMAGES_CLS_RETINA_SCALE_HELP: Will take the calculated size and divide by scale factor to display a higher resolution image at a smaller pixel size for better handling of HiDPI resolutions
+    IMAGES_WATERMARK_TITLE: Watermark
+    IMAGES_WATERMARK_ALL: Watermark all images
+    IMAGES_WATERMARK_ALL_HELP: Automatically stamp the watermark on every image the site serves
+    IMAGES_WATERMARK_IMAGE: Watermark image
+    IMAGES_WATERMARK_IMAGE_HELP: Path to the image used as the watermark, such as system://images/watermark.png
+    IMAGES_WATERMARK_POSITION_Y: Vertical position
+    IMAGES_WATERMARK_POSITION_Y_HELP: Where the watermark sits from top to bottom
+    IMAGES_WATERMARK_POSITION_X: Horizontal position
+    IMAGES_WATERMARK_POSITION_X_HELP: Where the watermark sits from left to right
+    IMAGES_WATERMARK_SCALE: Watermark scale
+    IMAGES_WATERMARK_SCALE_HELP: Size of the watermark as a percentage of the image
+    IMAGES_WATERMARK_TOP: Top
+    IMAGES_WATERMARK_CENTER: Center
+    IMAGES_WATERMARK_BOTTOM: Bottom
+    IMAGES_WATERMARK_LEFT: Left
+    IMAGES_WATERMARK_RIGHT: Right
     IMAGES_CLS_TITLE: Cumulative Layout Shift (CLS)
     IMAGES_DEBUG: Image debug watermark
     IMAGES_DEBUG_HELP: Show an overlay over images indicating the pixel depth of the image when working with retina for example

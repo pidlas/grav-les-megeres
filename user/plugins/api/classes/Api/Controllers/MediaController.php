@@ -1369,11 +1369,13 @@ class MediaController extends AbstractApiController
 
     /**
      * The configured editable metadata fields, normalized to a list of
-     * `['key' => string, 'label' => string, 'type' => 'text'|'textarea']`.
-     * Entries with an unsafe/reserved key or an unknown type are dropped; an
-     * empty or absent config falls back to the built-in defaults.
+     * `['key' => string, 'label' => string, 'type' => 'text'|'textarea'|'tags'|'select']`.
+     * Entries with an unsafe/reserved key are dropped, an unknown type becomes
+     * `text`, and a `select` also carries `options` (stored value => display
+     * label) and is dropped when it has no usable options. An empty or absent
+     * config falls back to the built-in defaults.
      *
-     * @return list<array{key: string, label: string, type: string}>
+     * @return list<array{key: string, label: string, type: string, options?: array<string, string>}>
      */
     private function getMetadataFieldDefs(): array
     {
@@ -1395,16 +1397,52 @@ class MediaController extends AbstractApiController
                 continue;
             }
             $type = (string) ($entry['type'] ?? 'text');
-            if (!in_array($type, ['text', 'textarea', 'tags'], true)) {
+            if (!in_array($type, ['text', 'textarea', 'tags', 'select'], true)) {
                 $type = 'text';
             }
             $label = trim((string) ($entry['label'] ?? '')) ?: $key;
 
+            $def = ['key' => $key, 'label' => $label, 'type' => $type];
+            if ($type === 'select') {
+                $options = $this->normalizeSelectOptions($entry['options'] ?? null);
+                if ($options === []) {
+                    continue;
+                }
+                $def['options'] = $options;
+            }
+
             $seen[$key] = true;
-            $defs[] = ['key' => $key, 'label' => $label, 'type' => $type];
+            $defs[] = $def;
         }
 
         return $defs !== [] ? $defs : self::DEFAULT_META_FIELDS;
+    }
+
+    /**
+     * Normalize a `select` field's configured `options` (a map of stored value
+     * to display label) into `array<string, string>`. Entries with an empty
+     * value or a non-scalar label are skipped, a blank label falls back to the
+     * value, and labels are stripped of HTML tags. Anything that is not a map
+     * yields no options.
+     *
+     * @return array<string, string>
+     */
+    private function normalizeSelectOptions(mixed $options): array
+    {
+        if (!is_array($options)) {
+            return [];
+        }
+
+        $normalized = [];
+        foreach ($options as $value => $label) {
+            $value = trim((string) $value);
+            if ($value === '' || !is_scalar($label)) {
+                continue;
+            }
+            $normalized[$value] = trim(strip_tags((string) $label)) ?: $value;
+        }
+
+        return $normalized;
     }
 
     /**
@@ -1600,15 +1638,32 @@ class MediaController extends AbstractApiController
      * Sanitize an incoming metadata value. Metadata renders into `<img>`
      * attributes on the site, so every value is coerced to a scalar string,
      * stripped of HTML tags and control characters, collapsed (single-line
-     * fields), and capped at the configured maximum length.
+     * fields), and capped at the configured maximum length. A `select` value
+     * must be one of its `$options` keys (or empty, which clears it); anything
+     * else is rejected.
+     *
+     * @param array<string, string> $options Allowed values of a `select` field.
      */
-    private function sanitizeMetadataValue(mixed $value, string $type, int $maxLen): string
+    private function sanitizeMetadataValue(mixed $value, string $type, int $maxLen, array $options = []): string
     {
         if (is_array($value) || is_object($value)) {
             throw new ValidationException('Metadata values must be plain text.');
         }
         if (is_bool($value)) {
             $value = $value ? '1' : '';
+        }
+
+        if ($type === 'select') {
+            $str = trim((string) $value);
+            if ($str === '') {
+                return '';
+            }
+            // PHP turns numeric option keys into ints, so compare as strings.
+            if (!in_array($str, array_map('strval', array_keys($options)), true)) {
+                throw new ValidationException('Metadata value is not one of the allowed options.');
+            }
+
+            return $str;
         }
 
         $str = strip_tags((string) $value);
@@ -1740,12 +1795,17 @@ class MediaController extends AbstractApiController
                 $value = is_scalar($raw) ? (string) $raw : '';
             }
 
-            $fields[] = [
+            $field = [
                 'key' => $key,
                 'label' => $def['label'],
                 'type' => $def['type'],
                 'value' => $value,
             ];
+            if ($def['type'] === 'select') {
+                // An object, so numeric option keys never serialize as a JSON list.
+                $field['options'] = (object) $def['options'];
+            }
+            $fields[] = $field;
         }
 
         // Everything else stays read-only in the UI (EXIF, dimensions, upload…).
@@ -1792,7 +1852,7 @@ class MediaController extends AbstractApiController
                 continue;
             }
 
-            $value = $this->sanitizeMetadataValue($input[$key], $def['type'], $maxLen);
+            $value = $this->sanitizeMetadataValue($input[$key], $def['type'], $maxLen, $def['options'] ?? []);
             if ($value === '') {
                 unset($stored[$key]);
             } else {
@@ -2083,10 +2143,11 @@ class MediaController extends AbstractApiController
      *
      * The direct URL is derived the way core's `MediaFileTrait::url()` does it —
      * strip the install root, prefix `base_url` — but only when the result is
-     * something the web server will actually hand over. Grav's shipped
-     * `.htaccess` and `webserver-configs/nginx.conf` both deny `user/env` and
-     * `user/config` whatever the file type, so those fall back to this plugin's
-     * own permission-gated byte-serving route instead of a guaranteed 403.
+     * something the web server will actually hand over. `user/config` is denied
+     * whatever the file type, and `user/env` was too before Grav 2.2.4, which
+     * nginx, Caddy and IIS sites keep until someone updates the server config by
+     * hand, so those fall back to this plugin's own permission-gated
+     * byte-serving route instead of a possible 403.
      */
     private function resolvePublicUrl(string $absolutePath, string $mediaRelativePath): string
     {
@@ -2154,10 +2215,11 @@ class MediaController extends AbstractApiController
      * Whether the web server will serve a webroot-relative path directly.
      *
      * Mirrors the deny rules Grav ships in `.htaccess` and
-     * `webserver-configs/nginx.conf`, which block `user/config`, `user/env` and
-     * `user/accounts` for every file type. A multi-site `user://media` living
-     * inside `user/env/<host>/` is on disk but 403s over HTTP, so its direct URL
-     * would be exactly as broken as the hardcoded one it replaces.
+     * `webserver-configs/`, which block `user/config` and `user/accounts` for
+     * every file type. Grav 2.2.4 stopped blocking all of `user/env`
+     * (getgrav/grav#4335), but a server config written before it still does, and
+     * only Apache's is updated on upgrade, so a multi-site `user://media` inside
+     * `user/env/<host>/` keeps using the fallback route, which works either way.
      */
     private function isWebServable(string $relative): bool
     {

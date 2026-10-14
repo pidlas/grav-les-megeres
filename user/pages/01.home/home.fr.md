@@ -21,7 +21,7 @@ slides:
         image: ta-grand-mere-sous-le-figuier.avif
     -
         titre: 'Théâtre Forum'
-        lien: /theatre-forum/presentation
+        lien: /theatre-forum/le-spectacle
         image: theatre-forum.avif
     -
         titre: 'Les cours'

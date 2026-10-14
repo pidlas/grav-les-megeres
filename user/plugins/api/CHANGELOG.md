@@ -1,3 +1,62 @@
+# v1.0.48
+## 10/13/2026
+
+1. [](#bugfix)
+    * Deleting a single translation of a modular page (a module such as a features or pricing section) no longer fails with "Could not locate the language file", and removes only that language
+
+# v1.0.47
+## 10/13/2026
+
+1. [](#improved)
+    * Added a Spanish translation, and the plugin's settings labels, help text and options can now be translated. Thanks @pmoreno-rodriguez [#58](https://github.com/getgrav/grav-plugin-api/pull/58)
+    * Media metadata fields can be a dropdown, with `type: select` and a list of `options`
+1. [](#bugfix)
+    * Creating a translation of a page whose source is not in the default language keeps the page's template, content and title when the request names the source language with `source_lang`. Thanks @fdruide [#59](https://github.com/getgrav/grav-plugin-api/pull/59) [getgrav/grav-plugin-admin2#193](https://github.com/getgrav/grav-plugin-admin2/issues/193)
+    * Moving a page to another level with the reorganize endpoint no longer reports success while leaving it in place or fails halfway: moves that change nothing are skipped, and a page moved into another folder takes that folder's order number width. Thanks @Gleydar [getgrav/grav-admin-next#36](https://github.com/getgrav/grav-admin-next/issues/36)
+
+# v1.0.46
+## 10/09/2026
+
+1. [](#bugfix)
+    * A language whose translation is a draft is listed only as translated, in page details and the page's languages, instead of as both translated and untranslated. Thanks @fdruide [#57](https://github.com/getgrav/grav-plugin-api/pull/57)
+    * Copying a page on a multi-language site gives every translation the new page's slug, so a translation with its own slug no longer shares its route with the original [getgrav/grav-admin-next#33](https://github.com/getgrav/grav-admin-next/issues/33)
+
+# v1.0.45
+## 10/06/2026
+
+1. [](#improved)
+    * Permissions in `user/pages/root.md` now apply to the top level of a regular site, as they already did on Flex Pages sites, so a group can be kept from creating top-level pages. Thanks @gareins [getgrav/grav#4345](https://github.com/getgrav/grav/issues/4345)
+    * Creating a module, or switching one to another template, is allowed again when that template doesn't exist on the site yet, and the response now includes a warning saying so, and page details say when a module's template is missing [#55](https://github.com/getgrav/grav-plugin-api/issues/55)
+1. [](#bugfix)
+    * The page preview opens a translation at its own address, such as `/fr/typographie`, so previewing a page in a language other than the default shows that language instead of the default one or a 404. Thanks @fdruide [getgrav/grav-plugin-admin2#188](https://github.com/getgrav/grav-plugin-admin2/issues/188)
+    * A module created at a route with an order prefix, such as `/page/01._hero`, is now recognised as a module, and the prefix no longer ends up in the new page's route [#55](https://github.com/getgrav/grav-plugin-api/issues/55)
+    * A page's ETag is now the same however the page was read (with translations, children or rendered content) and however it was saved, so sending it as `If-Match` on a save works, where the editor's own copy used to be refused with a conflict every time. Thanks @onetrev [getgrav/grav-plugin-admin2#189](https://github.com/getgrav/grav-plugin-admin2/issues/189)
+    * A page's group permissions now deny every letter after a `-` up to the next `+`, so `-c+r-ud`, which the permissions picker saves for create, update and delete denied, no longer allows delete. The picker now writes a sign before each denied letter [getgrav/grav#4340](https://github.com/getgrav/grav/issues/4340)
+
+# v1.0.44
+## 10/01/2026
+
+1. [](#new)
+    * A new `darkShade` preference (`graphite`, `zinc` or `midnight`) sets how dark mode looks, as a site default and as a per-user override. It defaults to `graphite`, and an unknown value falls back to it
+    * A new `helpMode` preference (`inline` or `tooltip`) sets whether field help text shows under the label or in a tooltip behind a small info icon, as a site default and as a per-user override. It defaults to `tooltip`, and an unknown value falls back to it
+    * A plugin or theme's changelog can now be fetched as just the entries newer than the installed version, so the admin can show what an available update changes [getgrav/grav-admin-next#27](https://github.com/getgrav/grav-admin-next/issues/27)
+1. [](#bugfix)
+    * Fetching a page with `render=true` no longer fails with a server error on module pages or pages using shortcodes that render Twig, and page summaries now include that output too [#52](https://github.com/getgrav/grav-plugin-api/issues/52)
+    * Page listings now show the new order or location right after a reorder, move, copy or delete, instead of the old state for up to a minute [#53](https://github.com/getgrav/grav-plugin-api/issues/53)
+    * Creating, copying or moving a page is now refused when a sibling already has the same slug under a different number, and a reorder checks every folder name first and puts things back if a rename fails, so pages are no longer left under `_temp_` names [#54](https://github.com/getgrav/grav-plugin-api/issues/54)
+    * A fieldset's `icon` setting now reaches the admin, so the icon shows beside the fieldset title [getgrav/grav-plugin-admin2#183](https://github.com/getgrav/grav-plugin-admin2/issues/183)
+    * The taxonomy list now returns number-like values such as `2024` as text, as documented, so the admin's Taxonomy field loads on sites that use years as tags or run the Archives plugin [getgrav/grav-plugin-admin2#186](https://github.com/getgrav/grav-plugin-admin2/issues/186)
+    * Creating a module, or switching one to another template, is now refused when that template doesn't exist on the site, with the available modular types listed in the error, instead of leaving a red "template not found" heading on the live page [#55](https://github.com/getgrav/grav-plugin-api/issues/55)
+    * Saving a module with its own template sent as `text` rather than `modular/text` no longer deletes the module's file [#55](https://github.com/getgrav/grav-plugin-api/issues/55)
+    * Switching the template of a page that has a `template` header no longer leaves the old page file behind
+    * A page `template` that is empty, not text or a path is now refused instead of writing a file Grav can't use
+
+# v1.0.43
+## 09/29/2026
+
+1. [](#bugfix)
+    * A modular page's translation status now sees its own files. A module reports its template as `modular/<name>` while its file is `<name>.md`, so the API said a module had no default file and listed none of its language files, even when they were there.
+
 # v1.0.42
 ## 09/28/2026
 

@@ -54,16 +54,7 @@ form:
       type: text
       label: Âge et Durée du spectacle
       placeholder: "Ex: Spectacle jeune public dès 6 ans - 40 mn"
-      
-    #spectacle.video.mp4:
-    #  type: text
-    #  label: Nom du fichier Vidéo MP4
-    #  placeholder: "Ex: teaser-gresilhette-salimonde.mp4"
 
-    #spectacle.video.webm:
-    #  type: text
-    #  label: Nom du fichier Vidéo WebM
-    #  placeholder: "Ex: teaser-gresilhette-salimonde.webm"
     # SÉLECTEUR VIDÉO MP4 VIA FILEPICKER
     spectacle.video.mp4:
       type: filepicker

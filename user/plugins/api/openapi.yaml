@@ -1309,11 +1309,34 @@ paths:
         exist (except when creating top-level pages). Supply an optional
         `order` to create an ordered (visible) page, or pass `"auto"` to let
         the server pick the next free prefix based on existing siblings.
+        The last segment of `route` may carry its own order prefix
+        (`/blog/03.my-post`): it names the folder and is left out of the
+        page's route, and an `order` in the body wins over it.
         Include `lang` in the body to create the page in a specific language.
 
         The new frontmatter is built from the template blueprint's
         non-toggleable `default:` values, then `title`, then the supplied
         `header`. A missing parent or an already occupied target returns 422.
+
+        `template` names the page file, so it must be a plain name: an empty
+        value, a non-string or a path returns 422. An ordinary page may use
+        any name, and one the theme has no template for renders with the
+        theme's `default` template.
+
+        A module (`kind: module`, or a route whose last segment starts with
+        `_` once any order prefix is set aside, as in `/page/01._hero`) can
+        be sent a template as `text` or `modular/text`. A module whose
+        template doesn't exist on the site is still created, because a
+        developer may be part way through building it, but the page the
+        module belongs to shows a "template not found" error until the
+        template exists, so the response carries a `template_missing` warning
+        in `data.warnings`. The template exists when it is a registered
+        modular type (see `GET /blueprints/pages?modular=true`) or a
+        `modular/<name>.html.twig` that Twig can find. Leaving `template` out
+        of a module writes `modular/default`, which only exists when the
+        theme has a `modular/default` template of its own. A `template`
+        header on a module that Twig can't find is warned about the same way
+        (`field: header.template`).
 
         Requires `api.pages.write`, and the parent page's own `create` rule
         (if any) must allow it: a page-level grant can stand in for the
@@ -1484,6 +1507,17 @@ paths:
         exist; otherwise 422 is returned (create it with
         `POST /pages/{route}/translate` first). Submitted fields are
         validated against the page blueprint (422 on failure).
+
+        A `template` that differs from the page's current one renames the
+        page file. It must be a plain name, as on create (422 otherwise). A
+        module can be switched to a template that doesn't exist on the site:
+        the save goes through and `data.warnings` carries a
+        `template_missing` warning. Sending the current template back
+        changes nothing, for a module in either form (`text` or
+        `modular/text`), so a page whose type the theme no longer has can
+        still be saved. A `template` header on a module is warned about only
+        when the request sets or changes it. Whether the page's template is
+        missing right now is in `data.template_missing`.
 
         Requires `api.pages.write`, subject to the page's own `update` rule.
         Enabling `process.twig`, or editing a page that already has it on,
@@ -1739,10 +1773,12 @@ paths:
       tags: [Pages]
       summary: Create a translation for a page
       description: |
-        Create a new language translation for an existing page. The `lang`
-        field specifies the target language code; it must be one of the
-        site's configured languages, and multi-language must be enabled. If a
-        translation already exists for that language, `422` is returned (use
+        Create a new language translation for an existing page. The `source_lang`
+        field specifies the language of the page to translate from. The
+        `lang` field specifies the target language code. Both
+        `source_lang` and `lang` must be one of the site's configured
+        languages, and multi-language must be enabled. If a translation
+        already exists for the target language, `422` is returned (use
         `PATCH /pages/{route}?lang=` to update it). Fields left out are copied
         from the source page, and the result is validated against the page
         blueprint. The response is the page in the new language.
@@ -1760,6 +1796,10 @@ paths:
               type: object
               required: [lang]
               properties:
+                source_lang:
+                  type: string
+                  description: Source page's language code.
+                  example: fr
                 lang:
                   type: string
                   description: Language code for the translation.
@@ -2757,7 +2797,7 @@ paths:
                         description: Lifetime in seconds.
                       route:
                         type: string
-                        description: Frontend route the browser should load.
+                        description: Frontend path the browser should load. On a multi-language site it starts with the language prefix the site serves that language under (for example `/fr/typographie`, using the page's route in that language), following `system.languages.include_default_lang` for the default language. Pass `lang` to preview a translation.
                       anchor:
                         type: string
                         nullable: true
@@ -5487,6 +5527,8 @@ paths:
         Return the raw Markdown content of the specified plugin's CHANGELOG.md
         file.
 
+        With `available=true` it returns what an update would change instead: the GPM repository's changelog entries for versions newer than the installed one, assembled into one Markdown document with a `# v{version} ({date})` heading per version (the same format as `GET /gpm/grav/changelog`). It answers 404 when the plugin is not in the repository or has no newer entries. An API plugin older than this parameter ignores it and returns the installed CHANGELOG.md.
+
         Requires `api.gpm.read`.
       parameters:
         - name: slug
@@ -5496,6 +5538,13 @@ paths:
           schema:
             type: string
           example: api
+        - name: available
+          in: query
+          required: false
+          description: When `true`, return the repository's changelog entries newer than the installed version instead of the installed CHANGELOG.md.
+          schema:
+            type: boolean
+            default: false
       responses:
         "200":
           description: Plugin changelog content returned.
@@ -5581,6 +5630,8 @@ paths:
         Return the raw Markdown content of the specified theme's CHANGELOG.md
         file.
 
+        With `available=true` it returns what an update would change instead: the GPM repository's changelog entries for versions newer than the installed one, assembled into one Markdown document with a `# v{version} ({date})` heading per version (the same format as `GET /gpm/grav/changelog`). It answers 404 when the theme is not in the repository or has no newer entries. An API plugin older than this parameter ignores it and returns the installed CHANGELOG.md.
+
         Requires `api.gpm.read`.
       parameters:
         - name: slug
@@ -5590,6 +5641,13 @@ paths:
           schema:
             type: string
           example: quark
+        - name: available
+          in: query
+          required: false
+          description: When `true`, return the repository's changelog entries newer than the installed version instead of the installed CHANGELOG.md.
+          schema:
+            type: boolean
+            default: false
       responses:
         "200":
           description: Theme changelog content returned.
@@ -11127,6 +11185,8 @@ paths:
             example:
               colorMode: dark
               accentHue: 200
+              darkShade: midnight
+              helpMode: tooltip
               fontSize: null
       responses:
         "200":
@@ -12321,7 +12381,9 @@ components:
                   Map of metadata field key to value. Only keys matching a
                   configured field are written; an empty string (or empty array
                   for a `tags` field) clears a field. A `tags` field accepts an
-                  array of strings, or a comma-separated string. A bare
+                  array of strings, or a comma-separated string. A `select`
+                  field accepts only one of its `options` keys (or an empty
+                  string); any other value is rejected with a 422. A bare
                   `{key: value}` object (without the `fields` wrapper) is also
                   accepted.
                 example:
@@ -12361,12 +12423,24 @@ components:
                 example: Alt Text
               type:
                 type: string
-                enum: [text, textarea, tags]
+                enum: [text, textarea, tags, select]
                 example: text
+              options:
+                type: object
+                additionalProperties:
+                  type: string
+                description: |
+                  Only present on a `select` field: the allowed stored values,
+                  each mapped to its display label.
+                example:
+                  generated: AI generated
+                  altered: AI altered
+                  none: No AI
               value:
                 description: |
-                  A string for `text`/`textarea` fields, or an array of strings
-                  for a `tags` field.
+                  A string for `text`/`textarea`/`select` fields, or an array of
+                  strings for a `tags` field. A `select` value is one of its
+                  `options` keys, or an empty string.
                 oneOf:
                   - type: string
                   - type: array
@@ -12764,6 +12838,26 @@ components:
           type: string
           description: The Twig template used to render this page.
           example: blog
+        template_missing:
+          type: boolean
+          description: |
+            True for a module whose template doesn't exist on the site, so the
+            page the module belongs to shows core's red "template not found"
+            error. The template checked is the one core renders with: the
+            `template` header when the page has one, otherwise the page file's
+            name under `modular/`. Always false for an ordinary page, which
+            falls back to the theme's default template. Present on single-page
+            details and on create and update responses, and left out of page
+            lists.
+          example: false
+        warnings:
+          type: array
+          description: |
+            Things the request did that the caller should know about, though
+            it succeeded. Only on create and update responses, and only when
+            there is something to say.
+          items:
+            $ref: "#/components/schemas/PageWarning"
         header:
           type: object
           additionalProperties: true
@@ -12969,6 +13063,27 @@ components:
         - modified
         - order
 
+    PageWarning:
+      type: object
+      description: |
+        A warning on a page create or update that succeeded. `template_missing`
+        means a module was created or switched to a template that doesn't exist
+        on the site, so the page it belongs to shows a "template not found"
+        error until the template exists.
+      required: [field, code, message]
+      properties:
+        field:
+          type: string
+          description: The request field the warning is about, `template` or `header.template`.
+          example: template
+        code:
+          type: string
+          enum: [template_missing]
+          example: template_missing
+        message:
+          type: string
+          description: A plain-words explanation, listing the modular types the site has.
+          example: "Template 'modular/testimonials' doesn't exist on this site, so the page this module belongs to will show a 'template not found' error until it does. Modular types on this site: modular/features, modular/hero."
     PageSummary:
       type: object
       description: |
@@ -13696,7 +13811,13 @@ components:
           example: My New Post
         template:
           type: string
-          description: Template name. Defaults to `default` if omitted.
+          description: |
+            Template name, which becomes the page file name (`blog` writes
+            `blog.md`). Defaults to `default` if omitted. For a module, send
+            a modular type as `text` or `modular/text`: a module has no
+            usable default unless the theme has a `modular/default` template
+            of its own, and a template that does not exist is allowed with a
+            `template_missing` warning in the response.
           default: default
           example: blog
         content:
@@ -13740,7 +13861,9 @@ components:
             What to create. `page` writes the folder plus `<template>.md`.
             `folder` creates only the directory (a routing/grouping
             container, no Markdown file). `module` creates a modular
-            sub-page: the slug is prefixed with `_` unless it already is.
+            sub-page: the slug is prefixed with `_` unless it already is,
+            and `template` should be a modular type (the response warns when
+            it isn't one the site has).
           example: page
         lang:
           type: string
@@ -13770,7 +13893,12 @@ components:
             New content here.
         template:
           type: string
-          description: Change the page template.
+          description: |
+            Change the page template, which renames the page file. For a
+            module, send a modular type as `text` or `modular/text`; one
+            that does not exist is allowed, with a `template_missing`
+            warning in the response. The page's current template is
+            accepted unchanged.
           example: blog
         header:
           type: object
@@ -15352,6 +15480,12 @@ components:
           minimum: 0
           maximum: 100
           example: 91
+        darkShade:
+          type: string
+          nullable: true
+          enum: [graphite, zinc, midnight]
+          description: How dark mode looks. `graphite` (the default) is dark greys, `zinc` is the near-black palette dark mode used before shades existed, and `midnight` is a deep blue-black. Only takes effect while dark mode is on. An unknown value is dropped, so the site default (or `graphite`) applies.
+          example: graphite
         fontFamily:
           type: string
           nullable: true
@@ -15360,6 +15494,12 @@ components:
           type: string
           nullable: true
           enum: [small, normal, large, xlarge, null]
+        helpMode:
+          type: string
+          nullable: true
+          enum: [inline, tooltip]
+          description: Where field help text goes. `tooltip` (the default) hides it behind a small info icon next to the label, and `inline` shows it under the field label. An unknown value is dropped, so the site default (or `tooltip`) applies.
+          example: tooltip
         editorMode:
           type: string
           nullable: true
@@ -15646,8 +15786,10 @@ components:
           colorMode: ""
           accentHue: 271
           accentSaturation: 91
+          darkShade: graphite
           fontFamily: google-sans
           fontSize: normal
+          helpMode: tooltip
           editorMode: normal
           editorKeymap: default
           editorStickyToolbar: true
@@ -15679,7 +15821,9 @@ components:
         effective:
           colorMode: dark
           accentHue: 271
+          darkShade: graphite
           fontFamily: google-sans
+          helpMode: tooltip
           autoSaveEnabled: false
           collabEnabled: true
           menubarLinks: []

@@ -25,6 +25,7 @@ use Grav\Plugin\Api\FlexBackend;
 use Grav\Plugin\Api\Response\ApiResponse;
 use Grav\Plugin\Api\Serializers\MediaSerializer;
 use Grav\Plugin\Api\Serializers\PageSerializer;
+use Grav\Plugin\Api\Services\ModularTemplates;
 use Grav\Plugin\Api\Services\ThumbnailService;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -36,10 +37,18 @@ class PagesController extends AbstractApiController
     private const PERMISSION_READ = 'api.pages.read';
     private const PERMISSION_WRITE = 'api.pages.write';
 
+    /**
+     * The order prefix of a page folder, as core strips it before it reads the
+     * slug (PAGE_ORDER_PREFIX_REGEX in Grav\Common\Page\Page, repeated here
+     * because the Flex constant cannot be loaded without the Flex page classes).
+     */
+    private const ORDER_PREFIX_REGEX = '/^[0-9]+\./u';
+
     private const ALLOWED_FILTERS = ['published', 'template', 'routable', 'visible', 'parent', 'children_of', 'root'];
     private const ALLOWED_SORT_FIELDS = ['date', 'title', 'slug', 'modified', 'order', 'default'];
 
     private readonly PageSerializer $serializer;
+    private readonly ModularTemplates $templates;
 
     public function __construct(Grav $grav, Config $config)
     {
@@ -47,7 +56,8 @@ class PagesController extends AbstractApiController
         $thumbnailService = ThumbnailService::forGrav($grav);
         $baseUrl = '/' . trim($config->get('plugins.api.route', '/api'), '/') . '/' . $config->get('plugins.api.version_prefix', 'v1');
         $mediaSerializer = new MediaSerializer($thumbnailService, $baseUrl);
-        $this->serializer = new PageSerializer($mediaSerializer);
+        $this->templates = new ModularTemplates($grav);
+        $this->serializer = new PageSerializer($mediaSerializer, $this->templates);
     }
 
     /**
@@ -259,14 +269,44 @@ class PagesController extends AbstractApiController
 
             // The ETag is the page's own state — take it BEFORE attaching the
             // caller's capabilities, which vary per user and would otherwise
-            // make every If-Match on a later PATCH mismatch.
-            $etag = $this->generateEtag($data);
+            // make every If-Match on a later PATCH mismatch (see pageEtag()).
+            $etag = $this->pageEtag($page, $data);
             $data['permissions'] = $this->pageCapabilities($request, $page);
 
             return $this->respondWithEtag($data, etag: $etag);
         } finally {
             $this->restoreLanguage($previousLang);
         }
+    }
+
+    /**
+     * The ETag of a page: a hash of what a PATCH can overwrite, which is its
+     * frontmatter, body, template and language. show(), update() and move() all
+     * take it from here, so the validator from any one of them is the one the
+     * next PATCH checks (getgrav/grav-plugin-admin2#189).
+     *
+     * Hashing the response itself did not work. The admin's editor loads with
+     * `translations=true`, and that read's ETag never matched what update()
+     * computed from the plain page, so every save with an `If-Match` was
+     * refused. The same went for anything else in a response that is not the
+     * page's own file: the media list (a page save never touches it, yet an
+     * upload would 409 the next save), `has_children` and `order` (a sibling
+     * added or moved), `modified` (Page::save() leaves the in-memory mtime at
+     * the pre-save value, so the response to a PATCH never matched the next
+     * request) and the caller's `permissions`.
+     *
+     * @param array<string, mixed> $data the serialized page, whatever options it was read with
+     */
+    private function pageEtag(PageInterface $page, array $data): string
+    {
+        return $this->generateEtag([
+            'header' => $data['header'] ?? [],
+            // A summary read leaves the body out of its response. Line endings
+            // are compared as LF: a body saved with CRLF reads back with LF.
+            'content' => str_replace(["\r\n", "\r"], "\n", (string) ($data['content'] ?? $page->rawMarkdown())),
+            'template' => $data['template'] ?? null,
+            'language' => $data['language'] ?? null,
+        ]);
     }
 
     /**
@@ -407,7 +447,13 @@ class PagesController extends AbstractApiController
             return ApiResponse::create([
                 'token' => $token,
                 'expires_in' => $ttl,
-                'route' => (string) $target->route(),
+                // The URL path the browser loads: the language prefix the
+                // front end serves this language under, then the route the
+                // page has IN that language. The active language is the one
+                // the page was just resolved in, so a translated slug
+                // (`/typographie`) and its prefix (`/fr`) always agree
+                // (admin2#188).
+                'route' => $this->grav['language']->getLanguageURLPrefix() . $target->route(),
                 // A theme that gives its modules an anchor can scroll straight
                 // to the one being previewed. Advisory only: a theme that emits
                 // no such id simply lands at the top of the parent.
@@ -485,6 +531,20 @@ class PagesController extends AbstractApiController
         $pos = strrpos($route, '/');
 
         return ($pos === false || $pos === 0) ? '/' : substr($route, 0, $pos);
+    }
+
+    /**
+     * Split a page folder name or route segment into its order prefix and its
+     * slug (`01._hero` into `01.` and `_hero`), with the pattern core strips
+     * the prefix with. The prefix is '' when the name has none.
+     *
+     * @return array{0: string, 1: string}
+     */
+    private static function splitOrderPrefix(string $name): array
+    {
+        $slug = (string) preg_replace(self::ORDER_PREFIX_REGEX, '', $name);
+
+        return [substr($name, 0, strlen($name) - strlen($slug)), $slug];
     }
 
     /**
@@ -572,13 +632,22 @@ class PagesController extends AbstractApiController
 
             // Ensure parent exists
             $parentRoute = self::routeParent($route);
-            $slug = self::routeBasename($route);
+
+            // The last segment may carry an order prefix the way a folder does
+            // (`01._hero`). Grav routes by the slug without it and decides
+            // whether a page is a module from that slug, so the `_` test below
+            // has to see the slug alone (#55). The prefix is kept for the
+            // folder name and left out of the route, which never holds it.
+            [$routePrefix, $slug] = self::splitOrderPrefix(self::routeBasename($route));
+            if ($routePrefix !== '' && $slug === '') {
+                throw new ValidationException("Invalid route: '{$route}' has an order prefix but no page name.");
+            }
 
             // Modular sub-page convention: folder name starts with `_`.
             if ($kind === 'module' && !str_starts_with($slug, '_')) {
                 $slug = '_' . $slug;
-                $route = ($parentRoute === '/' ? '' : $parentRoute) . '/' . $slug;
             }
+            $route = ($parentRoute === '/' ? '' : $parentRoute) . '/' . $slug;
 
             if ($parentRoute !== '/') {
                 $parent = $this->grav['pages']->find($parentRoute);
@@ -599,6 +668,18 @@ class PagesController extends AbstractApiController
 
             $this->authorizePageAction($request, $parent, 'create', self::PERMISSION_WRITE);
 
+            // A page whose folder starts with `_` is a module whichever `kind`
+            // asked for it. A module whose template doesn't exist is still
+            // created, with a warning in the response (#55). A folder writes
+            // no .md, so its template is never used.
+            $warnings = [];
+            $module = $kind !== 'folder' && str_starts_with($slug, '_');
+            if ($kind === 'folder') {
+                $template = is_string($template) ? $template : 'default';
+            } else {
+                $template = $this->resolveTemplate($template, $module);
+            }
+
             // Resolve `order: "auto"` against existing siblings: if any sibling
             // carries a numeric prefix, assign the next number; otherwise leave
             // the new page unprefixed. Mirrors admin-classic's add-page flow.
@@ -609,11 +690,16 @@ class PagesController extends AbstractApiController
             // Build directory name with optional ordering prefix. Width follows
             // the parent's existing children when present, so adding a page
             // under a 3-digit collection stays 3-digit.
-            $dirName = $order !== null ? PageOrdering::key($order, $slug, $this->siblingDigits($parentPath)) : $slug;
+            // An `order` in the body wins over a prefix typed into the route.
+            $dirName = $order !== null
+                ? PageOrdering::key($order, $slug, $this->siblingDigits($parentPath))
+                : $routePrefix . $slug;
             $pagePath = $parentPath . '/' . $dirName;
 
-            if (is_dir($pagePath)) {
-                throw new ValidationException("A page already exists at route: {$route}");
+            // Grav routes by slug, so `02._dup` and `03._dup` would claim the same
+            // route: refuse the slug when a sibling has it under any order prefix.
+            if (($clash = $this->findSlugClash($parentPath, $dirName)) !== null) {
+                throw new ValidationException("A page already exists at route: {$route} (folder '{$clash}').");
             }
 
             // Build header: blueprint field defaults sit lowest, then the
@@ -627,6 +713,19 @@ class PagesController extends AbstractApiController
                 ['title' => $title],
                 $header,
             );
+
+            // Core renders with the `template` header when there is one, and
+            // with the file's template otherwise, so that is the one to warn
+            // about.
+            if ($module) {
+                $headerTemplate = $header['template'] ?? null;
+                $warning = $headerTemplate === null || (is_string($headerTemplate) && trim($headerTemplate) === '')
+                    ? $this->templates->warning($template)
+                    : $this->headerTemplateWarning($headerTemplate, null);
+                if ($warning !== null) {
+                    $warnings[] = $warning;
+                }
+            }
 
             // Enforce security.twig_content.* gate before any plugin event can
             // mutate the header — reject the create up-front if the request
@@ -696,6 +795,9 @@ class PagesController extends AbstractApiController
             if ($resolved !== null) {
                 $data['permissions'] = $this->pageCapabilities($request, $resolved);
             }
+            if ($warnings) {
+                $data['warnings'] = $warnings;
+            }
             $location = $this->getApiBaseUrl() . '/pages' . $route;
 
             return ApiResponse::created(
@@ -706,6 +808,94 @@ class PagesController extends AbstractApiController
         } finally {
             $this->restoreLanguage($previousLang);
         }
+    }
+
+    /**
+     * Check the `template` a create or a template switch asked for, and return
+     * it the way Grav reports it (`modular/<name>` for a module).
+     *
+     * The page file is named after the template, so anything that is not a
+     * plain name is refused. buildPageFilename() would otherwise quietly turn
+     * `modular/text` on an ordinary page into `text.md`, and an empty value
+     * into a hidden `.md`.
+     *
+     * Whether the template exists on the site is not asked here. A module whose
+     * template is missing is allowed, with a warning (#55): see
+     * {@see ModularTemplates::warning()}.
+     *
+     * @throws ValidationException
+     */
+    private function resolveTemplate(mixed $template, bool $module): string
+    {
+        if (!is_string($template) || trim($template) === '') {
+            throw $this->templateError('template', "The 'template' field must be a non-empty string.");
+        }
+
+        $template = trim($template);
+        // A module's template is named either way: the admin sends the
+        // `modular/text` its type list holds, other callers send `text`.
+        $name = $module && str_starts_with($template, 'modular/') ? substr($template, 8) : $template;
+
+        if ($name === '' || $name[0] === '.' || strpbrk($name, '/\\') !== false) {
+            throw $this->templateError('template', !$module && str_starts_with($template, 'modular/')
+                ? "Template '{$template}' is a modular type, which only a module can use. Create it with kind 'module'."
+                : "Invalid template '{$template}': it must be a template name, not a path.");
+        }
+
+        if (!$module) {
+            return $name;
+        }
+
+        // Returned as registered, so `Hero` is written as `hero.md`.
+        $template = 'modular/' . $name;
+
+        return $this->templates->registered($template) ?? $template;
+    }
+
+    /**
+     * Whether `$template` names the template the page already has, in either
+     * spelling for a module (`text` or `modular/text`).
+     */
+    private function isCurrentTemplate(mixed $template, PageInterface $page): bool
+    {
+        if (!is_string($template)) {
+            return false;
+        }
+
+        $template = trim($template);
+        $current = (string) $page->template();
+
+        return strcasecmp($template, $current) === 0
+            || ($page->isModule() && strcasecmp('modular/' . $template, $current) === 0);
+    }
+
+    /**
+     * The warning for a `template` header a module is being given, when it
+     * names a template Twig cannot find (#55).
+     *
+     * Core reads that header before the file name, and it names any Twig
+     * template, so it is checked as written. Only a header this request sets or
+     * changes is looked at.
+     *
+     * @return array{field: string, code: string, message: string}|null
+     * @throws ValidationException when the header is not text, which core cannot read
+     */
+    private function headerTemplateWarning(mixed $new, mixed $old): ?array
+    {
+        if ($new === null || $new === '' || $new === $old) {
+            return null;
+        }
+
+        if (!is_string($new)) {
+            throw $this->templateError('header.template', "The 'template' header must be a template name, not " . gettype($new) . '.');
+        }
+
+        return $this->templates->warning($new, 'header.template');
+    }
+
+    private function templateError(string $field, string $message): ValidationException
+    {
+        return new ValidationException($message, [['field' => $field, 'message' => $message]]);
     }
 
     /**
@@ -819,6 +1009,10 @@ class PagesController extends AbstractApiController
             $page = $this->findPageOrFail('/' . $route, $request, self::PERMISSION_WRITE);
             $this->authorizePageAction($request, $page, 'update', self::PERMISSION_WRITE);
 
+            // What the request leaves the caller to know about (#55). Not part
+            // of the page's state, so it is added after the ETag is taken.
+            $warnings = [];
+
             // Guard against writing to a non-existent translation file. When
             // ?lang=X is specified but no X translation exists, Grav's fallback
             // would silently resolve to the source language and clobber it.
@@ -842,7 +1036,7 @@ class PagesController extends AbstractApiController
 
             // ETag validation for conflict detection
             $currentData = $this->serializer->serialize($page);
-            $this->validateEtag($request, $this->generateEtag($currentData));
+            $this->validateEtag($request, $this->pageEtag($page, $currentData));
 
             $body = $this->getRequestBody($request);
 
@@ -867,6 +1061,7 @@ class PagesController extends AbstractApiController
 
             if (array_key_exists('header', $body)) {
                 $incoming = (array) $body['header'];
+                $displayTemplate = $this->headerToArray($page->header())['template'] ?? null;
                 if (($body['header_mode'] ?? null) === 'replace') {
                     // Expert (raw-frontmatter) mode sends the COMPLETE header, so
                     // replace it wholesale. Merging would preserve keys the user
@@ -881,6 +1076,12 @@ class PagesController extends AbstractApiController
                     $existing = $this->headerToArray($page->header());
                     $merged = $this->mergePatch($existing, $incoming);
                     $merged = $this->stripNullValues($merged);
+                }
+                // Only a `template` header this request sets or changes is
+                // reported, so a module that already has one doesn't repeat
+                // the warning on every save.
+                if ($page->isModule() && ($warning = $this->headerTemplateWarning($merged['template'] ?? null, $displayTemplate)) !== null) {
+                    $warnings[] = $warning;
                 }
                 $page->header((object) $merged);
                 // Sync properties that legacy Page caches separately from the
@@ -897,7 +1098,23 @@ class PagesController extends AbstractApiController
             $templateChanged = false;
             $oldFilePath = null;
             $previousTemplate = null;
-            if (array_key_exists('template', $body) && $body['template'] !== $page->template()) {
+            // A module reports `modular/text` and callers send either that or
+            // `text`. Its own template in either spelling is not a switch: it
+            // used to be treated as one, and the "old" file removed after the
+            // save was the page's only file (#55). Sending a page's template
+            // back unchanged also has to keep working when that type is no
+            // longer registered, as after a theme switch.
+            if (array_key_exists('template', $body) && !$this->isCurrentTemplate($body['template'], $page)) {
+                $newTemplate = $this->resolveTemplate($body['template'], $page->isModule());
+                // A `template` header wins over the file's name when core
+                // renders, so the switch only matters here without one.
+                $headerTemplate = $this->headerToArray($page->header())['template'] ?? null;
+                if ($page->isModule()
+                    && (!is_string($headerTemplate) || trim($headerTemplate) === '')
+                    && ($warning = $this->templates->warning($newTemplate)) !== null
+                ) {
+                    $warnings[] = $warning;
+                }
                 $previousTemplate = $page->template();
                 // The page FILENAME is the template basename only. For modular
                 // modules Grav's template() returns a `modular/<name>` form, so
@@ -906,9 +1123,12 @@ class PagesController extends AbstractApiController
                 // leave the original module untouched (admin2#69). buildPageFilename()
                 // strips the prefix (basename) and handles the language extension.
                 $lang = $page->language() ?: null;
-                $oldFilePath = $page->path() . '/' . $this->buildPageFilename($page->template(), $lang);
-                $page->template($body['template']);
-                $page->name($this->buildPageFilename($body['template'], $lang));
+                // The file the page was loaded from. template() is no guide to
+                // it when a `template` header overrides the display template.
+                $oldFilePath = $page->filePath()
+                    ?: $page->path() . '/' . $this->buildPageFilename($previousTemplate, $lang);
+                $page->template($newTemplate);
+                $page->name($this->buildPageFilename($newTemplate, $lang));
                 $templateChanged = true;
             }
 
@@ -940,8 +1160,9 @@ class PagesController extends AbstractApiController
 
             $page->save();
 
-            // Remove old template file after successful save
-            if ($templateChanged && $oldFilePath && file_exists($oldFilePath)) {
+            // Remove old template file after successful save, unless the save
+            // went to that same file.
+            if ($templateChanged && $oldFilePath && $oldFilePath !== $page->filePath() && file_exists($oldFilePath)) {
                 unlink($oldFilePath);
             }
 
@@ -960,10 +1181,12 @@ class PagesController extends AbstractApiController
             $this->fireEvent('onApiPageUpdated', $updatedEvent);
 
             $data = $this->serializer->serialize($page);
-            // ETag from the page state alone — see show() for why the caller's
-            // capabilities must stay out of it.
-            $etag = $this->generateEtag($data);
+            // ETag from the page state alone — see pageEtag().
+            $etag = $this->pageEtag($page, $data);
             $data['permissions'] = $this->pageCapabilities($request, $page);
+            if ($warnings) {
+                $data['warnings'] = $warnings;
+            }
 
             return $this->respondWithEtag($data, 200, ['pages:update:/' . $route, 'pages:list'], $etag);
         } finally {
@@ -1110,8 +1333,10 @@ class PagesController extends AbstractApiController
             throw new ValidationException('Source and destination paths are identical.');
         }
 
-        if (is_dir($newPath)) {
-            throw new ValidationException("A page already exists at the destination path.");
+        // The page's own folder is about to vacate, so it is not a clash (moving
+        // `02.foo` to `05.foo` within one parent).
+        if (($clash = $this->findSlugClash($newParentPath, $dirName, $oldPath)) !== null) {
+            throw new ValidationException("A page already exists at the destination path (folder '{$clash}').");
         }
 
         Folder::move($oldPath, $newPath);
@@ -1142,7 +1367,7 @@ class PagesController extends AbstractApiController
         }
 
         $data = $this->serializer->serialize($movedPage);
-        $etag = $this->generateEtag($data);
+        $etag = $this->pageEtag($movedPage, $data);
         $data['permissions'] = $this->pageCapabilities($request, $movedPage);
 
         return $this->respondWithEtag($data, 200, $moveTags, $etag);
@@ -1185,8 +1410,8 @@ class PagesController extends AbstractApiController
 
         $destPath = $destParentPath . '/' . $destSlug;
 
-        if (is_dir($destPath)) {
-            throw new ValidationException("A page already exists at route: {$destRoute}");
+        if (($clash = $this->findSlugClash($destParentPath, $destSlug)) !== null) {
+            throw new ValidationException("A page already exists at route: {$destRoute} (folder '{$clash}').");
         }
 
         $this->assertDescendantsNotDenied($request, $page, 'read');
@@ -1240,8 +1465,9 @@ class PagesController extends AbstractApiController
         $page = $this->findPageOrFail('/' . $route, $request, self::PERMISSION_READ);
         $this->authorizePageAction($request, $page, 'read', self::PERMISSION_READ);
 
-        $translated = $page->translatedLanguages();
-        $untranslated = $page->untranslatedLanguages();
+        // A draft translation counts as translated in both lists (#57).
+        $translated = $page->translatedLanguages(false);
+        $untranslated = $page->untranslatedLanguages(true);
 
         /** @var Language $language */
         $language = $this->grav['language'];
@@ -1261,90 +1487,89 @@ class PagesController extends AbstractApiController
      */
     public function translate(ServerRequestInterface $request): ResponseInterface
     {
-        $this->enablePages();
-
-        $route = $this->getRouteParam($request, 'route');
-        $page = $this->findPageOrFail('/' . $route, $request, self::PERMISSION_WRITE);
-        $this->authorizePageAction($request, $page, 'update', self::PERMISSION_WRITE);
-
         $body = $this->getRequestBody($request);
         $this->requireFields($body, ['lang']);
+        $sourceLang = $body['source_lang'] ?? null;
+        $targetLang = $body['lang'];
 
-        $lang = $body['lang'];
-        $this->validateLanguageCode($lang);
-
-        // Check if translation already exists
-        $translated = $page->translatedLanguages();
-        if (isset($translated[$lang])) {
-            throw new ValidationException("A translation already exists for language '{$lang}'. Use PATCH to update it.");
-        }
-
-        $title = $body['title'] ?? $page->title();
-        $content = $body['content'] ?? $page->rawMarkdown();
-        $header = $body['header'] ?? $this->headerToArray($page->header());
-
-        // Ensure title is set, and back-fill blueprint defaults underneath so a
-        // minimal explicit header still gets the template's `default:` values
-        // (admin2#49). When no header is supplied the source page's frontmatter
-        // is already complete, so the defaults are a no-op there.
-        $header = array_replace_recursive(
-            $this->blueprintHeaderDefaults($page->template()),
-            ['title' => $title],
-            is_array($header) ? $header : [],
-        );
-
-        // Same Twig-content scope/permission cap create()/update() enforce: an
-        // api.pages.write key scoped below admin.pages_twig must not enable
-        // process.twig on the page it authors here. translate() previously wrote
-        // a caller-supplied header/content without this gate, letting a scoped key
-        // turn on Twig-in-content (SSTI) that create()/update() would reject.
-        // (GHSA-w94c-jmg4-w4c9, follow-up to GHSA-96xv-p87j-58mx)
-        $this->guardTwigContent($request, null, is_array($body['header'] ?? null) ? $body['header'] : []);
-
-        $this->fireEvent('onApiBeforePageTranslate', [
-            'page' => $page,
-            'lang' => $lang,
-            'header' => &$header,
-            'content' => &$content,
-        ]);
-
-        // Build the language-specific file path
-        $template = $page->template();
-        $filename = $this->buildPageFilename($template, $lang);
-        $filePath = $page->path() . '/' . $filename;
-
-        $translatedPage = new Page();
-        $translatedPage->filePath($filePath);
-        $translatedPage->header((object) $header);
-        $translatedPage->rawMarkdown($content);
-
-        // Editor XSS backstop, as run by create()/update(). (GHSA-w94c-jmg4-w4c9)
-        $this->validatePageChanges($translatedPage, ['header' => $header, 'content' => $content]);
-
-        // Allow plugins to modify the page before save
-        $this->fireAdminEvent('onAdminSave', ['object' => &$translatedPage, 'page' => &$translatedPage]);
-
-        $translatedPage->save();
-
-        $this->clearPagesCache();
-
-        // Re-init and fetch the translated page
-        /** @var Language $language */
-        $language = $this->grav['language'];
-        $previousLang = $language->getActive() ?? false;
+        $previousLang = $this->applyLanguage($request, $sourceLang);
 
         try {
+            $this->enablePages();
+
+            $route = $this->getRouteParam($request, 'route');
+            $page = $this->findPageOrFail('/' . $route, $request, self::PERMISSION_WRITE);
+            $this->authorizePageAction($request, $page, 'update', self::PERMISSION_WRITE);
+
+            $this->validateLanguageCode($targetLang);
+
+            // Check if translation already exists
+            $translated = $page->translatedLanguages();
+            if (isset($translated[$targetLang])) {
+                throw new ValidationException("A translation already exists for language '{$targetLang}'. Use PATCH to update it.");
+            }
+
+            $title = $body['title'] ?? $page->title();
+            $content = $body['content'] ?? $page->rawMarkdown();
+            $header = $body['header'] ?? $this->headerToArray($page->header());
+
+            // Ensure title is set, and back-fill blueprint defaults underneath so a
+            // minimal explicit header still gets the template's `default:` values
+            // (admin2#49). When no header is supplied the source page's frontmatter
+            // is already complete, so the defaults are a no-op there.
+            $header = array_replace_recursive(
+                $this->blueprintHeaderDefaults($page->template()),
+                ['title' => $title],
+                is_array($header) ? $header : [],
+            );
+
+            // Same Twig-content scope/permission cap create()/update() enforce: an
+            // api.pages.write key scoped below admin.pages_twig must not enable
+            // process.twig on the page it authors here. translate() previously wrote
+            // a caller-supplied header/content without this gate, letting a scoped key
+            // turn on Twig-in-content (SSTI) that create()/update() would reject.
+            // (GHSA-w94c-jmg4-w4c9, follow-up to GHSA-96xv-p87j-58mx)
+            $this->guardTwigContent($request, null, is_array($body['header'] ?? null) ? $body['header'] : []);
+
+            $this->fireEvent('onApiBeforePageTranslate', [
+                'page' => $page,
+                'lang' => $targetLang,
+                'header' => &$header,
+                'content' => &$content,
+            ]);
+
+            // Build the language-specific file path
+            $template = $page->template();
+            $filename = $this->buildPageFilename($template, $targetLang);
+            $filePath = $page->path() . '/' . $filename;
+
+            $translatedPage = new Page();
+            $translatedPage->filePath($filePath);
+            $translatedPage->header((object) $header);
+            $translatedPage->rawMarkdown($content);
+
+            // Editor XSS backstop, as run by create()/update(). (GHSA-w94c-jmg4-w4c9)
+            $this->validatePageChanges($translatedPage, ['header' => $header, 'content' => $content]);
+
+            // Allow plugins to modify the page before save
+            $this->fireAdminEvent('onAdminSave', ['object' => &$translatedPage, 'page' => &$translatedPage]);
+
+            $translatedPage->save();
+
+            $this->clearPagesCache();
+
+            // Re-init and fetch the translated page
             // The file was written explicitly above, so this switch only affects
             // what gets echoed back — but without it the response (and the
             // events below) carried the source-language page (#24).
-            $this->switchLanguage($lang);
+            $this->switchLanguage($targetLang);
             $newPage = $this->grav['pages']->find('/' . $route);
 
             $this->fireAdminEvent('onAdminAfterSave', ['object' => $newPage ?? $translatedPage, 'page' => $newPage ?? $translatedPage]);
             $this->fireEvent('onApiPageTranslated', [
                 'page' => $newPage ?? $translatedPage,
                 'route' => '/' . $route,
-                'lang' => $lang,
+                'lang' => $targetLang,
             ]);
 
             $data = $this->serializer->serialize($newPage ?? $translatedPage);
@@ -1741,16 +1966,32 @@ class PagesController extends AbstractApiController
         $parentPath = $parent->path();
         $children = $parent->children();
 
-        // Build a map of slug -> current directory name
+        // Build a map of slug -> current directory name. Grav routes by slug, so a
+        // slug two children share (under different order prefixes) cannot be told
+        // apart here; keep every folder so it can be refused below instead of
+        // letting the last one win.
         $childMap = [];
+        $dirsBySlug = [];
         foreach ($children as $child) {
-            $childMap[$child->slug()] = basename($child->path());
+            $dir = basename($child->path());
+            $childMap[$child->slug()] = $dir;
+            $dirsBySlug[$child->slug()][] = $dir;
         }
 
-        // Validate all slugs exist
+        // Validate all slugs exist, are listed once, and name exactly one folder
+        $listed = [];
         foreach ($order as $slug) {
-            if (!isset($childMap[$slug])) {
-                throw new ValidationException("Child page with slug '{$slug}' not found under '{$parent->route()}'.");
+            if (!is_string($slug) || !isset($childMap[$slug])) {
+                throw new ValidationException("Child page with slug '" . (is_string($slug) ? $slug : gettype($slug)) . "' not found under '{$parent->route()}'.");
+            }
+            if (isset($listed[$slug])) {
+                throw new ValidationException("Child page with slug '{$slug}' is listed more than once.");
+            }
+            $listed[$slug] = true;
+            if (count($dirsBySlug[$slug]) > 1) {
+                throw new ValidationException(
+                    "More than one child of '{$parent->route()}' has the slug '{$slug}' (" . implode(', ', $dirsBySlug[$slug]) . "). Rename or delete one before reordering."
+                );
             }
         }
 
@@ -1764,38 +2005,12 @@ class PagesController extends AbstractApiController
                 $digits = $w;
             }
         }
-        $reorderDigits = $digits ?: null;
 
-        $tempRenames = [];
-        $position = 1;
-
-        foreach ($order as $slug) {
-            $currentDir = $childMap[$slug];
-            $newDir = PageOrdering::key($position, $slug, $reorderDigits);
-
-            if ($currentDir !== $newDir) {
-                $oldPath = $parentPath . '/' . $currentDir;
-                // Use temp name to avoid conflicts during rename
-                $tempPath = $parentPath . '/_temp_' . $position . '_' . $slug;
-                $tempRenames[] = [
-                    'temp' => $tempPath,
-                    'final' => $parentPath . '/' . $newDir,
-                    'old' => $oldPath,
-                ];
-                if (is_dir($oldPath)) {
-                    rename($oldPath, $tempPath);
-                }
-            }
-
-            $position++;
-        }
-
-        // Now rename from temp to final names
-        foreach ($tempRenames as $rename) {
-            if (is_dir($rename['temp'])) {
-                rename($rename['temp'], $rename['final']);
-            }
-        }
+        // Every target name is checked before the first folder moves, and a
+        // failure part-way puts the folders back, so a bad request can no longer
+        // strand children under `_temp_` names.
+        $plan = $this->planReorder($parentPath, $childMap, $order, $digits ?: null, $parent->route());
+        $this->applyRenames($plan);
 
         $this->clearPagesCache();
 
@@ -2048,17 +2263,27 @@ class PagesController extends AbstractApiController
                 }
             }
 
-            // Whether this op actually causes a path rename on disk. Position-
-            // unchanged + parent-unchanged ops are no-ops at the filesystem
-            // level — clients (e.g. the tree-view drag handler) emit them
-            // when renumbering all siblings of a drop target, even for
-            // siblings whose position didn't actually shift. Tracking these
-            // as "moved" below would falsely flag conflicts when one of those
-            // no-op siblings happens to be the source parent of another op.
-            $currentOrder = (int) $page->order();
+            // The folder name this op ends with. A page staying in its folder
+            // keeps the width it already used; one landing in another folder
+            // takes the width that folder's numbered pages use, so `005.x`
+            // doesn't arrive among `01.`, `02.` (or the reverse).
+            $slug = ltrim($page->slug(), '.');
+            $ownDigits = PageOrdering::digitsFromFolder(basename($page->path()));
+            $digits = ($newParentRoute !== $currentParentRoute && $newParentPath !== null
+                    ? $this->siblingDigits($newParentPath)
+                    : null)
+                ?? $ownDigits
+                ?? PageOrdering::defaultDigits();
+            $dirName = $position !== null
+                ? str_pad((string) $position, $digits, '0', STR_PAD_LEFT) . '.' . $slug
+                : $slug;
+
+            // Whether this op renames anything on disk. Clients renumbering
+            // every sibling of a drop target send ops for siblings that keep
+            // their number; those change nothing, so they are neither treated
+            // as moved below nor renamed (getgrav/grav-admin-next#36).
             $parentChanged = $newParentRoute !== $currentParentRoute;
-            $positionChanged = $position !== null && $position !== $currentOrder;
-            $actuallyMoves = $parentChanged || $positionChanged;
+            $actuallyMoves = $parentChanged || $dirName !== basename($page->path());
 
             $resolved[] = [
                 'route' => $route,
@@ -2067,13 +2292,15 @@ class PagesController extends AbstractApiController
                 // '.' don't get rebuilt into '04..slug' style folders.
                 // Matches the sanitization the single-page /move endpoint
                 // already applies.
-                'slug' => ltrim($page->slug(), '.'),
+                'slug' => $slug,
+                'dirName' => $dirName,
                 'oldPath' => $page->path(),
                 'currentParentRoute' => $currentParentRoute,
                 'newParentRoute' => $newParentRoute,
                 'newParentPath' => $newParentPath,
                 'position' => $position,
                 'actuallyMoves' => $actuallyMoves,
+                'tempPath' => null,
             ];
         }
 
@@ -2109,27 +2336,56 @@ class PagesController extends AbstractApiController
             }
         }
 
+        // Grav routes by slug, so a page landing under a new parent must not share
+        // its slug with a page already there, or with another page landing there,
+        // whatever their order prefixes. Folders that move in this batch vacate
+        // their old name. A reorder within one parent creates no new clash, so a
+        // clash that was already on disk never blocks renumbering.
+        $vacating = array_map(static fn (array $op): string => (string) $op['oldPath'], $resolved);
+        $landing = [];
+        foreach ($resolved as $op) {
+            $landingKey = rtrim((string) $op['newParentPath'], '/') . "\0" . $op['slug'];
+            $landing[$landingKey] = ($landing[$landingKey] ?? 0) + 1;
+        }
+        foreach ($resolved as $index => $op) {
+            if ($op['newParentPath'] === null || $op['newParentRoute'] === $op['currentParentRoute']) {
+                continue;
+            }
+            $landingKey = rtrim((string) $op['newParentPath'], '/') . "\0" . $op['slug'];
+            if ($landing[$landingKey] > 1
+                || $this->findSlugClash($op['newParentPath'], $op['slug'], $vacating) !== null) {
+                throw new ValidationException(
+                    "A page with the slug '{$op['slug']}' already exists under '{$op['newParentRoute']}' (operation index {$index})."
+                );
+            }
+        }
+
         $this->fireEvent('onApiBeforePagesReorganize', ['operations' => $resolved]);
 
         // --- Phase 2: Move to temp names ---
+        // Only ops that rename something take part. A no-op sent through a
+        // temp name carried its whole subtree away, so an op for a page inside
+        // it found nothing at its old path and was skipped while the request
+        // still reported success. Deepest folders go first, so a page leaves
+        // its folder before that folder is renamed.
+        $moving = array_keys(array_filter($resolved, static fn (array $op): bool => $op['actuallyMoves']));
+        usort($moving, static fn (int $a, int $b): int
+            => substr_count($resolved[$b]['oldPath'], '/') <=> substr_count($resolved[$a]['oldPath'], '/'));
         $completedRenames = [];
 
         try {
-            foreach ($resolved as $index => &$op) {
-                $slug = $op['slug'];
-                $destParentPath = $op['newParentPath'];
-                $tempName = '_reorg_temp_' . $index . '_' . $slug;
-                $tempPath = $destParentPath . '/' . $tempName;
-
-                if (is_dir($op['oldPath'])) {
-                    Folder::move($op['oldPath'], $tempPath);
-                    $completedRenames[] = ['from' => $op['oldPath'], 'to' => $tempPath];
-                    $op['tempPath'] = $tempPath;
-                } else {
-                    $op['tempPath'] = null;
+            foreach ($moving as $index) {
+                $op = &$resolved[$index];
+                if (!is_dir($op['oldPath'])) {
+                    throw new \RuntimeException("'{$op['route']}' is no longer at '{$op['oldPath']}'.");
                 }
+
+                $tempPath = $op['newParentPath'] . '/_reorg_temp_' . $index . '_' . $op['slug'];
+                Folder::move($op['oldPath'], $tempPath);
+                $completedRenames[] = ['from' => $op['oldPath'], 'to' => $tempPath];
+                $op['tempPath'] = $tempPath;
+                unset($op);
             }
-            unset($op);
 
             // --- Phase 3: Rename from temp to final names ---
             foreach ($resolved as &$op) {
@@ -2137,18 +2393,7 @@ class PagesController extends AbstractApiController
                     continue;
                 }
 
-                $slug = $op['slug'];
-                $position = $op['position'];
-                $destParentPath = $op['newParentPath'];
-
-                // Keep the width the folder already used — the temp name carries no
-                // prefix, so the original path is what to read it from.
-                $digits = PageOrdering::digitsFromFolder(basename($op['oldPath'])) ?? PageOrdering::defaultDigits();
-                $dirName = $position !== null
-                    ? str_pad((string) $position, $digits, '0', STR_PAD_LEFT) . '.' . $slug
-                    : $slug;
-
-                $finalPath = $destParentPath . '/' . $dirName;
+                $finalPath = $op['newParentPath'] . '/' . $op['dirName'];
 
                 rename($op['tempPath'], $finalPath);
                 $completedRenames[] = ['from' => $op['tempPath'], 'to' => $finalPath];
@@ -2254,10 +2499,26 @@ class PagesController extends AbstractApiController
 
         // Simplify: return just taxonomy type => [values] without internal file paths
         foreach ($raw as $type => $values) {
-            $taxonomy[$type] = array_keys($values);
+            $taxonomy[$type] = self::taxonomyValueList((array) $values);
         }
 
         return ApiResponse::create($taxonomy);
+    }
+
+    /**
+     * The values in use for one taxonomy type, as a list of strings.
+     *
+     * Core keys its taxonomy map by value, and PHP turns a key that looks like
+     * an integer ("2024") into an int. array_keys() alone therefore sent year
+     * tags and the like as JSON numbers, where the documented response and its
+     * clients expect strings (getgrav/grav-plugin-admin2#186).
+     *
+     * @param array<int|string, mixed> $values Core's map for one type, keyed by value.
+     * @return list<string>
+     */
+    private static function taxonomyValueList(array $values): array
+    {
+        return array_map('strval', array_keys($values));
     }
 
     // -------------------------------------------------------------------------
@@ -2813,6 +3074,8 @@ class PagesController extends AbstractApiController
             'include_media' => false,
             'include_translations' => filter_var($query['translations'] ?? false, FILTER_VALIDATE_BOOLEAN),
             'include_header' => !(is_string($fields) && strtolower(trim($fields)) === 'summary'),
+            // A Twig lookup per module is not worth it in a list (#55).
+            'include_template_state' => false,
         ];
     }
 
@@ -2976,7 +3239,7 @@ class PagesController extends AbstractApiController
         }
 
         $destPath = $destParentPath . '/' . $destSlug;
-        if (is_dir($destPath)) {
+        if ($this->findSlugClash($destParentPath, $destSlug) !== null) {
             throw new ValidationException("A page already exists at the copy destination for: {$page->route()}");
         }
 
@@ -3018,7 +3281,10 @@ class PagesController extends AbstractApiController
      */
     private function rewriteCopiedSlug(string $destPath, string $destSlug, string $extension): void
     {
-        $extension = '.' . ltrim($extension, '.');
+        // A translated page's extension carries its language (`.en.md`), but
+        // every language file of the copy holds the source slug, so match on
+        // the markdown extension alone.
+        $extension = '.' . pathinfo('page.' . ltrim($extension, '.'), PATHINFO_EXTENSION);
 
         // scandir rather than glob: a page folder name may legitimately contain
         // `[` or `*`, which glob would read as a pattern.
@@ -3047,6 +3313,133 @@ class PagesController extends AbstractApiController
     }
 
     /**
+     * The folder under $parentPath that already holds the slug of $dirName, or
+     * null. The order prefix is ignored: Grav routes by slug, so `02.foo` and
+     * `03.foo` answer to the same route and one of them never shows in listings.
+     *
+     * @param string      $parentPath Filesystem path of the parent folder.
+     * @param string      $dirName    Folder name about to be created, prefix included.
+     * @param list<string>|string|null $ignorePaths Folder(s) about to vacate (the page being moved).
+     */
+    private function findSlugClash(string $parentPath, string $dirName, array|string|null $ignorePaths = null): ?string
+    {
+        if (!is_dir($parentPath)) {
+            return null;
+        }
+
+        $slug = PageOrdering::parse($dirName)[1];
+        $ignore = array_flip(array_map(
+            static fn (string $path): string => rtrim($path, '/'),
+            (array) $ignorePaths
+        ));
+
+        foreach (scandir($parentPath) ?: [] as $entry) {
+            if ($entry[0] === '.' || !is_dir($parentPath . '/' . $entry)) {
+                continue;
+            }
+            if (isset($ignore[rtrim($parentPath, '/') . '/' . $entry])) {
+                continue;
+            }
+            if (PageOrdering::parse($entry)[1] === $slug) {
+                return $entry;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Work out the renames a reorder needs, refusing the request when a target
+     * name is taken by a folder that is not part of it.
+     *
+     * @param array<string, string> $childMap slug => current folder name
+     * @param list<string>          $order    slugs in their new order
+     * @return list<array{old: string, temp: string, final: string}>
+     */
+    private function planReorder(string $parentPath, array $childMap, array $order, ?int $digits, string $parentRoute): array
+    {
+        $existing = array_flip(array_filter(
+            scandir($parentPath) ?: [],
+            static fn (string $entry): bool => $entry !== '.' && $entry !== '..'
+        ));
+
+        $plan = [];
+        $vacated = [];
+        $position = 1;
+
+        foreach ($order as $slug) {
+            $currentDir = $childMap[$slug];
+            $newDir = PageOrdering::key($position, $slug, $digits);
+
+            if ($currentDir !== $newDir && is_dir($parentPath . '/' . $currentDir)) {
+                $tempDir = '_temp_' . $position . '_' . $slug;
+                $plan[] = [
+                    'old' => $parentPath . '/' . $currentDir,
+                    'temp' => $parentPath . '/' . $tempDir,
+                    'final' => $parentPath . '/' . $newDir,
+                ];
+                $vacated[$currentDir] = true;
+            }
+
+            $position++;
+        }
+
+        // A folder that moves away frees its name; anything else already sitting
+        // on a temp or final name is in the way.
+        foreach ($plan as $rename) {
+            foreach (['temp', 'final'] as $kind) {
+                $name = basename($rename[$kind]);
+                if (isset($existing[$name]) && !isset($vacated[$name])) {
+                    throw new ValidationException(
+                        "Cannot reorder '{$parentRoute}': the folder '{$name}' already exists and is not part of this reorder."
+                    );
+                }
+            }
+        }
+
+        return $plan;
+    }
+
+    /**
+     * Carry out planned renames through temp names, and put every folder back
+     * if any step fails.
+     *
+     * @param list<array{old: string, temp: string, final: string}> $plan
+     */
+    private function applyRenames(array $plan): void
+    {
+        $done = [];
+
+        try {
+            // Temp names first, so a folder can take a name another one is leaving.
+            foreach ($plan as $rename) {
+                $this->renameOrFail($rename['old'], $rename['temp']);
+                $done[] = [$rename['old'], $rename['temp']];
+            }
+            foreach ($plan as $rename) {
+                $this->renameOrFail($rename['temp'], $rename['final']);
+                $done[] = [$rename['temp'], $rename['final']];
+            }
+        } catch (\Throwable $e) {
+            foreach (array_reverse($done) as [$from, $to]) {
+                if (is_dir($to) && !file_exists($from)) {
+                    @rename($to, $from);
+                }
+            }
+
+            throw new \RuntimeException('Reorder failed and was rolled back: ' . $e->getMessage(), 0, $e);
+        }
+    }
+
+    private function renameOrFail(string $from, string $to): void
+    {
+        if (!@rename($from, $to)) {
+            $reason = error_get_last()['message'] ?? 'rename failed';
+            throw new \RuntimeException($reason);
+        }
+    }
+
+    /**
      * Clear the pages cache after a mutation.
      */
     private function clearPagesCache(): void
@@ -3057,6 +3450,14 @@ class PagesController extends AbstractApiController
         $pages = $this->grav['pages'];
         if (method_exists($pages, 'markChanged')) {
             $pages->markChanged();
+
+            // markChanged() only moves core's pages cache id. The listing reads
+            // the Flex pages directory, which keeps its storage keys in its own
+            // index cache for `system.flex.cache.index.lifetime` (60s), so a move,
+            // reorder, copy or delete made by renaming folders would list the old
+            // state until that expires. Page::save() clears the directory itself,
+            // which is why create and update were never affected.
+            $this->getFlexDirectory('pages')?->clearCache();
 
             return;
         }
@@ -3313,8 +3714,10 @@ class PagesController extends AbstractApiController
             return;
         }
 
-        // Find and delete the specific language file
-        $template = $page->template();
+        // Find and delete the specific language file. The filename is the template
+        // basename only: a module's template() is `modular/<name>`, but its file is
+        // `<name>.<lang>.md` (same as buildPageFilename()).
+        $template = basename($page->template());
         $pagePath = $page->path();
 
         /** @var Language $language */

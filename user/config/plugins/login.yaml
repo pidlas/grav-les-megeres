@@ -1,0 +1,1 @@
+site_host: '{{ @root.uri.scheme }}://{{ @root.uri.host }}'

@@ -50,6 +50,10 @@ class GetAttrExpression extends AbstractExpression implements SupportDefinedTest
     {
         $env = $compiler->getEnvironment();
         $arrayAccessSandbox = false;
+        // GRAV FORK: compile-time source sandboxing (see CompileTimeSourcePolicyInterface), a trusted
+        // template compiles attribute access as if the SandboxExtension were not registered. If lost,
+        // trusted templates keep the checks (slower, still safe).
+        $sandboxed = $env->hasExtension(SandboxExtension::class) && !$this->hasAttribute('sandbox_trusted');
         $nullSafe = $this->getAttribute('null_safe');
 
         // optimize array calls
@@ -67,7 +71,7 @@ class GetAttrExpression extends AbstractExpression implements SupportDefinedTest
                 ->raw($var)
             ;
 
-            if (!$env->hasExtension(SandboxExtension::class)) {
+            if (!$sandboxed) {
                 $compiler
                     ->raw(') || ')
                     ->raw($var)
@@ -145,7 +149,7 @@ class GetAttrExpression extends AbstractExpression implements SupportDefinedTest
             ->repr($this->getAttribute('type'))
             ->raw(', ')->repr($this->definedTest)
             ->raw(', ')->repr($this->getAttribute('ignore_strict_check'))
-            ->raw(', ')->repr($env->hasExtension(SandboxExtension::class))
+            ->raw(', ')->repr($sandboxed)
             ->raw(', ')->repr($this->getNode('node')->getTemplateLine())
             ->raw(')')
         ;
@@ -195,7 +199,7 @@ class GetAttrExpression extends AbstractExpression implements SupportDefinedTest
         $compiler
             ->raw('(('.$key.' = ')
             ->subcompile($attribute)
-            ->raw(') instanceof \Stringable && (is_array('.$var.') || in_array('.$var.'::class, CoreExtension::STRINGABLE_KEY_ARRAY_ACCESS_CLASSES, true)) ? (string) '.$key.' : '.$key.')')
+            ->raw(') instanceof \Stringable && (is_array('.$var.') || '.$var.' instanceof \ArrayObject || '.$var.' instanceof \ArrayIterator) ? (string) '.$key.' : '.$key.')')
         ;
     }
 
