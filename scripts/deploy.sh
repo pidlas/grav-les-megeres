@@ -32,6 +32,7 @@ BACKUP_ENABLED="${BACKUP_ENABLED:-1}"
 DEFAULT_MODE="DRY-RUN"
 BACKUP_PATH="${BACKUP_PATH:-${REMOTE_BASE}.backup}"
 BACKUP_TIMESTAMPED="${BACKUP_TIMESTAMPED:-1}"
+tmp_file=""
 
 # [2026-08-25] Ajout de DEPLOY_INCLUDE_PATHS par défaut s'il n'est pas défini dans deploy.conf
 DEPLOY_INCLUDE_PATHS=("${DEPLOY_INCLUDE_PATHS[@]:-user}")
@@ -65,7 +66,21 @@ RSYNC_EXCLUDES=(
   "/data/flex/indexes/"
   "/data/feed/"
   "/data/notifications/"
-  "/accounts/"
+  "accounts/"
+  '**/accounts/**'
+  "data/"
+  "**/data/**"
+  "pages/**/*.avif"
+  "pages/**/*.pdf"
+  "pages/**/*.mp4"
+  "pages/**/*.ogg"
+  "pages/**/*.jpg"
+  "pages/**/*.jpeg"
+  "pages/**/*.png"
+  "pages/**/*.webp"
+  "pages/**/*.svg"
+  "pages/**/*.gif"
+  "pages/**/*.yaml"
   "/plugins/"
   "/themes/quark2/"
   "system.yaml"
@@ -255,8 +270,10 @@ show_delete_summary() {
   fi
 
   echo "==> Preparing remote deletion summary"
-  local tmp_file
+  # 1. On crée le fichier temporaire et on l'assigne IMMÉDIATEMENT
   tmp_file="$(mktemp)"
+  
+  # 2. On déclare le trap UNE FOIS que la variable contient sa valeur
   trap 'rm -f "$tmp_file"' EXIT
 
   # [2026-08-25] Réparation de la simulation de suppression :

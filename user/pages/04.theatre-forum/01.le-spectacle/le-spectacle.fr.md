@@ -11,7 +11,7 @@ process:
 ---
 
 [div class="image-au-centre"]
-[![vers les scolaires](les-scolaires.avif?resize=200)](/les-scolaires){.morph} [![vers le tout public](le-tout-public.avif?resize=200)](/le-tout-public){.morph}
+[![vers les scolaires](les-scolaires.avif?resize=200)](/les-scolaires){.images-spectacle .morph} [![vers le tout public](le-tout-public.avif?resize=200)](/le-tout-public){.images-spectacle .morph}
 [/div]
 
 ## C'EST QUOI ? {.display-title .marge-haute}
