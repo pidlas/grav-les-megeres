@@ -1,6 +1,6 @@
 ---
 title: "Le spectacle : 0'Pression | Une pratique participative pour ouvrir le dialogue avec la Compagnie Les Mégères de l'Humus"
-sous_titre: "Spectacle de Théâtre Forum - 1h45"
+sous_titre: 'Spectacle de Théâtre Forum - 1h45'
 metadata:
     description: "Découvrez l'approche théâtre forum des Mégères de l'Humus: une pratique participative pour ouvrir le dialogue et agir collectivement."
 menu: "Le spectacle : 0'Pression"
@@ -11,7 +11,7 @@ process:
 ---
 
 [div class="image-au-centre"]
-[![vers les scolaires](les-scolaires.avif?resize=200)](/les-scolaires){.images-spectacle .morph} [![vers le tout public](le-tout-public.avif?resize=200)](/le-tout-public){.images-spectacle .morph}
+[![vers les scolaires](les-scolaires.avif?resize=200)](/theatre-forum/le-spectacle/les-scolaires){.images-spectacle .morph} [![vers le tout public](le-tout-public.avif?resize=200)](/theatre-forum/le-spectacle/le-tout-public){.images-spectacle .morph}
 [/div]
 
 ## C'EST QUOI ? {.display-title .marge-haute}
