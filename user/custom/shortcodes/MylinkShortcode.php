@@ -17,7 +17,10 @@ class MylinkShortcode extends Shortcode {
             // Conversion du "@" anti-spam en "@" s'il est écrit en entité dans le Markdown
             $url = str_replace(['@', '&amp;#64;', '&#64;'], '@', $url);
 
-            $alt = Utils::getNonce($sc->getParameter('alt', '')); 
+            // $alt = Utils::getNonce($sc->getParameter('alt', ''));
+            // On récupère simplement le paramètre 'alt' ou 'title' écrit dans le shortcode
+            $alt = trim((string) $sc->getParameter('alt', $sc->getParameter('title', '')));
+ 
             $class = trim((string) $sc->getParameter('class', ''));
             $target = trim((string) $sc->getParameter('target', ''));
             $forced_type = trim((string) $sc->getParameter('data-type', ''));
@@ -107,7 +110,7 @@ class MylinkShortcode extends Shortcode {
                 $attributes[] = "href='" . htmlspecialchars($url, ENT_QUOTES, 'UTF-8') . "'";
             }
 
-            $attributes[] = "data-type='" . $data_type . "'";
+            // $attributes[] = "data-type='" . $data_type . "'";
 
             if ($class !== '') {
                 $attributes[] = "class='" . htmlspecialchars($class, ENT_QUOTES, 'UTF-8') . "'";
@@ -117,7 +120,10 @@ class MylinkShortcode extends Shortcode {
             }
 
             // 5. Génération du HTML de la balise <a>
-            $output = '<a ' . implode(' ', $attributes) . $target_attr . '>';
+            // $output = '<a ' . implode(' ', $attributes) . $target_attr . '>';
+            // On force l'attribut data-type au tout début, juste après le "<a"
+            $output = '<a data-type="' . htmlspecialchars($data_type, ENT_QUOTES, 'UTF-8') . '" ' . implode(' ', $attributes) . $target_attr . '>';
+
             $output .= $content;
             $output .= '</a>';
 

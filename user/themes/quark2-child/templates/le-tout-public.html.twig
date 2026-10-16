@@ -1,0 +1,85 @@
+{% extends 'main-layout.html.twig' %}
+
+{% block content %}
+<main>
+    <section>
+
+        <div class="p_le-tout-public"> 
+        {# Première image : chargée depuis le dossier parent #}
+            <a class="images-spectacle morph" href="{{ url('/theatre-forum/le-spectacle/les-scolaires') }}">
+                {% if page.parent.media['les-scolaires.avif'] %}
+                    {{ page.parent.media['les-scolaires.avif'].html('vers le Théâtre Forum pour les scolaires', '', '')|raw }}
+                {% endif %}
+            </a> 
+    
+        {# Deuxième image : chargée depuis le dossier parent #}
+            <a class="images-spectacle" href="{{ url('/theatre-forum/le-spectacle/le-tout-public') }}">
+                {% if page.parent.media['le-tout-public.avif'] %}
+                    {{ page.parent.media['le-tout-public.avif'].html('vers le Théâtre Forum pour tout public', '', 'image-ronde')|raw }}
+                {% endif %}
+            </a> 
+        </div>
+        
+        <div class="section-spectacle">
+
+            {# Les 3 bulles de fond supérieures spécifiques au Tout Public #}
+            {% if page.media['bulle-tout-public-1.avif'] %}
+                <img src="{{ page.media['bulle-tout-public-1.avif'].url }}" class="bulle-fond b-haut-gauche" alt="" loading="lazy">
+            {% endif %}
+            {% if page.media['bulle-tout-public-2.avif'] %}
+                <img src="{{ page.media['bulle-tout-public-2.avif'].url }}" class="bulle-fond b-milieu-droite" alt="" loading="lazy">
+            {% endif %}
+            {% if page.media['bulle-tout-public-3.avif'] %}
+                <img src="{{ page.media['bulle-tout-public-3.avif'].url }}" class="bulle-fond b-objectifs-gauche" alt="" loading="lazy">
+            {% endif %}
+
+            <div class="opression-wrapper">
+                <div class="opression-corps">
+                    
+                    {% set html = page.content %}
+        
+                    {# 1. DECOUPAGE : Alignement strict sur l'orthographe unifiée avec un S #}
+                    {% set titre_formats_brut = '<h2>Nos formats</h2>' %}
+                    {% set titre_tarifs_brut = '<h2>Tarifs</h2>' %}
+                    
+                    {% if titre_formats_brut in html and titre_tarifs_brut in html %}
+                        {% set parties = html|split(titre_formats_brut) %}
+                        {% set sous_parties = parties[1]|split(titre_tarifs_brut) %}
+                        
+                        {# zone_formats contient la zone HTML entre les deux H2 #}
+                        {% set zone_formats = sous_parties[0] %}
+                        
+                        {# 2. SÉPARATION CHIRURGICALE DES DEUX FORMATS INTERNES #}
+                        {% set formats_separes = zone_formats|split('<h3>Format 1h30</h3>') %}
+                        
+                        {# On enveloppe chaque format dans sa boîte individuelle #}
+                        {% set format1_html = '<div class="format-bloc">' ~ formats_separes[0] ~ '</div>' %}
+                        {% set format2_html = '<div class="format-bloc"><h3>Format 1h30</h3>' ~ formats_separes[1] ~ '</div>' %}
+                        
+                        {# 3. ENCAPSULATION DANS LE GRAND CONTENEUR FLEXBOX PARENT #}
+                        {% set titre_formats_stylise = '<h2 class="display-title">Nos formats</h2>' %}
+                        {% set format_html = '<div class="opression-formats">' ~ format1_html ~ format2_html ~ '</div>' %}
+                        
+                        {# 4. TRAITEMENT DE LA SECTION TARIFS #}
+                        {% set tarifs_html = sous_parties[1]|replace({
+                            '<p>': '<p class="opression-tarifs">'
+                        }) %}
+                        
+                        {# 5. RECONSTRUCTION #}
+                        {% set html = parties[0] ~ titre_formats_stylise ~ format_html ~ titre_tarifs_brut ~ tarifs_html %}
+                    {% endif %}
+        
+                    {# 6. INTERCEPTIONS GLOBALES : S'applique sur "Objectifs pédagogiques", "Tarifs" et les listes #}
+                    {% set html = html|replace({
+                        '<h2>': '<h2 class="display-title">',
+                        '<ul>': '<ul class="jolie-ombres slide-list">'
+                    }) %}
+        
+                    {{ html|raw }}
+        
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+{% endblock %}

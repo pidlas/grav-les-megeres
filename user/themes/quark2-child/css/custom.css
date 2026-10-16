@@ -183,3 +183,9 @@ main section p:first-of-type,
     opacity: 0.8;
     vertical-align: middle; /* Aligne parfaitement l'enveloppe avec la ligne de texte */
 }
+
+.p_les-scolaires img.image-ronde,
+.p_le-tout-public img.image-ronde{
+    width:200px;
+    height:auto;
+} 
