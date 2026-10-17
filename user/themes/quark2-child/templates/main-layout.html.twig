@@ -91,7 +91,7 @@
         {# En-tête unique du site #}
         {% include 'partials/header.html.twig' %}
         
-        <main>
+        <main id="main-content" tabindex="-1">
             {# Zone commune du haut (Champignons + Titres dynamiques) #}
             <section class="{{ page.slug }}">
 
@@ -129,10 +129,9 @@
     </div>
 
     {# Vos scripts JS #}
-    <script src="{{ url('theme://js/app.js') }}"></script>
+    <script src="{{ url('theme://js/navigation.js') }}"></script>
     <script src="{{ url('theme://js/audio.js') }}"></script>
     <script src="{{ url('theme://js/video.js') }}"></script>
     <script src="{{ url('theme://js/don-ha.js') }}"></script>
-    <script src="{{ url('theme://js/menu-active-state.js') }}"></script>
 </body>
 </html>

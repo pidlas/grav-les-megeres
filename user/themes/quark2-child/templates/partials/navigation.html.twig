@@ -1,0 +1,52 @@
+{# 1. Boucle sur les catégories principales du menu (Infos, Spectacles, Théâtre Forum...) #}
+{% for page in pages.children.visible %}
+    
+    {# 🌟 GRAV DÉTECTE L'ÉTAT ACTIF : #}
+    {# Si l'utilisateur est sur cette page principale OU sur une de ses sous-pages #}
+    {% set is_active = (page.active or page.activeChild) ? ' menu--visible' : '' %}
+    
+    {# SI LA PAGE A DES ENFANTS VISIBLES (Ex: Infos, Spectacles, etc.) #}
+    {% if page.children.visible.count > 0 %}
+        {# 🌟 On ajoute dynamiquement la classe "menu--visible" ici #}
+        <div class="menu{{ is_active }}">
+            <button type="button" 
+                    class="menu-trigger tan" 
+                    aria-expanded="{% if page.activeChild %}true{% else %}false{% endif %}" 
+                    aria-controls="submenu-{{ page.slug }}" 
+                    aria-haspopup="true">
+                {{ page.menu }}
+            </button>
+            
+            <div id="submenu-{{ page.slug }}" class="niv1 coco">
+                {# Sous-boucle pour afficher les pages enfants #}
+                {% for child in page.children.visible %}
+                    {# Gestion de la classe 'cache' spécifique au règlement intérieur si besoin #}
+                    {% set class_cache = (child.slug == 'reglement-interieur') ? ' class="cache"' : '' %}
+                    
+                    {# 🌟 Optionnel : on peut ajouter une classe si la sous-page précise est active #}
+                    {% set child_active = child.active ? ' class="sub-active"' : '' %}
+                    
+                    <a href="{{ child.url }}"{{ class_cache | raw }}{{ child_active | raw }}>{{ child.menu }}</a>
+                {% endfor %}
+            </div>
+        </div>
+        
+    {# SI C'EST UNE PAGE SIMPLE SANS ENFANTS (Ex: Contact) #}
+    {% else %}
+        {# 🌟 On ajoute aussi "menu--visible" si on est sur la page contact #}
+        <div class="menu-{{ page.slug }} menu{{ is_active }}">
+            <a href="{{ page.url }}" class="tan">{{ page.menu }}</a>
+        </div>
+    {% endif %}
+    
+{% endfor %}
+
+{# 2. Liens Réseaux Sociaux et Mobile (statiques, car indépendants des pages Grav) #}
+<div class="rs menu">
+    <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" aria-label="Accéder à notre page Facebook"><i class="fa-brands fa-facebook-f" aria-hidden="true"></i></a>
+    <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" aria-label="Accéder à notre page Instagram"><i class="fa-brands fa-instagram" aria-hidden="true"></i></a>
+</div>
+
+<div class="menu mobile-only">
+    <button id="openHaOverlay-mobile" class="e_faire-un-don">&nbsp;Faire un don</button>
+</div>
