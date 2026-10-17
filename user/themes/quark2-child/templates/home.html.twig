@@ -1,0 +1,10 @@
+{% extends 'main-layout.html.twig' %}
+
+{% block avant_conteneur_texte %}
+    {# On appelle le diaporama en lui transmettant explicitement l'objet de l'accueil #}
+    {% include 'partials/diaporama.html.twig' with {'la_page_accueil': page} %}
+{% endblock %}
+
+{% block content %}
+    {{ page.content | shortcodes | raw }}
+{% endblock %}

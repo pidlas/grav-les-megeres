@@ -1,18 +1,14 @@
 {% extends 'main-layout.html.twig' %}
 
 {% block content %}
-<main>
-    <section class=" {{ page.slug }}">
 
-        {#1. Collecte et affichage forcé des 3 blocs par leur route physique #}
-        {% set intro = pages.find('/infos/compagnie/_1-intro') %}
-        {% set details = pages.find('/infos/compagnie/_2-details') %}
-        {% set galerie = pages.find('/infos/compagnie/_3-galerie-liens') %}
+{#1. Collecte et affichage forcé des 3 blocs par leur route physique #}
+{% set intro = pages.find('/infos/compagnie/_1-intro') %}
+{% set details = pages.find('/infos/compagnie/_2-details') %}
+{% set galerie = pages.find('/infos/compagnie/_3-galerie-liens') %}
 
-        {% if intro %}{{ intro.content|raw }}{% endif %}
-        {% if details %}{{ details.content|raw }}{% endif %}
-        {% if galerie %}{{ galerie.content|raw }}{% endif %}
-        
-    </section>
-</main>
+{% if intro %}{{ intro.content|raw }}{% endif %}
+{% if details %}{{ details.content|raw }}{% endif %}
+{% if galerie %}{{ galerie.content|raw }}{% endif %}
+
 {% endblock %}

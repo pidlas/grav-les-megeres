@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="fr">
 
@@ -14,11 +13,8 @@
  
     {# 2. BALISES MÉTADONNÉES SEO #}
     {% block head_meta %}
-    {# Correction cruciale de la clé d'accès à la description et aux robots #}
     <meta name="description" content="{% if page.header.metadata.description %}{{ page.header.metadata.description|e }}{% else %}{{ site.metadata.description|e }}{% endif %}" />
     <meta name="robots" content="{% if page.header.metadata.robots %}{{ page.header.metadata.robots|e }}{% else %}index, follow{% endif %}" />
-    
-    {# URL Canonique absolue #}
     <link rel="canonical" href="{{ page.url(true, true)|e }}" />
     {% endblock %}
  
@@ -29,12 +25,11 @@
     <meta property="og:title" content="{% if page.title %}{{ page.title|e }}{% else %}{{ site.title|e }}{% endif %}" />
     <meta property="og:description" content="{% if page.header.metadata.description %}{{ page.header.metadata.description|e }}{% else %}{{ site.metadata.description|e }}{% endif %}" />
     <meta property="og:url" content="{{ page.url(true, true)|e }}" />
-    {# FORCE L'URL ABSOLUE DE L'IMAGE #}
     <meta property="og:image" content="{{ uri.rootUrl(true) ~ url('theme://images/logohumous-notext-blue.png', false) }}" />
     <meta property="og:image:alt" content="Logo de la compagnie {{ site.title|e }}" />
     {% endblock %}
  
-    {# 4. FEUILLES DE STYLE #}
+    {# 4. FEUILLES DE STYLE (Vos balises en dur qui marchent à tous les coups !) #}
     <link rel="stylesheet" href="{{ url('theme://css/style.css') }}" type="text/css" />
     <link rel="stylesheet" href="{{ url('theme://css/custom.css') }}" type="text/css" />
     <link rel="stylesheet" href="{{ url('theme://css/all.min.css') }}" type="text/css" />
@@ -47,18 +42,10 @@
     <link rel="shortcut icon" href="{{ url('theme://images/favicon/favicon.ico') }}" />
     <link rel="apple-touch-icon" sizes="180x180" href="{{ url('theme://images/favicon/apple-touch-icon.png') }}" />
 
-    {# 5. VOTRE AJOUT CIBLÉ SUR LA PAGE SPECTACLE GRÉSILHETTE #}
-    {% if page.slug == 'gresilhette-et-la-salimonde' %}
-    <style>
-        .encadre:before, 
-        .encadre-lenga:before, 
-        .encadre-extrait:before {
-            background-image: url('{{ page.media["livre-blanc-fleur-remplie.avif"].url }}') !important;
-        }
-    </style>
-    {% endif %}
+    {# 5. LE BLOC MAGIQUE : Plus de "if page.slug" ici. Il est vide et attend qu'une page l'utilise #}
+    {% block custom_styles %}{% endblock %}
 
-    {# 6. DONNÉES STRUCTURÉES (SCHEMA.ORG) CONCATÉNÉES EN TEXTE PUR #}
+    {# 6. DONNÉES STRUCTURÉES (SCHEMA.ORG) #}
     {% block head_jsonld %}
     {% set absolute_root = uri.rootUrl(true) %}
     <script type="application/ld+json">
@@ -72,10 +59,7 @@
           "url": "{{ absolute_root }}",
           "logo": "{{ absolute_root }}{{ url('theme://images/logohumous-notext-blue.png', false) }}",
           "email": "compagnie@lesmegeresdelhumus.fr",
-          "sameAs": [
-            "https://facebook.com",
-            "https://instagram.com"
-          ],
+          "sameAs": [ "https://facebook.com", "https://instagram.com" ],
           "address": {
             "@type": "PostalAddress",
             "streetAddress": "7 rue du 19 mars 1962",
@@ -89,9 +73,7 @@
           "@id": "{{ absolute_root }}/#website",
           "url": "{{ absolute_root }}",
           "name": "{{ site.title|e }}",
-          "publisher": {
-            "@id": "{{ absolute_root }}/#organization"
-          },
+          "publisher": { "@id": "{{ absolute_root }}/#organization" },
           "inLanguage": "fr"
         }
       ]
@@ -99,7 +81,6 @@
     </script>
     {% endblock %}
 
-    {# Laissez ce bloc ici, vide, comme réceptacle de secours pour les plugins Grav #}
     {% block meta %}{% endblock %}
 
 </head>
@@ -107,65 +88,47 @@
 <body>
 
     <div class="wrapper">
-        {# 1. En-tête du site #}
+        {# En-tête unique du site #}
         {% include 'partials/header.html.twig' %}
+        
         <main>
+            {# Zone commune du haut (Champignons + Titres dynamiques) #}
             <section class="{{ page.slug }}">
-                {# Habillage commun du haut - UNIVERSEL ET SANS CONFIGURATION #}
+
                 <div class="conteneur-champignons">
                     <img src="{{ url('theme://images/i_champignons.svg') }}" class="champignons" alt="" loading="lazy">
                             
-                    {# 1. SOLUTION FINALE INFALLIBLE : On force Grav à charger la page de l'URL actuelle #}
                     {% set vraie_page_url = page.find(uri.path) %}
-                            
-                    {# 2. Extraction du titre depuis cette page absolue (gère l'accueil, les classiques et modular.fr.md) #}
+
                     {% set titre_brut = vraie_page_url.title | default(page.title) %}
-                            
-                    {# 3. Votre filtre Split + Trim avec l'index [0] présent #}
+
                     {% set titre_decoupe = titre_brut|split('|') %}
                     <h1>{{ titre_decoupe[0]|trim }}</h1>
                            
-                    {# 4. Affichage du sous-titre optionnel #}
                     {% set sous_titre = vraie_page_url.header.subtitle | default(page.header.subtitle) %}
-                        {% if sous_titre %}
-                            <p class="sous-titre">{{ sous_titre | raw }}</p>
-                        {% endif %}
-                    </div>
-                </section>                
-            </main>
-        {# 2. CAS DE LA PAGE D'ACCUEIL (Présence de slides) #}
-        {% if page.header.slides %}
-            {# On affiche le Diaporama juste en dessous #}
-            {% include 'partials/diaporama.html.twig' %}
-            <main>
-                <section>
-                    {# C. On affiche enfin le texte de l'accueil en dessous du diaporama #}
-                    <div class="page-content">
-                        <p>Les Mégères de l'Humus est une <a data-type="internal" href="{{ base_url_relative }}/infos/compagnie">compagnie</a><span class="lien-i-seul"></span> 
-                        de théâtre éco-queer, féministe et artiviste installée à Moussoulens, dans l'Aude. Nous créons des <a data-type="internal" href="{{ base_url_relative }}/spectacles/gresilhette-et-la-salimonde">spectacles</a>
-                        <span class="lien-i-seul"></span>, menons des actions de <a data-type="internal" href="{{ base_url_relative }}/theatre-forum/presentation">théâtre forum</a>
-                        <span class="lien-i-seul"></span> et proposons des <a data-type="internal" href="{{ base_url_relative }}/prestations/ateliers">ateliers</a>
-                        <span class="lien-i-seul"></span>, <a data-type="internal" href="{{ base_url_relative }}/prestations/cours">cours</a>
-                        <span class="lien-i-seul"></span> et <a data-type="internal" href="{{ base_url_relative }}/prestations/stages">stages</a>
-                        <span class="lien-i-seul"></span> pour différents publics. 
-                        {# Sécurisation du lien de contact pour éviter le crash global #}
-                        Nous sommes joignables <a data-type="internal" href="{{ base_url_relative }}/contact">ici</a><span class="lien-i-seul"></span>.</p>
-                    </div>
-                </section>
-            </main>
-        {# 3. CAS DES AUTRES PAGES DU SITE (Pas de slides) #}
-        {% else %}
-            {# On appelle le bloc classique qui exécutera votre fichier default.html.twig normalement #}
-            {% block content %}{% endblock %}
-        {% endif %}
-        {# 4. Image décorative du bas : Feuilles (toujours au-dessus du footer) #}
+                    {% if sous_titre %}
+                        <p class="sous-titre">{{ sous_titre | raw }}</p>
+                    {% endif %}
+                </div>
+
+                {# LE BLOC MAGIQUE DU DIAPORAMA #}
+                {% block avant_conteneur_texte %}{% endblock %}
+
+                {# LE CŒUR UNIQUE DU SITE : Tout le contenu spécifique s'injectera ici #}
+                {% block content %}{% endblock %}
+            </section>
+        </main>
+
+        {# Zone commune du bas (Feuilles) #}
         <div class="conteneur-feuilles">
             <img src="{{ url('theme://images/i_feuilles.svg') }}" class="feuilles" alt="" loading="lazy">
         </div>
-        {# 5. Pied de page du site #}
+
+        {# Pied de page unique #}
         {% include 'partials/footer.html.twig' %}
     </div>
-    {# Les scripts JS #}
+
+    {# Vos scripts JS #}
     <script src="{{ url('theme://js/app.js') }}"></script>
     <script src="{{ url('theme://js/audio.js') }}"></script>
     <script src="{{ url('theme://js/video.js') }}"></script>

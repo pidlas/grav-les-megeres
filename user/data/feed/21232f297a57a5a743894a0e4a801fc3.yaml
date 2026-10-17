@@ -1,5 +1,10 @@
-last_checked: 1792166007
+last_checked: 1792221948
 data:
+  -
+    title: 'Grav vs WordPress: An Honest Comparison'
+    url: 'https://getgrav.org/blog/grav-vs-wordpress'
+    date: '2026-10-16T15:00:00+00:00'
+    summary: ''
   -
     title: 'KahunaCart, One Month In'
     url: 'https://getgrav.org/blog/kahunacart-one-month-in'
@@ -44,9 +49,4 @@ data:
     title: 'Tailwind CSS in Grav, No Node Required'
     url: 'https://getgrav.org/blog/tailwind-css-without-node'
     date: '2026-07-31T16:30:00+00:00'
-    summary: ''
-  -
-    title: 'Why I Built Riffle'
-    url: 'https://getgrav.org/blog/why-i-built-riffle'
-    date: '2026-07-21T14:00:00+00:00'
     summary: ''

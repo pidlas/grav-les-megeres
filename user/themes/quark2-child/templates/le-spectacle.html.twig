@@ -1,30 +1,24 @@
 {% extends 'main-layout.html.twig' %}
 
 {% block content %}
-<main>
-    <section>
-        <div class="container element-content">
             
-            {# On récupère dynamiquement le sous-titre défini dans le fichier .md #}
-            <h2 class="coco sous-titre-page">{{ page.header.sous_titre }}</h2>
+    {# On récupère dynamiquement le sous-titre défini dans le fichier .md #}
+    <h2 class="coco sous-titre-page">{{ page.header.sous_titre }}</h2>
 
-            {# 2. Affichage automatique des 2 images contenant le mot-clé 'top' #}
-            <div class="galerie-spectacle" style="display: flex; gap: 20px; margin: 2rem 0;">
-                {% set images_affichees = 0 %}
-                
-                {% for image in page.media.images %}
-                    {# On cherche 'top' dans le nom du fichier et on limite le compteur à 2 #}
-                    {% if 'top' in image.filename and images_affichees < 2 %}
-                        {{ image.html('Un spectacle du Théâtre Forum : 0\'Pression', 'Un spectacle du Théâtre Forum : 0\'Pression', 'photo-stages-ateliers')|raw }}
-                        {% set images_affichees = images_affichees + 1 %}
-                    {% endif %}
-                {% endfor %}
-            </div>
+    {# 2. Affichage automatique des 2 images contenant le mot-clé 'top' #}
+    <div class="galerie-spectacle" style="display: flex; gap: 20px; margin: 2rem 0;">
+        {% set images_affichees = 0 %}
+        
+        {% for image in page.media.images %}
+            {# On cherche 'top' dans le nom du fichier et on limite le compteur à 2 #}
+            {% if 'top' in image.filename and images_affichees < 2 %}
+                {{ image.html('Un spectacle du Théâtre Forum : 0\'Pression', 'Un spectacle du Théâtre Forum : 0\'Pression', 'photo-stages-ateliers')|raw }}
+                {% set images_affichees = images_affichees + 1 %}
+            {% endif %}
+        {% endfor %}
+    </div>
 
-            {# 3. Le reste de votre contenu Markdown ("C'EST QUOI ?", paragraphes, etc.) #}
-            {{ page.content|raw }}
+    {# 3. Le reste de votre contenu Markdown ("C'EST QUOI ?", paragraphes, etc.) #}
+    {{ page.content|raw }}
 
-        </div>
-    </section>
-</main>
 {% endblock %}

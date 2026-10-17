@@ -87,8 +87,7 @@ img.text-image-loaded {
 }
 
 /* Cible automatiquement le premier paragraphe de chaque page */
-main section p:first-of-type,
-.page-content p:first-of-type {
+main section p:first-of-type{
     margin-top: var(--space-m);
 }
 
@@ -188,4 +187,33 @@ main section p:first-of-type,
 .p_le-tout-public img.image-ronde{
     width:200px;
     height:auto;
-} 
+}
+
+/* ==========================================================================
+   CORRECTIF PLEINE LARGEUR POUR LE DIAPORAMA EN CSS GRID
+   ========================================================================== */
+
+/* 1. On cible le fieldset de l'accueil pour l'afficher proprement */
+.home fieldset.visually-hidden {
+    display: block !important; 
+    visibility: visible !important;
+    border: none;
+    padding: 0;
+    
+    /* Le mécanisme d'échappement qui a fonctionné pour la pleine largeur */
+    width: 100vw;
+    position: relative;
+    left: 50%;
+    right: 50%;
+    margin-left: -50vw;
+    margin-right: -50vw;
+}
+
+/* 2. On s'assure que le conteneur interne s'étale sur toute la largeur */
+.home .button-container {
+    width: 100%;
+    max-width: 100%;
+
+    padding-left: 7%;
+    padding-right: 7%;
+}

@@ -1,105 +1,101 @@
 {% extends 'main-layout.html.twig' %}
 
 {% block content %}
-<main>
-    <section class="{{ page.slug }}">
 
-            {# Récupération de la collection Flex-Objects #}
-            {% set directory = grav.flex.directory('equipe') %}
-            
-            {% if directory %}
-                {% set liste_membres = directory.getCollection() %}
-                
-                <div class="page_equipe">
-                
-                    {# ==========================================================================
-                       GROUPE 1 : LES FONDATRICES (Suzie et Sabine)
-                       ========================================================================== #}
-                    <ul class="g_equipe g_fondatrices">
-                        {% for membre in liste_membres if membre.slug in ['suzie', 'sabine'] %}
-                            <li class="tan item">
-                                {{ membre.nom }}
-                                
-                                {% if membre.role is not empty %}
-                                    <p class="coco gras">{{ membre.role|nl2br|raw }}</p>
+    {# Récupération de la collection Flex-Objects #}
+    {% set directory = grav.flex.directory('equipe') %}
+    
+    {% if directory %}
+        {% set liste_membres = directory.getCollection() %}
+        
+        <div class="page_equipe">
+        
+            {# ==========================================================================
+                GROUPE 1 : LES FONDATRICES (Suzie et Sabine)
+                ========================================================================== #}
+            <ul class="g_equipe g_fondatrices">
+                {% for membre in liste_membres if membre.slug in ['suzie', 'sabine'] %}
+                    <li class="tan item">
+                        {{ membre.nom }}
+                        
+                        {% if membre.role is not empty %}
+                            <p class="coco gras">{{ membre.role|nl2br|raw }}</p>
+                        {% endif %}
+
+                        <div class="anime_hover {{ membre.classe_sup }}">
+                            <p class="montre coco">Plus sur {{ membre.nom | capitalize | split(' ')|first }}</p>
+                            <a href="equipe/{{ membre.slug }}">
+                                {% if membre.image is not empty %}
+                                    {% set photo_media = page.media[membre.image] %}
+                                    {% if photo_media %}
+                                        <img src="{{ photo_media.url }}" alt="{{ membre.nom }}" class="img-menu-spectacle" loading="lazy">
+                                    {% endif %}
                                 {% endif %}
+                            </a>
+                        </div>
+                    </li>
+                {% endfor %}
+            </ul>
 
-                                <div class="anime_hover {{ membre.classe_sup }}">
-                                    <p class="montre coco">Plus sur {{ membre.nom | capitalize | split(' ')|first }}</p>
-                                    <a href="equipe/{{ membre.slug }}">
-                                        {% if membre.image is not empty %}
-                                            {% set photo_media = page.media[membre.image] %}
-                                            {% if photo_media %}
-                                                <img src="{{ photo_media.url }}" alt="{{ membre.nom }}" class="img-menu-spectacle" loading="lazy">
-                                            {% endif %}
-                                        {% endif %}
-                                    </a>
-                                </div>
-                            </li>
-                        {% endfor %}
-                    </ul>
+            {# ==========================================================================
+                GROUPE 2 : LES COMÉDIENS (Muriel et Anne)
+                ========================================================================== #}
+            <ul class="g_equipe g_comediens">
+                {% for membre in liste_membres if membre.slug in ['muriel', 'anne'] %}
+                    <li class="tan item">
+                        {{ membre.nom }}
+                        
+                        {% if membre.role is not empty %}
+                            <p class="coco gras">{{ membre.role|nl2br|raw }}</p>
+                        {% endif %}
 
-                    {# ==========================================================================
-                       GROUPE 2 : LES COMÉDIENS (Muriel et Anne)
-                       ========================================================================== #}
-                    <ul class="g_equipe g_comediens">
-                        {% for membre in liste_membres if membre.slug in ['muriel', 'anne'] %}
-                            <li class="tan item">
-                                {{ membre.nom }}
-                                
-                                {% if membre.role is not empty %}
-                                    <p class="coco gras">{{ membre.role|nl2br|raw }}</p>
+                        <div class="anime_hover {{ membre.classe_sup }}">
+                            <p class="montre coco">Plus sur {{ membre.nom | capitalize | split(' ')|first }}</p>
+                            <a href="equipe/{{ membre.slug }}">
+                                {% if membre.image is not empty %}
+                                    {% set photo_media = page.media[membre.image] %}
+                                    {% if photo_media %}
+                                        <img src="{{ photo_media.url }}" alt="{{ membre.nom }}" class="img-menu-spectacle" loading="lazy">
+                                    {% endif %}
                                 {% endif %}
+                            </a>
+                        </div>
+                    </li>
+                {% endfor %}
+            </ul>
 
-                                <div class="anime_hover {{ membre.classe_sup }}">
-                                    <p class="montre coco">Plus sur {{ membre.nom | capitalize | split(' ')|first }}</p>
-                                    <a href="equipe/{{ membre.slug }}">
-                                        {% if membre.image is not empty %}
-                                            {% set photo_media = page.media[membre.image] %}
-                                            {% if photo_media %}
-                                                <img src="{{ photo_media.url }}" alt="{{ membre.nom }}" class="img-menu-spectacle" loading="lazy">
-                                            {% endif %}
-                                        {% endif %}
-                                    </a>
-                                </div>
-                            </li>
-                        {% endfor %}
-                    </ul>
+            {# ==========================================================================
+                GROUPE 3 : LES PERMANENTS (Delphine, Marie, Juliette, Philippe)
+                ========================================================================== #}
+            <ul class="g_equipe g_permanents">
+                {% for membre in liste_membres if membre.slug in ['delphine', 'marie', 'juliette', 'philippe'] %}
+                    <li class="tan item">
+                        {{ membre.nom }}
+                        
+                        {% if membre.role is not empty %}
+                            <p class="coco gras">{{ membre.role|nl2br|raw }}</p>
+                        {% endif %}
 
-                    {# ==========================================================================
-                       GROUPE 3 : LES PERMANENTS (Delphine, Marie, Juliette, Philippe)
-                       ========================================================================== #}
-                    <ul class="g_equipe g_permanents">
-                        {% for membre in liste_membres if membre.slug in ['delphine', 'marie', 'juliette', 'philippe'] %}
-                            <li class="tan item">
-                                {{ membre.nom }}
-                                
-                                {% if membre.role is not empty %}
-                                    <p class="coco gras">{{ membre.role|nl2br|raw }}</p>
+                        <div class="anime_hover {{ membre.classe_sup }}">
+                            <p class="montre coco">Plus sur {{ membre.nom | capitalize | split(' ')|first }}</p>
+                            <a href="equipe/{{ membre.slug }}">
+                                {% if membre.image is not empty %}
+                                    {% set photo_media = page.media[membre.image] %}
+                                    {% if photo_media %}
+                                        <img src="{{ photo_media.url }}" alt="{{ membre.nom }}" class="img-menu-spectacle" loading="lazy">
+                                    {% endif %}
                                 {% endif %}
+                            </a>
+                        </div>
+                    </li>
+                {% endfor %}
+            </ul>
 
-                                <div class="anime_hover {{ membre.classe_sup }}">
-                                    <p class="montre coco">Plus sur {{ membre.nom | capitalize | split(' ')|first }}</p>
-                                    <a href="equipe/{{ membre.slug }}">
-                                        {% if membre.image is not empty %}
-                                            {% set photo_media = page.media[membre.image] %}
-                                            {% if photo_media %}
-                                                <img src="{{ photo_media.url }}" alt="{{ membre.nom }}" class="img-menu-spectacle" loading="lazy">
-                                            {% endif %}
-                                        {% endif %}
-                                    </a>
-                                </div>
-                            </li>
-                        {% endfor %}
-                    </ul>
+        </div>{# fermeture balise .page_equipe #}
 
-                </div>{# fermeture balise .page_equipe #}
+    {% else %}
+        <p>Erreur : Le répertoire Flex 'equipe' n'est pas initialisé.</p>
+    {% endif %}
+    {{ page.content | raw }}
 
-            {% else %}
-                <p>Erreur : Le répertoire Flex 'equipe' n'est pas initialisé.</p>
-            {% endif %}
-            {{ page.content | raw }}
-
-    </section>
-</main>
 {% endblock %}

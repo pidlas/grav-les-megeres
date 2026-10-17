@@ -1,78 +1,75 @@
 {% extends 'main-layout.html.twig' %}
 
 {% block content %}
-<main>
-    <section>
 
-    <div class="p_les-scolaires"> 
-    {# Première image : chargée depuis le dossier parent (01.le-spectacle) #}
-        <a class="images-spectacle" href="{{ url('/theatre-forum/le-spectacle/les-scolaires') }}">
-            {% if page.parent.media['les-scolaires.avif'] %}
-                {{ page.parent.media['les-scolaires.avif'].html('vers le Théâtre Forum pour les scolaires', '', 'image-ronde')|raw }}
-            {% endif %}
-        </a> 
+<div class="p_les-scolaires"> 
+{# Première image : chargée depuis le dossier parent (01.le-spectacle) #}
+<a class="images-spectacle" href="{{ url('/theatre-forum/le-spectacle/les-scolaires') }}">
+    {% if page.parent.media['les-scolaires.avif'] %}
+        {{ page.parent.media['les-scolaires.avif'].html('vers le Théâtre Forum pour les scolaires', '', 'image-ronde')|raw }}
+    {% endif %}
+</a> 
 
-    {# Deuxième image : chargée depuis le dossier parent (01.le-spectacle) #}
-        <a class="images-spectacle morph" href="{{ url('/theatre-forum/le-spectacle/le-tout-public') }}">
-            {% if page.parent.media['le-tout-public.avif'] %}
-                {{ page.parent.media['le-tout-public.avif'].html('vers le Théâtre Forum pour tout public', '', '')|raw }}
-            {% endif %}
-        </a> 
-    </div>
-        
-        <div class="section-spectacle">
+{# Deuxième image : chargée depuis le dossier parent (01.le-spectacle) #}
+<a class="images-spectacle morph" href="{{ url('/theatre-forum/le-spectacle/le-tout-public') }}">
+    {% if page.parent.media['le-tout-public.avif'] %}
+        {{ page.parent.media['le-tout-public.avif'].html('vers le Théâtre Forum pour tout public', '', '')|raw }}
+    {% endif %}
+</a> 
+</div>
 
-            {# Les 3 bulles de fond supérieures (Même niveau que le contenu) #}
-            {% if page.media['bulle-scolaire-1.avif'] %}
-                <img src="{{ page.media['bulle-scolaire-1.avif'].url }}" class="bulle-fond b-haut-gauche" alt="" loading="lazy">
-            {% endif %}
-            {% if page.media['bulle-scolaire-2.avif'] %}
-                <img src="{{ page.media['bulle-scolaire-2.avif'].url }}" class="bulle-fond b-milieu-droite" alt="" loading="lazy">
-            {% endif %}
-            {% if page.media['bulle-scolaire-3.avif'] %}
-                <img src="{{ page.media['bulle-scolaire-3.avif'].url }}" class="bulle-fond b-objectifs-gauche" alt="" loading="lazy">
+<div class="section-spectacle">
+
+    {# Les 3 bulles de fond supérieures (Même niveau que le contenu) #}
+    {% if page.media['bulle-scolaire-1.avif'] %}
+        <img src="{{ page.media['bulle-scolaire-1.avif'].url }}" class="bulle-fond b-haut-gauche" alt="" loading="lazy">
+    {% endif %}
+    {% if page.media['bulle-scolaire-2.avif'] %}
+        <img src="{{ page.media['bulle-scolaire-2.avif'].url }}" class="bulle-fond b-milieu-droite" alt="" loading="lazy">
+    {% endif %}
+    {% if page.media['bulle-scolaire-3.avif'] %}
+        <img src="{{ page.media['bulle-scolaire-3.avif'].url }}" class="bulle-fond b-objectifs-gauche" alt="" loading="lazy">
+    {% endif %}
+
+    <div class="opression-wrapper">
+        <div class="opression-corps">
+            
+            {% set html = page.content %}
+
+            {# 1. RECHERCHE : Découpage basé sur les titres bruts (Désormais deux H2) #}
+            {% set titre_formats_brut = '<h2>Nos formats</h2>' %}
+            {% set titre_tarifs_brut = '<h2>Tarifs</h2>' %}
+            
+            {% if titre_formats_brut in html and titre_tarifs_brut in html %}
+                {% set parties = html|split(titre_formats_brut) %}
+                {% set sous_parties = parties[1]|split(titre_tarifs_brut) %}
+                
+                {# Restitution du H2 "Nos formats" avec sa classe de design #}
+                {% set titre_formats_stylise = '<h2 class="display-title">Nos formats</h2>' %}
+                
+                {# Ajout des classes .opression-formats et .format-bloc autour du format #}
+                {% set format_html = '<div class="opression-formats"><div class="format-bloc">' ~ sous_parties[0] ~ '</div></div>' %}
+                
+                {# Modification spécifique du bloc des tarifs (paragraphes) #}
+                {% set tarifs_html = sous_parties[1]|replace({
+                    '<p>': '<p class="opression-tarifs">'
+                }) %}
+                
+                {# 2. RECONSTRUCTION : On réinjecte le titre Tarifs brut. 
+                    L'interception globale du dessous se chargera de lui ajouter sa classe ! #}
+                {% set html = parties[0] ~ titre_formats_stylise ~ format_html ~ titre_tarifs_brut ~ tarifs_html %}
             {% endif %}
 
-            <div class="opression-wrapper">
-                <div class="opression-corps">
-                    
-                    {% set html = page.content %}
-        
-                    {# 1. RECHERCHE : Découpage basé sur les titres bruts (Désormais deux H2) #}
-                    {% set titre_formats_brut = '<h2>Nos formats</h2>' %}
-                    {% set titre_tarifs_brut = '<h2>Tarifs</h2>' %}
-                    
-                    {% if titre_formats_brut in html and titre_tarifs_brut in html %}
-                        {% set parties = html|split(titre_formats_brut) %}
-                        {% set sous_parties = parties[1]|split(titre_tarifs_brut) %}
-                        
-                        {# Restitution du H2 "Nos formats" avec sa classe de design #}
-                        {% set titre_formats_stylise = '<h2 class="display-title">Nos formats</h2>' %}
-                        
-                        {# Ajout des classes .opression-formats et .format-bloc autour du format #}
-                        {% set format_html = '<div class="opression-formats"><div class="format-bloc">' ~ sous_parties[0] ~ '</div></div>' %}
-                        
-                        {# Modification spécifique du bloc des tarifs (paragraphes) #}
-                        {% set tarifs_html = sous_parties[1]|replace({
-                            '<p>': '<p class="opression-tarifs">'
-                        }) %}
-                        
-                        {# 2. RECONSTRUCTION : On réinjecte le titre Tarifs brut. 
-                           L'interception globale du dessous se chargera de lui ajouter sa classe ! #}
-                        {% set html = parties[0] ~ titre_formats_stylise ~ format_html ~ titre_tarifs_brut ~ tarifs_html %}
-                    {% endif %}
-        
-                    {# 3. INTERCEPTIONS GLOBALES : S'applique sur "Objectifs pédagogiques", "Tarifs" et les listes #}
-                    {% set html = html|replace({
-                        '<h2>': '<h2 class="display-title">',
-                        '<ul>': '<ul class="jolie-ombres slide-list">'
-                    }) %}
-        
-                    {{ html|raw }}
-        
-                </div>
-            </div>
+            {# 3. INTERCEPTIONS GLOBALES : S'applique sur "Objectifs pédagogiques", "Tarifs" et les listes #}
+            {% set html = html|replace({
+                '<h2>': '<h2 class="display-title">',
+                '<ul>': '<ul class="jolie-ombres slide-list">'
+            }) %}
+
+            {{ html|raw }}
+
         </div>
-    </section>
-</main>
+    </div>
+</div>
+
 {% endblock %}

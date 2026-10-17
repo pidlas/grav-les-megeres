@@ -1,61 +1,57 @@
 {% extends 'main-layout.html.twig' %}
 
 {% block content %}
-    <main>
-        <section class="{{ page.slug }}">
 
-            {# 👇 On récupère la Collection complète #}
-            {% set liste_partenaires = grav.flex.directory('partenaires').getCollection() %}
+{# 👇 On récupère la Collection complète #}
+{% set liste_partenaires = grav.flex.directory('partenaires').getCollection() %}
 
-            {% if liste_partenaires is not empty %}
-                {# 1. Votre liste globale d'origine brute #}
-                <ul class="g_partenaires">
+{% if liste_partenaires is not empty %}
+    {# 1. Votre liste globale d'origine brute #}
+    <ul class="g_partenaires">
+        
+        {% for partenaire in liste_partenaires %}
+            {# 2. Vos puces de liste d'origine #}
+            <li>
+                {# L'encadré visuel pro #}
+                <div class="partenaire-carte-pro">
                     
-                    {% for partenaire in liste_partenaires %}
-                        {# 2. Vos puces de liste d'origine #}
-                        <li>
-                            {# L'encadré visuel pro #}
-                            <div class="partenaire-carte-pro">
-                                
-                                {% set alt_text = partenaire.nom is not empty ? partenaire.nom : 'Logo partenaire' %}
-                                
-                                {% if partenaire.url %}
-                                    <a href="{{ partenaire.url }}" target="_blank" rel="noopener noreferrer">
-                                {% endif %}
-
-                                {# 👇 BLOC MODIFIÉ POUR LE FILEPICKER ET LE STOCKAGE PAGE #}
-                                {% if partenaire.image is not empty %}
-                                    {# On va chercher l'image par son nom texte directement dans les médias de la page courante #}
-                                    {% set logo_media = page.media[partenaire.image] %}
-                                    
-                                    {% if logo_media %}
-                                        <img src="{{ logo_media.url }}" alt="{{ alt_text }}" class="partenaire-logo-pro" loading="lazy">
-                                    {% else %}
-                                        {# Sécurité : Si l'image n'est pas trouvée, on affiche le texte pour éviter un trou #}
-                                        <h3 class="partenaire-titre-pro">{{ alt_text }}</h3>
-                                    {% endif %}
-                                {% else %}
-                                    <h3 class="partenaire-titre-pro">{{ alt_text }}</h3>
-                                {% endif %}
-
-                                {% if partenaire.url %}
-                                    </a>
-                                    {# Le bouton d'action sous le logo #}
-                                    <a href="{{ partenaire.url }}" target="_blank" rel="noopener noreferrer" class="btn btn-primary partenaire-btn-pro">
-                                        Visiter le site
-                                    </a>
-                                {% endif %}
-                                
-                            </div>
-                        </li>
-                    {% endfor %}
+                    {% set alt_text = partenaire.nom is not empty ? partenaire.nom : 'Logo partenaire' %}
                     
-                </ul>
-            {% endif %}
+                    {% if partenaire.url %}
+                        <a href="{{ partenaire.url }}" target="_blank" rel="noopener noreferrer">
+                    {% endif %}
 
-            {# 3. Le contenu textuel de la page s'affiche désormais ici, après la liste des logos #}
-            {{ page.content|raw }}
+                    {# 👇 BLOC MODIFIÉ POUR LE FILEPICKER ET LE STOCKAGE PAGE #}
+                    {% if partenaire.image is not empty %}
+                        {# On va chercher l'image par son nom texte directement dans les médias de la page courante #}
+                        {% set logo_media = page.media[partenaire.image] %}
+                        
+                        {% if logo_media %}
+                            <img src="{{ logo_media.url }}" alt="{{ alt_text }}" class="partenaire-logo-pro" loading="lazy">
+                        {% else %}
+                            {# Sécurité : Si l'image n'est pas trouvée, on affiche le texte pour éviter un trou #}
+                            <h3 class="partenaire-titre-pro">{{ alt_text }}</h3>
+                        {% endif %}
+                    {% else %}
+                        <h3 class="partenaire-titre-pro">{{ alt_text }}</h3>
+                    {% endif %}
 
-        </section>
-    </main>
+                    {% if partenaire.url %}
+                        </a>
+                        {# Le bouton d'action sous le logo #}
+                        <a href="{{ partenaire.url }}" target="_blank" rel="noopener noreferrer" class="btn btn-primary partenaire-btn-pro">
+                            Visiter le site
+                        </a>
+                    {% endif %}
+                    
+                </div>
+            </li>
+        {% endfor %}
+        
+    </ul>
+{% endif %}
+
+{# 3. Le contenu textuel de la page s'affiche désormais ici, après la liste des logos #}
+{{ page.content|raw }}
+
 {% endblock %}

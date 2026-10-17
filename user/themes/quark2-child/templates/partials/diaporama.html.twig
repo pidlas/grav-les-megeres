@@ -1,32 +1,28 @@
-{% if page.header.slides %}
+{% set cible_page = la_page_accueil | default(page) %}
+
+{% if cible_page.header.slides %}
 <fieldset class="visually-hidden">
     <legend>Diaporama</legend>
     <div class="button-container">
         
-        {% for slide in page.header.slides %}
+        {% for slide in cible_page.header.slides %}
             {# Génère l'ID automatique (c1, c2, c3...) #}
             {% set slide_id = 'c' ~ loop.index %}
             
             <input type="radio" name="slide" id="{{ slide_id }}" {{ loop.first ? 'checked' : '' }}>
             
-            {# Gestion dynamique des formats d'images (AVIF et WebP) depuis les médias de la page #}
+            {# Gestion dynamique des formats d'images #}
             {% set style_bg = '' %}
             {% if slide.image %}
-                {# 1. Récupération du fichier WebP attaché à la page #}
-                {% set img_webp = page.media[slide.image] %}
+                {# On récupère directement votre image .avif attachée à la page #}
+                {% set img_avif = cible_page.media[slide.image] %}
                 
-                {% if img_webp %}
-                    {% set url_webp = img_webp.url %}
-                    {# 2. Déduction de l'URL du fichier AVIF converti par votre script #}
-                    {% set url_avif = url_webp | replace({'.webp': '.avif'}) %}
+                {% if img_avif %}
+                    {% set url_avif = img_avif.url %}
                     
-                    {# 3. Construction des propriétés CSS de repli et de sélection moderne #}
+                    {# Version épurée : Plus de remplacement de chaîne, on injecte directement l'AVIF d'origine #}
                     {% set style_bg %}
-                        style="
-                            background-image: url('{{ url_webp }}');
-                            background-image: -webkit-image-set(url('{{ url_avif }}') type('image/avif'), url('{{ url_webp }}') type('image/webp'));
-                            background-image: image-set(url('{{ url_avif }}') type('image/avif'), url('{{ url_webp }}') type('image/webp'));
-                        "
+                        style="background-image: url('{{ url_avif }}');"
                     {% endset %}
                 {% endif %}
             {% endif %}
