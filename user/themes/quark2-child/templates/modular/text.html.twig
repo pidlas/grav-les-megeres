@@ -1,0 +1,7 @@
+<div id="{{ page.id }}" class="modular-text-block">
+    {{ page.content | raw }}
+
+    {% if page.header.signature %}
+        <p class="signature">{{ page.header.signature }}</p>
+    {% endif %}
+</div>

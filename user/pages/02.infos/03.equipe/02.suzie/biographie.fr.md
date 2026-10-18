@@ -8,6 +8,7 @@ personne_image: webRigolote_si.avif
 image_alt: 'Suzie Idlas, responsable communication, metteuse en scène, autrice, comédienne'
 citation: 'Je veux juste la Terre que j’adore.'
 citation_auteur: 'Testament, Vita Sackville West'
+book_url: ''
 ---
 
 Suzie est comédienne et conteuse. En 2011 elle passe son baccalauréat Littéraire en option lourde Théâtre au Lycée René Cassin à Arpajon (91).

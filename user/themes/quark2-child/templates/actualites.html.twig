@@ -1,85 +1,89 @@
 {% extends 'main-layout.html.twig' %}
 
 {% block content %}
+    {# 1. Enveloppe sémantique globale propre pour le contenu textuel #}
+    <div class="page-content">
+        {{ page.content | raw }}
+    </div>
 
-        {# Rendu de l'introduction rédigée en Markdown #}
-        <div class="page-content">
-            {{ page.content | raw }}
-        </div>
+    {# 2. Récupération propre de la collection via les Flex-Objects #}
+    {% set actualites_flex = grav.flex_objects.directory('actualites').getCollection() %}
 
-        {# Récupération de la collection des catégories d'actualités du Flex-Object #}
-        {% set actualites_flex = grav.flex_objects.directory('actualites').getCollection() %}
-
-        {# Zone dynamique de la liste des Actualités #}
-        {% if actualites_flex is not empty %}
-        <div class="actus-list" aria-live="polite">
-            {% for item in actualites_flex %}
-                <article class="actu-item">
-                    
-                    {# 1. Image principale de la catégorie actu #}
-                    {% if item.image_principale %}
-                        {% set img_main = page.media[item.image_principale] %}
-                        {% if img_main %}
-                            <img src="{{ img_main.url }}" alt="{{ item.image_alt }}" class="actu-image" loading="lazy">
-                        {% endif %}
+    {# Zone dynamique de la liste des Actualités #}
+    {% if actualites_flex is not empty %}
+    {# Remplacement de la div par une balise de section sémantique générale #}
+    <div class="actus-list" aria-live="polite">
+        {% for item in actualites_flex %}
+            <article class="actu-item">
+                
+                {# Image principale de la catégorie actu #}
+                {% if item.image_principale %}
+                    {% set img_main = page.media[item.image_principale] %}
+                    {% if img_main %}
+                        {{ img_main.html('', item.image_alt, 'actu-image') | raw }}
                     {% endif %}
-                    
-                    <h2>{{ item.categorie }}</h2>
-                    
-                    <div class="actu-content">
-                        {# Boucle sur les événements/blocs internes de cette catégorie #}
-                        {% for bloc in item.blocs %}
-                            <p class="actu-date">{{ bloc.date }}</p>
+                {% endif %}
+                
+                <h2>{{ item.categorie }}</h2>
+                
+                <div class="actu-content">
+                    {# Boucle sur les événements/blocs internes de cette catégorie #}
+                    {% for bloc in item.blocs %}
+                        <p class="actu-date">{{ bloc.date }}</p>
+                        
+                        {# Simplification de la logique structurelle HTML #}
+                        <div class="{% if bloc.miniature %}alignement{% else %}actu-wrapper{% endif %}">
                             
-                            <div class="{% if bloc.miniature %}alignement{% else %}actu-wrapper{% endif %}">
+                            {# Rendu de la miniature (affiche) via l'API native de Grav #}
+                            {% if bloc.miniature %}
+                                {% set img_mini = page.media[bloc.miniature] 
+                                               ?: media['page://' ~ bloc.miniature] 
+                                               ?: media['theme://images/' ~ bloc.miniature] %}
                                 
-                                {# 2. Rendu de la miniature (affiche) #}
-                                {% if bloc.miniature %}
-
-                                    {# 1. Tentative via les médias de la page ou chemin absolu direct basé sur l'URL de la page #}
-                                    {% set img_mini = page.media[bloc.miniature] %}
-                                    
-                                    {% if img_mini %}
-                                        <img src="{{ img_mini.url }}" width="80" alt="{{ bloc.miniature_alt }}" loading="lazy">
-                                    {% else %}
-                                        {# 2. Secours ultime : on construit l'URL directement par rapport à l'adresse de la page ou du dossier de secours #}
-                                        {% set direct_url = page.url ~ '/' ~ bloc.miniature %}
-                                        {% set global_media = media['page://' ~ bloc.miniature] ?: media['theme://images/' ~ bloc.miniature] %}
-                                        
-                                        <img src="{{ global_media ? global_media.url : direct_url }}" width="80" alt="{{ bloc.miniature_alt }}" loading="lazy">
-                                    {% endif %}
-                                    <div class="actu-wrapper">
+                                {% if img_mini %}
+                                    {# Redimensionnement à la volée (80px) et génération propre de la balise HTML #}
+                                    {{ img_mini.zoomCrop(80, 80).html('', bloc.miniature_alt, '') | raw }}
+                                {% else %}
+                                    {# Ultime secours si le fichier n'est nulle part dans les médias #}
+                                    <img src="{{ page.url ~ '/' ~ bloc.miniature }}" width="80" alt="{{ bloc.miniature_alt }}" loading="lazy">
                                 {% endif %}
                                 
-                                <h3 class="actu-titre">{{ bloc.titre }}</h3>
-                                <p class="actu-resume">{{ bloc.resume | raw }}</p>
-                                
-                                {# 3. Boucle automatique pour afficher les boutons de liens s'ils existent #}
-                                {% if bloc.liens %}
-                                    {% for lien in bloc.liens %}
-                                        <p class="actu-action">
-                                            {% set is_external = lien.url starts with 'http' %}
-                                            <a href="{{ lien.url }}" 
-                                               data-type="{{ is_external ? 'external' : 'internal' }}"
-                                               {% if is_external %}target="_blank" rel="noopener noreferrer"{% endif %}>
-                                                {{ lien.texte }}
-                                            </a>
-                                            {% if is_external %}
-                                                <span class="lien-e-seul"></span>
-                                            {% endif %}
-                                        </p>
-                                    {% endfor %}
-                                {% endif %}
-                                
-                                {% if bloc.miniature %}
-                                    </div> {# Fermeture de actu-wrapper si alignement #}
-                                {% endif %}
+                                <div class="actu-wrapper">
+                            {% endif %}
+                            
+                            <h3 class="actu-titre">{{ bloc.titre }}</h3>
+                            
+                            {# Sécurité : Utilisation du filtre markdown si le résumé contient du gras, de l'italique, etc. #}
+                            <div class="actu-resume">
+                                {{ bloc.resume | markdown | raw }}
                             </div>
-                        {% endfor %}
-                    </div>
-                </article>
-            {% endfor %}
-        </div>
-        {% endif %}
-
+                            
+                            {# Boucle automatique pour afficher les boutons de liens s'ils existent #}
+                            {% if bloc.liens %}
+                                {% for lien in bloc.liens %}
+                                    <p class="actu-action">
+                                        {% set is_external = lien.url starts with 'http' or lien.url starts with '//' %}
+                                        <a href="{{ lien.url }}" 
+                                           data-type="{{ is_external ? 'external' : 'internal' }}"
+                                           {% if is_external %}target="_blank" rel="noopener noreferrer"{% endif %}>
+                                            {{ lien.texte }}
+                                        </a>
+                                        {% if is_external %}
+                                            <span class="lien-e-seul" aria-hidden="true"></span>
+                                        {% endif %}
+                                    </p>
+                                {% endfor %}
+                            {% endif %}
+                            
+                            {# Fermeture conditionnelle propre #}
+                            {% if bloc.miniature %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+            </article>
+        {% endfor %}
+    </div>
+    {% endif %}
 {% endblock %}

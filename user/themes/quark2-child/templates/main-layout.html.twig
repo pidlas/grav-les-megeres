@@ -83,6 +83,9 @@
 
     {% block meta %}{% endblock %}
 
+    {# 🌟 ANCRE SYSTEME 1 : Permet à Grav d'injecter les CSS internes de sa barre de débogage #}
+    {{ assets.css() | raw }}
+
 </head>
 
 <body>
@@ -129,9 +132,19 @@
     </div>
 
     {# Vos scripts JS #}
+    {% do assets.addJs('jquery', 101) %}
+    {{ assets.js() | raw }}
     <script src="{{ url('theme://js/navigation.js') }}"></script>
     <script src="{{ url('theme://js/audio.js') }}"></script>
     <script src="{{ url('theme://js/video.js') }}"></script>
     <script src="{{ url('theme://js/don-ha.js') }}"></script>
+
+    {# 🌟 COMMANDE FORCEE : On oblige Grav à injecter le script de la Debugbar ICI, dans le HTML #}
+    {% if grav.debugger %}
+        {{ grav.debugger.assets|raw }}
+    {% endif %}
+
+    {# 🌟 ANCRE SYSTEME 2 : Permet à Grav d'injecter la debugbar et ses scripts de pied de page #}
+    {{ assets.js('bottom') | raw }}
 </body>
 </html>

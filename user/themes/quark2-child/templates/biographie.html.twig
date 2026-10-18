@@ -4,22 +4,28 @@
 
     <article class="g_bio">
 
-        {# ÉLÉMENT 1 : LA PHOTO (Sécurisée : ne s'affiche que si l'image existe) #}
+        {# ÉLÉMENT 1 : LA PHOTO + LE BOOK #}
         <div class="e_photo">
             {% if page.header.personne_image and page.media[page.header.personne_image] %}
-                {# Grav génère l'URL relative de l'image automatiquement #}
                 <img class="fade-zoom text-image-loaded" 
                     src="{{ page.media[page.header.personne_image].url }}" 
                     alt="{{ page.header.image_alt|default(page.title) }}">
+            {% endif %}
+
+            {# 🌟 AJOUT DU PARAGRAPHE DE LIEN VERS LE BOOK #}
+            {% if page.header.book_url %}
+                <p class="book-url">
+                    <a href="{{ page.header.book_url | e }}" target="_blank" rel="noopener noreferrer" data-type="external">
+                        Consulter le book de l'artiste<span class="lien-e-seul"></span>
+                    </a>
+                </p>
             {% endif %}
         </div>
 
         {# ÉLÉMENT 2 : LE DÉBUT DE LA BIO + LA CITATION #}
         <div class="e_debut_bio">
-            {# page.summary récupère tout le texte situé AVANT le marqueur === #}
             {{ page.summary|raw }}
 
-            {# BLOC CITATION (Sécurisé : s'affiche uniquement si une citation est remplie) #}
             {% if page.header.citation %}
                 <figure class="bio">
                     <blockquote>
@@ -35,10 +41,8 @@
         </div>
 
         {# ÉLÉMENT 3 : LA FIN DE LA BIO #}
-        {# On vérifie si le contenu complet est plus grand que le résumé #}
         {% if page.content|length > page.summary|length %}
             <div class="e_fin_bio">
-                {# On affiche le reste du texte #}
                 {{ page.content|slice(page.summary|length)|raw }}
             </div>
         {% endif %}

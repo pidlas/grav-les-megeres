@@ -1,6 +1,6 @@
 type: flex-objects
 
-title: Equipe
+title: Page Équipe
 description: 'Gestion conviviale des membres de la compagnie'
 
 config:
@@ -20,7 +20,7 @@ config:
     menu:
       list:
         route: /equipe
-        title: Équipe
+        title: Page Équipe
         priority: 4
         icon: 'fa fa-users'
     list:

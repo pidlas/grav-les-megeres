@@ -180,12 +180,11 @@ h2:not(.display-title) {
     text-align: left;
 }
 .bio figcaption span,
-
 .contact p {
     font-size: 1.125rem;
 }
 
-p {
+p:not(.signature){
     margin-top: var(--space-s);
 }
 
@@ -1060,16 +1059,8 @@ input:checked + label .row {
 
 .e_debut_bio {
     position: relative;
-}
-
-.e_citation,
-.e_debut_bio {
     display: flex;
     flex-direction: column;
-}
-
-.e_citation {
-    text-align: left;
 }
 
 figure.bio {
@@ -1137,14 +1128,22 @@ figure.bio {
     width: 100%;
 }
 
-.g_compagnie2 figure.bio {
+.g_compagnie2 > figure {
+    display:flex;
     align-items: center;
-    display: flex;
     flex-direction: column;
+    margin:0 auto;
+    padding:0 3.75rem;
 }
 
-.g_compagnie2 .bio blockquote p {
-    color: #f7ae56;
+.g_compagnie2 > figure > blockquote {
+    font-size:clamp(1.2rem, 4vw, 2rem);
+}
+
+.g_compagnie2 > figure > figcaption {
+    align-self:end;
+    font-size:clamp(1.1rem, 0.9rem + 1.5vw, 1.5rem);
+    padding-right:2%;
 }
 
 .g_co-item2 {

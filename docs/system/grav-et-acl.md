@@ -70,3 +70,29 @@ sudo setfacl -R -d -m u:www-data:rwx,u:pilipe:rwx /var/www/grav/user/pages/
 * `-m` : Modifier/Ajouter une règle.
 * `-d` : Par défaut (s'applique aux créations futures).
 * `u:nom:` : Cible un utilisateur spécifique.
+
+## Résolution des conflits d'ACL (Access Control Lists) avec VS Code & Nginx
+
+### Symptôme
+Lors de la création de nouveaux répertoires ou fichiers Markdown dans Grav depuis **VS Code**, l'éditeur applique des permissions étendues locales (marquées par un signe `+` lors d'un `ls -al`). Le serveur **Nginx** (`www-data`) se voit alors renvoyer une exception PHP critique : 
+`RecursiveDirectoryIterator: Failed to open directory: Permission denied`.
+
+---
+
+### 1. Nettoyage immédiat (Action corrective)
+Pour supprimer instantanément les ACL restrictives existantes et rétablir l'affichage du site :
+
+```bash
+sudo setfacl -R -b /var/www/grav/user/pages/
+```
+*Note : Le drapeau `-b` efface toutes les ACL étendues pour revenir aux permissions Linux standards.*
+
+---
+
+### 2. Automatisation de l'héritage (Action préventive définitive)
+Pour forcer Linux à donner systématiquement les droits de lecture/écriture au groupe de Nginx (`www-data`) sur tous les futurs fichiers créés par VS Code :
+
+```bash
+sudo setfacl -R -d -m g:www-data:rwx /var/www/grav/user/pages/
+```
+*Note : Le drapeau `-d` (Default) crée une règle d'héritage automatique. Même si VS Code génère un signe `+`, `www-data` est inclus d'office dans les autorisations de sécurité.*

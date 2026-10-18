@@ -8,6 +8,7 @@ personne_image: webRigolote_sr.avif
 image_alt: 'Sabine Rance, Responsable artistique, metteuse en scène, autrice, comédienne'
 citation: "Elle savait qu'on se remet de tout. Un peu de traviole, mais on repart"
 citation_auteur: 'Apocalypse bébé, Virginie Despentes'
+book_url: 'https://sabinerance.book.fr'
 ---
 
 Originaire de Rodez, Sabine s'oriente en 2009, après l'obtention de son Certificat d'Études Musicales en formation musicale et instrumentale, hautbois, vers des études plus théoriques.

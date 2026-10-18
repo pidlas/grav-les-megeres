@@ -111,12 +111,6 @@ main section p:first-of-type{
     height:auto;
 }
 
-/* Delphine, Marie, Suzie & Sabine de la page compagnie */
-.signature{
-    font-size:1.5rem;
-    font-weight:bold;
-}
-
 /* Titre pour introduire les rapports pour adoucir la transition */
 .titre-rapports{
     grid-row:1/2;
@@ -229,4 +223,40 @@ main section p:first-of-type{
 .reglement-interieur .important p {
     border-left-color: #e74c3c !important;
     background-color: rgba(231, 76, 60, 0.05) !important;
+}
+
+/* Cibler le texte de la citation */
+.g_compagnie2 .e_citation p {
+    font-family: 'The Seasons Bold', sans-serif; /* Remplace class="theseasonsbold" */
+    font-size: 1.25rem;
+}
+
+/* Cibler l'auteur (le paragraphe qui commence par un tiret dans le blockquote) */
+.g_compagnie2 .e_citation p:last-of-type {
+    font-family: 'The Seasons Regular', sans-serif; /* Remplace class="theseasonsregular" */
+    font-style: normal;
+}
+
+/* Style minimaliste de citation pour les paragraphes du bloc de fin */
+.g_compagnie2 p:has(+ .signature) {
+    font-style: italic;
+    border-left: 2px solid #cccccc;
+    padding-left: 1.5rem;
+    margin-left: 0.5rem;
+    line-height: 1.6;
+}
+
+/* Style de votre classe signature alignée sur le texte de la citation */
+.g_compagnie2 .signature {
+    text-align: left;
+    font-size:1.2rem;
+    font-weight:bold;
+    margin-top:.3rem;
+    /*letter-spacing: 1.5px;*/
+    padding-left: 2rem;        /* Aligne la signature sur le texte en retrait */
+}
+
+.book-url{
+    margin:0!important;
+    text-align:center;
 }

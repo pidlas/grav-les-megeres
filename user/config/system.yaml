@@ -4,7 +4,7 @@ languages:
   supported:
     - fr
   default_lang: fr
-  include_default_lang: false
+  include_default_lang: true
   enabled: true
 pages:
   theme: quark2-child
@@ -15,18 +15,23 @@ pages:
     extra: true
   append_url_extension: null
   redirect_default_code: '302'
-  redirect_default_route: 1
+  redirect_default_route: true
   custom_base_url: null
   media:
     descriptions: true
 cache:
+  enabled: true
   redis:
     socket: null
 errors:
   display: 1
+  log: true
 debugger:
   enabled: true
-  token: null
+  provider: debugbar
+  censored: false
+  shutdown:
+    close_connection: false
   twig: true
 images:
   adapter: imagick

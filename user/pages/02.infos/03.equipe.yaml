@@ -1,6 +1,6 @@
 ae550adbfde24f25246b3755917f636f:
   nom: 'Suzie Idlas'
-  role: "Responsable Communication\nMetteuse en scène, Commédienne"
+  role: "Responsable Communication\nMetteuse en scène, comédienne"
   slug: suzie
   image: webJolie_si.avif
 f9a772563f40f1ff599151c8a4ab062f:
@@ -13,6 +13,7 @@ f9a772563f40f1ff599151c8a4ab062f:
   role: Comédienne
   slug: muriel
   image: webJolie_ml.avif
+  classe_sup: posImage
 5d0f0f74202efe8d6e70f13d9779eff1:
   nom: 'Anne Spielmann'
   role: "Metteuse en scène,  Comédienne\nPlasticienne, Scénographe"

@@ -1,0 +1,66 @@
+title: 'Biographie Membre'
+'@extends':
+  type: default
+  context: blueprints://pages
+
+form:
+  fields:
+    tabs:
+      type: tabs
+      active: container
+      fields:
+        # 🌟 AJOUT DE VOTRE ONGLET PERSONNALISÉ
+        biographie:
+          type: tab
+          title: "Biographie de l'équipe"
+          fields:
+            
+            section_photo:
+              type: section
+              title: "Photographie du membre"
+              underline: true
+
+            header.personne_image:
+              type: filepicker
+              folder: '@self'
+              label: "Sélectionner la photo"
+              description: "Sélectionnez l'image présente dans le dossier du membre."
+              accept:
+                - .jpg
+                - .jpeg
+                - .png
+                - .webp
+                - .avif
+
+            header.image_alt:
+              type: text
+              label: "Texte alternatif de l'image (SEO)"
+              placeholder: "Ex: Portrait de Sabine"
+
+            section_citation:
+              type: section
+              title: "Bloc Citation intermédiaire"
+              underline: true
+
+            header.citation:
+              type: textarea
+              label: "Texte de la citation"
+              rows: 3
+              placeholder: "Saisissez la citation qui s'affichera au milieu de la biographie..."
+
+            header.citation_auteur:
+              type: text
+              label: "Auteur de la citation"
+              placeholder: "Ex: Simone de Beauvoir"
+            section_book:
+              type: section
+              title: "Lien externe vers le Book"
+              underline: true
+
+            header.book_url:
+              type: text
+              label: "URL du Book de l'artiste"
+              placeholder: "Ex: https://monbook.com"
+              validate:
+                pattern: '^https:\/\/[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*\.[a-z]{2,6}(\/[a-zA-Z0-9-_.\/?=&%]*)?$'
+                message: "L'URL est invalide. Elle doit obligatoirement commencer par https:// et comporter une extension réelle (Ex: .fr, .com)"
