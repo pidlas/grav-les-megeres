@@ -1,0 +1,190 @@
+eab53ecba4c398d0f998f53577108433:
+  nom: 'Suzie Idlas'
+  slug: suzie
+  role: "Responsable Communication\nMetteuse en scène, Comédienne"
+  image:
+    user/data/flex-objects/equipe/webJolie_si.avif:
+      name: webJolie_si.avif
+      type: image/avif
+      size: 200682
+      path: user/data/flex-objects/equipe/webJolie_si.avif
+      url: /user/data/flex-objects/equipe/webJolie_si.avif
+  personne_image:
+    user/data/flex-objects/equipe/webRigolote_si.avif:
+      name: webRigolote_si.avif
+      type: image/avif
+      size: 350547
+      path: user/data/flex-objects/equipe/webRigolote_si.avif
+      url: /user/data/flex-objects/equipe/webRigolote_si.avif
+  image_alt: 'Suzie Idlas, Responsable Communication, Metteuse en scène, Comédienne'
+  citation: "Je veux juste la Terre que j'adore"
+  citation_auteur: 'Testament, Vita Sackville West'
+  bio_debut: "Suzie est comédienne et conteuse. En 2011 elle passe son baccalauréat Littéraire en option lourde Théâtre au Lycée René Cassin à Arpajon (91).\n\nDepuis 2009, elle joue dans plusieurs créations entre l’île de France, Toulouse et l'Aude. En 2015, elle se forme à la langue des signes à l'[a url=\"https://ivt.fr\"]International Visual Theatre[/a] à Paris et en 2020 à l'art de conter au [a url=\"https://www.theatredelaparole.be/\"]Théâtre de la parole[/a] à Bruxelles.\n\nSuzie est aussi autrice. Elle écrit un recueil de poésies *l’Esquisse Folle* qui retrace son parcours de jeune adulte dans un monde patriarcal.\n\nElle est publiée dans les recueils n°2 et n°3 du collectif Format Papier basé à Lausanne. En 2018 elle écrit une pièce de théâtre *Ta boue* qui parle des rapports toxiques dans les relations hétéronormées."
+  bio_fin: "Elle expérimente le milieu du cinéma dans plusieurs domaines : voix off - comédienne pour un court métrage et régisseuse principale pour le tournage d'une web série. C'est en 2022 que Suzie se lance à la découverte de sa pleine créativité en travaillant au sein de la compagnie de théâtre *Les Mégères de l'Humus*. Elle crée notamment le spectacle *Grésilhette et la Salimonde* coécrit avec sa collègue Sabine Rance."
+2b57e33621da8e15e9579d1df87de225:
+  nom: 'Sabine Rance'
+  slug: sabine
+  role: "Responsable Artistique\nMetteuse en scène, Comédienne"
+  image:
+    user/data/flex-objects/equipe/webJolie_sr.avif:
+      name: webJolie_sr.avif
+      type: image/avif
+      size: 279099
+      path: user/data/flex-objects/equipe/webJolie_sr.avif
+      url: /user/data/flex-objects/equipe/webJolie_sr.avif
+  personne_image:
+    user/data/flex-objects/equipe/webRigolote_sr.avif:
+      name: webRigolote_sr.avif
+      type: image/avif
+      size: 245078
+      path: user/data/flex-objects/equipe/webRigolote_sr.avif
+      url: /user/data/flex-objects/equipe/webRigolote_sr.avif
+  image_alt: 'Sabine Rance, Responsable Artistique, Metteuse en scène, Comédienne'
+  book_url: 'https://sabinerance.book.fr'
+  citation: "Elle savait qu'on se remet de tout. Un peu de traviole, mais on repart"
+  citation_auteur: 'Apocalypse bébé, Virginie Despentes'
+  bio_debut: "Originaire de Rodez, Sabine s'oriente en 2009, après l'obtention de son Certificat d'Études Musicales en formation musicale et instrumentale, hautbois, vers des études plus théoriques.\n\nEn 2015, Sabine s'inscrit en Licence d'art du spectacle, option théâtre. Sa licence en poche, elle se tourne à nouveau vers la pratique et intègre [a url=\"https://www.ecoleclaudemathieu.com/\"]l'École Claude Mathieu[/a], Arts et Techniques de l'acteur, à Paris. Elle y approfondira ses qualités de danseuse, musicienne et comédienne.\n\nEn 2019, Sabine se consacre à l’art photographique en tant que modèle en menant des projets artistiques en partenariat avec les élèves de l'[a url=\"https://www.gobelins.fr/ecole\"]école des Gobelins[/a] à Paris.\n\nDe 2020 à 2023, elle tourne dans les collèges de la région Ile de France, et Orléans, avec la compagnie de théâtre forum, [a url=\"https://nomadiserane.com/\"]Nomad'i Serane[/a]."
+  bio_fin: "Depuis Septembre 2020, elle est, tour à tour, régie, comédienne et réalisatrice sur le projet cinématographique *Concompliqué*. Elle travaille actuellement au sein de la compagnie *Les Mégères de l'Humus* comme comédienne et conteuse."
+7204302437e415e65a74fbce18631205:
+  nom: 'Muriel Lamy'
+  slug: muriel
+  role: Comédienne
+  image:
+    user/data/flex-objects/equipe/webJolie_ml.avif:
+      name: webJolie_ml.avif
+      type: image/avif
+      size: 28945
+      path: user/data/flex-objects/equipe/webJolie_ml.avif
+      url: /user/data/flex-objects/equipe/webJolie_ml.avif
+  classe_sup: posImage
+  personne_image:
+    user/data/flex-objects/equipe/webRigolote_ml.avif:
+      name: webRigolote_ml.avif
+      type: image/avif
+      size: 22665
+      path: user/data/flex-objects/equipe/webRigolote_ml.avif
+      url: /user/data/flex-objects/equipe/webRigolote_ml.avif
+  image_alt: Comédienne
+  citation: 'La vie tricote.'
+  citation_auteur: Marie
+  bio_debut: "Originaire de Bretagne et de Lorraine, Muriel se sensibilise dès ses premières années d’études à la communication audiovisuelle. Elle consacre une grande partie de ses études à la réflexion sur le cinéma, les médias et la représentation. Elle développe l’esprit critique et l’analyse d’image à [a url=\"https://ieca.univ-lorraine.fr/\"]l’Institut Européen de Cinéma et d'Audiovisuel[/a].\n\nEn parallèle, elle développe sa pratique du théâtre en suivant des cours au [a url=\"https://conservatoire.grandnancy.eu/theatre/presentation\"]conservatoire régional du grand Nancy[/a] pendant plus de 3 ans.\n\nEn 2012 Muriel s’installe à Toulouse et entre en master à l[a url=\"https://www.ensav.fr/\"]’ENSAV[/a]. Elle y approfondit la recherche et l’expérimentation en axant son travail sur l’absurde et le burlesque dans le cinéma d’[a url=\"https://fr.wikipedia.org/wiki/Elia_Suleiman\"]Elia Suleiman[/a].\n\nEn 2014, elle intègre [a url=\"https://www.lehangar.org/\"]Le Hangar[/a] pour suivre une formation professionnelle de théâtre."
+  bio_fin: "POUET\nCela lui ouvre un champs de techniques et de pratiques théâtrales plus contemporaines. Muriel s’amuse et explore les possibilités infinies d’interprétation de l’acteurice. Elle y travaille notamment l’improvisation et y joue dans une mise en scène de Didier Roux, [a url=\"https://labellecie.org/creation/page6/index.html\"]Perdre connaissance[/a]. Elle intègre par ailleurs un laboratoire de recherche dirigé par <em>Isabelle Luccioni</em>.\n\nEn 2017, Muriel se diversifie davantage en jouant pour du jeune public avec la [a url=\"https://cie-artemisia.com/\"]compagnie Artémisia[/a] et se forme à la pédagogie avec <em>Les Ateliers d’Eauvive</em>.\n\nEn 2022, elle intègre le [a url=\"https://kazico.net/\"]Quasi-collectif[/a] avec lequel elle cocrée une fable jeune public sur l’amitié, <em>Une Vie de Mouche</em> et un spectacle sur le voyage et le deuil, <em>Ça va</em>.\n\nEn 2026, elle rejoint la <em>Cie Les Mégères de l’Humus</em> pour jouer dans [a url=\"/spectacles/gresilhette-et-la-salimonde\"]Grésilhette et la Salimonde[/a], un spectacle jeune public et [a url=\"/theatre-forum/le-spectacle\"]Le spectacle : 0’Pression[/a], un spectacle de Théâtre Forum. C’est l’occasion pour Muriel de se renouveler encore et toujours."
+  meta_description: "Découvrez Muriel Lamy, comédienne associée aux créations et spectacles des Mégères de l'Humus."
+817cc83d6aa2d4ab5df446416bf94e49:
+  nom: 'Anne Spielmann'
+  slug: anne
+  role: "Metteuse en scène, comédienne\nPlasticienne, Scénographe"
+  image:
+    user/data/flex-objects/equipe/webJolie_as.avif:
+      name: webJolie_as.avif
+      type: image/avif
+      size: 31347
+      path: user/data/flex-objects/equipe/webJolie_as.avif
+      url: /user/data/flex-objects/equipe/webJolie_as.avif
+  personne_image:
+    user/data/flex-objects/equipe/webRigolote_as.avif:
+      name: webRigolote_as.avif
+      type: image/avif
+      size: 16411
+      path: user/data/flex-objects/equipe/webRigolote_as.avif
+      url: /user/data/flex-objects/equipe/webRigolote_as.avif
+  image_alt: 'Metteuse en scène, Comédienne, Plasticienne, Scénographe'
+  citation: "Puisque ces mystères me dépassent, feignons d'en être l'organisateur."
+  citation_auteur: 'Les Mariés de la Tour Eiffel, Jean Cocteau'
+  bio_debut: "Originaire de Nancy, Anne obtient, par amour de la bidouille, en 1985 un master d’Arts Plastiques à l’université de Strasbourg.\n\nEnsuite, elle s’initie à la pratique théâtrale avec [a url=\"https://yoshioida.com/\"]Yoshi Oida[/a], [a url=\"https://claireheggen.theatredumouvement.fr/\"]Claire Heggen, le théâtre du mouvement[/a], [a url=\"https://fr.wikipedia.org/wiki/Anna_Prucnal\"]Anna Prucnal[/a] et [a url=\"https://fr.wikipedia.org/wiki/Jeanne_Biras\"]Jeanne Biras[/a] entre autres. Étiquetée comme Conceptrice de théâtre d’objet, Anne intervient depuis près de 40 ans dans la création et la réalisation de spectacles essentiellement visuels pour tous publics.\n\nAnne partage le goût du jeu avec les enfants, ainsi que la poésie, l'intelligence, la joie de surprendre et l'humour."
+  bio_fin: "Elle adore créer des moments où s’éveillent la curiosité et l’émotion de chacun·e, sans distinction d’âge, de classe sociale ou de nationalité.\n\nAnne travaille comme conceptrice de spectacle et interprète au sein de la compagnie *Les Babas au Rhum* depuis 1985. Elle intervient également pour d’autres compagnies telles que le [a url=\"https://tjp-strasbourg.com\"]TJP - Centre Dramatique National de Strasbourg[/a], la *Compagnie Jardins insolites* à Angers et la [a url=\"https://lalouetheatre.com\"]Compagnie Théâtre de La Loue[/a] à Narbonne.\n\nElle accompagne à la mise-en-scène depuis une quinzaine d’années des artistes, musicien·ne·s et comédien·ne·s dont [a url=\"https://lesfrereslocomotive.com\"]La Fanfare Toto[/a], [a url=\"https://lamalcoiffee.com\"]La Mal Coiffée[/a] et depuis 2024 la compagnie *Les Mégères de l’Humus*."
+f6ea20b67c40e917e216154e6d4c1871:
+  nom: 'Delphine Verniol'
+  slug: delphine
+  role: Présidente
+  image:
+    user/data/flex-objects/equipe/webJolie_dv.avif:
+      name: webJolie_dv.avif
+      type: image/avif
+      size: 51074
+      path: user/data/flex-objects/equipe/webJolie_dv.avif
+      url: /user/data/flex-objects/equipe/webJolie_dv.avif
+  personne_image:
+    user/data/flex-objects/equipe/webRigolote_dv.avif:
+      name: webRigolote_dv.avif
+      type: image/avif
+      size: 39733
+      path: user/data/flex-objects/equipe/webRigolote_dv.avif
+      url: /user/data/flex-objects/equipe/webRigolote_dv.avif
+  image_alt: "Delphine Verniol, présidente de la Cie Les Mégères de l'Humus"
+  citation: 'Faire les choses sérieusement, sans se prendre au sérieux.'
+  citation_auteur: 'Bertrand Belin'
+  bio_debut: "Originaire de Figeac, Delphine grandit dans cet écrin de verdure de la région Occitanie. Depuis toujours c'est une grande sportive. Elle fait du VTT, de la marche à pied et des sports collectifs en tout genre.\n\nEn 2000, elle passe son Baccalauréat Sciences et Technologies Ternaires, option comptabilité et gestion.\n\nEn 2009, Delphine se réoriente et passe le diplôme d'*assistante sociale* à Perpignan. Elle exerce ensuite au *Conseil Départemental des Pyrénées Orientales* puis à la mairie de Montauban.\n\nProche de la nature et militante écologiste, elle passe en 2013 une Licence Agriculture Biologique, Conseil et Développement à l’[a url=\"https://ineopole-mfr.com/\"]Inéopole[/a] et au [a url=\"https://campusterreetnature.fr/\"]Centre de Formation pour Adultes sur le Campus Terre & Nature[/a] du lycée Charlemagne de Carcassonne. Avec ce nouveau diplôme en poche, elle est rapidement embauchée au [a url=\"https://www.bio-aude.com/\"]Biocivam[/a], association de producteurs écologiques de l’Aude, en tant que chargée administrative et de la communication. Elle y restera 8 ans."
+  bio_fin: "En parallèle elle devient responsable de la cave à la [a url=\"https://www.tourne-sol-biocoop.fr/\"]Biocoop Tourne-Sol[/a] de Carcassonne. Elle fournira ses conseils et s'occupera de ce rayon pendant 10 ans. Depuis 2019, Delphine est pompier volontaire à la caserne d'[a url=\"https://sdis11.fr/centre-de-secours-alzonne/\"]Alzonne[/a]. En parallèle, elle travaille dans un *EHPAD* en tant qu’adjointe administrative.\n\nMis à part ce parcours fourni d’expériences différentes et oh combien ! formatrices, Delphine a pratiqué le théâtre dans une troupe amateur à Montauban, à Carcassonne et à Perpignan où elle a pratiqué du [a url=\"https://fr.wikipedia.org/wiki/Playback_Th%C3%A9%C3%A2tre\"]théâtre Playback[/a]."
+  meta_description: "Découvrez le parcours de Delphine Verniol, présidente de la Cie et soutien essentiel des Mégères de l'Humus."
+103450043c556de6b564b2467ae41595:
+  nom: 'Marie Diel'
+  slug: marie
+  role: Trésorière
+  image:
+    user/data/flex-objects/equipe/webJolie_md.avif:
+      name: webJolie_md.avif
+      type: image/avif
+      size: 63839
+      path: user/data/flex-objects/equipe/webJolie_md.avif
+      url: /user/data/flex-objects/equipe/webJolie_md.avif
+  personne_image:
+    user/data/flex-objects/equipe/webRigolote_md.avif:
+      name: webRigolote_md.avif
+      type: image/avif
+      size: 53682
+      path: user/data/flex-objects/equipe/webRigolote_md.avif
+      url: /user/data/flex-objects/equipe/webRigolote_md.avif
+  image_alt: 'Marie Diel, Trésorière'
+  citation: "L'essentiel c'est d'embrasser l'entièreté de ce que nous sommes, à la fois notre part d'ombre et nos lumières."
+  citation_auteur: 'Ne marche pas si tu peux danser, Anne Van Stappen'
+  bio_debut: "Originaire de Carcassonne, Marie a vécu 19 ans en Angleterre de 2001 à 2020. Elle y a passé un Bachelor Degree en Arts et Médias et a travaillé comme professeure de français et éducatrice spécialisée auprès d’enfants en difficulté.\n\nAujourd’hui Marie est rentrée en France. Apprentie naturopathe, elle est salariée dans une Biocoop et s’occupe du rayon Bien-être.\n\nElle a créé son entreprise [a url=\"https://fr.mademoiselleyogi.com\"]Mademoiselle Yogi[/a] avec laquelle elle donne des cours de yoga. \n\nC’est la reine du [a url=\"https://fr.wikipedia.org/wiki/Surcyclage\"]up-cycling[/a] et du bricolage ! Elle rénove et décore toute seule sa maison et c’est très joli ! Spécialisée dans la cuisine végétalienne, elle propose ses services en qualité de traiteur pour des évènements locaux et bio. C’est aussi une jardinière autodidacte.\n"
+  bio_fin: 'Marie est une vraie petite abeille travailleuse, elle s’intéresse à tout, butine par-ci, par-là, elle est inarrêtable et passionnée !'
+  meta_description: "Portrait de Marie Diel, trésorière de l'association et actrice du développement des Mégères de l'Humus."
+390bd87b4f22197f0f49ef289da1bb56:
+  nom: 'Juliette Gaubert'
+  slug: juliette
+  role: Graphiste
+  image:
+    user/data/flex-objects/equipe/webJolie_jg.avif:
+      name: webJolie_jg.avif
+      type: image/avif
+      size: 53874
+      path: user/data/flex-objects/equipe/webJolie_jg.avif
+      url: /user/data/flex-objects/equipe/webJolie_jg.avif
+  personne_image:
+    user/data/flex-objects/equipe/webRigolote_jg.avif:
+      name: webRigolote_jg.avif
+      type: image/avif
+      size: 32443
+      path: user/data/flex-objects/equipe/webRigolote_jg.avif
+      url: /user/data/flex-objects/equipe/webRigolote_jg.avif
+  image_alt: 'Juliette Gaubert, graphiste'
+  citation: 'Si y’a un problème, y’a une solution. Quand y’a pas de solution, y’a pas de problème.'
+  citation_auteur: 'Juliette Gaubert'
+  bio_debut: "Originaire de Toulouse, Juliette y passe son enfance. Elle commence le théâtre en loisir au lycée et c’est une révélation.\n\nEn 2009, son bac en poche, elle s’inscrit à l’université Toulouse II Jean-Jaurès en *Art Appliqué* et y obtient en 2012 son Bachelor, équivalence licence-maîtrise.\n\nDurant ces 3 ans, elle suivra son cursus entre l’université de Toulouse et celle de Florence, Italie, ou elle sera inscrite en *design industriel*.\n\nDe 2012 à 2014, Juliette continue son cursus entre l’[a url=\"https://www.univ-tlse2.fr/\"]Université Toulouse II Jean-Jaurès[/a] et l’[a url=\"https://www.eina.cat/en\"]EINA[/a], centre universitaire de design et d'art de Barcelone, Espagne. Elle y obtient son Master en *Design Transdisciplinaire Cultures et Territoires*."
+  bio_fin: "En 2015, Juliette déménage à Berlin. Elle se réoriente et passe un Diplôme Universitaire Community Manager et une formation Designer UX en 2021.\n\nÀ partir de 2018, en parallèle de son travail, elle replonge dans son amour du lycée : le théâtre. Elle s’investit pleinement au sein du\n[a url=\"https://theaterimnu.de/fr/accueil\"]Theater Im Nu[/a].\n\nElle est notamment comédienne et accessoiriste sur les créations *Un fil à la Patte* et *Grenouille&copy;, conte sanglant pour cyborgs*. Elle est aussi bénévole sur toutes les éditions du festival de la compagnie, le *Lampenfieber*."
+efb47b7f298a7d6064ed009c762cf23c:
+  nom: 'Philippe Guerrini'
+  slug: philippe
+  role: Informaticien
+  image:
+    user/data/flex-objects/equipe/webJolie_pi.avif:
+      name: webJolie_pi.avif
+      type: image/avif
+      size: 78716
+      path: user/data/flex-objects/equipe/webJolie_pi.avif
+      url: /user/data/flex-objects/equipe/webJolie_pi.avif
+  personne_image:
+    user/data/flex-objects/equipe/webRigolote_pi.avif:
+      name: webRigolote_pi.avif
+      type: image/avif
+      size: 68330
+      path: user/data/flex-objects/equipe/webRigolote_pi.avif
+      url: /user/data/flex-objects/equipe/webRigolote_pi.avif
+  image_alt: 'Philippe Guerrini Idlas, dit Quiligus, dev, auto-hébergeur, philosophe des bacs à sable'
+  citation: "Le dormeur doitt s'éveiller."
+  citation_auteur: 'Duc Leto Atréides - Dune, Frank Herbert'
+  bio_debut: "Originaire de Paris, Philippe a sillonné la France, sa famille d'origine ayant circulé entre le sud marseillais, l'est vosgien et Paris.\n\nIl obtient un DEUG en sciences économiques en 1980 à l'université Paris Nord 13 et décide d'aller rejoindre son frère en Israël pour expérimenter la vie collective dans un kibbutz, à Or Haner, tout près de la ville d'Ashkelon. Il y reste 2 ans, dont 6 mois sur un Ulpan dans le nord d'Israël, pour y apprendre l'hébreu moderne.\n\nLe retour en France l'emmène à s'inscrire dans une cursus diplômant à l'[a url=\"https://iutv.univ-paris13.fr/?sitemap\"]IUT de Villetaneuse[/a]. Il y décroche le diplôme universitaire de technologie en Informatique.\n\nS'ensuit une carrière de 20 ans dans de grandes entreprises informatiques comme spécialiste du système PICK&reg;, puis comme spécialiste du progiciel Baan&reg;, et enfin, comme consultant en système d'information, spécialisé dans la réorganisation des services informatiques."
+  bio_fin: "Après une reconversion de 3 ans, Philippe s'installe, dès 2005, comme praticien professionnel en kinésiologie dans le sud de l'Essonne. Sa formation et l'accompagnement d'enfants en difficulté d'apprentissage oriente Philippe vers le métier de professeur des écoles. Il passe le concours en 2007 et enseigne en classes élémentaires et en collège jusqu'en 2015.\n\nDe 2015 à 2020, il rejoint les équipes informatiques du rectorat de Versailles pour y assurer le support des collèges et lycées du 78 puis du 91. Depuis son départ à la retraite, Philippe vit, avec son épouse, dans un village de l'Essonne où ils se sont installés en 1992."
+  meta_description: "Portrait de Philippe Guerrini Idlas, artisan de la partie technique et soutien numérique des Mégères de l'Humus."

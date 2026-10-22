@@ -8,6 +8,33 @@
       webm: teaser-gresilhette-salimonde.webm
     dossier_pdf: dossier-prez_compressed.pdf
     dossier_img: btn-prez.avif
+    versions:
+      -
+        nom_version: "Théâtre d'Ombres"
+        slug_version: theatre-d-ombres
+        image_version: montage-inspiration.avif
+        pdf_technique: fiche-theatre-d-ombres.pdf
+        btn_technique: btn-tech-ombres.avif
+        texte_version: "Pendant notre enfance, notre adolescence et notre vie de jeunes adultes nous nous sommes rendu·e·s compte que nous avions des références communes dans plusieurs domaines artistiques. Nous avons décidé de réunir ses inspirations qui nous ressemblent et nous rassemblent. Pour cette version avec le théâtre d’ombres nous avons été influencées par les univers artistiques, politiques et sociaux de plusieurs artistes et plusieurs œuvres. Parmi elleux :\n\n- l’univers d’Hayao Miyazaki\n- la poésie d’Anne Sylvestre\n- Persépolis de Marjane Satrapi\n- le militantisme d’Adèle Haenel\n- Le Roi et l’Oiseau de P. Grimault\n- Princes et Princesses de M. Ocelot\n- Et à la fin, ils meurent de Lou Lubie\n- Les Triplettes de Belleville de S. Chomet\n\nPour jouer en intérieur, nous vous proposons le format théâtre d’ombres. Celui-ci apporte une dimension magique et surnaturelle aux deux personnages du conte. Il a été conçu pour recréer l’ambiance des veillées que vivaient nos grands-parents. Cette version de *Grésilhette et la Salimonde* est pensée comme une forme visuelle et poétique autour des silhouettes, de la lumière et de la narration.\n\nLe théâtre d'ombres ouvre un imaginaire accessible pour tout les âges et tout les goûts. La compagnie adapte la représentation selon le lieu et le public. Elle peut autant jouer en milieu scolaire qu'en programmation culturelle. Pour connaître les conditions techniques, la durée et les modalités d'intervention, vous pouvez nous [a url=\"/contact\"]contacter[/a]."
+      -
+        nom_version: 'Sieste contée'
+        slug_version: sieste-contee
+        image_version: sigean.avif
+        pdf_technique: fiche-sieste-contee.pdf
+        btn_technique: btn-tech-sieste.avif
+        texte_version: "La sieste contée propose une expérience douce, sensible et immersive à partir de l'univers de *Grésilhette et la Salimonde*. Cette forme privilégie l'écoute, le rythme et l'imaginaire, dans une ambiance propice au relâchement et à la rêverie.\n\nElle peut être programmée en bibliothèque, en école, en festival ou en structure associative sur le territoire audois et en Occitanie et plus largement. Pour organiser une séance adaptée à votre public, vous pouvez nous [a url=\"mailto:compagnie&#64;lesmegeresdelhumus.fr?subject=Message du site, page Sieste Contée\"]écrire[/a].\n\nVoir ci-dessous la fiche technique."
+      -
+        nom_version: 'Le Projet Pédagogique'
+        slug_version: projet-pedagogique
+        texte_version: "Le projet pédagogique accompagne les spectacles de la compagnie avec des outils concrets pour préparer, prolonger et approfondir l'expérience artistique. Il s'appuie sur l'expression orale, l'esprit critique, la coopération et la créativité.\n\nCes propositions s'adressent aux établissements scolaires, aux structures jeunesse et aux acteurs culturels de l'Aude et d'Occitanie. Elles peuvent prendre la forme d'ateliers, de bord de scène ou de parcours sur mesure autour de l'écologie, du conte et du théâtre."
+        btn_technique: btn-tech-projet.avif
+    grille:
+      ombres: sp_theatre-d-ombres.avif
+      sieste: sp_sieste-contee.avif
+      projet: sp_projet-pedagogique.avif
+    texte_intro: "Le spectacle aborde le thème de l'écologie de façon ludique. C’est un conte théâtralisé avec une esthétique merveilleuse et intemporelle. Il existe trois versions du spectacle :\n"
+    texte_suite: "Ce conte s’inspire de la légende de la Salimonde : sorcière de la Montagne Noire qui vit dans une grotte. Une fois par an, au milieu de l'hiver, tout le monde l’entend. S'iels entendent des pleurs, les villageois·e·s savent alors qu'iels doivent encore rester bien au chaud. S’iels entendent une mélodie de flûte, iels savent alors que les beaux jours reviennent. Cette année là, la Salimonde pleure !\n\nAu village, c’est la catastrophe ! La météo est instable. Les températures oscillent entre -20° et +40° et les villageois·e·s sont désemparé·e·s. Grésilhette, un·e enfant du village, décide d’aller demander de l’aide directement à la sorcière. Iel va être la première humaine à approcher la Salimonde...  \nOn sillone les sentiers de la montagne en compagnie de l'enfant. Grâce à sa spontanéité, son bagou et sa franchise, iel entraîne personnages et spectateur·rice·s dans son aventure. Grésilhette permet la rencontre de ces deux mondes autour des mêmes questionnements : Comment pallier les conséquences néfastes que peut avoir le déréglement climatique ? Et quelles sont les responsabilités qui incombent aux personnages ?\n"
+    texte_distribution: "Écriture, mise en scène : Suzie Idlas et Sabine Rance  \nInterprétation : Estelle Doumeng et Suzie Idlas  \nAccompagnement : Anne Spielman"
   titre_occitan: 'La langue occitane dans le spectacle'
   titre_extrait: Extrait
   occitan_paragraphes:
@@ -21,3 +48,4 @@
       texte_fr: '"Grésilhette et la Salimonde" vous invite à renouer avec vos racines.'
       texte_oc: '"Gresilhette e La Salimonda" vos convida a tornar trapar las rasigas vèstras.'
   traduction_signature: "L'Alan Roch"
+  bio_extrait: "**CONTEUSE :** Iel s’élance vers la forêt et prend le petit chemin qui descend jusqu’au Grésilhou. Iel longe la rivière, passe un petit pont de bois, et là, une douce lumière dorée apparaît : ce sont des lucioles, elles la guident dans la pénombre. Devant les yeux de Grésilhette un monde enchanté apparaît. Les feuilles des arbres sont toutes bleues de givre. Des guirlandes de perles de rosée gelées habillent les troncs. Le sol scintille sous une fine couche de glace qui craque sous son poids. Grésilhette s’arrête net. L’antre de la sorcière est là, plongée dans le noir.\n\n**GRESILHETTE :** Salimonde ! Je m’appelle Grésilhette, j’ai 8 ans, à la maison j’ai une grande collection de feuilles des arbres, j’adore le champignon et je n’ai pas peur de toi !\n\n**SALIMONDE :** Qu’est-ce que tu fais là, petit insecte insignifiant ?! Comment oses-tu troubler ma quiétude ?\n\n**GRESILHETTE :** Maquiétude ? C’est quoi ? Ça s'écrit comment ? Oh d’ailleurs, merci de m’avoir allumé les lucioles sur le chemin, c’était joliiii ! J’avais l’impression de marcher sur un miroir gelé… Oh ! Elle est rigolote ta barbichette, tu ressembles à une chèvre ! Huun ! Au village c’est la catastrophe ! Les bébés chèvres y meurent de froid et Juju, elle est fatiguée !"

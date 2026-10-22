@@ -1,0 +1,28 @@
+enabled: true
+
+# 🌟 L'INDEXATION TECHNIQUE DE L'ADMINISTRATION
+admin:
+  list:
+    title: nom
+    fields:
+      nom:
+        link: edit
+        title: Nom
+      role:
+        title: Rôle
+      slug:
+        title: Slug URL
+
+object:
+  ordering:
+    key: nom
+    dir: asc
+
+site:
+  templates:
+    collection:
+      paths:
+        - /infos/equipe
+    object:
+      route: /infos/equipe
+      template: equipe

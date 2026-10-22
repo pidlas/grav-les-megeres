@@ -1,7 +1,7 @@
 type: flex-objects
 
 title: Page Équipe
-description: 'Gestion conviviale des membres de la compagnie'
+description: Gestion conviviale des membres de l'équipe
 
 config:
   data:
@@ -10,10 +10,17 @@ config:
       options:
         formatter:
           class: 'Grav\Framework\File\Formatter\YamlFormatter'
-        folder: 'user/pages/02.infos/03.equipe'
+        folder: 'user/data/flex-objects/equipe'
     media:
-      per_object: true
+      per_object: false
+  # 🌟 LA CORRECTION HUMAINE QUI MANQUE ICI :
+  # On dit au blueprint lui-même comment calculer la route de l'objet
+  site:
+    templates:
+      object:
+        route: /infos/equipe
 
+  # 🌟 LE TABLEAU ICI : Parfaitement imbriqué sous "config" comme pour Partenaires
   admin:
     router:
       path: /equipe
@@ -22,53 +29,75 @@ config:
         route: /equipe
         title: Page Équipe
         priority: 4
-        icon: 'fa fa-users'
+        icon: fa fa-users
     list:
-      title: 'Liste des Membres'
+      title: Liste de l'Équipe
       ordering:
         nom: asc
       fields:
         nom:
-          title: 'Nom du membre'
+          title: Nom
           link: edit
         role:
           title: Rôle
+        slug:
+          title: Slug URL
 
 form:
   fields:
-    nom:
-      type: text
-      label: 'Identifiant / Nom du membre'
-      help: 'Obligatoire. Ce nom sert à lister le membre dans le tableau.'
-      validate:
-        required: true
+    tabs:
+      type: tabs
+      active: 1
+      fields:
         
-    role:
-      type: textarea
-      label: 'Rôle et compétences dans la compagnie'
-      help: 'Appuyez sur Entrée pour aller à la ligne entre vos deux rôles.'
-      rows: 2              # 🛠️ Fixé sur 2 lignes de saisie pour vos rédacteurs
-      placeholder: "Metteuse en scène\nComédienne"
+        tab_liste:
+          type: tab
+          title: "Aperçu Liste"
+          fields:
+            nom:
+              type: text
+              label: "Nom"
+            slug:
+              type: text
+              label: "Slug"
+            role:
+              type: textarea
+              label: "Rôle"
+            classe_sup:
+              type: text
+              label: "Classe Sup"
+            image:
+              type: file
+              label: "Image Jolie"
+              destination: data/flex-objects/equipe
 
-    slug:
-      type: text
-      label: 'Identifiant URL (Slug)'
-      placeholder: 'suzie'
-
-    classe_sup:
-      type: text
-      label: 'Classe CSS supplémentaire'
-      placeholder: 'posImage'
-
-    image:
-      #type: file
-      type: filepicker
-      label: 'Choisir la photo du membre'
-      multiple: false
-      folder: 'page://02.infos/03.equipe'
-      preview_images: true
-      #destination: 'flex-objects/equipe'
-      accept:
-        - 'image/*'
-        - '.avif'
-        - 'image/avif'
+        tab_biographie:
+          type: tab
+          title: "Page Biographie"
+          fields:
+            personne_image:
+              type: file
+              label: "Image Rigolote"
+              destination: data/flex-objects/equipe
+            image_alt:
+              type: text
+              label: "Image Alt"
+            book_url:
+              type: text
+              label: "Book URL"
+            citation:
+              type: text
+              label: "Citation"
+            citation_auteur:
+              type: text
+              label: "Citation Auteur"
+            bio_debut:
+              type: markdown
+              label: "Début de la biographie"
+            bio_fin:
+              type: markdown
+              label: "Fin de la biographie"
+            meta_description:
+              type: text
+              label: "Description SEO (Meta Description)"
+              description: "Texte court (environ 150 caractères) pour les moteurs de recherche."

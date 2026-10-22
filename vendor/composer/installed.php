@@ -1,9 +1,9 @@
 <?php return array(
     'root' => array(
         'name' => 'getgrav/grav',
-        'pretty_version' => '2.2.6',
-        'version' => '2.2.6.0',
-        'reference' => '8dccabb6a5282fe6bf224f0b139892331eea16ef',
+        'pretty_version' => '2.2.11',
+        'version' => '2.2.11.0',
+        'reference' => 'b47d89b661cb25cd75136ebe36c8c14cf4048aa6',
         'type' => 'project',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -110,9 +110,9 @@
             'dev_requirement' => false,
         ),
         'getgrav/grav' => array(
-            'pretty_version' => '2.2.6',
-            'version' => '2.2.6.0',
-            'reference' => '8dccabb6a5282fe6bf224f0b139892331eea16ef',
+            'pretty_version' => '2.2.11',
+            'version' => '2.2.11.0',
+            'reference' => 'b47d89b661cb25cd75136ebe36c8c14cf4048aa6',
             'type' => 'project',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),

@@ -1,9 +1,23 @@
 {# 1. Boucle sur les catégories principales du menu (Infos, Spectacles, Théâtre Forum...) #}
 {% for page in pages.children.visible %}
     
-    {# 🌟 GRAV DÉTECTE L'ÉTAT ACTIF : #}
-    {# Si l'utilisateur est sur cette page principale OU sur une de ses sous-pages #}
-    {% set is_active = (page.active or page.activeChild) ? ' menu--visible' : '' %}
+    {# 🌟 PROTECTION ROUTES VIRTUELLES : On vérifie si l'URL courante commence par le chemin de la catégorie #}
+    {# 🌟 LISTE BLANCHE DES CATÉGORIES PRINCIPALES À MAINTENIR ALLUMÉES #}
+    {% set categories_autorisees = ['infos', 'spectacles', 'theatre-forum', 'prestations', 'contact'] %}
+    
+    {# On active le forçage textuel uniquement si le slug de la page est dans notre liste blanche #}
+    {% set is_virtual_active = false %}
+    {% if page.slug in categories_autorisees %}
+        {% set is_virtual_active = (page.slug in uri.path|split('/')) %}
+    {% endif %}
+    
+    {# L'onglet s'allume si Grav le détecte d'origine OU si notre route virtuelle est validée #}
+    {% set is_active = (page.active or page.activeChild or is_virtual_active) ? ' menu--visible' : '' %}
+
+    
+    {# L'onglet s'allume si l'état Grav est vrai OU si l'URL correspond textuellement #}
+    {% set is_active = (page.active or page.activeChild or is_virtual_active) ? ' menu--visible' : '' %}
+
     
     {# SI LA PAGE A DES ENFANTS VISIBLES (Ex: Infos, Spectacles, etc.) #}
     {% if page.children.visible.count > 0 %}

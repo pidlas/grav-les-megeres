@@ -1,3 +1,41 @@
+# v2.2.11
+## 10/19/2026
+
+1. [](#bugfix)
+    * A licence key saved with a stray space in the product slug or the key itself (` lightbox-gallery`, for example) now works for installs and updates. Spaces are trimmed when a key is saved, and keys already saved that way are read correctly
+    * An image pasted into the editor as inline data (a `data:` image) now shows on the frontend. Grav was turning the `+` characters in the image data into spaces, which also affected image paths with a `+` in them such as `a+b.png` [getgrav/grav-premium-issues#628](https://github.com/getgrav/grav-premium-issues/issues/628)
+
+# v2.2.10
+## 10/16/2026
+
+1. [](#bugfix)
+    * With `images.watermark.watermark_all` on, every image now gets the watermark, not only images with a resize or other action. A 1x image made from an `@2x` file and a framed image are stamped once, and retina alternatives are kept. Thanks @HawkForge [#4359](https://github.com/getgrav/grav/issues/4359) [#4360](https://github.com/getgrav/grav/pull/4360)
+    * A remote CSS or JS file in the asset pipeline (a CDN stylesheet, for example) now gives up after 5 seconds if its server doesn't answer (set with the new `assets.pipeline_remote_timeout` option in `system.yaml`), instead of holding the page until PHP's `max_execution_time` ends it with a 503. When a remote file can't be downloaded, its group is not cached: that request renders each file as its own tag, and the next request tries the download again
+
+# v2.2.9
+## 10/14/2026
+
+1. [](#bugfix)
+    * Adding an environment folder such as `user/env/<host>/` no longer creates a new security key for that host, which broke forms and sessions signed with the old one. The key stays in `user/config`, and a copy an earlier version put in an environment folder is moved there
+    * A plugin or theme zipped from inside its own folder, or a zip made on macOS with a `__MACOSX` folder, now installs with `bin/gpm direct-install` and the admin's install-from-zip instead of failing with "Not a valid Grav package". Thanks @wakqasahmed [#2688](https://github.com/getgrav/grav/issues/2688) [#4357](https://github.com/getgrav/grav/pull/4357)
+    * Sites on PHP-FPM pools that disable `getmypid()` (a common hardening) no longer fail when the page index is rebuilt: its temporary database file is named with a random string instead of the process id. The scheduler's `whoami()` also checks for `get_current_user()` before calling it
+
+# v2.2.8
+## 10/13/2026
+
+1. [](#new)
+    * Plugins can react when an image is loaded with the new `onImageMediumReset` event, for example to queue a watermark or other action on every image from its own metadata
+2. [](#bugfix)
+    * Setting only `watermark_all` for images in `system.yaml` no longer removes the watermark image, position and scale settings, and the watermark settings can now be edited in the Admin under Images
+
+# v2.2.7
+## 10/13/2026
+
+1. [](#bugfix)
+    * The scheduler log no longer gets two lines written every minute when no job was due; runs that do work still log their full detail. Thanks @onetrev [#4355](https://github.com/getgrav/grav/issues/4355)
+    * The compiled config, blueprints and languages caches are written to a temporary file and moved into place, and a damaged one is rebuilt, so a request arriving while the cache is being rewritten no longer fails with a blank error page. Thanks @omega8cc [#4356](https://github.com/getgrav/grav/issues/4356)
+    * The scheduler's run summary in `scheduler.log` counted each successful job twice
+
 # v2.2.6
 ## 10/09/2026
 

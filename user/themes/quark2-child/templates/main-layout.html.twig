@@ -13,9 +13,9 @@
  
     {# 2. BALISES MÉTADONNÉES SEO #}
     {% block head_meta %}
-    <meta name="description" content="{% if page.header.metadata.description %}{{ page.header.metadata.description|e }}{% else %}{{ site.metadata.description|e }}{% endif %}" />
-    <meta name="robots" content="{% if page.header.metadata.robots %}{{ page.header.metadata.robots|e }}{% else %}index, follow{% endif %}" />
-    <link rel="canonical" href="{{ page.url(true, true)|e }}" />
+        <meta name="description" content="{% if page.header.metadata.description %}{{ page.header.metadata.description|e }}{% else %}{{ site.metadata.description|e }}{% endif %}" />
+        <meta name="robots" content="{% if page.header.metadata.robots %}{{ page.header.metadata.robots|e }}{% else %}index, follow{% endif %}" />
+        <link rel="canonical" href="{{ page.url(true, true)|e }}" />
     {% endblock %}
  
     {# 3. BALISES POUR LES RÉSEAUX SOCIAUX (OPENGRAPH) #}

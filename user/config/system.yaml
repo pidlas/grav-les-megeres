@@ -32,7 +32,10 @@ debugger:
   censored: false
   shutdown:
     close_connection: false
-  twig: true
+    twig: true
+twig:
+  debug: true               # 🌟 Active le moteur de dump dans les templates
+  auto_reload: true
 images:
   adapter: imagick
   cls:
