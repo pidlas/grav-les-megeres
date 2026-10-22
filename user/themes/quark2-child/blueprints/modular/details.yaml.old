@@ -1,4 +1,0 @@
-title: Bloc de Détails
-"@extends":
-    type: default
-    context: blueprints/pages
