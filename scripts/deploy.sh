@@ -68,8 +68,6 @@ RSYNC_EXCLUDES=(
   "/data/notifications/"
   "accounts/"
   '**/accounts/**'
-  "data/"
-  "**/data/**"
   "pages/**/*.avif"
   "pages/**/*.pdf"
   "pages/**/*.mp4"
