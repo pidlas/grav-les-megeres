@@ -135,7 +135,8 @@
                             <div class="anime_hover {{ membre.classe_sup }}">
                                 <p class="montre coco">Plus sur {{ membre.nom | capitalize | split(' ')|first }}</p>
                                 {# 🌟 PRÊT POUR LE RÉGLAGE : Lien absolu par rapport au référent #}
-                                <a href="/infos/equipe/{{ membre.slug }}">
+                                <a href="{{ page.url ~ '/' ~ membre.slug }}">
+                                {# <a href="/infos/equipe/{{ membre.slug }}"> #}
                                     {% if membre.image is not empty %}
                                         {% set path_joli = (membre.image|values|first).path %}
                                         <img src="{{ base_url_simple ~ '/' ~ path_joli }}" alt="{{ membre.nom }}" class="img-menu-spectacle" loading="lazy">
@@ -156,7 +157,8 @@
 
                             <div class="anime_hover {{ membre.classe_sup }}">
                                 <p class="montre coco">Plus sur {{ membre.nom | capitalize | split(' ')|first }}</p>
-                                <a href="/infos/equipe/{{ membre.slug }}">
+                                <a href="{{ page.url ~ '/' ~ membre.slug }}">
+                                {# <a href="/infos/equipe/{{ membre.slug }}"> #}
                                     {% if membre.image is not empty %}
                                         {% set path_joli = (membre.image|values|first).path %}
                                         <img src="{{ base_url_simple ~ '/' ~ path_joli }}" alt="{{ membre.nom }}" class="img-menu-spectacle" loading="lazy">
@@ -177,7 +179,8 @@
 
                             <div class="anime_hover {{ membre.classe_sup }}">
                                 <p class="montre coco">Plus sur {{ membre.nom | capitalize | split(' ')|first }}</p>
-                                <a href="/infos/equipe/{{ membre.slug }}">
+                                <a href="{{ page.url ~ '/' ~ membre.slug }}">
+                                {# <a href="/infos/equipe/{{ membre.slug }}"> #}
                                     {% if membre.image is not empty %}
                                         {% set path_joli = (membre.image|values|first).path %}
                                         <img src="{{ base_url_simple ~ '/' ~ path_joli }}" alt="{{ membre.nom }}" class="img-menu-spectacle" loading="lazy">
