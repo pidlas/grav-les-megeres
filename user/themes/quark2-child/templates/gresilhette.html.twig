@@ -95,17 +95,17 @@
 {% set macro_grille_3_ronds %}
     <p class="versions-spectacle">
         {% if gresilhette_flex.spectacle.grille.ombres %}
-            <a class="images-spectacle morph" href="/spectacles/gresilhette-et-la-salimonde/theatre-d-ombres">
+            <a class="images-spectacle morph" href="{{ page.url ~ '/theatre-d-ombres' }}">
                 {{ page.media[gresilhette_flex.spectacle.grille.ombres|trim].html('Version Théâtre d\'ombres') | raw }}
             </a>
         {% endif %}
         {% if gresilhette_flex.spectacle.grille.sieste %}
-            <a class="images-spectacle morph" href="/spectacles/gresilhette-et-la-salimonde/sieste-contee">
+            <a class="images-spectacle morph" href="{{ page.url ~ '/sieste-contee' }}">
                 {{ page.media[gresilhette_flex.spectacle.grille.sieste|trim].html('Version Sieste contée') | raw }}
             </a>
         {% endif %}
         {% if gresilhette_flex.spectacle.grille.projet %}
-            <a class="images-spectacle morph" href="/spectacles/gresilhette-et-la-salimonde/projet-pedagogique">
+            <a class="images-spectacle morph" href="{{ page.url ~ '/projet-pedagogique' }}">
                 {{ page.media[gresilhette_flex.spectacle.grille.projet|trim].html('Version Projet pédagogique') | raw }}
             </a>
         {% endif %}

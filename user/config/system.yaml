@@ -4,7 +4,7 @@ languages:
   supported:
     - fr
   default_lang: fr
-  include_default_lang: true
+  include_default_lang: false
   enabled: true
 pages:
   theme: quark2-child
