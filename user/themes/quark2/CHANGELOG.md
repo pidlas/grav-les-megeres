@@ -1,3 +1,11 @@
+# v1.1.18
+## 10/22/2026
+
+1. [](#new)
+    * The blog sidebar shows a TNTSearch search box when that plugin is enabled, the same way it does for SimpleSearch [trilbymedia/grav-plugin-tntsearch#149](https://github.com/trilbymedia/grav-plugin-tntsearch/issues/149)
+1. [](#bugfix)
+    * The archives sidebar now lists posts by year when the Archives plugin's date format is set to `Y`, instead of showing every entry as 1970 [getgrav/grav-plugin-archives#39](https://github.com/getgrav/grav-plugin-archives/issues/39)
+
 # v1.1.17
 ## 10/09/2026
 

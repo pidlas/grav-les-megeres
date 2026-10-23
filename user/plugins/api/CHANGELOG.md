@@ -1,3 +1,35 @@
+# v1.0.57
+## 10/22/2026
+
+1. [](#new)
+    * **Icon sets for the `iconpicker` field**: a theme or plugin that draws its own icons registers them as a set on the new `onApiIconSets` event (SVG markup, IconSpec values, or a YAML file of them), and a blueprint field lists that set instead of Font Awesome with `icons: <set>`. The icons travel with the field as structured SVG data, never as markup. See "Icon sets for the `iconpicker` field" in the README
+2. [](#improved)
+    * **Admin branding honors an environment's own `admin-next.yaml`**: the sign-in card, logo and title are read through Grav's config, so a copy of `admin-next.yaml` in `user/env/<env>/config/` takes the place of the site's one for that environment (a local copy of a demo can name its own sign-ins, for example). Saving from the admin still writes `user/config/admin-next.yaml`
+    * The list of modular templates (`GET /blueprints/pages?modular=true`, and a module's Template select) names each type after the `title` of its own blueprint, instead of its file name made readable. Types with no blueprint title keep the file name
+3. [](#bugfix)
+    * Creating a module at the top level of the site is refused with a clear message: nothing draws a module without a modular page above it, so it only made a folder that never showed
+    * An icon set's `file` is read only when it is a `theme://`, `plugin://`, `user://`, `plugins://` or `themes://` URL for a `.yaml` or `.yml` file inside that stream's folders: plain and absolute paths, `..` segments and symlinks out of the folder are refused
+    * The top-level module refusal covers every way a module can land there: moving a page, renaming one to a `_` name, copying a module and reorganizing it to the top level of the site are refused with the same message as creating one, however the root or the order prefix is spelled
+
+# v1.0.56
+## 10/22/2026
+
+1. [](#bugfix)
+    * Opening a folder with thousands of pages in the admin's Tree or Columns view is now about five times faster and no longer runs out of memory once the cache is warm [getgrav/grav-plugin-admin2#200](https://github.com/getgrav/grav-plugin-admin2/issues/200)
+    * Duplicating a page that has a number in its folder name now numbers the copy too, so it keeps its place in the menu instead of disappearing from navigation [grav#4367](https://github.com/getgrav/grav/issues/4367)
+    * An API key whose ID happens to be all digits no longer fails with a server error on some requests, and new keys never get such an ID. Thanks @srameko and @sandymac [#64](https://github.com/getgrav/grav-plugin-api/issues/64)
+    * Updating a page that only exists in a non-default language now saves that translation when no language is given, the same one reading the page returns, instead of refusing the edit as changed or silently saving nothing
+
+# v1.0.55
+## 10/22/2026
+
+1. [](#new)
+    * Media metadata fields can now be a number (with an optional minimum and maximum), a date or a yes/no toggle, and any field can be marked required so a save can't leave it empty. Thanks @phmg701 [#63](https://github.com/getgrav/grav-plugin-api/pull/63)
+2. [](#improved)
+    * Saving metadata to several media files at once now checks the values first and refuses the whole batch when one is invalid, instead of reporting the same error for every file
+3. [](#bugfix)
+    * A page that only has a translation, and no file in the site's default language, now opens in the editor as that translation, so it can be deleted and its Translations card is right. Saving it in the missing language is refused instead of silently doing nothing [admin2#199](https://github.com/getgrav/grav-plugin-admin2/issues/199)
+
 # v1.0.54
 ## 10/20/2026
 

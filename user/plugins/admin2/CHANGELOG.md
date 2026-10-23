@@ -1,3 +1,36 @@
+# v2.1.40
+## 10/22/2026
+
+1. [](#new)
+    * **Modules in a modular page's editor**: a modular page now lists its modules above its own form, each with its name, its type, a publish toggle and a link to its editor. Drag a module to reorder it (or focus its handle and press Alt+Up or Alt+Down), the same reordering the Tree and Columns views do. **Add module** opens the new-module form with the page already set as the parent
+    * **Icon sets for the icon picker**: a blueprint's `iconpicker` field can list a theme's or plugin's own icons instead of Font Awesome with `icons: <set>`, and saves the icon's name. The theme registers the set on the API's `onApiIconSets` event. Needs API 1.0.57
+2. [](#improved)
+    * The module type list in Add Module, and a module's Page Template select, show each type's blueprint title instead of its file name. Needs API 1.0.57
+    * A `pagemedia` field's `label` now heads its media box (a module's "Pictures", say) instead of always "Page Media"
+3. [](#bugfix)
+    * Add Module no longer offers the site root as the parent, where a module would never show: the form starts with no parent and says a module goes inside a modular page. API 1.0.57 also refuses one there
+    * A page that uses the `modular` template got the module templates in its own Page Template select when the list had to be fetched separately
+    * A page whose `content.items` is a list (`['@self.modular']`, or a list of selector maps) now counts as a modular page, so its modules panel shows
+    * The modules panel says so, with a Retry button, when the modules could not be loaded, instead of looking like a page with no modules, and keeps the rows it already had when a refresh fails
+    * The icon picker selects on click instead of on mouse press, so Enter or Space on a focused icon picks it (a theme's own set, Font Awesome and the family tabs)
+
+# v2.1.39
+## 10/22/2026
+
+1. [](#improved)
+    * Live collaborative editing works with Mercure 1.x hubs as well as 0.x, and the hub token now travels in a request header instead of the web address. Thanks @Gleydar [getgrav/grav-plugin-sync-mercure#2](https://github.com/getgrav/grav-plugin-sync-mercure/issues/2)
+1. [](#bugfix)
+    * In the Tree view a folder now opens straight away with a loading indicator, offers Retry if its pages fail to load, and stays closed if you close it before they arrive [#200](https://github.com/getgrav/grav-plugin-admin2/issues/200)
+
+# v2.1.38
+## 10/22/2026
+
+1. [](#new)
+    * Media metadata fields set up as a number, date or yes/no toggle now get a number box, a date picker or a checkbox, and required fields are marked and checked before saving. Needs API 1.0.55. Thanks @phmg701 [getgrav/grav-admin-next#41](https://github.com/getgrav/grav-admin-next/pull/41)
+2. [](#bugfix)
+    * Applying metadata to several media files at once no longer shows an error after the files were saved, and Reset works again afterwards
+    * Plugin fields in the page editor can now refresh what they show after the page is saved: Admin2 sends a `grav:invalidate` window event with the API's invalidation tags (such as `pages:update:/<route>`). SEO Magic 7.0.19 uses it to refresh its panels [grav-premium-issues#630](https://github.com/getgrav/grav-premium-issues/issues/630)
+
 # v2.1.37
 ## 10/19/2026
 

@@ -9,23 +9,15 @@ config:
       options:
         formatter:
           class: 'Grav\Framework\File\Formatter\YamlFormatter'
-        folder: 'user/pages/03.spectacles/01.gresilhette-et-la-salimonde' 
+        # 🌟 ANCRAGE : Fichier unique global de collection stocké dans user/data
+        folder: 'user/data/flex-objects/gresilhette' 
     media:
-      per_object: true
-
-  object:
-    ordering:
-      key: title
-      dir: asc
+      per_object: false
 
   site:
     templates:
-      collection:
-        paths:
-          - /spectacles/gresilhette-et-la-salimonde
       object:
         route: /spectacles/gresilhette-et-la-salimonde
-        template: gresilhette
 
   admin:
     router:
@@ -78,14 +70,14 @@ form:
             spectacle.video.mp4:
               type: filepicker
               label: Sélectionner le teaser vidéo MP4
-              folder: 'page://03.spectacles/01.gresilhette-et-la-salimonde'
+              folder: 'user/data/flex-objects/gresilhette'
               preview_images: false
               accept:
                 - .mp4
             spectacle.video.webm:
               type: filepicker
               label: Sélectionner le teaser vidéo WebM
-              folder: 'page://03.spectacles/01.gresilhette-et-la-salimonde'
+              folder: 'user/data/flex-objects/gresilhette'
               preview_images: false
               accept:
                 - .webm
@@ -105,21 +97,21 @@ form:
             spectacle.grille.ombres:
               type: filepicker
               label: "Rond pour le Théâtre d'ombres"
-              folder: 'page://03.spectacles/01.gresilhette-et-la-salimonde'
+              folder: 'user/data/flex-objects/gresilhette'
               preview_images: true
               accept:
                 - .avif
             spectacle.grille.sieste:
               type: filepicker
               label: "Rond pour la Sieste contée"
-              folder: 'page://03.spectacles/01.gresilhette-et-la-salimonde'
+              folder: 'user/data/flex-objects/gresilhette'
               preview_images: true
               accept:
                 - .avif
             spectacle.grille.projet:
               type: filepicker
               label: "Rond pour le Projet pédagogique"
-              folder: 'page://03.spectacles/01.gresilhette-et-la-salimonde'
+              folder: 'user/data/flex-objects/gresilhette'
               preview_images: true
               accept:
                 - .avif
@@ -139,13 +131,13 @@ form:
             spectacle.dossier_pdf:
               type: filepicker
               label: Sélectionner le dossier artistique (PDF)
-              folder: 'page://03.spectacles/01.gresilhette-et-la-salimonde'
+              folder: 'user/data/flex-objects/gresilhette'
               accept:
                 - .pdf
             spectacle.dossier_img:
               type: filepicker
               label: Sélectionner l'image du bouton (AVIF)
-              folder: 'page://03.spectacles/01.gresilhette-et-la-salimonde'
+              folder: 'user/data/flex-objects/gresilhette'
               preview_images: true
               accept:
                 - .avif
@@ -213,7 +205,7 @@ form:
                 .image_version:
                   type: filepicker
                   label: "Image d'illustration interne (ex: montage-inspiration.avif)"
-                  folder: 'page://03.spectacles/01.gresilhette-et-la-salimonde'
+                  folder: 'user/data/flex-objects/gresilhette'
                   preview_images: true
                   accept:
                     - .avif
@@ -223,12 +215,12 @@ form:
                 .pdf_technique:
                   type: filepicker
                   label: "Fiche technique (PDF)"
-                  folder: 'page://03.spectacles/01.gresilhette-et-la-salimonde'
+                  folder: 'user/data/flex-objects/gresilhette'
                   accept:
                     - .pdf
                 .btn_technique:
                   type: filepicker
                   label: "Image du bouton de téléchargement (AVIF)"
-                  folder: 'page://03.spectacles/01.gresilhette-et-la-salimonde'
+                  folder: 'user/data/flex-objects/gresilhette'
                   accept:
                     - .avif

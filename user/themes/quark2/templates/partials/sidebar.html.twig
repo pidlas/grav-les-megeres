@@ -1,6 +1,10 @@
 {% set new_base_url = blog.url == '/' ? '' : blog.url %}
 
-{% if config.plugins.simplesearch.enabled %}
+{% if config.plugins.tntsearch.enabled %}
+<div class="sidebar-content">
+    {% include 'partials/tntsearch.html.twig' ignore missing with { dropdown: true } %}
+</div>
+{% elseif config.plugins.simplesearch.enabled %}
 <div class="sidebar-content">
     {% include 'partials/simplesearch_searchbox.html.twig' ignore missing %}
 </div>

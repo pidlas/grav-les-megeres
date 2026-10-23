@@ -1,5 +1,10 @@
-last_checked: 1792642279
+last_checked: 1792749466
 data:
+  -
+    title: 'Critical PHP Security Fixes: Update PHP on Your Grav Sites'
+    url: 'https://getgrav.org/blog/php-critical-security-release-october-2026'
+    date: '2026-10-21T23:00:00+00:00'
+    summary: ''
   -
     title: 'Grav vs WordPress: An Honest Comparison'
     url: 'https://getgrav.org/blog/grav-vs-wordpress'
@@ -44,9 +49,4 @@ data:
     title: 'Forum Pro is Available'
     url: 'https://getgrav.org/blog/forum-pro-released'
     date: '2026-08-03T12:00:00+00:00'
-    summary: ''
-  -
-    title: 'Tailwind CSS in Grav, No Node Required'
-    url: 'https://getgrav.org/blog/tailwind-css-without-node'
-    date: '2026-07-31T16:30:00+00:00'
     summary: ''

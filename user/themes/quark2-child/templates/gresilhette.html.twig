@@ -12,7 +12,7 @@
     {% set target_slug = segments_url|last|trim %}
 
     {# Si l'URL se termine par un slug qui correspond à une version technique #}
-    {% if target_slug is not empty %}
+    {% if target_slug is not empty and target_slug != 'gresilhette-et-la-salimonde' %}
         {% for version in gresilhette_flex.spectacle.versions if version.slug_version == target_slug %}
             {% set seo_title = version.nom_version ~ ' | ' ~ seo_title %}
         {% endfor %}
@@ -33,7 +33,7 @@
     
     {% set seo_description = gresilhette_flex.meta_description | default(page.header.metadata.description) %}
 
-    {% if target_slug is not empty %}
+    {% if target_slug is not empty and target_slug != 'gresilhette-et-la-salimonde' %}
         {% for version in gresilhette_flex.spectacle.versions if version.slug_version == target_slug %}
             {% set texte_pur = version.texte_version|markdown|striptags|trim %}
             {% set seo_description = texte_pur|truncate(150) %}
@@ -68,7 +68,7 @@
 
 {# Identification de la version technique active #}
 {% set version_active = null %}
-{% if target_slug is not empty %}
+{% if target_slug is not empty and target_slug != 'gresilhette-et-la-salimonde' %}
     {% for version in gresilhette_flex.spectacle.versions if version.slug_version == target_slug %}
         {% set version_active = version %}
     {% endfor %}
@@ -86,7 +86,8 @@
 {% block custom_styles %}
     <style>
         .encadre:before, .encadre-lenga:before, .encadre-extrait:before {
-            background-image: url('{{ page.media["livre-blanc-fleur-remplie.avif"].url }}') !important;
+            {# 🌟 SÉCURISÉ : Chargement de l'image de fond depuis le dossier du thème #}
+            background-image: url('{{ url('theme://images/livre-blanc-fleur-remplie.avif') }}') !important;
         }
     </style>
 {% endblock %}
@@ -96,17 +97,17 @@
     <p class="versions-spectacle">
         {% if gresilhette_flex.spectacle.grille.ombres %}
             <a class="images-spectacle morph" href="{{ page.url ~ '/theatre-d-ombres' }}">
-                {{ page.media[gresilhette_flex.spectacle.grille.ombres|trim].html('Version Théâtre d\'ombres') | raw }}
+                <img src="{{ base_url_simple ~ '/user/data/flex-objects/gresilhette/' ~ gresilhette_flex.spectacle.grille.ombres }}" alt="Version Théâtre d'elles" class="img-menu-spectacle" loading="lazy">
             </a>
         {% endif %}
         {% if gresilhette_flex.spectacle.grille.sieste %}
             <a class="images-spectacle morph" href="{{ page.url ~ '/sieste-contee' }}">
-                {{ page.media[gresilhette_flex.spectacle.grille.sieste|trim].html('Version Sieste contée') | raw }}
+                <img src="{{ base_url_simple ~ '/user/data/flex-objects/gresilhette/' ~ gresilhette_flex.spectacle.grille.sieste }}" alt="Version Sieste contée" class="img-menu-spectacle" loading="lazy">
             </a>
         {% endif %}
         {% if gresilhette_flex.spectacle.grille.projet %}
             <a class="images-spectacle morph" href="{{ page.url ~ '/projet-pedagogique' }}">
-                {{ page.media[gresilhette_flex.spectacle.grille.projet|trim].html('Version Projet pédagogique') | raw }}
+                <img src="{{ base_url_simple ~ '/user/data/flex-objects/gresilhette/' ~ gresilhette_flex.spectacle.grille.projet }}" alt="Version Projet pédagogique" class="img-menu-spectacle" loading="lazy">
             </a>
         {% endif %}
     </p>
@@ -126,9 +127,8 @@
             <div class="montage-wrapper">
                 <h2 class="display-title">Nos sources d'inspiration</h2>
                 
-                {# Corrigé : image_interne devient image_version #}
-                {% if version_active.image_version and page.media[version_active.image_version|trim] %}
-                    {{ page.media[version_active.image_version|trim].html('Inspiration', 'Inspiration', 'forme-montage') | raw }}
+                {% if version_active.image_version %}
+                    <img src="{{ base_url_simple ~ '/user/data/flex-objects/gresilhette/' ~ version_active.image_version }}" alt="Inspiration" class="forme-montage" loading="lazy">
                 {% endif %}
 
                 <div class="content-list">
@@ -150,10 +150,9 @@
             <div class="sieste-wrapper">
                 {{ bloc_histoire | raw }}
                 
-                {# Corrigé : image_interne devient image_version #}
-                {% if version_active.image_version and page.media[version_active.image_version|trim] %}
+                {% if version_active.image_version %}
                     <div class="image-centree">
-                        {{ page.media[version_active.image_version|trim].html('Sigean', 'Sigean', 'sigean-sieste-contee') | raw }}
+                        <img src="{{ base_url_simple ~ '/user/data/flex-objects/gresilhette/' ~ version_active.image_version }}" alt="Sigean" class="sigean-sieste-contee" loading="lazy">
                     </div>
                 {% endif %}
             </div>
@@ -164,23 +163,19 @@
 
         {# 🌟 CAS 3 : AUTRES VERSIONS (PROJET PEDAGOGIQUE...) #}
         {% else %}
-            {# Corrigé : image_interne devient image_version #}
-            {% if version_active.image_version and page.media[version_active.image_version|trim] %}
+            {% if version_active.image_version %}
                 <div class="image-illustration-version">
-                    {{ page.media[version_active.image_version|trim].html(version_active.nom_version) | raw }}
+                    <img src="{{ base_url_simple ~ '/user/data/flex-objects/gresilhette/' ~ version_active.image_version }}" alt="{{ version_active.nom_version }}" loading="lazy">
                 </div>
             {% endif %}
             {{ version_active.texte_version|markdown|shortcodes|raw }}
         {% endif %}
         
         {# BOUTON DE TELECHARGEMENT DE LA FICHE TECHNIQUE PDF #}
-        {# Corrigé : get_btn_technique devient btn_technique #}
-        {% if version_active.pdf_technique and page.media[version_active.pdf_technique|trim] and version_active.btn_technique and page.media[version_active.btn_technique|trim] %}
-            {% set file_pdf = page.media[version_active.pdf_technique|trim] %}
-            {% set img_btn = page.media[version_active.btn_technique|trim] %}
+        {% if version_active.pdf_technique and version_active.btn_technique %}
             <p class="btn-dossier-technique">
-                <a href="{{ file_pdf.url }}" title="Télécharger la fiche technique {{ version_active.nom_version }}">
-                    {{ img_btn.html('', '', 'btn-pdf') | raw }}
+                <a href="{{ base_url_simple ~ '/user/data/flex-objects/gresilhette/' ~ version_active.pdf_technique }}" title="Télécharger la fiche technique {{ version_active.nom_version }}">
+                    <img src="{{ base_url_simple ~ '/user/data/flex-objects/gresilhette/' ~ version_active.btn_technique }}" alt="Téléchargement" class="btn-pdf">
                 </a>
             </p>
         {% endif %}
@@ -195,11 +190,11 @@
 
             <div class="wrapper-video">
                 <video id="video" controls preload="auto" loading="metadata" width="640" height="360">
-                    {% if gresilhette_flex.spectacle.video.mp4 and page.media[gresilhette_flex.spectacle.video.mp4|trim] %}
-                        <source src="{{ page.media[gresilhette_flex.spectacle.video.mp4|trim].url }}" type="video/mp4" />
+                    {% if gresilhette_flex.spectacle.video.mp4 %}
+                        <source src="{{ base_url_simple ~ '/user/data/flex-objects/gresilhette/' ~ gresilhette_flex.spectacle.video.mp4 }}" type="video/mp4" />
                     {% endif %}
-                    {% if gresilhette_flex.spectacle.video.webm and page.media[gresilhette_flex.spectacle.video.webm|trim] %}
-                        <source src="{{ page.media[gresilhette_flex.spectacle.video.webm|trim].url }}" type="video/webm" />
+                    {% if gresilhette_flex.spectacle.video.webm %}
+                        <source src="{{ base_url_simple ~ '/user/data/flex-objects/gresilhette/' ~ gresilhette_flex.spectacle.video.webm }}" type="video/webm" />
                     {% endif %}
                 </video>
             </div>
@@ -216,15 +211,11 @@
                 {% endif %}
 
                 {% if gresilhette_flex.spectacle.dossier_pdf and gresilhette_flex.spectacle.dossier_img %}
-                    {% set f_pdf = page.media[gresilhette_flex.spectacle.dossier_pdf|trim] %}
-                    {% set b_img = page.media[gresilhette_flex.spectacle.dossier_img|trim] %}
-                    {% if f_pdf and b_img %}
-                        <p class="btn-dossier-artistique">
-                            <a href="{{ f_pdf.url }}" title="Dossier artistique">
-                                {{ b_img.html('', '', 'btn-pdf') | raw }}
-                            </a>
-                        </p>
-                    {% endif %}
+                    <p class="btn-dossier-artistique">
+                        <a href="{{ base_url_simple ~ '/user/data/flex-objects/gresilhette/' ~ gresilhette_flex.spectacle.dossier_pdf }}" title="Dossier artistique">
+                            <img src="{{ base_url_simple ~ '/user/data/flex-objects/gresilhette/' ~ gresilhette_flex.spectacle.dossier_img }}" alt="Dossier" class="btn-pdf">
+                        </a>
+                    </p>
                 {% endif %}
 
                 {% if gresilhette_flex.spectacle.texte_distribution %}
