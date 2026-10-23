@@ -1,0 +1,224 @@
+{% extends 'main-layout.html.twig' %}
+
+{# ==========================================================================
+   1. SURCHARGE DU TITRE DE L'ONGLET
+   ========================================================================== #}
+{% block head_title %}
+    {% set directory = grav.flex.directory('equipe') %}
+
+        {% set liste_membres = directory ? directory.getCollection() : null %}
+        {% set seo_title = page.title %}
+        {% set segments_url = uri.path|split('/') %}
+        {% set target_slug = segments_url|last|trim %}
+        
+        {% if target_slug not in ['equipe', '03.equipe'] and target_slug is not empty %}
+            {% for m in liste_membres if m.slug == target_slug %}
+                {% set seo_title = m.nom %}
+            {% endfor %}
+        {% endif %}
+    {% endif %}
+
+    <title>{% if seo_title %}{{ seo_title|e }} | {{ site.title|e }}{% else %}{% if page.title %}{{ page.title|e }}{% else %}{{ site.title|e }}{% endif %}{% endif %}</title>
+{% endblock %}
+
+{# ==========================================================================
+   2. SURCHARGE DE LA DESCRIPTION CLASSIQUE (Écrase le bloc de main-layout)
+   ========================================================================== #}
+{% block head_meta %}
+    {% set directory = grav.flex.directory('equipe') %}
+    {% set seo_description = null %}
+
+    {% if directory %}
+        {% set liste_membres = directory.getCollection() %}
+        {% set segments_url = uri.path|split('/') %}
+        {% set target_slug = segments_url|last|trim %}
+        
+        {% if target_slug not in ['equipe', '03.equipe'] and target_slug is not empty %}
+            {% for m in liste_membres if m.slug == target_slug %}
+                {% set bio_texte_pur = m.bio_debut|markdown|shortcodes|striptags|trim %}
+                {% set seo_description = m.meta_description|default(bio_texte_pur|truncate(150)) %}
+            {% endfor %}
+        {% endif %}
+    {% endif %}
+
+    <meta name="description" content="{% if seo_description %}{{ seo_description|e('html_attr') }}{% else %}{% if page.header.metadata.description %}{{ page.header.metadata.description|e }}{% else %}{{ site.metadata.description|e }}{% endif %}{% endif %}" />
+    <meta name="robots" content="{% if page.header.metadata.robots %}{{ page.header.metadata.robots|e }}{% else %}index, follow{% endif %}" />
+    <link class="can" rel="canonical" href="{{ page.url(true, true)|e }}" />
+{% endblock %}
+
+{# ==========================================================================
+   3. SURCHARGE DES BALISES SOCIALES (Écrase le bloc head_opengraph de main-layout)
+   ========================================================================== #}
+{% block head_opengraph %}
+    {% set directory = grav.flex.directory('equipe') %}
+    {% set seo_title = null %}
+    {% set seo_description = null %}
+
+    {% if directory %}
+        {% set liste_membres = directory.getCollection() %}
+        {% set segments_url = uri.path|split('/') %}
+        {% set target_slug = segments_url|last|trim %}
+        
+        {% if target_slug not in ['equipe', '03.equipe'] and target_slug is not empty %}
+            {% for m in liste_membres if m.slug == target_slug %}
+                {% set seo_title = m.nom %}
+                {% set bio_texte_pur = m.bio_debut|markdown|shortcodes|striptags|trim %}
+                {% set seo_description = m.meta_description|default(bio_texte_pur|truncate(150)) %}
+            {% endfor %}
+        {% endif %}
+    {% endif %}
+
+    <meta property="og:site_name" content="{{ site.title|e }}" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="{% if seo_title %}{{ seo_title|e }} | {{ site.title|e }}{% else %}{% if page.title %}{{ page.title|e }}{% else %}{{ site.title|e }}{% endif %}{% endif %}" />
+    <meta property="og:description" content="{% if seo_description %}{{ seo_description|e('html_attr') }}{% else %}{% if page.header.metadata.description %}{{ page.header.metadata.description|e }}{% else %}{{ site.metadata.description|e }}{% endif %}{% endif %}" />
+    <meta property="og:url" content="{{ page.url(true, true)|e }}" />
+    <meta property="og:image" content="{{ uri.rootUrl(true) ~ url('theme://images/logohumous-notext-blue.png', false) }}" />
+    <meta property="og:image:alt" content="Logo de la compagnie {{ site.title|e }}" />
+{% endblock %}
+{# ==========================================================================
+   4. AFFICHAGE DU CONTENU DE LA PAGE (Le corps du site)
+   ========================================================================== #}
+{% block content %}
+<!-- DEBUG BASE_URL : "{{ base_url }}" -->
+
+    {% set directory = grav.flex.directory('equipe') %}
+    
+    {% if directory %}
+        {% set liste_membres = directory.getCollection() %}
+        {% set segments_url = uri.path|split('/') %}
+        {% set target_slug = segments_url|last|trim %}
+        
+        {% set membre_actif = null %}
+        {% if target_slug not in ['equipe', '03.equipe'] and target_slug is not empty %}
+            {% for m in liste_membres if m.slug == target_slug %}
+                {% set membre_actif = m %}
+            {% endfor %}
+        {% endif %}
+
+        {% if membre_actif %}
+            {# ==========================================================================
+                VUE INTERNE : LA BIOGRAPHIE
+                ========================================================================= #}
+            <script>
+                (function() {
+                    var h1 = document.querySelector(".conteneur-champignons h1");
+                    if (h1) { h1.textContent = "{{ membre_actif.nom|e('js') }}"; }
+                })();
+            </script>
+
+            <article class="g_bio">
+                <div class="e_photo">
+                    {% if membre_actif.personne_image is not empty %}
+                        {% set path_rigolot = (membre_actif.personne_image|values|first).url %}
+                        <img class="fade-zoom text-image-loaded" 
+                            src="{{ base_url_simple ~ '/' ~ path_rigolot }}" 
+                            alt="{{ membre_actif.image_alt|default(membre_actif.nom) }}">
+                    {% endif %}
+
+                    {% if membre_actif.book_url %}
+                        <p class="book-url">
+                            <a href="{{ membre_actif.book_url | e }}" target="_blank" rel="noopener noreferrer" data-type="external">
+                                Consulter le book de l'artiste<span class="lien-e-seul"></span>
+                            </a>
+                        </p>
+                    {% endif %}
+                </div>
+
+                <div class="e_debut_bio">
+                    {{ membre_actif.bio_debut|markdown|shortcodes|raw }}
+
+                    {% if membre_actif.citation %}
+                        <figure class="bio">
+                            <blockquote>
+                                <p class="theseasonsbold">&ldquo;&nbsp;{{ membre_actif.citation }}&nbsp;&rdquo;</p>
+                            </blockquote>
+                            {% if membre_actif.citation_auteur %}
+                                <figcaption>
+                                    <span class="theseasonsregular">{{ membre_actif.citation_auteur }}</span>
+                                </figcaption>
+                            {% endif %}
+                        </figure>
+                    {% endif %}
+                </div>
+
+                {% if membre_actif.bio_fin %}
+                    <div class="e_fin_bio">
+                        {{ membre_actif.bio_fin|markdown|shortcodes|raw }}
+                    </div>
+                {% endif %}
+            </article>
+        {% else %}
+            {# ==========================================================================
+                VUE GENERALE : LA LISTE
+                ========================================================================= #}
+            <div class="page_equipe">
+                <ul class="g_equipe g_fondatrices">
+                    {% for membre in liste_membres if membre.slug in ['suzie', 'sabine'] %}
+                        <li class="tan item">
+                            {{ membre.nom }}
+                            {% if membre.role is not empty %}
+                                <p class="coco gras">{{ membre.role|nl2br|raw }}</p>
+                            {% endif %}
+
+                            <div class="anime_hover {{ membre.classe_sup }}">
+                                <p class="montre coco">Plus sur {{ membre.nom | capitalize | split(' ')|first }}</p>
+                                <a href="/infos/equipe/{{ membre.slug|trim('/') }}">
+                                    {% if membre.image is not empty %}
+                                        {% set path_jolie = (membre.image|values|first).url %}
+                                        <img src="{{ base_url_simple ~ '/' ~ path_jolie }}" alt="{{ membre.nom }}" class="img-menu-spectacle" loading="lazy">
+                                    {% endif %}
+                                </a>
+                            </div>
+                        </li>
+                    {% endfor %}
+                </ul>
+
+                <ul class="g_equipe g_comediens">
+                    {% for membre in liste_membres if membre.slug in ['muriel', 'anne'] %}
+                        <li class="tan item">
+                            {{ membre.nom }}
+                            {% if membre.role is not empty %}
+                                <p class="coco gras">{{ membre.role|nl2br|raw }}</p>
+                            {% endif %}
+
+                            <div class="anime_hover {{ membre.classe_sup }}">
+                                <p class="montre coco">Plus sur {{ membre.nom | capitalize | split(' ')|first }}</p>
+                                <a href="/infos/equipe/{{ membre.slug|trim('/') }}">
+                                    {% if membre.image is not empty %}
+                                        {% set path_jolie = (membre.image|values|first).url %}
+                                        <img src="{{ base_url_simple ~ '/' ~ path_jolie|trim('/') }}" alt="{{ membre.nom }}" class="img-menu-spectacle" loading="lazy">
+                                    {% endif %}
+                                </a>
+                            </div>
+                        </li>
+                    {% endfor %}
+                </ul>
+
+                <ul class="g_equipe g_permanents">
+                    {% for membre in liste_membres if membre.slug in ['delphine', 'marie', 'juliette', 'philippe'] %}
+                        <li class="tan item">
+                            {{ membre.nom }}
+                            {% if membre.role is not empty %}
+                                <p class="coco gras">{{ membre.role|nl2br|raw }}</p>
+                            {% endif %}
+
+                            <div class="anime_hover {{ membre.classe_sup }}">
+                                <p class="montre coco">Plus sur {{ membre.nom | capitalize | split(' ')|first }}</p>
+                                <a href="/infos/equipe/{{ membre.slug|trim('/') }}">
+                                    {% if membre.image is not empty %}
+                                        {% set path_jolie = (membre.image|values|first).url %}
+                                        <img src="{{ base_url_simple ~ '/' ~ path_jolie|trim('/') }}" alt="{{ membre.nom }}" class="img-menu-spectacle" loading="lazy">
+                                    {% endif %}
+                                </a>
+                            </div>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+    {% else %}
+        <p>Erreur : Le répertoire Flex 'equipe' n'est pas initialisé.</p>
+    {% endif %}
+    {{ page.content | raw }}
+{% endblock %}
