@@ -62,10 +62,7 @@ RSYNC_EXCLUDES=(
   # ==========================================================================
   # 3. PROTECTION ASYMÉTRIQUE DES MÉDIAS FLEX-OBJECTS
   # ==========================================================================
-  "data/flex-objects/**/*.avif"      # Empêche la suppression des images AVIF des actus/spectacles
-  "data/flex-objects/**/*.pdf"       # Empêche la suppression des fiches techniques PDF
-  "data/flex-objects/**/*.mp4"       # Empêche la suppression des teasers vidéo MP4
-  "data/flex-objects/**/*.webm"      # Empêche la suppression des teasers vidéo WebM
+
 
   # ==========================================================================
   # 4. CACHES, IMAGES MUTÉES ET FICHIERS TEMPORAIRES DE RENDU
@@ -268,6 +265,7 @@ fi
 RSYNC_OPTS=(
   -az
   --modify-window=2
+  --filter="protect user/data/flex-objects/**" # Protéger le téléchargement directement à partir du serveur
   --size-only
   --itemize-changes
   --human-readable
@@ -275,6 +273,7 @@ RSYNC_OPTS=(
   --no-owner          # Ignore la synchronisation du propriétaire original
   --no-group          # Ignore la synchronisation du groupe original
   --omit-dir-times    # Évite l'acharnement sur l'ajustement temporel des dossiers (.d..t......)
+
   -e "$RSYNC_SSH"
 )
 
