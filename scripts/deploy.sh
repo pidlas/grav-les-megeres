@@ -38,60 +38,80 @@ tmp_file=""
 DEPLOY_INCLUDE_PATHS=("${DEPLOY_INCLUDE_PATHS[@]:-user}")
 
 RSYNC_EXCLUDES=(
-  "tmp/"
-  "**/tmp/"
-  "*.old"
-  "*.old2"
-  "*.old.*"
-  "*.old2.*"
-  "*.bak"
-  "*.bak.*"
-  "*~"
-  "*.sans-twig"
-  "*.a.tester"
-  ".DS_Store"
-  "**/.DS_Store"
-  "Thumbs.db"
-  "**/Thumbs.db"
-  "desktop.ini"
-  "**/desktop.ini"
-  ".._*"
-  "**/._*"
-  "logs/"
-  "**/logs/"
-  "backup/"
-  "**/backup/"
-  "*.log"
-  "**/*.log"
-  "/data/flex/indexes/"
-  "/data/feed/"
-  "/data/notifications/"
-  "accounts/"
-  '**/accounts/**'
-  "pages/**/*.avif"
-  "pages/**/*.pdf"
-  "pages/**/*.mp4"
-  "pages/**/*.ogg"
-  "pages/**/*.jpg"
-  "pages/**/*.jpeg"
-  "pages/**/*.png"
-  "pages/**/*.webp"
-  "pages/**/*.svg"
-  "pages/**/*.gif"
-  "pages/**/*.yaml"
-  "/plugins/"
-  "/themes/quark2/"
-  "system.yaml"
-  "security.yaml"
-  "security-private.php"
-  "api-private.php"
-  "/cache/"
-  "**/cache/"
-  "/images/"
-  ".htaccess"
-  "/media/"
-  "config/themes/quark2.yaml"
-  "config/versions.yaml"
+  # ==========================================================================
+  # 1. SÉCURITÉ SERVEUR & CLOISONNEMENT YUNOHOST (LDAP Sanctuarisé)
+  # ==========================================================================
+  "config/plugins/login-ldap"        # Protège le dossier complet du plugin LDAP (YunoHost)
+  "config/plugins/login-ldap.yaml"   # Protège le fichier de configuration du plugin
+  "config/scheduler.yaml"            # Configuration locale du planificateur de tâches
+  "security.yaml"                    # Clés de sécurité système du CMS
+  "security-private.php"             # Scripts de cryptage privés du serveur
+  "api-private.php"                  # Fichiers d'accès aux API privées
+  ".htaccess"                        # Règles de routage spécifiques à l'hôte distant
+
+  # ==========================================================================
+  # 2. SANCTUARISATION DES DONNÉES DE PRODUCTION (Générées en ligne)
+  # ==========================================================================
+  "accounts"                         # Dossier complet des comptes utilisateurs
+  "data/scheduler"                   # États et journaux d'exécution du planificateur
+  "data/sessions"                    # Sessions actives des utilisateurs connectés
+  "data/flex"                        # Index de recherche générés par Flex-Objects
+  "data/feed"                        # Flux RSS et caches de syndication
+  "data/notifications"               # Alertes et notifications système internes
+
+  # ==========================================================================
+  # 3. PROTECTION ASYMÉTRIQUE DES MÉDIAS FLEX-OBJECTS
+  # ==========================================================================
+  "data/flex-objects/**/*.avif"      # Empêche la suppression des images AVIF des actus/spectacles
+  "data/flex-objects/**/*.pdf"       # Empêche la suppression des fiches techniques PDF
+  "data/flex-objects/**/*.mp4"       # Empêche la suppression des teasers vidéo MP4
+  "data/flex-objects/**/*.webm"      # Empêche la suppression des teasers vidéo WebM
+
+  # ==========================================================================
+  # 4. CACHES, IMAGES MUTÉES ET FICHIERS TEMPORAIRES DE RENDU
+  # ==========================================================================
+  "cache"                            # Cache principal compilé de Grav
+  "images"                           # Cache de traitement et d'optimisation des images
+  "media"                            # Médias mis en cache par le moteur de page Grav
+  "tmp"                              # Fichiers temporaires système
+  "logs"                             # Journaux d'activité de Grav
+  "*.log"                            # Fichiers de rapports bruts
+  "**/*.log"                         # Fichiers d'erreurs applicatifs
+  "backup"                           # Sauvegardes du site générées en ligne
+
+  # ==========================================================================
+  # 5. PROTECTION DES THÈMES CORES & CONFIGURATIONS D'ENVIRONNEMENT
+  # ==========================================================================
+  "plugins"                          # Plugins installés (gestion exclusive par le serveur)
+  "themes/quark2"                    # Thème parent d'origine (non modifié)
+  "system.yaml"                      # Configuration système globale
+  "config/themes/quark2.yaml"        # Configuration du thème parent
+  "config/versions.yaml"             # Index de version des paquets Grav
+
+  # ==========================================================================
+  # 6. NETTOYAGE DES SCRATCHPADS & FICHIERS HISTORIQUES DU DÉVELOPPEUR
+  # ==========================================================================
+  "*.old"                            # Fichiers renommés obsolètes
+  "*.old2"                           # Variantes de fichiers obsolètes
+  "*.old.*"                          # Extensions de sauvegardes de scripts
+  "*.old2.*"                         # Doublons de scripts de secours
+  "*.bak"                            # Fichiers de sauvegarde d'éditeurs
+  "*.bak.*"                          # Fichiers de backup secondaires
+  "*~"                               # Fichiers temporaires Linux/Emacs
+  "*.sans-twig"                      # Sauvegardes de gabarits HTML bruts
+  "*.a.tester"                       # Scripts de tests unitaires locaux
+
+  # ==========================================================================
+  # 7. POLLUTION VISUELLE DES SYSTÈMES D'EXPLOITATION (OS)
+  # ==========================================================================
+  ".DS_Store"                        # Fichier d'indexation macOS
+  "**/.DS_Store"                     # Pollution macOS dans les sous-dossiers
+  ".._*"                             # Fichiers de métadonnées de partition macOS
+  "**/._*"                           # Fichiers miroirs cachés macOS
+  "Thumbs.db"                        # Cache des vignettes Windows
+  "**/Thumbs.db"                     # Cache Windows dans les sous-répertoires
+  "desktop.ini"                      # Configuration d'affichage des dossiers Windows
+  "**/desktop.ini"                   # Paramètres Windows dans les arborescences
 )
 
 usage() {

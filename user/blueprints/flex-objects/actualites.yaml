@@ -10,9 +10,13 @@ config:
       options:
         formatter:
           class: 'Grav\Framework\File\Formatter\YamlFormatter'
-        folder: 'user/pages/02.infos/01.actualites/' # <-- Pointe directement dans votre dossier de page
+        folder: 'user/data/flex-objects/actualites'
     media:
-      per_object: true
+      per_object: false
+  site:
+    templates:
+      object:
+        route: /infos/actualites
 
   admin:
     router:
@@ -41,15 +45,13 @@ form:
         required: true
 
     image_principale:
-      #type: text
       type: filepicker
-      #label: Nom de l'image principale
       label: Choisir l'image principale
-      folder: 'page://02.infos/01.actualites'
+      folder: 'user/data/flex-object/actualites'
       preview_images: true
       accept:
         - .avif
-      #placeholder: "Ex: actu-event.webp"
+      placeholder: "Ex: actu-event.avif"
 
     image_alt:
       type: text
@@ -72,11 +74,9 @@ form:
           label: Résumé / Description
           rows: 3
         .miniature:
-          #type: text
-          #label: Nom de la miniature (Optionnel)
           type: filepicker
-          label: Choisir la miniature
-          folder: 'page://02.infos/01.actualites'
+          label: Choisir la miniature (Optionnel)
+          folder: 'user/data/flex-objects/actualites'
           preview_images: true
           accept:
             - .avif

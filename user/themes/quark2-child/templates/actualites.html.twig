@@ -1,27 +1,26 @@
 {% extends 'main-layout.html.twig' %}
 
+{# ==========================================================================
+   AFFICHAGE DU CONTENU DE LA PAGE (Le corps du site)
+   ========================================================================== #}
 {% block content %}
     {# 1. Enveloppe sémantique globale propre pour le contenu textuel #}
     <div class="page-content">
         {{ page.content | raw }}
     </div>
 
-    {# 2. Récupération propre de la collection via les Flex-Objects #}
-    {% set actualites_flex = grav.flex_objects.directory('actualites').getCollection() %}
+    {# 2. Récupération propre de la collection via l'extracteur Flex unifié #}
+    {% set actualites_flex = grav.flex.directory('actualites').getCollection() %}
 
     {# Zone dynamique de la liste des Actualités #}
     {% if actualites_flex is not empty %}
-    {# Remplacement de la div par une balise de section sémantique générale #}
     <div class="actus-list" aria-live="polite">
         {% for item in actualites_flex %}
             <article class="actu-item">
                 
-                {# Image principale de la catégorie actu #}
+                {# Image principale de la catégorie actu depuis le dossier user/data #}
                 {% if item.image_principale %}
-                    {% set img_main = page.media[item.image_principale] %}
-                    {% if img_main %}
-                        {{ img_main.html('', item.image_alt, 'actu-image') | raw }}
-                    {% endif %}
+                    <img src="{{ base_url_simple ~ '/' ~ 'user/data/flex-objects/actualites/' ~ item.image_principale }}" alt="{{ item.image_alt }}" class="actu-image" loading="lazy">
                 {% endif %}
                 
                 <h2>{{ item.categorie }}</h2>
@@ -31,29 +30,19 @@
                     {% for bloc in item.blocs %}
                         <p class="actu-date">{{ bloc.date }}</p>
                         
-                        {# Simplification de la logique structurelle HTML #}
+                        {# Logiciel structurel HTML simplifié #}
                         <div class="{% if bloc.miniature %}alignement{% else %}actu-wrapper{% endif %}">
                             
-                            {# Rendu de la miniature (affiche) via l'API native de Grav #}
+                            {# Rendu de la miniature (affiche) depuis le dossier user/data avec base_url_simple #}
                             {% if bloc.miniature %}
-                                {% set img_mini = page.media[bloc.miniature] 
-                                               ?: media['page://' ~ bloc.miniature] 
-                                               ?: media['theme://images/' ~ bloc.miniature] %}
-                                
-                                {% if img_mini %}
-                                    {# Redimensionnement à la volée (80px) et génération propre de la balise HTML #}
-                                    {{ img_mini.zoomCrop(80, 80).html('', bloc.miniature_alt, '') | raw }}
-                                {% else %}
-                                    {# Ultime secours si le fichier n'est nulle part dans les médias #}
-                                    <img src="{{ page.url ~ '/' ~ bloc.miniature }}" width="80" alt="{{ bloc.miniature_alt }}" loading="lazy">
-                                {% endif %}
+                                <img src="{{ base_url_simple ~ '/' ~ 'user/data/flex-objects/actualites/' ~ bloc.miniature }}" width="80" height="80" alt="{{ bloc.miniature_alt }}" style="object-fit: cover;" loading="lazy">
                                 
                                 <div class="actu-wrapper">
                             {% endif %}
                             
                             <h3 class="actu-titre">{{ bloc.titre }}</h3>
                             
-                            {# Sécurité : Utilisation du filtre markdown si le résumé contient du gras, de l'italique, etc. #}
+                            {# Sécurité : Utilisation du filtre markdown pour le texte enrichi #}
                             <div class="actu-resume">
                                 {{ bloc.resume | markdown | raw }}
                             </div>
