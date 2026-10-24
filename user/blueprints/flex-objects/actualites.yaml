@@ -43,14 +43,14 @@ form:
       help: 'Obligatoire. Ce nom servira également de nom de dossier pour stocker ces actualités.'
       validate:
         required: true
-
     image_principale:
-      type: filepicker
+      type: file
       label: Choisir l'image principale
-      folder: 'user/data/flex-object/actualites'
-      preview_images: true
+      destination: 'user/data/flex-objects/actualites'
+      multiple: false
       accept:
         - .avif
+      preview_images: true
       placeholder: "Ex: actu-event.avif"
 
     image_alt:
@@ -74,9 +74,10 @@ form:
           label: Résumé / Description
           rows: 3
         .miniature:
-          type: filepicker
+          type: file
           label: Choisir la miniature (Optionnel)
-          folder: 'user/data/flex-objects/actualites'
+          destination: 'user/data/flex-objects/actualites'
+          multiple: false
           preview_images: true
           accept:
             - .avif

@@ -16,13 +16,16 @@
     {% if actualites_flex is not empty %}
     <div class="actus-list" aria-live="polite">
         {% for item in actualites_flex %}
+
             <article class="actu-item">
                 
                 {# Image principale de la catégorie actu depuis le dossier user/data #}
-                {% if item.image_principale %}
-                    <img src="{{ base_url_simple ~ '/' ~ 'user/data/flex-objects/actualites/' ~ item.image_principale }}" alt="{{ item.image_alt }}" class="actu-image" loading="lazy">
+                {% if item.image_principale is not empty %}
+                    {# 🌟 EXTRACTION SÉCURISÉE : On intercepte la clé du tableau (le chemin physique) #}
+                    {% set path_main = item.image_principale|keys|first %}
+                    <img src="{{ base_url_simple ~ '/' ~ path_main }}" alt="{{ item.image_alt }}" class="actu-image" loading="lazy">
                 {% endif %}
-                
+
                 <h2>{{ item.categorie }}</h2>
                 
                 <div class="actu-content">
@@ -34,12 +37,14 @@
                         <div class="{% if bloc.miniature %}alignement{% else %}actu-wrapper{% endif %}">
                             
                             {# Rendu de la miniature (affiche) depuis le dossier user/data avec base_url_simple #}
-                            {% if bloc.miniature %}
-                                <img src="{{ base_url_simple ~ '/' ~ 'user/data/flex-objects/actualites/' ~ bloc.miniature }}" width="80" height="80" alt="{{ bloc.miniature_alt }}" style="object-fit: cover;" loading="lazy">
+                            {% if bloc.miniature is not empty %}
+                                {# 🌟 EXTRACTION INTERNE SÉCURISÉE : Fonctionne au cœur de la sous-liste #}
+                                {% set path_mini = bloc.miniature|keys|first %}
+                                <img src="{{ base_url_simple ~ '/' ~ path_mini }}" width="80" height="80" alt="{{ bloc.miniature_alt }}" style="object-fit: cover;" loading="lazy">
                                 
                                 <div class="actu-wrapper">
                             {% endif %}
-                            
+
                             <h3 class="actu-titre">{{ bloc.titre }}</h3>
                             
                             {# Sécurité : Utilisation du filtre markdown pour le texte enrichi #}
