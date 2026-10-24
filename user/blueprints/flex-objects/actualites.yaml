@@ -46,7 +46,7 @@ form:
     image_principale:
       type: file
       label: Choisir l'image principale
-      destination: 'user/data/flex-objects/actualites'
+      destination: 'data/flex-objects/actualites'
       multiple: false
       accept:
         - .avif
@@ -76,7 +76,7 @@ form:
         .miniature:
           type: file
           label: Choisir la miniature (Optionnel)
-          destination: 'user/data/flex-objects/actualites'
+          destination: 'data/flex-objects/actualites'
           multiple: false
           preview_images: true
           accept:
