@@ -1,0 +1,246 @@
+type: flex-objects
+title: La Compagnie
+description: Gestion centralisée des textes, citations, grilles, rapports d'activités et médias de la page Compagnie.
+
+config:
+  data:
+    storage:
+      className: 'Grav\Framework\Flex\Storage\FolderStorage'
+      options:
+        formatter:
+          class: 'Grav\Framework\File\Formatter\YamlFormatter'
+        # 🌟 ALIGNEMENT TOTAL : Stockage du fichier unique compagnie.yaml dans user/data/flex-objects/
+        folder: 'user/data/flex-objects/compagnie' 
+    media:
+      per_object: false
+
+  site:
+    templates:
+      object:
+        route: /infos/compagnie
+        template: compagnie
+
+  admin:
+    router:
+      path: /compagnie
+    menu:
+      list:
+        route: /compagnie
+        title: Page Compagnie
+        priority: 5
+        icon: fa fa-university
+    list:
+      title: Contenu de la Compagnie
+      fields:
+        title:
+          title: Titre principal
+          field: title
+          link: edit
+
+form:
+  fields:
+    tabs:
+      type: tabs
+      active: 1
+      fields:
+
+        # ==================================================================
+        # ONGLET 1 : INTRODUCTION (_1-intro)
+        # ==================================================================
+        tab_intro:
+          type: tab
+          title: "1. Introduction"
+          fields:
+            title:
+              type: text
+              label: Titre principal de la page
+              default: "La Compagnie"
+              validate:
+                required: true
+            
+            intro.texte_principal:
+              type: markdown
+              label: "Texte d'introduction (Les 3 premiers paragraphes)"
+            
+            # 🌟 RECTIFICATION SÉMANTIQUE : Image principale relative sans "user/"
+            intro.image_principale:
+              type: file
+              label: "Image d'illustration principale (Le théâtre d'ombres)"
+              destination: 'data/flex-objects/compagnie'
+              multiple: false
+              accept:
+                - .avif
+
+        # ==================================================================
+        # ONGLET 2 : DÉTAILS DE L'AVENTURE (_2-details)
+        # ==================================================================
+        tab_details:
+          type: tab
+          title: "2. Détails & Citations"
+          fields:
+            # --- BLOC DE DÉBUT ---
+            section_debut:
+              type: section
+              title: "Partie Haute : Engagement et Rythme"
+              underline: true
+            details.texte_debut:
+              type: markdown
+              label: "Texte de début (Les 2 paragraphes : La compagnie a été créée...)"
+              placeholder: "La compagnie a été créée pour deux raisons essentielles : travailler à notre rythme..."
+
+            # --- PREMIÈRE CITATION (CENTRALE) ---
+            section_citation_1:
+              type: section
+              title: "Citation Centrale : Éloge de la lenteur"
+              underline: true
+            details.citation_texte:
+              type: text
+              label: "Texte de la citation centrale"
+              default: "Il est essentiel de prendre le temps de prendre le temps."
+            details.citation_auteur:
+              type: text
+              label: "Auteur de la citation centrale"
+              default: "La Compagnie Les Mégères de l'Humus"
+
+            # --- BLOC DE FIN ---
+            section_fin:
+              type: section
+              title: "Partie Basse : Éducation et Sensibilité"
+              underline: true
+            details.texte_fin:
+              type: markdown
+              label: "Texte de fin (Les 2 paragraphes : Rien que ça !...)"
+              placeholder: "Rien que ça ! Alors nous nous nourrissons intellectuellement..."
+
+            # --- SECONDE CITATION (CLÔTURE) ---
+            section_citation_2:
+              type: section
+              title: "Citation de Clôture : Le Manifeste des Mégères"
+              underline: true
+            details.citation_2_texte:
+              type: text
+              label: "Texte de la citation de clôture"
+              default: "Et oui car nous sommes Les Mégères de l’Humus ; nous papotons et œuvrons pour un monde chaque jour un peu plus doux et juste, de notre mieux et à notre échelle."
+            details.citation_2_auteur:
+              type: text
+              label: "Signature de la clôture"
+              default: "Delphine, Marie, Sabine & Suzie"
+
+        # ==================================================================
+        # ONGLET 3 : GALERIE & RAPPORTS (_3-galerie-liens)
+        # ==================================================================
+        tab_galerie:
+          type: tab
+          title: "3. Coulisses & Mythologie"
+          fields:
+            section_rapports:
+              type: section
+              title: "Les Rapports d'Activités (Items 7 & 8)"
+              underline: true
+            galerie.rapport_2024_pdf:
+              type: file
+              label: "Fichier PDF du Rapport 2024"
+              destination: 'data/flex-objects/compagnie'
+              multiple: false
+              accept:
+                - .pdf
+            galerie.rapport_2024_img:
+              type: file
+              label: "Image du bouton de téléchargement 2024 (AVIF)"
+              destination: 'data/flex-objects/compagnie'
+              multiple: false
+              preview_images: true
+              accept:
+                - .avif
+
+            galerie.rapport_2025_pdf:
+              type: file
+              label: "Fichier PDF du Rapport 2025"
+              destination: 'data/flex-objects/compagnie'
+              multiple: false
+              accept:
+                - .pdf
+            galerie.rapport_2025_img:
+              type: file
+              label: "Image du bouton de téléchargement 2025 (AVIF)"
+              destination: 'data/flex-objects/compagnie'
+              multiple: false
+              preview_images: true
+              accept:
+                - .avif
+
+            section_gorgone:
+              type: section
+              title: "Bloc Pourquoi les Mégères ? (Items 10 & 11)"
+              underline: true
+            galerie.gorgone_img:
+              type: file
+              label: "Image du Masque de Gorgone (Item 10)"
+              destination: 'data/flex-objects/compagnie'
+              multiple: false
+              accept:
+                - .avif
+            galerie.gorgone_alt:
+              type: text
+              label: "Texte alternatif du Masque"
+            galerie.gorgone_texte:
+              type: textarea
+              label: "Texte explicatif sur les Mégères / Gorgone"
+              rows: 5
+
+            galerie.erinyes_img:
+              type: file
+              label: "Image des Érinyes (Item 11)"
+              destination: 'data/flex-objects/compagnie'
+              multiple: false
+              accept:
+                - .avif
+            galerie.erinyes_alt:
+              type: text
+              label: "Texte alternatif des Érinyes"
+            galerie.erinyes_texte:
+              type: textarea
+              label: "Texte explicatif sur le Mythe des Érinyes"
+              rows: 5
+
+            section_oreste:
+              type: section
+              title: "Bloc Mythologie Classique (Item 12)"
+              underline: true
+            galerie.oreste_img:
+              type: file
+              label: "Image d'Oreste et les Érinyes"
+              destination: 'data/flex-objects/compagnie'
+              multiple: false
+              accept:
+                - .avif
+            galerie.oreste_alt:
+              type: text
+              label: "Texte alternatif de la peinture"
+            galerie.oreste_legende:
+              type: textarea
+              label: "Légende sous la peinture"
+              rows: 2
+
+            section_humus:
+              type: section
+              title: "Bloc L'Humus & Nature (Item 13)"
+              underline: true
+            galerie.humus_texte:
+              type: textarea
+              label: "Texte explicatif sur l'Humus"
+              rows: 5
+            galerie.humus_img:
+              type: file
+              label: "Image de l'Humus"
+              destination: 'data/flex-objects/compagnie'
+              multiple: false
+              accept:
+                - .avif
+            galerie.humus_alt:
+              type: text
+              label: "Texte alternatif de l'image Humus"
+            galerie.humus_legende:
+              type: textarea
+              label: "Légende sous l'image Humus"
+              rows: 2

@@ -28,7 +28,8 @@ errors:
   log: true
 debugger:
   enabled: true
-  provider: debugbar
+  provider: clockwork
+  token: vocation-unstitch-laxative
   censored: false
   shutdown:
     close_connection: false

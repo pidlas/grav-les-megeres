@@ -1,0 +1,64 @@
+1b65a708ccea6d5faa127d9fe2482776:
+  title: 'Nous Contacter'
+  subtitle: '…Pour tout renseignement, fiche technique & tarif du spectacle'
+  email_adresse: compagnie@lesmegeresdelhumus.fr
+  email_icone:
+    user/data/flex-objects/contact/iconeMail.avif:
+      name: iconeMail.avif
+      type: image/avif
+      size: 6529
+      path: user/data/flex-objects/contact/iconeMail.avif
+      url: /user/data/flex-objects/contact/iconeMail.avif
+  telephone_icone:
+    user/data/flex-objects/contact/iconeTel.avif:
+      name: iconeTel.avif
+      type: image/avif
+      size: 6773
+      path: user/data/flex-objects/contact/iconeTel.avif
+      url: /user/data/flex-objects/contact/iconeTel.avif
+  poles_contact:
+    -
+      type: classique
+      nom: Diffusion
+      membres:
+        - { nom: 'Maëlle Prévôt', tel: '06 16 24 21 32' }
+        - { nom: 'Yaniss Moutaoukil', tel: '06 25 59 25 20' }
+    -
+      type: classique
+      nom: 'Responsables Communication & Artistique'
+      tel_commun: '06 95 19 25 35'
+      membres:
+        - { nom: 'Suzie Idlas' }
+        - { nom: 'Sabine Rance' }
+  reseaux_facebook: 'https://www.facebook.com/people/Cie-Les-M%C3%A9g%C3%A8res-de-lHumus/100093667065923/'
+  reseaux_instagram: 'https://www.instagram.com/lesmegeresdelhumus/?igshid=NGExMml2YTkyZg%3D%3D'
+  adresse_icone:
+    user/data/flex-objects/contact/iconeAdresse.avif:
+      name: iconeAdresse.avif
+      type: image/avif
+      size: 6817
+      path: user/data/flex-objects/contact/iconeAdresse.avif
+      url: /user/data/flex-objects/contact/iconeAdresse.avif
+  adresse_lignes:
+    -
+      value: "Cie LES MÉGÈRES DE L'HUMUS"
+    -
+      value: '7 rue du 19 mars 1962'
+    -
+      value: '11170 Moussoulens'
+  association_icone:
+    user/data/flex-objects/contact/connect.avif:
+      name: connect.avif
+      type: image/avif
+      size: 6186
+      path: user/data/flex-objects/contact/connect.avif
+      url: /user/data/flex-objects/contact/connect.avif
+  association_details:
+    -
+      value: 'Association loi 1901'
+    -
+      value: 'APE - 9001Z'
+    -
+      value: 'SIRET - 917 798 191 00016'
+    -
+      value: 'Licence du spectacle : L-D-22-7087 '

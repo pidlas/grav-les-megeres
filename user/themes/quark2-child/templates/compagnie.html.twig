@@ -1,0 +1,159 @@
+{% extends 'main-layout.html.twig' %}
+
+{% block content %}
+    {# 1. Récupération de la collection globale #}
+    {% set collection_compagnie = grav.flex.directory('compagnie').getCollection() %}
+    {% set compagnie_flex = collection_compagnie.first() %}
+
+    {# ======================================================================
+       SECTION 1 : L'INTRODUCTION (_1-intro)
+       ====================================================================== #}
+    <div class="g_compagnie">
+        <div class="g_co-item1">
+            {% if compagnie_flex.intro.texte_principal %}
+                {{ compagnie_flex.intro.texte_principal | markdown | shortcodes | raw }}
+            {% endif %}
+            
+            {% if compagnie_flex.intro.image_principale is not empty %}
+                {% set path_intro = compagnie_flex.intro.image_principale | keys | first %}
+                <img src="{{ base_url_simple ~ '/' ~ path_intro }}" alt="Le théâtre d'ombres - Grésilhette et la Salimonde" loading="lazy">
+            {% endif %}
+        </div>
+    </div>
+
+    {# ======================================================================
+       SECTION 2 : LES DÉTAILS ET LES DEUX CITATIONS (_2-details)
+       ====================================================================== #}
+    <div class="g_compagnie2">
+        
+        {# A. Partie Haute : La Création et l'Engagement #}
+        <div class="modular-text-block">
+            {% if compagnie_flex.details.texte_debut %}
+                {{ compagnie_flex.details.texte_debut | markdown | shortcodes | raw }}
+            {% endif %}
+        </div>
+
+        {# B. Première Citation Centrale : Éloge de la lenteur #}
+        {% if compagnie_flex.details.citation_texte %}
+            <figure>
+                <blockquote>
+                    <p class="theseasonsbold">&ldquo;&nbsp;{{ compagnie_flex.details.citation_texte }}&nbsp;&rdquo;</p>
+                </blockquote>
+                {% if compagnie_flex.details.citation_auteur %}
+                    <figcaption>
+                        <span class="theseasonsregular">{{ compagnie_flex.details.citation_auteur }}</span>
+                    </figcaption>
+                {% endif %}
+            </figure>
+        {% endif %}
+
+        {# C. Partie Basse : Éducation et Sensibilité #}
+        <div class="modular-text-block">
+            {% if compagnie_flex.details.texte_fin %}
+                {{ compagnie_flex.details.texte_fin | markdown | shortcodes | raw }}
+            {% endif %}
+        </div>
+
+        {# D. Seconde Citation de Clôture : Le Manifeste des Mégères #}
+        {% if compagnie_flex.details.citation_2_texte %}
+            <figure>
+                <blockquote>
+                    <p class="theseasonsbold">&ldquo;&nbsp;{{ compagnie_flex.details.citation_2_texte }}&nbsp;&rdquo;</p>
+                </blockquote>
+                {% if compagnie_flex.details.citation_2_auteur %}
+                    <figcaption>
+                        <span class="theseasonsregular">{{ compagnie_flex.details.citation_2_auteur }}</span>
+                    </figcaption>
+                {% endif %}
+            </figure>
+        {% endif %}
+
+    </div>
+    {# ======================================================================
+       SECTION 3 : LA GALERIE, LES RAPPORTS ET LA MYTHOLOGIE (_3-galerie-liens)
+       ====================================================================== #}
+    <div class="g_compagnie3">
+        <h2 class="display-title titre-rapports">Découvrez les coulisses de notre aventure !</h2>
+
+        {# ITEM 7 : RAPPORT 2024 #}
+        <div class="g_co-item7">
+            {% if compagnie_flex.galerie.rapport_2024_img is not empty %}
+                {% set path_img_2024 = compagnie_flex.galerie.rapport_2024_img | keys | first %}
+                {% if compagnie_flex.galerie.rapport_2024_pdf is not empty %}
+                    {% set path_pdf_2024 = compagnie_flex.galerie.rapport_2024_pdf | keys | first %}
+                    <a target="_blank" rel="noopener noreferrer" href="{{ base_url_simple ~ '/' ~ path_pdf_2024 }}" title="Visualiser le rapport 2024">
+                {% endif %}
+                <img alt="Rapport d'activités 2024" src="{{ base_url_simple ~ '/' ~ path_img_2024 }}" loading="lazy">
+                {% if compagnie_flex.galerie.rapport_2024_pdf is not empty %}</a>{% endif %}
+            {% endif %}
+        </div>
+
+        {# ITEM 8 : RAPPORT 2025 #}
+        <div class="g_co-item8">
+            {% if compagnie_flex.galerie.rapport_2025_img is not empty %}
+                {% set path_img_2025 = compagnie_flex.galerie.rapport_2025_img | keys | first %}
+                {% if compagnie_flex.galerie.rapport_2025_pdf is not empty %}
+                    {% set path_pdf_2025 = compagnie_flex.galerie.rapport_2025_pdf | keys | first %}
+                    <a target="_blank" rel="noopener noreferrer" href="{{ base_url_simple ~ '/' ~ path_pdf_2025 }}" title="Visualiser le rapport 2025">
+                {% endif %}
+                <img alt="Rapport d'activités 2025" src="{{ base_url_simple ~ '/' ~ path_img_2025 }}" loading="lazy">
+                {% if compagnie_flex.galerie.rapport_2025_pdf is not empty %}</a>{% endif %}
+            {% endif %}
+        </div>
+
+        <div class="g_co-item9">
+            <h2 class="display-title">Et pourquoi les Mégères ?</h2>
+        </div>
+
+        {# ITEM 10 : GORGONE #}
+        <div class="g_co-item10">
+            {% if compagnie_flex.galerie.gorgone_img is not empty %}
+                {% set path_gorgone = compagnie_flex.galerie.gorgone_img | keys | first %}
+                <img class="forme-masque" alt="{{ compagnie_flex.galerie.gorgone_alt }}" src="{{ base_url_simple ~ '/' ~ path_gorgone }}" loading="lazy">
+            {% endif %}
+            {% if compagnie_flex.galerie.gorgone_texte %}
+                <p>{{ compagnie_flex.galerie.gorgone_texte | markdown(false) | raw }}</p>
+            {% endif %}
+        </div>
+
+        {# ITEM 11 : ERINYES #}
+        <div class="g_co-item11">
+            {% if compagnie_flex.galerie.erinyes_img is not empty %}
+                {% set path_erinyes = compagnie_flex.galerie.erinyes_img | keys | first %}
+                <img class="forme-erinyes" alt="{{ compagnie_flex.galerie.erinyes_alt }}" src="{{ base_url_simple ~ '/' ~ path_erinyes }}" loading="lazy">
+            {% endif %}
+            {% if compagnie_flex.galerie.erinyes_texte %}
+                <p>{{ compagnie_flex.galerie.erinyes_texte | markdown(false) | raw }}</p>
+            {% endif %}
+        </div>
+                
+        {# ITEM 12 : ORESTE #}
+        <div class="g_co-item12">
+            <h2 class="display-title">Les Érinyes poursuivent Oreste pour avoir tué Clytemnestre</h2>
+            {% if compagnie_flex.galerie.oreste_img is not empty %}
+                {% set path_oreste = compagnie_flex.galerie.oreste_img | keys | first %}
+                <img alt="{{ compagnie_flex.galerie.oreste_alt }}" src="{{ base_url_simple ~ '/' ~ path_oreste }}" loading="lazy">
+            {% endif %}
+            {% if compagnie_flex.galerie.oreste_legende %}
+                <p class="legende-oreste">{{ compagnie_flex.galerie.oreste_legende }}</p>
+            {% endif %}
+        </div>
+                
+        {# ITEM 13 : L'HUMUS ET SA LÉGENDE BIOLOGISTE #}
+        <div class="g_co-item13">
+            <h2 class="display-title">Et l'humus dans tout ça ?</h2>
+            {% if compagnie_flex.galerie.humus_texte %}
+                <p>{{ compagnie_flex.galerie.humus_texte | markdown(false) | raw }}</p>
+            {% endif %}
+            <figure>
+                {% if compagnie_flex.galerie.humus_img is not empty %}
+                    {% set path_humus = compagnie_flex.galerie.humus_img | keys | first %}
+                    <img alt="{{ compagnie_flex.galerie.humus_alt }}" src="{{ base_url_simple ~ '/' ~ path_humus }}" loading="lazy">
+                {% endif %}
+                {% if compagnie_flex.galerie.humus_legende %}
+                    <figcaption class="p_centrer legende">{{ compagnie_flex.galerie.humus_legende }}</figcaption>
+                {% endif %}
+            </figure>
+        </div>
+    </div>
+{% endblock %}

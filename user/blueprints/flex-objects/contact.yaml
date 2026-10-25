@@ -1,0 +1,188 @@
+type: flex-objects
+title: Contact & Association
+description: Gestion centralisée des coordonnées, des pôles téléphoniques de l'équipe, des réseaux sociaux et des mentions légales de l'association.
+
+config:
+  data:
+    storage:
+      className: 'Grav\Framework\Flex\Storage\FolderStorage'
+      options:
+        formatter:
+          class: 'Grav\Framework\File\Formatter\YamlFormatter'
+        # 🌟 LOGIQUE UNIFIÉE : Un fichier de collection unique sous user/data/
+        folder: 'user/data/flex-objects/contact' 
+    media:
+      per_object: false
+
+  site:
+    templates:
+      object:
+        route: /contact
+        template: contact
+
+  # 🌟 LOGIQUE ADMIN ALIGNÉE SUR GRÉSILHETTE, L'ÉQUIPE ET LA COMPAGNIE
+  admin:
+    router:
+      path: /contact
+    menu:
+      list:
+        route: /contact
+        title: Page Contact
+        priority: 1
+        icon: fa fa-envelope
+    list:
+      title: Liste des Coordonnées
+      fields:
+        title:
+          title: Nom de la page
+          field: title
+          link: edit
+
+form:
+  fields:
+    tabs:
+      type: tabs
+      active: 1
+      fields:
+
+        # ==================================================================
+        # ONGLET 1 : EN-TÊTE, MAIL & RÉSEAUX
+        # ==================================================================
+        tab_general:
+          type: tab
+          title: "1. En-tête, Mail & Réseaux"
+          fields:
+            title:
+              type: text
+              label: Titre principal de la page
+              default: "Nous Contacter"
+              validate:
+                required: true
+            subtitle:
+              type: text
+              label: Sous-titre d'accompagnement
+              default: "…Pour tout renseignement, fiche technique & tarif du spectacle"
+
+            section_email:
+              type: section
+              title: "Zone Email"
+              underline: true
+            email_adresse:
+              type: text
+              label: "Adresse e-mail de la compagnie"
+              default: "compagnie@lesmegeresdelhumus.fr"
+            email_icone:
+              type: file
+              label: "Icône pour l'Email (AVIF)"
+              destination: 'data/flex-objects/contact'
+              multiple: false
+              accept:
+                - .avif
+
+            section_reseaux:
+              type: section
+              title: "Réseaux Sociaux"
+              underline: true
+            reseaux_facebook:
+              type: text
+              label: "URL de la page Facebook"
+            reseaux_instagram:
+              type: text
+              label: "URL du compte Instagram"
+
+        # ==================================================================
+        # ONGLET 2 : PÔLES TÉLÉPHONIQUES
+        # ==================================================================
+        tab_equipe:
+          type: tab
+          title: "2. Pôles Téléphoniques"
+          fields:
+            telephone_icone:
+              type: file
+              label: "Icône Générale pour le Téléphone (AVIF)"
+              destination: 'data/flex-objects/contact'
+              multiple: false
+              accept:
+                - .avif
+
+            poles_contact:
+              type: list
+              label: "Pôles / Groupes de l'équipe de contact"
+              btn_add: "Ajouter un pôle de contact"
+              fields:
+                .nom:
+                  type: text
+                  label: "Nom du pôle (ex: Diffusion, Artistique...)"
+                  validate:
+                    required: true
+                .type:
+                  type: select
+                  label: "Type d'affichage des numéros"
+                  default: classique
+                  options:
+                    classique: "Un numéro par personne (Affichage standard)"
+                    fusionne: "Un numéro fusionné pour tout le groupe (Rowspan)"
+                .tel_commun:
+                  type: text
+                  label: "Numéro de téléphone fusionné"
+                  help: "À remplir uniquement si le type d'affichage est positionné sur Rowspan."
+                .membres:
+                  type: list
+                  label: "Membres rattachés à ce pôle"
+                  btn_add: "Ajouter un membre au pôle"
+                  fields:
+                    ..nom:
+                      type: text
+                      label: "Nom et Prénom du membre"
+                      validate:
+                        required: true
+                    ..tel:
+                      type: text
+                      label: "Téléphone individuel"
+
+        # ==================================================================
+        # ONGLET 3 : ADRESSE & MENTIONS LÉGALES
+        # ==================================================================
+        tab_association:
+          type: tab
+          title: "3. Adresse & Mentions Légales"
+          fields:
+            section_adresse:
+              type: section
+              title: "Adresse Postale de la Compagnie"
+              underline: true
+            adresse_icone:
+              type: file
+              label: "Icône pour l'Adresse (AVIF)"
+              destination: 'data/flex-objects/contact'
+              multiple: false
+              accept:
+                - .avif
+            adresse_lignes:
+              type: list
+              label: "Lignes de l'adresse postale"
+              btn_add: "Ajouter une ligne"
+              fields:
+                .value:
+                  type: text
+                  label: "Texte de la ligne"
+
+            section_legal:
+              type: section
+              title: "Informations Administratives de l'Association"
+              underline: true
+            association_icone:
+              type: file
+              label: "Icône pour l'Association / Identification (AVIF)"
+              destination: 'data/flex-objects/contact'
+              multiple: false
+              accept:
+                - .avif
+            association_details:
+              type: list
+              label: "Détails légaux (Loi 1901, SIRET, APE, Licence)"
+              btn_add: "Ajouter une ligne légale"
+              fields:
+                .value:
+                  type: text
+                  label: "Texte du détail officiel"

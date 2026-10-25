@@ -1,0 +1,162 @@
+# Documentation d'Administration CMS Grav — Migration AVIF & Flex-Objects
+
+Cette documentation synthétise la configuration technique et les procédures à appliquer pour la gestion native des images au format `.avif` et des structures de données centralisées (`Flex-Objects`).
+
+---
+
+## 1. Prérequis Système (Serveur de Production)
+
+Pour que Grav puisse lire et manipuler l'AVIF via l'extension PHP `Imagick`, le serveur doit disposer des bibliothèques de décodage système.
+
+### Procédure d'installation (Exemple Debian 13 / Ubuntu récent) :
+1. Connectez-vous en SSH et installez les modules de décodage et encodage :
+   ```bash
+   sudo apt update
+   sudo apt install imagemagick libheif-plugin-aomdec libheif-plugin-aomenc libavif-dev
+   ```
+2. Vérifiez que la prise en charge est active dans ImageMagick (le retour doit afficher `rw+`) :
+   ```bash
+   magick -list format | grep -i AVIF
+   ```
+3. Redémarrez le moteur PHP-FPM et le serveur Nginx pour charger les fonctionnalités :
+   ```bash
+   sudo systemctl restart php8.X-fpm
+   sudo systemctl restart nginx
+   ```
+
+---
+
+## 2. Configuration Globale du CMS Grav
+
+### Déclaration du format d'image (`user/config/media.yaml`)
+Pour que Grav intègre l'extension `.avif` dans l'objet `page.media.images` (permettant l'utilisation des filtres `.resize()`, `.html()`, etc.), le type de média doit être déclaré de manière stricte :
+
+```yaml
+types:
+  avif:
+    type: image
+    thumb: media/thumb-jpg.png
+    mime: image/avif
+```
+
+### Purge absolue du Cache (Après chaque modification de structure)
+L'environnement multilingue (`.fr.md`) applique un cache agressif. Utilisez impérativement l'option `--all` :
+```bash
+bin/grav clear-cache --all
+```
+
+---
+
+## 3. Architecture des Données & Formulaires Flex-Objects
+
+Pour centraliser les métadonnées (textes alternatifs, légendes, fichiers associés), nous utilisons un inventaire global indexé sous forme de fichier YAML unique situé dans les pages.
+
+### Fichier de Blueprint (`user/blueprints/flex-objects/galerie-liens.yaml`)
+Ce formulaire génère un menu déroulant sécurisé pour que les administratrices lient les données aux bons emplacements graphiques de la page sans risque d'erreur de saisie :
+
+```yaml
+type: flex-objects
+title: Galerie Compagnie
+description: Gestion des métadonnées de la galerie (Alts, images et PDFs).
+
+config:
+  data:
+    storage:
+      className: 'Grav\Framework\Flex\Storage\FolderStorage'
+      options:
+        formatter:
+          class: 'Grav\Framework\File\Formatter\YamlFormatter'
+        folder: 'user/pages/02.infos/03.galerie-liens'
+        file: 'galerie-liens.yaml'
+    media:
+      per_object: true
+
+  admin:
+    router:
+      path: /galerie-liens
+    menu:
+      list:
+        route: /galerie-liens
+        title: Galerie Compagnie
+        icon: fa fa-picture-o
+    list:
+      title: Liste des Éléments
+      fields:
+        item_data:
+          title: Emplacement
+          link: edit
+        alt_text:
+          title: Texte Alternatif
+
+form:
+  fields:
+    item_data:
+      type: select
+      label: "Emplacement de l'élément (Item)"
+      help: "Sélectionnez l'emplacement sur la page où cette image/document doit s'afficher."
+      validate:
+        required: true
+      options:
+        item7: "Item 7 : Rapport d'activités 2024 (Haut gauche)"
+        item8: "Item 8 : Rapport d'activités 2025 (Haut droit)"
+        item10: "Item 10 : Bloc Masque de Gorgone (Milieu)"
+        item11: "Item 11 : Bloc Les Érinyes (Milieu)"
+        item12: "Item 12 : Bloc Peinture Oreste (Bas)"
+        item13: "Item 13 : Bloc L'Humus & Légende (Pied de page)"
+
+    alt_text:
+      type: text
+      label: 'Texte alternatif (Alt)'
+      validate:
+        required: true
+
+    image_name:
+      type: text
+      label: 'Nom exact du fichier image .avif'
+
+    pdf_name:
+      type: text
+      label: 'Nom exact du fichier PDF (Optionnel)'
+
+    legende:
+      type: textarea
+      label: 'Légende (Optionnel)'
+      rows: 2
+```
+
+---
+
+## 4. Bonnes Pratiques de Rendu (Twig)
+
+### Règles d'appel de médias tolérants (Exemple de l'Item 7)
+Pour éviter qu'un champ optionnel vide (comme un PDF non renseigné) ne masque l'intégralité du bloc ou ne déclenche une erreur 500, isolez les fichiers dans des variables et utilisez des conditions souples :
+
+```twig
+{# 1. Chargement et indexation de la collection Flex #}
+{% set galerie_items = grav['flex'].collection('galerie-liens') %}
+{% set items = {} %}
+{% for obj in galerie_items %}
+    {% set items = items|merge({ (obj.item_data|trim): obj }) %}
+{% endfor %}
+
+{# 2. Rendu tolérant d'un bloc #}
+<div class="g_co-item7">
+    {% if items.item7 %}
+        {% set pdf = items.item7.pdf_name|trim ? page.media[items.item7.pdf_name|trim] : null %}
+        {% set img = page.media[items.item7.image_name|trim] %}
+        
+        {% if img %}
+            {% if pdf %}<a target="_blank" rel="noopener noreferrer" href="{{ pdf.url }}" title="Visualiser">{% endif %}
+            <img alt="{{ items.item7.alt_text }}" src="{{ img.url }}" loading="lazy">
+            {% if pdf %}</a>{% endif %}
+        {% endif %}
+    {% endif %}
+</div>
+```
+
+### Évolution des balises `<picture>` obsolètes
+Toutes les images du site étant désormais converties au format `.avif`, l'utilisation de la balise `<picture>` avec des alternatives `.webp` ou `.jpg` en dur est devenue inutile. Remplacez ces structures par des balises `<img>` standards, plus légères et performantes.
+```html
+<!-- Rendu cible universel -->
+<img src="mon-image.avif" alt="Texte descriptif" loading="lazy">
+```

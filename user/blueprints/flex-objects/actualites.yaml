@@ -24,7 +24,7 @@ config:
     menu:
       list:
         route: /actualites
-        title: Actualités
+        title: Page Actualités
         priority: 6
         icon: fa fa-newspaper-o
     list:

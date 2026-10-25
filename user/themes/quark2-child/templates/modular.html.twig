@@ -1,9 +1,0 @@
-{% extends 'main-layout.html.twig' %}
-
-{% block content %}
-
-    {% for module in page.collection() %}
-        {{ module.content | raw }}
-    {% endfor %}
-
-{% endblock %}

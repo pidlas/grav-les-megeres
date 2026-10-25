@@ -2,24 +2,27 @@
 
 {% block content %}
 
-    {# ========================================================================= #}
-    {# SECTION TÉLÉPHONE (Flex-Objects - Rendu strict d'origine)                #}
-    {# ========================================================================= #}
-    {% set directory = grav.get('flex').directory('contact_equipe') %}
-    {% set poles = directory ? directory.collection() : null %}
+    {# 1. Récupération sémantique unifiée de la collection de contact (Comme Grésilhette/Compagnie) #}
+    {% set collection_contact = grav.flex.directory('contact').getCollection() %}
+    {% set contact_flex = collection_contact.first() %}
 
-    {% if poles and not poles.isEmpty() %}
+    {# ========================================================================= #}
+    {# SECTION TÉLÉPHONE (Pôles d'équipe réancrés dans l'onglet 2)               #}
+    {# ========================================================================= #}
+    {% if contact_flex.poles_contact is not empty %}
     <div class="telephone">
-        {# On récupère le nom du fichier choisi, sinon on utilise le nom par défaut de secours #}
-        {% set tel_icone_name = page.header.telephone.icone | default('iconeTel.avif') %}
-        {% set img_tel = page.media[tel_icone_name] %}
         
-        {% if img_tel %}
-            <p><img src="{{ img_tel.url }}" width="50px" alt="Téléphone"></p>
+        {# Récupération sécurisée de l'icône téléphone depuis user/data via |keys|first #}
+        {% if contact_flex.telephone_icone is not empty %}
+            {% set path_tel_icone = contact_flex.telephone_icone | keys | first %}
+            <p><img src="{{ base_url_simple ~ '/' ~ path_tel_icone }}" width="50px" alt="Téléphone"></p>
+        {% else %}
+            {# Secours par défaut si aucune icône n'est envoyée #}
+            <p><img src="{{ base_url_simple ~ '/user/data/flex-objects/contact/iconeTel.avif' }}" width="50px" alt="Téléphone"></p>
         {% endif %}
         
         <table class="com">
-            {% for groupe in poles %}
+            {% for groupe in contact_flex.poles_contact %}
                 <thead>
                     <tr>
                         <th colspan="2" class="tresgras {% if loop.index > 1 %}sep{% endif %}">
@@ -35,7 +38,7 @@
                                 {% if loop.first %}
                                     <td rowspan="{{ groupe.membres|length }}">{{ groupe.tel_commun }}</td>
                                 {% else %}
-                                    <td></td>
+                                    {# Rowspan : On laisse la cellule vide pour fusionner la ligne #}
                                 {% endif %}
                             </tr>
                         {% endfor %}
@@ -54,79 +57,83 @@
     {% endif %}
 
     {# ========================================================================= #}
-    {# SECTION EMAIL                                                             #}
+    {# SECTION EMAIL & RÉSEAUX SOCIAUX                                           #}
     {# ========================================================================= #}
-    {% set email_data = page.header.email %}
-    {% if email_data and email_data.adresse %}
+    {% if contact_flex.email_adresse %}
     <div class="infos-contact">
-        {# Chargement depuis le média de la page #}
-        {% set mail_icone_name = email_data.icone | default('iconeMail.avif') %}
-        {% set img_mail = page.media[mail_icone_name] %}
-        {% if img_mail %}
-            <img src="{{ img_mail.url }}" width="50px" alt="Email">
+        
+        {# Récupération sécurisée de l'icône e-mail #}
+        {% if contact_flex.email_icone is not empty %}
+            {% set path_mail_icone = contact_flex.email_icone | keys | first %}
+            <img src="{{ base_url_simple ~ '/' ~ path_mail_icone }}" width="50px" alt="Email">
+        {% else %}
+            <img src="{{ base_url_simple ~ '/user/data/flex-objects/contact/iconeMail.avif' }}" width="50px" alt="Email">
         {% endif %}
+        
         <span>
-            <a href="mailto:{{ email_data.adresse }}?subject={{ email_data.sujet|url_encode }}">
-                {{ email_data.texte|default('Nous écrire') }}
+            <a href="mailto:{{ contact_flex.email_adresse }}?subject={{ 'Demande de renseignement'|url_encode }}">
+                Nous écrire
             </a>
         </span>
     </div>
     {% endif %}
-
-    {# ========================================================================= #}
-    {# SECTION RÉSEAUX SOCIAUX (Génère le conteneur pour vos ::before CSS)      #}
-    {# ========================================================================= #}
-    {% set fb_data = page.header.reseaux.facebook %}
-    {% if fb_data and fb_data.url %}
+    {# Extraction et rendu de la zone Facebook (CSS ::before conservé) #}
+    {% if contact_flex.reseaux_facebook %}
     <div class="infos-contact fb">
-        <a href="{{ fb_data.url }}" target="_blank" rel="noopener noreferrer">
+        <a href="{{ contact_flex.reseaux_facebook }}" target="_blank" rel="noopener noreferrer">
             Cie Les Mégères de l'Humus
         </a>
     </div>
     {% endif %}
 
-    {% set insta_data = page.header.reseaux.instagram %}
-    {% if insta_data and insta_data.url %}
+    {# Extraction et rendu de la zone Instagram (CSS ::before conservé) #}
+    {% if contact_flex.reseaux_instagram %}
     <div class="infos-contact insta">
-        <a href="{{ insta_data.url }}" target="_blank" rel="noopener noreferrer">
+        <a href="{{ contact_flex.reseaux_instagram }}" target="_blank" rel="noopener noreferrer">
             @lesmegeresdelhumus
         </a>
     </div>
     {% endif %}
 
     {# ========================================================================= #}
-    {# SECTION ADRESSE                                                           #}
+    {# SECTION ADRESSE POSTALE                                                  #}
     {# ========================================================================= #}
-    {% set adresse_data = page.header.adresse %}
-    {% if adresse_data and adresse_data.lignes %}
+    {% if contact_flex.adresse_lignes is not empty %}
     <div class="adresse">
-        {# Chargement depuis le média de la page #}
-        {% set adr_icone_name = adresse_data.icone | default('iconeAdresse.avif') %}
-        {% set img_adr = page.media[adr_icone_name] %}
-        {% if img_adr %}
-            <p><img src="{{ img_adr.url }}" width="50px" alt="Adresse"></p>
+        
+        {# Récupération sécurisée de l'icône adresse #}
+        {% if contact_flex.adresse_icone is not empty %}
+            {% set path_adr_icone = contact_flex.adresse_icone | keys | first %}
+            <p><img src="{{ base_url_simple ~ '/' ~ path_adr_icone }}" width="50px" alt="Adresse"></p>
+        {% else %}
+            <p><img src="{{ base_url_simple ~ '/user/data/flex-objects/contact/iconeAdresse.avif' }}" width="50px" alt="Adresse"></p>
         {% endif %}
-        {% for ligne in adresse_data.lignes %}
-            <p>{{ ligne.value|default(ligne) }}</p>
+        
+        {# Boucle propre sur les lignes textuelles configurées #}
+        {% for ligne in contact_flex.adresse_lignes %}
+            <p>{{ ligne.value }}</p>
         {% endfor %}
     </div>
     {% endif %}
 
     {# ========================================================================= #}
-    {# SECTION ASSOCIATION                                                       #}
+    {# SECTION ASSOCIATION & MENTIONS LÉGALES                                   #}
     {# ========================================================================= #}
-    {% set asso_data = page.header.association %}
-    {% if asso_data and asso_data.details %}
+    {% if contact_flex.association_details is not empty %}
     <div class="association">
-        {# Chargement depuis le média de la page #}
-        {% set asso_icone_name = asso_data.icone | default('connect.avif') %}
-        {% set img_asso = page.media[asso_icone_name] %}
-        {% if img_asso %}
-            <p><img src="{{ img_asso.url }}" width="40px" alt="Association"></p>
+        
+        {# Récupération sécurisée de l'icône d'identification #}
+        {% if contact_flex.association_icone is not empty %}
+            {% set path_asso_icone = contact_flex.association_icone | keys | first %}
+            <p><img src="{{ base_url_simple ~ '/' ~ path_asso_icone }}" width="40px" alt="Association"></p>
+        {% else %}
+            <p><img src="{{ base_url_simple ~ '/user/data/flex-objects/contact/connect.avif' }}" width="40px" alt="Association"></p>
         {% endif %}
+        
         <p>
-            {% for detail in asso_data.details %}
-                {{ detail.value|default(detail) }}{% if not loop.last %}<br>{% endif %}
+            {# Boucle et saut de ligne automatique entre chaque mention légale #}
+            {% for detail in contact_flex.association_details %}
+                {{ detail.value }}{% if not loop.last %}<br>{% endif %}
             {% endfor %}
         </p>
     </div>
