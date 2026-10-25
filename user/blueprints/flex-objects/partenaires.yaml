@@ -1,26 +1,33 @@
 type: flex-objects
-
 title: Partenaires
-description: Gestion conviviale des partenaires du site
+description: Gestion centralisée des logos, des noms et des sites internet des partenaires culturels et institutionnels.
 
 config:
   data:
     storage:
-      className: 'Grav\Framework\Flex\Storage\FolderStorage' # 👈 Adapté au fichier de liste
+      className: 'Grav\Framework\Flex\Storage\FolderStorage'
       options:
         formatter:
           class: 'Grav\Framework\File\Formatter\YamlFormatter'
-        folder: 'user/pages/02.infos/04.partenaires' 
+        # 🌟 LOGIQUE CENTRALISÉE : Stockage de la liste dans user/data/
+        folder: 'user/data/flex-objects/partenaires' 
     media:
-      per_object: true
+      per_object: false
 
+  site:
+    templates:
+      object:
+        route: /infos/partenaires
+        template: partenaires
+
+  # 🌟 LOGIQUE ADMIN ALIGNÉE SUR LES ACTUALITÉS ET GRÉSILHETTE
   admin:
     router:
       path: /partenaires
     menu:
       list:
         route: /partenaires
-        title: Partenaires
+        title: Page Partenaires
         priority: 3
         icon: fa fa-handshake-o
     list:
@@ -39,7 +46,7 @@ form:
     nom:
       type: text
       label: 'Identifiant / Nom du partenaire'
-      help: 'Obligatoire. Ce nom sert à lister le partenaire dans ce tableau.'
+      help: 'Obligatoire. Ce nom sert à lister le partenaire dans le tableau.'
       validate:
         required: true
         
@@ -50,18 +57,12 @@ form:
       validate:
         type: url
 
+    # 🌟 MODERNISATION : Passage au type file applicatif relatif sans "user/"
     image:
-      #type: file
-      type: filepicker
+      type: file
       label: Choisir le logo du partenaire
-      folder: 'page://02.infos/04.partenaires'
-      preview_images: true
-      #label: 'Logo du partenaire'
+      destination: 'data/flex-objects/partenaires'
       multiple: false
-      #destination: 'data/flex-objects/partenaires'
-      random_name: false
-      avoid_overwriting: false
+      preview_images: true
       accept:
-        - 'image/*'
-        - '.avif'
-        - 'image/avif'
+        - .avif

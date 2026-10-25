@@ -1,0 +1,70 @@
+c33056d83c41c5a8fbadb7038cdbce0c:
+  url: 'https://www.culture.gouv.fr/Regions/Drac-Occitanie'
+  nom: Drac-Occitanie
+  image:
+    user/data/flex-objects/partenaires/prefet-region-occitanie.avif:
+      name: prefet-region-occitanie.avif
+      type: image/avif
+      size: 7588
+      path: user/data/flex-objects/partenaires/prefet-region-occitanie.avif
+      url: /user/data/flex-objects/partenaires/prefet-region-occitanie.avif
+bf524d33b6c5aa1a3d16f128e6f53c51:
+  nom: 'Fond Pour le Développement de la Vie Associative'
+  url: 'https://education.gouv.fr'
+  image:
+    user/data/flex-objects/partenaires/fdva.avif:
+      name: fdva.avif
+      type: image/avif
+      size: 31119
+      path: user/data/flex-objects/partenaires/fdva.avif
+      url: /user/data/flex-objects/partenaires/fdva.avif
+1054a5583f2da247ec5150a2030e1d7e:
+  nom: 'Aude, le département'
+  url: 'https://www.aude.fr'
+  image:
+    user/data/flex-objects/partenaires/aude.avif:
+      name: aude.avif
+      type: image/avif
+      size: 21323
+      path: user/data/flex-objects/partenaires/aude.avif
+      url: /user/data/flex-objects/partenaires/aude.avif
+379024ab5ca6bdba7cacb50f71158b94:
+  nom: 'Agglomération de Carcassonne'
+  url: 'https://www.carcassonne-agglo.fr'
+  image:
+    user/data/flex-objects/partenaires/carcassonne-agglo.avif:
+      name: carcassonne-agglo.avif
+      type: image/avif
+      size: 14066
+      path: user/data/flex-objects/partenaires/carcassonne-agglo.avif
+      url: /user/data/flex-objects/partenaires/carcassonne-agglo.avif
+fd78c2981ef1e6c9eaae1dfd3cb9d528:
+  nom: 'Communauté de Communes de la Montagne Noire'
+  url: 'https://www.cdcmontagnenoire.fr'
+  image:
+    user/data/flex-objects/partenaires/cdc-montagne-noire.avif:
+      name: cdc-montagne-noire.avif
+      type: image/avif
+      size: 21835
+      path: user/data/flex-objects/partenaires/cdc-montagne-noire.avif
+      url: /user/data/flex-objects/partenaires/cdc-montagne-noire.avif
+c9e04682f568ea60b0eb7cc9a50e175b:
+  nom: 'Foyer Socio-Culturel de Moussoulens'
+  url: 'https://www.moussoulens.fr/associations/foyer-socio-culturel-de-moussoulens/'
+  image:
+    user/data/flex-objects/partenaires/fsc-theatre.avif:
+      name: fsc-theatre.avif
+      type: image/avif
+      size: 15484
+      path: user/data/flex-objects/partenaires/fsc-theatre.avif
+      url: /user/data/flex-objects/partenaires/fsc-theatre.avif
+e0c1a33fbc2408e5413b748a427878ad:
+  nom: 'Commune de Moussoulens'
+  url: 'https://www.moussoulens.fr'
+  image:
+    user/data/flex-objects/partenaires/blason-moussoulens.avif:
+      name: blason-moussoulens.avif
+      type: image/avif
+      size: 10874
+      path: user/data/flex-objects/partenaires/blason-moussoulens.avif
+      url: /user/data/flex-objects/partenaires/blason-moussoulens.avif

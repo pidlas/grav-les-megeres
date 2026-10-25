@@ -41,9 +41,9 @@ RSYNC_EXCLUDES=(
   # ==========================================================================
   # 1. SÉCURITÉ SERVEUR & CLOISONNEMENT YUNOHOST (LDAP Sanctuarisé)
   # ==========================================================================
-  "config/plugins/login-ldap"        # Protège le dossier complet du plugin LDAP (YunoHost)
-  "config/plugins/login-ldap.yaml"   # Protège le fichier de configuration du plugin
-  "config/scheduler.yaml"            # Configuration locale du planificateur de tâches
+  "/config/plugins/login-ldap"        # Protège le dossier complet du plugin LDAP (YunoHost)
+  "/config/plugins/login-ldap.yaml"   # Protège le fichier de configuration du plugin
+  "/config/scheduler.yaml"            # Configuration locale du planificateur de tâches
   "security.yaml"                    # Clés de sécurité système du CMS
   "security-private.php"             # Scripts de cryptage privés du serveur
   "api-private.php"                  # Fichiers d'accès aux API privées
@@ -79,7 +79,7 @@ RSYNC_EXCLUDES=(
   # ==========================================================================
   # 5. PROTECTION DES THÈMES CORES & CONFIGURATIONS D'ENVIRONNEMENT
   # ==========================================================================
-  "plugins"                          # Plugins installés (gestion exclusive par le serveur)
+  "user/plugins"                     # Plugins installés (gestion exclusive par le serveur)
   "themes/quark2"                    # Thème parent d'origine (non modifié)
   "system.yaml"                      # Configuration système globale
   "config/themes/quark2.yaml"        # Configuration du thème parent
