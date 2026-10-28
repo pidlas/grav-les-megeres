@@ -12,7 +12,7 @@ echo "🎨 [LOCAL] Optimisation et conversion de toutes les images en .avif..."
 cd "$REPO_ROOT"
 
 # On cherche toutes les images (.webp, .png, .jpg, .jpeg) de façon insensible à la casse (-iname)
-find user/pages/ -type f \( -iname "*.webp" -o -iname "*.png" -o -iname "*.jpg" -o -iname "*.jpeg" \) | while read -r img; do
+find user/data/ -type f \( -iname "*.webp" -o -iname "*.png" -o -iname "*.jpg" -o -iname "*.jpeg" \) | while read -r img; do
     
     # Extraction de l'extension actuelle pour couper proprement le nom du fichier
     ext="${img##*.}"

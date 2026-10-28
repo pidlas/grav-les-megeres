@@ -87,8 +87,12 @@ img.text-image-loaded {
 }
 
 /* Cible automatiquement le premier paragraphe de chaque page */
-main section p:first-of-type{
+main section > p:first-of-type{
     margin-top: var(--space-m);
+}
+
+.actu-resume p{
+    margin-top:var(--space-xs);
 }
 
 .marge-haute {

@@ -79,7 +79,8 @@ RSYNC_EXCLUDES=(
   # ==========================================================================
   # 5. PROTECTION DES THÈMES CORES & CONFIGURATIONS D'ENVIRONNEMENT
   # ==========================================================================
-  "user/plugins"                     # Plugins installés (gestion exclusive par le serveur)
+  "plugins"                          # Plugins installés (gestion exclusive par le serveur)
+  "plugins/**"                       # 
   "themes/quark2"                    # Thème parent d'origine (non modifié)
   "system.yaml"                      # Configuration système globale
   "config/themes/quark2.yaml"        # Configuration du thème parent

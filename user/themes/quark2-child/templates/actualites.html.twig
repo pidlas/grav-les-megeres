@@ -23,10 +23,10 @@
                 {% if item.image_principale is not empty %}
                     {# 🌟 EXTRACTION SÉCURISÉE : On intercepte la clé du tableau (le chemin physique) #}
                     {% set path_main = item.image_principale|keys|first %}
-                    <img src="{{ base_url_simple ~ '/' ~ path_main }}" alt="{{ item.image_alt }}" class="actu-image" loading="lazy">
+                    <img src="{{ base_url_simple ~ '/' ~ path_main }}" alt="{{ item.image_alt }}" class="actu-item-image" loading="lazy">
                 {% endif %}
 
-                <h2>{{ item.categorie }}</h2>
+                <h2 class="display-title">{{ item.categorie }}</h2>
                 
                 <div class="actu-content">
                     {# Boucle sur les événements/blocs internes de cette catégorie #}
@@ -34,7 +34,7 @@
                         <p class="actu-date">{{ bloc.date }}</p>
                         
                         {# Logiciel structurel HTML simplifié #}
-                        <div class="{% if bloc.miniature %}alignement{% else %}actu-wrapper{% endif %}">
+                        <div class="{% if bloc.miniature %}actu-bloc{% else %}actu-wrapper{% endif %}">
                             
                             {# Rendu de la miniature (affiche) depuis le dossier user/data avec base_url_simple #}
                             {% if bloc.miniature is not empty %}

@@ -10,16 +10,18 @@
   image_alt: 'Les évènements de la compagnie'
   blocs:
     -
-      date: 'mercredi 24 juin 2026 à 19h00'
-      titre: "Spectacle de fin d'année de la section Théâtre Enfants"
-      resume: 'En partenariat avec le FSC de Moussoulens, ce spectacle se tiendra à la Maison du Temps Libre. Réservation obligatoire'
-      miniature:
-        user/data/flex-objects/actualites/les-7-petits-cauchemars.avif: { name: les-7-petits-cauchemars.avif, type: image/avif, size: 63228, path: user/data/flex-objects/actualites/les-7-petits-cauchemars.avif, url: /user/data/flex-objects/actualites/les-7-petits-cauchemars.avif }
-      miniature_alt: "Miniature de l'affiche du spectacle de fin d'année Les 7 Petits Cauchemards"
-    -
-      date: 'novembre 2026 - date à venir'
-      titre: 'Spectacle de Théâtre Forum'
+      date: '19 novembre 2026 à 16h'
+      titre: "Spectacle de Théâtre Forum 0'Pression"
       resume: "En partenariat avec la FDE de Montpellier, antenne de Carcassonne, à l'occasion de la semaine de lutte contre les LGBT+phobies. À l'intention des étudiants et du personnel de l'établissement."
+      miniature: {  }
+      miniature_alt: "Miniature de l'affiche du spectacle de Théâtre Forum 0'Pression "
+    -
+      date: 'mer. 16 décembre 2026'
+      titre: 'Spectacle Jeune Public Grésilhette et la Salimonde'
+      resume: "À l'intention des élèves de l'école primaire de Moussoulens."
+      miniature_alt: "Miniature de l'affiche du spectacle Grésilhette et la Salimonde"
+      miniature:
+        user/data/flex-objects/actualites/actualite-visuel-portrait.avif: { name: actualite-visuel-portrait.avif, type: image/avif, size: 438222, path: user/data/flex-objects/actualites/actualite-visuel-portrait.avif, url: /user/data/flex-objects/actualites/actualite-visuel-portrait.avif }
 cb81d4d97cea3272948649dc194c9ed2:
   categorie: 'Les réseaux sociaux'
   image_principale:
@@ -29,12 +31,15 @@ cb81d4d97cea3272948649dc194c9ed2:
       size: 36116
       path: user/data/flex-objects/actualites/le-croco-bleu.avif
       url: /user/data/flex-objects/actualites/le-croco-bleu.avif
-  image_alt: 'Stage ados 2026 à Carcassonne'
+  image_alt: 'Stage pour les ados'
   blocs:
     -
-      date: 'jeudi 23 avril 2026'
-      titre: 'Stage ados 2026 à Carcassonne'
-      resume: "Pendant ces vacances scolaire de Printemps, la compagnie Les Mégères de l'Humus a fait découvrir le théâtre a un petit groupe d'adolescent·e·s du territoire. Partage, joie, rires et apprentissage."
+      date: 'Information disponible sur place'
+      titre: 'Ateliers de théâtre à la FDE de Carcassonne Libérer la parole et le corps'
+      resume: "Réservés aux étudiant·e·s et personnels de l'académie de Montpellier qui souhaitent développer leurs capacités vocales et posturales devant un public d’enfants."
       liens:
-        - { texte: 'Voir la publication sur Facebook', url: 'https://www.facebook.com/share/p/1AzNZwvigi/' }
-        - { texte: 'Voir la publication sur Instagram', url: 'https://www.instagram.com/p/DXezLzSDTUO/?utm_source=ig_web_button_share_sheet&igsh=MzRIODBiNWFIZA==' }
+        - { texte: 'Voir la publication sur Facebook', url: 'https://www.facebook.com/' }
+        - { texte: 'Voir la publication sur Instagram', url: 'https://www.instagram.com/p/De7EDnCtFiB/?utm_source=ig_web_copy_link&cplk=NTc4MTIwNjQ2YQ==' }
+      miniature:
+        user/data/flex-objects/actualites/actualite-ateliers.avif: { name: actualite-ateliers.avif, type: image/avif, size: 625233, path: user/data/flex-objects/actualites/actualite-ateliers.avif, url: /user/data/flex-objects/actualites/actualite-ateliers.avif }
+      miniature_alt: 'Miniature pour le spectacle de Théâtre Forum pour les adultes'

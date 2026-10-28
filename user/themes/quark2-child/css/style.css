@@ -184,10 +184,6 @@ h2:not(.display-title) {
     font-size: 1.125rem;
 }
 
-p:not(.signature){
-    margin-top: var(--space-s);
-}
-
 p.traduction {
     font-variant-caps: small-caps;
     margin-top: var(--space-m);
@@ -775,25 +771,33 @@ main:focus-visible {
     gap: 0.625rem;
     grid-auto-rows: minmax(auto, max-content);
     grid-template-columns: 1fr;
-    justify-items: center;
     padding: 0.9375rem;
 }
 
-.actu-image {
+.actu-item-image {
     border-radius: 0.5rem;
     display: block;
     height: auto;
     max-width: 100%;
     width: calc(30vh - 2rem);
+    justify-self:center;
 }
 
 .actu-content {
     min-width: 0;
 }
 
-.alignement {
-    display: flex;
-    justify-content: center;
+.actu-bloc {
+    display:block;
+}
+
+.actu-bloc img {
+    float:left;
+    border-radius: 0.5rem;
+    width:80px;
+    height:115px;
+    object-fit:cover;
+    margin-right:var(--space-xs);
 }
 
 .actu-date {
@@ -805,9 +809,7 @@ main:focus-visible {
 }
 
 .actu-wrapper {
-    align-items: left;
-    display: flex;
-    flex-direction: column;
+    display:block;
 }
 
 .actu-titre {
@@ -938,19 +940,18 @@ input:checked + label .row {
 .page_equipe {
   display: flex;
   flex-direction: column;
-  gap: 3rem; /* Espace vertical entre vos 3 sections de l'assoce */
+  gap: 3rem;
 }
 
-/* --- LE STYLE CSS DE VOS <ul> (Remplace votre ancien .g_equipe seul) --- */
 .g_equipe {
   display: grid;
-  grid-template-columns: 1fr; /* Mobile-first : 1 seule colonne */
+  grid-template-columns: 1fr;
   grid-template-rows:auto;
   align-content:start;
   gap: 1.25rem;
   justify-items: center; /* Aligne le contenu au centre de chaque cellule */
   justify-content: center; /* Aligne la ligne de la grille au centre de la page */
-  list-style: none; /* Supprime les puces de la liste <ul> */
+  list-style: none;
   padding: 0;
   margin: 0;
 }
@@ -1058,8 +1059,8 @@ input:checked + label .row {
 }
 
 .e_debut_bio {
+    display:flex;
     position: relative;
-    display: flex;
     flex-direction: column;
 }
 
@@ -1146,28 +1147,6 @@ figure.bio {
     padding-right:2%;
 }
 
-.g_co-item2 {
-    grid-row: 1/2;
-}
-
-.g_co-item3 {
-    grid-row: 2/3;
-}
-
-.g_co-item4 {
-    grid-row: 3/4;
-}
-
-.g_co-item5 {
-    grid-row: 4/5;
-}
-
-.g_co-item6 {
-    display: flex;
-    flex-direction: column;
-    padding-top: 0.625rem;
-}
-
 .g_compagnie3 {
     display:grid;
     align-items: center;
@@ -1240,7 +1219,6 @@ figure.bio {
     grid-column:1/3;
     grid-row:6/7;
     flex-direction: column;
-    align-items: center;
     justify-content: center;
 }
 
@@ -1256,6 +1234,7 @@ figure.bio {
     grid-row:7/8;
 }
 
+.g_co-item12 figure,
 .g_co-item13 figure {
     display: flex;
     flex-direction: column;
@@ -2062,6 +2041,7 @@ th.sep {
 
     .versions-spectacle {
         flex-direction:row;
+        gap:20px;
     }
 
     .images-spectacle {
