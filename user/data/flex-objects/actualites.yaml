@@ -38,7 +38,7 @@ cb81d4d97cea3272948649dc194c9ed2:
       titre: 'Ateliers de théâtre à la FDE de Carcassonne Libérer la parole et le corps'
       resume: "Réservés aux étudiant·e·s et personnels de l'académie de Montpellier qui souhaitent développer leurs capacités vocales et posturales devant un public d’enfants."
       liens:
-        - { texte: 'Voir la publication sur Facebook', url: 'https://www.facebook.com/' }
+        - { texte: 'Voir la publication sur Facebook', url: 'https://www.facebook.com/share/p/1Cf7UvAuLQ/' }
         - { texte: 'Voir la publication sur Instagram', url: 'https://www.instagram.com/p/De7EDnCtFiB/?utm_source=ig_web_copy_link&cplk=NTc4MTIwNjQ2YQ==' }
       miniature:
         user/data/flex-objects/actualites/actualite-ateliers.avif: { name: actualite-ateliers.avif, type: image/avif, size: 625233, path: user/data/flex-objects/actualites/actualite-ateliers.avif, url: /user/data/flex-objects/actualites/actualite-ateliers.avif }
