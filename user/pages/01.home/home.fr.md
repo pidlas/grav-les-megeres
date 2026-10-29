@@ -39,7 +39,7 @@ mes_liens:
     contact: /contact
 ---
 
-Les Mégères de l'Humus est une [a url="/infos/compagnie" class="lien-interne"]compagnie[/a] de théâtre éco-queer, féministe et artiviste installée à Moussoulens, dans l'Aude. Nous créons des [a url="/spectacles/gresilhette-et-la-salimonde" class="lien-interne"]spectacles[/a], menons des actions de [a url="/theatre-forum/le-spectacle" class="lien-interne"]théâtre forum[/a] et proposons des [a url="/prestations/ateliers" class="lien-interne"]ateliers[/a], [a url="/prestations/cours" class="lien-interne"]cours[/a] et [a url="/prestations/stages" class="lien-interne"]stages[/a]
+Les _Mégères de l'Humus_ est une [a url="/infos/compagnie" class="lien-interne"]compagnie[/a] de théâtre éco-queer, féministe et artiviste installée à Moussoulens, dans l'Aude. Nous créons des [a url="/spectacles/gresilhette-et-la-salimonde" class="lien-interne"]spectacles[/a], menons des actions de [a url="/theatre-forum/le-spectacle" class="lien-interne"]théâtre forum[/a] et proposons des [a url="/prestations/ateliers" class="lien-interne"]ateliers[/a], [a url="/prestations/cours" class="lien-interne"]cours[/a] et [a url="/prestations/stages" class="lien-interne"]stages[/a]
 pour différents publics. 
                         
 Nous sommes joignables [a url="/contact"]ici[/a].

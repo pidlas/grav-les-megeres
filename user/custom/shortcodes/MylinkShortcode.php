@@ -17,7 +17,17 @@ class MylinkShortcode extends Shortcode {
             // Conversion du "@" anti-spam en "@" s'il est écrit en entité dans le Markdown
             $url = str_replace(['@', '&amp;#64;', '&#64;'], '@', $url);
 
-            // $alt = Utils::getNonce($sc->getParameter('alt', ''));
+            // --- AJOUT DE LA CONDITION SERVEUR PRODUCTION vs LOCAL ---
+            // On vérifie si l'hôte actuel est celui de production
+            $current_host = $_SERVER['HTTP_HOST'] ?? '';
+            if ($current_host === 'grav.lesmegeresdelhumus.fr') {
+                // Si l'url ne commence pas déjà par /grav et est une URL relative
+                if (strpos($url, '/grav') !== 0 && !preg_match('/^https?:\/\//i', $url) && strpos($url, '#') !== 0 && strpos($url, 'mailto:') !== 0 && strpos($url, 'tel:') !== 0) {
+                    // On s'assure qu'il y a un slash correctement placé
+                    $url = '/grav' . '/' . ltrim($url, '/');
+                }
+            }
+            
             // On récupère simplement le paramètre 'alt' ou 'title' écrit dans le shortcode
             $alt = trim((string) $sc->getParameter('alt', $sc->getParameter('title', '')));
  
