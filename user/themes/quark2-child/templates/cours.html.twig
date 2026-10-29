@@ -30,7 +30,7 @@
     </div>
 
     {# 3. Bloc des premières images au centre #}
-    <div class="image-au-centre">
+    <div class="img-centre">
         {# Image 1 : Les tarifs des cours #}
         {% set img_tarifs = page.media['les-cours.avif'] %}
         {% if img_tarifs %}
@@ -45,9 +45,8 @@
     </div>
 
     {# 4. Bloc des objectifs pédagogiques #}
-    <div class="image-au-centre">
-        <h2 class="display-title">Les objectifs pédagogiques</h2>
-
+    <h2 class="display-title">Les objectifs pédagogiques</h2>
+    <div class="img-centre">
         {# Sécurisation et appel direct de l'image AVIF #}
         {% set img_objectifs = page.media['objectifs-des-cours.avif'] %}
         {% if img_objectifs %}

@@ -1619,15 +1619,11 @@ section {
     width: min(800px, 100%);
 }
 
-.image-au-centre {
-    display: block;
-    margin-top: var(--space-l);
-    text-align: center;
-}
-
 .img-centre {
     display: flex;
     justify-content: center;
+    margin-top:var(--space-m);
+    gap:2rem;
 }
 
 .affiche-stage {
@@ -1643,6 +1639,7 @@ section {
     display: block;
     padding: 0.625rem;
     width: 80%;
+    margin:0 auto;
 }
 
 .contact p {

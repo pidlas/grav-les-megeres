@@ -10,7 +10,7 @@ process:
     shortcode: true
 ---
 
-[div class="image-au-centre"]
+[div class="img-centre"]
 [![vers les scolaires](les-scolaires.avif?resize=200)](/theatre-forum/le-spectacle/les-scolaires){.images-spectacle .morph} [![vers le tout public](le-tout-public.avif?resize=200)](/theatre-forum/le-spectacle/le-tout-public){.images-spectacle .morph}
 [/div]
 
