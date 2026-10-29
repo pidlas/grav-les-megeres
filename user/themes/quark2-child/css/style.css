@@ -1292,6 +1292,10 @@ figure.bio {
     align-items:center;
 }
 
+.versions-spectacle + p {
+    margin-top:var(--space-m);
+}
+
 .images-spectacle {
     margin-top: var(--space-m);
     position: relative;
@@ -2046,6 +2050,10 @@ th.sep {
     .versions-spectacle {
         flex-direction:row;
         gap:20px;
+    }
+
+    .versions-spectacle + p {
+    margin-top:0;
     }
 
     .images-spectacle {
