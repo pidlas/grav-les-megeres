@@ -1287,9 +1287,9 @@ figure.bio {
 
 .versions-spectacle {
     display:flex;
-    flex-direction:column;
-    justify-content:center;
     align-items:center;
+    justify-content:center;
+    gap:20px;
 }
 
 .versions-spectacle + p {
@@ -1641,7 +1641,6 @@ section {
     border-radius: 2rem;
     box-shadow: -0.5rem 0.5rem 0.75rem rgba(0, 0, 0, 0.3);
     display: block;
-    margin: 2rem auto 0;
     padding: 0.625rem;
     width: 80%;
 }
