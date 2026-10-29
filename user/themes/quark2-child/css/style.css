@@ -193,6 +193,11 @@ p.traduction {
     margin: 0;
 }
 
+/* Cible automatiquement le premier paragraphe de chaque page */
+main p:nth-of-type(1){
+    margin-top: var(--space-m);
+}
+
 .p_centrer {
     text-align: center;
 }
@@ -775,11 +780,11 @@ main:focus-visible {
 }
 
 .actu-item-image {
+    display:block;
     border-radius: 0.5rem;
-    display: block;
-    height: auto;
     max-width: 100%;
     width: calc(30vh - 2rem);
+    height: calc(30vh - 2rem);
     justify-self:center;
 }
 

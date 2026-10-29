@@ -25,12 +25,12 @@
 cb81d4d97cea3272948649dc194c9ed2:
   categorie: 'Les réseaux sociaux'
   image_principale:
-    user/data/flex-objects/actualites/le-croco-bleu.avif:
-      name: le-croco-bleu.avif
+    user/data/flex-objects/actualites/actu-reseaux-sociaux.avif:
+      name: actu-reseaux-sociaux.avif
       type: image/avif
-      size: 36116
-      path: user/data/flex-objects/actualites/le-croco-bleu.avif
-      url: /user/data/flex-objects/actualites/le-croco-bleu.avif
+      size: 8836
+      path: user/data/flex-objects/actualites/actu-reseaux-sociaux.avif
+      url: /user/data/flex-objects/actualites/actu-reseaux-sociaux.avif
   image_alt: 'Stage pour les ados'
   blocs:
     -
