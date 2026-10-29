@@ -1283,7 +1283,6 @@ figure.bio {
     display:flex;
     align-items: center;
     flex-direction: column;
-    margin-top: 1.125rem;
 }
 
 .versions-spectacle {
