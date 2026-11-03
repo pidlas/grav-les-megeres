@@ -1,3 +1,34 @@
+# v3.12.0
+## 11/03/2026
+
+1. [](#new)
+    * Passkeys (Grav 2 only, off by default: `passkeys.enabled`). An account adds passkeys on its profile page and signs in with one, from 1Password, iCloud Keychain, Google Password Manager, Windows Hello or a security key, without its password. A passkey is both steps at once, so it skips the 2-Factor Authentication code, and at the 2FA step after a password it can stand in for the code. Passkeys are stored on the account, so the same passkey signs in to the site and to Admin2
+    * The login form offers passkeys in the username field's autofill and as a "Sign in with a passkey" button, shown only in browsers that can use one (HTTPS)
+    * Adding or removing a passkey asks for the current password (or, for an account without one, the current 2FA code), and `passkeys`/`webauthn_id` can't be set through the profile form
+    * New settings: `passkeys.rp_id` and `passkeys.origin` for sites behind a proxy or sharing passkeys across subdomains, and per-IP limits for failed and started passkey ceremonies (`passkey_attempts`, `passkey_options`)
+    * `Login::passkeys()` gives other plugins the passkey service, and the `onUserPasskeyAdded` / `onUserPasskeyRemoved` events fire on changes
+1. [](#improved)
+    * Ships lbuchs/webauthn for the passkey checks. It is only loaded on Grav 2 with PHP 8, so the plugin still installs and runs on Grav 1.7 and PHP 7.3
+
+# v3.11.2
+## 10/31/2026
+
+1. [](#bugfix)
+    * [security] The security fixes below were found by Anthropic's OSS Scanner
+    * [security] The 2-Factor Authentication secret and QR code now show only on a member's own account
+    * [security] Different spellings of one account name, such as capital letters or its email address, now share one sign-in attempt limit
+    * [security] Email addresses containing template code are no longer accepted when registering, saving a profile or changing an email address
+    * [security] Protected page media is now checked against the page that file is served from
+
+# v3.11.1
+## 10/29/2026
+
+1. [](#improved)
+    * [security] The profile page asks for your current password before a new email address, the same way it does before a new password, while an account with no password yet (one made by a sign-in service or a magic link) can still change its email without one. A site with its own profile form needs the `current_password` field for this, as it does for password changes
+    * [security] Asking for a new email address now sends the old address a notice with the new one partly hidden (`an***@example.com`) and a link that cancels the change. The link works once, stops the confirm link working too, and signs the account out everywhere else, since "this wasn't me" means someone else may be signed in. Sent only when `profile.verify_email_change` is on
+2. [](#bugfix)
+    * [security] Confirming an email change now signs the account out of every other browser, API token and remember-me cookie, so a session someone else took over ends once the owner confirms. The browser that opened the link stays signed in when it's the owner's
+
 # v3.11.0
 ## 10/23/2026
 

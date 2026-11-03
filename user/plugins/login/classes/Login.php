@@ -28,6 +28,7 @@ use Grav\Common\Utils;
 use Grav\Plugin\Login\Events\PageAuthorizeEvent;
 use Grav\Plugin\Login\Events\UserLoginEvent;
 use Grav\Plugin\Login\Invitations\Invitation;
+use Grav\Plugin\Login\Passkeys\Passkeys;
 use Grav\Plugin\Login\RememberMe\RememberMe;
 use Grav\Plugin\Login\RememberMe\TokenStorage;
 use Grav\Plugin\Login\TwoFactorAuth\TwoFactorAuth;
@@ -63,6 +64,9 @@ class Login
 
     /** @var TwoFactorAuth */
     protected $twoFa;
+
+    /** @var Passkeys|null|false false until first asked */
+    protected $passkeys = false;
 
     /** @var RateLimiter[] */
     protected $rateLimiters = [];
@@ -640,7 +644,7 @@ class Login
      */
     public static function getRateLimitContexts(): array
     {
-        return ['login_attempts', 'twofa_attempts', 'pw_resets', 'magic_links', 'token_attempts', 'registrations', 'email_changes'];
+        return ['login_attempts', 'twofa_attempts', 'pw_resets', 'magic_links', 'token_attempts', 'registrations', 'email_changes', 'passkey_attempts', 'passkey_options'];
     }
 
     /**
@@ -789,6 +793,57 @@ class Login
     }
 
     /**
+     * Whether a value holds the opening of a Twig expression, statement or comment.
+     *
+     * @param string $value
+     * @return bool
+     */
+    public static function hasTemplateSyntax(string $value): bool
+    {
+        return (bool)preg_match('/\{[{%#]/', $value);
+    }
+
+    /**
+     * Whether a value is an email address Login accepts: a valid address that
+     * doesn't contain Twig syntax, since addresses end up in page and email templates.
+     *
+     * @param mixed $value
+     * @return bool
+     */
+    public static function isAcceptableEmail($value): bool
+    {
+        if (!is_string($value)) {
+            return false;
+        }
+
+        $value = trim($value);
+
+        return $value !== '' && !static::hasTemplateSyntax($value) && filter_var($value, FILTER_VALIDATE_EMAIL) !== false;
+    }
+
+    /**
+     * The name a login counter is kept under: the stored account's username
+     * when the submitted name opens one, so spellings of one account (case,
+     * or its email address) share a counter, otherwise the submitted name.
+     *
+     * @param string $submitted
+     * @param UserInterface|null $user The account the submitted name opened.
+     * @return string
+     */
+    public function rateLimitName(string $submitted, $user = null): string
+    {
+        if (!$user || !$user->exists()) {
+            /** @var UserCollectionInterface $accounts */
+            $accounts = $this->grav['accounts'];
+            $user = $submitted !== '' ? $accounts->find($submitted, ['email']) : null;
+        }
+
+        $stored = $user && $user->exists() ? (string)$user->get('username') : '';
+
+        return $stored !== '' ? $stored : $submitted;
+    }
+
+    /**
      * @param string $type
      * @param mixed  $value
      * @param string $extra
@@ -834,7 +889,7 @@ class Login
 
             case 'email':
                 $value = \is_string($value) ? trim($value) : '';
-                if ($value === '' || !filter_var($value, FILTER_VALIDATE_EMAIL)) {
+                if (!static::isAcceptableEmail($value)) {
                     throw new \RuntimeException('Not a valid email address');
                 }
 
@@ -1004,9 +1059,14 @@ class Login
      * the link is opened. A second request replaces the first one, so an older
      * link stops working.
      *
-     * When the address already belongs to another account nothing is mailed,
-     * but the account still shows the change as waiting, so the profile form
-     * answers the same way it does for a free address.
+     * A request for a new address also tells the current address, with a link
+     * to cancel it (sendEmailChangeRequestedNotice()). Sending the link again
+     * for the same address keeps the cancel link already mailed, so it isn't
+     * mailed twice.
+     *
+     * When the address already belongs to another account nothing is mailed
+     * to it, but the account still shows the change as waiting, so the profile
+     * form answers the same way it does for a free address.
      *
      * @param UserInterface $user
      * @param string $email
@@ -1015,17 +1075,22 @@ class Login
      */
     public function requestEmailChange(UserInterface $user, string $email)
     {
-        try {
-            $token = bin2hex(random_bytes(16));
-        } catch (\Exception $e) {
-            $token = md5(uniqid((string)mt_rand(), true));
-        }
-
         $expire = time() + static::EMAIL_CHANGE_TTL;
 
+        $newRequest = mb_strtolower((string)$user->get('email_pending', '')) !== mb_strtolower($email)
+            || (string)$user->get('email_change_cancel_token', '') === '';
+
         $user->email_pending = $email;
-        $user->email_change_token = $token . '::' . $expire;
+        $user->email_change_token = static::newToken() . '::' . $expire;
+        if ($newRequest) {
+            // Its own token, so the confirm link can't be worked out from it.
+            $user->email_change_cancel_token = static::newToken();
+        }
         $user->save();
+
+        if ($newRequest) {
+            $this->sendEmailChangeRequestedNotice($user);
+        }
 
         if ($this->emailBelongsToAnother($user, $email)) {
             $this->grav['log']->info(sprintf('plugin.login: email change for "%s" not mailed, the address belongs to another account', $user->username));
@@ -1054,7 +1119,7 @@ class Login
      */
     public function refreshEmailFields(UserInterface $user): void
     {
-        $this->refreshStoredFields($user, ['email', 'email_pending', 'email_change_token', 'email_verified', 'email_verified_at']);
+        $this->refreshStoredFields($user, ['email', 'email_pending', 'email_change_token', 'email_change_cancel_token', 'email_verified', 'email_verified_at']);
     }
 
     /**
@@ -1110,7 +1175,59 @@ class Login
      */
     public function clearEmailChange(UserInterface $user): void
     {
-        unset($user->email_pending, $user->email_change_token);
+        unset($user->email_pending, $user->email_change_token, $user->email_change_cancel_token);
+    }
+
+    /**
+     * Tell the current address that a change to a new one was asked for, with
+     * a link to cancel it. A delivery failure is logged, since the request
+     * itself has gone through.
+     *
+     * @param UserInterface $user
+     * @return bool True if the action was performed.
+     */
+    public function sendEmailChangeRequestedNotice(UserInterface $user)
+    {
+        if ((string)$user->get('email', '') === '') {
+            return false;
+        }
+
+        try {
+            Email::sendEmailChangeRequestedNotice($user);
+        } catch (\Exception $e) {
+            $this->grav['log']->error('plugin.login: could not send email change requested notice: ' . $e->getMessage());
+
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * A random token for an emailed link.
+     *
+     * @return string
+     */
+    public static function newToken(): string
+    {
+        try {
+            return bin2hex(random_bytes(16));
+        } catch (\Exception $e) {
+            return md5(uniqid((string)mt_rand(), true));
+        }
+    }
+
+    /**
+     * Whether a token from a link matches the one stored on the account. An
+     * empty token never matches, so a cleared one can't be used.
+     *
+     * @param string $stored
+     * @param string $given
+     * @return bool
+     */
+    public static function tokenMatches(string $stored, string $given): bool
+    {
+        return $stored !== '' && $given !== '' && hash_equals($stored, $given);
     }
 
     /**
@@ -1274,6 +1391,24 @@ class Login
     }
 
     /**
+     * Passkeys, when this site offers them: Grav 2 (Passkeys::supported())
+     * and `passkeys.enabled` on. Null otherwise, and always null on Grav 1.7,
+     * so callers never reach the WebAuthn code there.
+     *
+     * @return Passkeys|null
+     */
+    public function passkeys()
+    {
+        if ($this->passkeys === false) {
+            $this->passkeys = Passkeys::supported() && $this->grav['config']->get('plugins.login.passkeys.enabled', false)
+                ? new Passkeys($this->grav)
+                : null;
+        }
+
+        return $this->passkeys;
+    }
+
+    /**
      * @param string $context
      * @param int $maxCount
      * @param int $interval
@@ -1311,6 +1446,16 @@ class Login
                 case 'magic_links':
                     $maxCount = $this->grav['config']->get('plugins.login.magic_link.max_requests_count', 3);
                     $interval = $this->grav['config']->get('plugins.login.magic_link.max_requests_interval', 60);
+                    break;
+                case 'passkey_attempts':
+                    // Passkey answers that didn't check out, per IP.
+                    $maxCount = $this->grav['config']->get('plugins.login.passkeys.max_attempts_count', 10);
+                    $interval = $this->grav['config']->get('plugins.login.passkeys.max_attempts_interval', 10);
+                    break;
+                case 'passkey_options':
+                    // Passkey ceremonies started, per IP (each stores a challenge).
+                    $maxCount = $this->grav['config']->get('plugins.login.passkeys.max_options_count', 60);
+                    $interval = $this->grav['config']->get('plugins.login.passkeys.max_options_interval', 10);
                     break;
                 case 'email_changes':
                     $maxCount = $this->grav['config']->get('plugins.login.profile.max_email_changes_count', 5);

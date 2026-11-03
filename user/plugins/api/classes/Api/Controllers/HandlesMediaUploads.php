@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Grav\Plugin\Api\Controllers;
 
-use Grav\Common\Security;
 use Grav\Plugin\Api\Exceptions\ValidationException;
 use Grav\Plugin\Api\Serializers\MediaSerializer;
 use Grav\Plugin\Api\Services\ThumbnailService;
@@ -26,6 +25,7 @@ use Psr\Http\Message\UploadedFileInterface;
  */
 trait HandlesMediaUploads
 {
+    use StoresMediaUploads;
     /** Maximum upload size: 64 MB */
     private const int MAX_UPLOAD_SIZE = 67_108_864;
 
@@ -142,67 +142,24 @@ trait HandlesMediaUploads
             $filename = $settings->resolveFilename($filename, $targetDir);
         }
 
-        // Move the file to the target directory
-        $targetPath = $targetDir . '/' . $filename;
-        $file->moveTo($targetPath);
-
-        // An SVG can carry executable <script>/event-handler payloads that run
-        // when the file is later served inline as image/svg+xml — a stored XSS
-        // vector (GHSA-7vhm-8x52-2r5p). The extension denylist can't cover it
-        // because SVG is a legitimate media type, so sanitize the markup in
-        // place with core's canonical routine (honors security.sanitize_svg;
-        // quarantines and throws if it can't be cleaned). This matches how the
-        // admin and Form plugin upload paths already protect SVG uploads.
-        //
-        // Decide by what the file IS, not by what it is called: keying the gate
-        // on the literal extension "svg" let the same markup through under any
-        // other name a browser still renders as SVG, `.svgz` above all
-        // (GHSA-66xf-ggf4-6hmc).
-        if ($this->isSvgUpload($targetPath, $filename)) {
-            Security::sanitizeSVG($targetPath);
-        }
+        $this->storeUploadedFile($file, $targetDir . '/' . $filename, $filename);
 
         return $filename;
     }
 
     /**
-     * Whether a stored upload is SVG markup and therefore has to go through
-     * the sanitizer, regardless of the name it arrived under.
-     *
-     * Both the name and the bytes are consulted: the name catches the ordinary
-     * `.svg`/`.svgz` upload, and the content sniff catches markup parked under
-     * some other extension that a browser will still render inline. A gzipped
-     * SVG (`.svgz`) is deliberately reported here even though the sanitizer
-     * cannot read compressed markup — it fails closed, quarantining the file
-     * and rejecting the upload, which is the right answer for a format we have
-     * no reason to accept (GHSA-66xf-ggf4-6hmc).
-     */
-    protected function isSvgUpload(string $path, string $filename): bool
-    {
-        if (in_array(strtolower(pathinfo($filename, PATHINFO_EXTENSION)), ['svg', 'svgz'], true)) {
-            return true;
-        }
-
-        $head = @file_get_contents($path, false, null, 0, 1024);
-        if ($head === false || $head === '') {
-            return false;
-        }
-
-        // Gzip magic — an SVG under any name, compressed. Sniff the inflated
-        // head so a renamed .svgz is caught the same way.
-        if (str_starts_with($head, "\x1f\x8b")) {
-            $inflated = @gzdecode((string)@file_get_contents($path));
-            $head = $inflated === false ? $head : substr($inflated, 0, 1024);
-        }
-
-        return stripos($head, '<svg') !== false;
-    }
-
-    /**
      * Validate that none of a filename's extensions are on the dangerous list.
+     *
+     * Also refuses names with control or invisible format characters, or that
+     * end in whitespace or a dot: some filesystems and servers strip those, so
+     * the stored name would not be the one checked here.
      */
     protected function validateFileExtension(string $filename): void
     {
+        if (preg_match('/[\p{Cc}\p{Cf}]/u', $filename) !== 0 || preg_match('/[\s\p{Z}.]$/u', $filename) !== 0) {
+            throw new ValidationException('Invalid filename.');
+        }
+
         $extension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
 
         if ($extension === '') {
@@ -218,12 +175,15 @@ trait HandlesMediaUploads
         // "shell.php.jpg" passes a last-extension check (".jpg") yet the web
         // server may still execute the earlier ".php" — the classic double-
         // extension RCE (GHSA-66v2-vxxf-xc3v). The basename (first segment) is
-        // skipped; only the trailing extension chain is inspected.
+        // skipped; only the trailing extension chain is inspected. Each part is
+        // also checked URL-decoded and trimmed, so `php%00` or `php%20` can't
+        // slip past as a name the denylist doesn't recognize.
         $parts = array_slice(explode('.', strtolower($filename)), 1);
         foreach ($parts as $part) {
-            if (in_array($part, $dangerousExtensions, true)) {
+            $decoded = strtolower(trim(rawurldecode($part)));
+            if (in_array($part, $dangerousExtensions, true) || in_array($decoded, $dangerousExtensions, true)) {
                 throw new ValidationException(
-                    "File extension '.{$part}' is not allowed for security reasons."
+                    "File extension '.{$decoded}' is not allowed for security reasons."
                 );
             }
         }

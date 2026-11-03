@@ -936,6 +936,8 @@ Resolution follows Grav's Flex pages: a matching group that denies wins outright
 
 Every page record returned by the API carries a `permissions` object with the caller's effective `create` / `read` / `update` / `delete` / `publish` / `list` for that page, which is what Admin-Next uses to show or hide the Save, Copy and Delete buttons.
 
+Page lists follow the same rules. `GET /pages` leaves out every page the caller may not `read` or `list`, and its totals count only the rest. A folder listing (`children_of` or `root=true`) still returns a folder the caller can't open when a page they can read is somewhere below it, with `ancestor_only: true` on that row so a tree can be expanded down to the page; such a row carries only the title, route, order and `permissions`. `GET /pages?editable=true` keeps only the pages the caller may update (and, in a folder listing, the folders that lead to them), which gives an editor a short list of their own pages. Changing a page's media needs the right to update that page as well as `api.media.write` (a page without rules needs only `api.media.write`); a single page's `permissions.media` says whether the caller may. Reorder and reorganize number against every child of the folder, including ones the caller can't see, so a partial order never gives two pages the same number.
+
 ## CLI Commands
 
 Manage API keys from the command line:
@@ -1121,6 +1123,7 @@ The sidebar item structure:
 | `badge` | string\|null | Optional badge text (e.g., count or status) |
 | `badgeEndpoint` | string | Optional API path returning `{ count: N }`, fetched for a live badge that overrides `badge` |
 | `authorize` | string\|array | Optional permission (or any-of list) a user needs to see the item |
+| `placement` | string | Optional `footer` to show the item in the sidebar's bottom group, above Settings, for site-wide tools such as a trash (Admin2 2.2.3 and later). Footer items aren't part of the arrangeable list. Default `main` |
 | `children` | array | Optional shortcuts a user can show under the item: each has an `id`, a `label`, a `route` (which may carry a `#` part) and optionally `default` (`true` to show it until the user picks their own), an `icon` and `authorize` |
 
 Each user arranges their own sidebar in Admin2 (the pencil at the bottom of the sidebar): they reorder and hide items, and star the `children` they want under an item. Until they pick, the children marked `default` show. A plugin's own page can star them too, through `window.__GRAV_SIDEBAR` in Admin2 2.2.0 and later (`children(itemId)` lists the ones it offers this user, `shortcuts(itemId)` the ones showing, `setShortcut(itemId, childId, on)` saves a change, and a `grav:sidebar:shortcuts` event on `window` says when they change). A super admin can save an arrangement as the site's default for everyone who hasn't arranged their own. The arrangement is the `sidebarLayout` preference, which names items by id (`plugin:<id>`) and keeps the picked children under `shortcuts`, keyed by item, so keep your item's `id` and its children's ids stable across releases.
@@ -1353,8 +1356,9 @@ The API fires events before and after all write operations, allowing plugins to 
 | `onApiPageCreated` | After page creation | `page` (PageInterface), `route`, `lang` |
 | `onApiBeforePageUpdate` | Before a page is updated | `page` (PageInterface), `data` (request body, modifiable by reference) |
 | `onApiPageUpdated` | After page update | `page` (PageInterface), `previous_template` (string, only when the template changed) |
-| `onApiBeforePageDelete` | Before a page is deleted | `page` (PageInterface), `lang` (if language-specific delete) |
-| `onApiPageDeleted` | After page deletion | `route`, `lang` (if language-specific delete) |
+| `onApiBeforePageDelete` | Before a page is deleted | `page` (PageInterface), `lang` (if language-specific delete), `method` (`batch` in a batch) |
+| `onApiPageDeleted` | After page deletion | `route`, `lang` (if language-specific delete), `undo` (set it to offer an undo, see below; `DELETE /pages/{route}` only), `method` (`batch` in a batch) |
+| `onApiPageDeleteInfo` | Once per request, when page records are built | `recoverable` (set it to `true` when your plugin keeps deleted pages so they can be restored), `user` |
 | `onApiPageMoved` | After page move | `page` (PageInterface), `old_route`, `new_route` |
 | `onApiBeforePageTranslate` | Before a translation is created | `page`, `lang`, `header`, `content` (modifiable by reference) |
 | `onApiPageTranslated` | After translation created | `page`, `route`, `lang` |
@@ -1462,6 +1466,33 @@ public function onApiPageDeleted(Event $event): void
 {
     $route = $event['route'];
     $this->searchIndex->remove($route);
+}
+```
+
+**Undo a page delete** (e.g. a plugin that keeps deleted pages in a trash). `onApiPageDeleted` carries an `undo` slot. Fill it with the call that brings the page back, and `DELETE /pages/{route}` answers `200` with `{"data": {"undo": {...}}}` instead of `204` (the `X-Invalidates` header is sent either way). Admin2 then shows the delete toast with an Undo button that makes that call, and opens the restored page (from the page editor) or refreshes the list. `endpoint` is a path relative to the API base (`/api/v1`), never a URL; `method` defaults to `POST`; `body` (a JSON object) and `label` (the button text, Admin2's own translated "Undo" when left out) are optional. A slot that doesn't fit this is ignored and the delete answers `204`. The undo call is an ordinary API request, so it must check the caller's permissions itself. Batch deletes don't offer an undo.
+
+```php
+public function onApiPageDeleted(Event $event): void
+{
+    $id = $this->trash->commitLatest();
+    $event['undo'] = [
+        'method'   => 'POST',
+        'endpoint' => '/my-trash/' . $id . '/restore',
+        'body'     => ['mode' => 'original'],
+    ];
+}
+```
+
+The response's `route` (when the undo endpoint returns one as `data.route`) is the page Admin2 opens after the undo.
+
+**Say deletes can be undone.** A plugin that keeps deleted pages sets `recoverable` on `onApiPageDeleteInfo`, and every page record then carries `delete_recoverable: true`, so a client can tell people the delete can be undone instead of warning that it is permanent:
+
+```php
+public function onApiPageDeleteInfo(Event $event): void
+{
+    if ($this->trashEnabled()) {
+        $event['recoverable'] = true;
+    }
 }
 ```
 

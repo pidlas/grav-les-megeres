@@ -5,12 +5,13 @@ declare(strict_types=1);
 namespace Grav\Plugin\Api\Controllers;
 
 use Grav\Common\Filesystem\Folder;
-use Grav\Common\Security;
+use Grav\Common\Page\Interfaces\PageInterface;
 use Grav\Plugin\Api\Exceptions\ForbiddenException;
 use Grav\Plugin\Api\Exceptions\ValidationException;
 use Grav\Plugin\Api\Response\ApiResponse;
 use Grav\Plugin\Api\Services\BlueprintLoader;
 use Grav\Plugin\Api\Services\BlueprintPathResolver;
+use Grav\Plugin\Api\Services\PathContainment;
 use Grav\Plugin\Api\Services\UploadFieldSettings;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -32,6 +33,8 @@ use Psr\Http\Message\UploadedFileInterface;
  */
 class BlueprintUploadController extends AbstractApiController
 {
+    use StoresMediaUploads;
+
     private const MAX_UPLOAD_SIZE = 64 * 1_048_576; // 64 MB
 
     /**
@@ -106,7 +109,8 @@ class BlueprintUploadController extends AbstractApiController
             $this->getUser($request),
             $this->mayWriteUsersScope($request)
         );
-        $this->guardConfigBearingTarget($targetDir);
+        $isAccountsDir = $this->guardTargetDir($request, $targetDir) === 'accounts';
+        $this->guardPageFolder($request, $targetDir);
 
         $files = $this->flattenUploadedFiles($request->getUploadedFiles());
         if ($files === []) {
@@ -116,8 +120,6 @@ class BlueprintUploadController extends AbstractApiController
         if (!is_dir($targetDir)) {
             Folder::create($targetDir);
         }
-
-        $isAccountsDir = $this->resolver()->classifyTargetDir($targetDir) === 'accounts';
 
         // A field's `allow_extensions`, read from the scope's own blueprint.
         // Only looked up when a file actually carries a content/style extension.
@@ -197,12 +199,12 @@ class BlueprintUploadController extends AbstractApiController
         $targetDir = dirname($absolute);
         $filename = basename($absolute);
 
-        $this->guardConfigBearingTarget($targetDir, $filename);
+        $classification = $this->guardTargetDir($request, $targetDir, $filename);
 
         // Symmetric to the upload path: deletes targeting `user/accounts/` may
         // only act on image files (avatars). Without this gate, a holder of
         // `api.media.write` could `unlink` arbitrary account YAMLs.
-        if ($this->resolver()->classifyTargetDir($targetDir) === 'accounts') {
+        if ($classification === 'accounts') {
             $extension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
             if (!in_array($extension, self::ACCOUNTS_IMAGE_EXTENSIONS, true)) {
                 throw new ForbiddenException(
@@ -227,6 +229,7 @@ class BlueprintUploadController extends AbstractApiController
             )
             : [];
         $this->assertSafeExtension($filename, false, $lifted);
+        $this->guardPageFolder($request, $targetDir);
 
         // Idempotent: a file that's already gone is indistinguishable from a
         // file we just deleted, so don't pollute the client with a 404 that
@@ -348,21 +351,16 @@ class BlueprintUploadController extends AbstractApiController
             $filename = $settings->resolveFilename($filename, $targetDir);
         }
 
-        $targetPath = $targetDir . '/' . $filename;
-        $file->moveTo($targetPath);
-
-        // SVG can carry stored-XSS payloads that execute when served inline as
-        // image/svg+xml (GHSA-7vhm-8x52-2r5p) — sanitize in place like core's
-        // upload paths. Relevant here for avatar SVGs under user/accounts/.
-        if (strtolower(pathinfo($filename, PATHINFO_EXTENSION)) === 'svg') {
-            Security::sanitizeSVG($targetPath);
-        }
+        $this->storeUploadedFile($file, $targetDir . '/' . $filename, $filename);
 
         return $filename;
     }
 
     /**
-     * Reject filenames that would escape the target dir or hide as a dotfile.
+     * Reject filenames that would escape the target dir or hide as a dotfile,
+     * that carry control or invisible format characters, or that end in
+     * whitespace or a dot (which some filesystems and servers strip, so the
+     * stored name would not be the one checked).
      */
     private function assertSafeFilename(string $filename): void
     {
@@ -371,6 +369,8 @@ class BlueprintUploadController extends AbstractApiController
             || str_contains($filename, '..')
             || str_contains($filename, "\0")
             || str_starts_with($filename, '.')
+            || preg_match('/[\p{Cc}\p{Cf}]/u', $filename) !== 0
+            || preg_match('/[\s\p{Z}.]$/u', $filename) !== 0
         ) {
             throw new ValidationException("Invalid filename: '{$filename}'.");
         }
@@ -403,7 +403,9 @@ class BlueprintUploadController extends AbstractApiController
         // Inspect EVERY dot-separated component, not just the last. "shell.php.jpg"
         // has a harmless final ".jpg" but the web server may still execute the
         // earlier ".php" — the double-extension bypass (GHSA-66v2-vxxf-xc3v).
-        $parts = array_slice(explode('.', strtolower($filename)), 1);
+        // Each part is also checked URL-decoded and trimmed, so `twig%20` or
+        // `php%00` can't slip past as a name the denylists don't recognize.
+        $parts = self::extensionParts($filename);
         foreach ($parts as $part) {
             if (in_array($part, $dangerous, true)) {
                 throw new ValidationException("File extension '.{$part}' is not allowed for security reasons.");
@@ -428,14 +430,32 @@ class BlueprintUploadController extends AbstractApiController
     }
 
     /**
+     * The dot-separated parts of $filename after the first, lowercased, each
+     * alongside its URL-decoded, trimmed form when that differs.
+     *
+     * @return string[]
+     */
+    private static function extensionParts(string $filename): array
+    {
+        $parts = [];
+        foreach (array_slice(explode('.', strtolower($filename)), 1) as $part) {
+            $parts[] = $part;
+            $decoded = strtolower(trim(rawurldecode($part)));
+            if ($decoded !== $part) {
+                $parts[] = $decoded;
+            }
+        }
+
+        return $parts;
+    }
+
+    /**
      * Whether any dot-separated part of $filename is a content/style extension,
      * i.e. whether the field's `allow_extensions` could matter at all.
      */
     private function carriesContentExtension(string $filename): bool
     {
-        $parts = array_slice(explode('.', strtolower($filename)), 1);
-
-        return array_intersect($parts, self::CONTENT_EXTENSIONS) !== [];
+        return array_intersect(self::extensionParts($filename), self::CONTENT_EXTENSIONS) !== [];
     }
 
     /**
@@ -538,23 +558,118 @@ class BlueprintUploadController extends AbstractApiController
     }
 
     /**
-     * Hard-deny writes resolving to directories that Grav reads as
-     * authoritative configuration: `user/config/` and any `user/env/.../config/`.
-     * `user/accounts/` is allowed (avatars) but extension-restricted in
-     * `assertSafeExtension()`.
+     * Hard-deny writes and deletes in directories that must not take arbitrary
+     * files, and return the directory's classification for the caller's
+     * follow-up checks. Super admin below always means super with the API-key
+     * scope cap applied, and so does the config permission.
+     *
+     *   - `user/config/` and any `user/env/.../config/`: Grav reads them as
+     *     authoritative configuration. Refused for everyone.
+     *   - Twig template folders (a theme's or plugin's `templates/`, or any
+     *     registered Twig path): every file there is site template code,
+     *     whatever its extension. Super admin only.
+     *   - Anywhere else in `user/themes/` or `user/plugins/`: needs
+     *     `api.config.write`. A theme or plugin settings file field (a logo, a
+     *     favicon) is part of editing that theme's or plugin's settings, and a
+     *     theme or plugin may hand any of its folders to Twig.
+     *   - Anywhere outside `user/` (cache, logs, system, ...): super admin only.
+     *   - `user/accounts/` is allowed (avatars) but extension-restricted in
+     *     `assertSafeExtension()` and the delete path.
      *
      * `$filename` is optional — pass it for delete-path checks (where we
      * have the final filename) so the error message can name the target;
      * for upload checks the per-file extension policy fires later anyway.
      */
-    private function guardConfigBearingTarget(string $absoluteDir, ?string $filename = null): void
+    private function guardTargetDir(ServerRequestInterface $request, string $absoluteDir, ?string $filename = null): ?string
     {
         $classification = $this->resolver()->classifyTargetDir($absoluteDir);
+        $where = $filename !== null ? "'{$filename}' under" : 'into';
+        $action = $filename !== null ? 'Deleting' : 'Uploading';
+
         if ($classification === 'config' || $classification === 'env') {
-            $where = $filename !== null ? "'{$filename}' under" : 'into';
             throw new ForbiddenException(
                 "Uploads {$where} the '{$classification}' directory are not allowed via this endpoint."
             );
+        }
+
+        if ($classification === 'templates' && !$this->isSuperWithinScope($request)) {
+            throw new ForbiddenException(
+                "{$action} files in a theme or plugin templates folder requires super admin access."
+            );
+        }
+
+        if ($classification === 'outside' && !$this->isSuperWithinScope($request)) {
+            throw new ForbiddenException(
+                "{$action} files outside the user folder requires super admin access."
+            );
+        }
+
+        if (
+            $classification === 'theme_or_plugin'
+            && !$this->isSuperWithinScope($request)
+            && !$this->hasPermissionWithinScope($request, 'api.config.write')
+        ) {
+            throw new ForbiddenException(
+                "{$action} files in a theme or plugin folder requires the 'api.config.write' permission."
+            );
+        }
+
+        return $classification;
+    }
+
+    /**
+     * A file field that saves into a page's folder (`self@:` on a page
+     * blueprint, a `page://` destination, or a delete of such a file) changes
+     * that page's media, so it follows the same page rules as
+     * `POST /pages/{route}/media` (getgrav/grav-plugin-admin2#209).
+     *
+     * The page is the nearest folder at or above the target that is a page;
+     * a file field can save into a subfolder of one. Super admins pass.
+     */
+    private function guardPageFolder(ServerRequestInterface $request, string $absoluteDir): void
+    {
+        try {
+            $pagesRoot = $this->grav['locator']->findResource('page://', true);
+        } catch (\Throwable) {
+            return;
+        }
+        if (!is_string($pagesRoot) || $pagesRoot === '') {
+            return;
+        }
+
+        $dir = rtrim(str_replace('\\', '/', $absoluteDir), '/');
+        $roots = array_unique(array_filter([
+            rtrim(str_replace('\\', '/', $pagesRoot), '/'),
+            ($real = realpath($pagesRoot)) !== false ? rtrim(str_replace('\\', '/', $real), '/') : null,
+        ]));
+
+        $root = null;
+        foreach ($roots as $candidate) {
+            if (PathContainment::isWithin($dir, $candidate, true, '/')) {
+                $root = $candidate;
+                break;
+            }
+        }
+        if ($root === null) {
+            return;
+        }
+
+        $pages = $this->grav['pages'];
+        if (method_exists($pages, 'enablePages')) {
+            $pages->enablePages();
+        }
+
+        // Pages are indexed by the path under the locator's root, so a target
+        // reached through the realpath is looked up under that root instead.
+        $base = rtrim(str_replace('\\', '/', $pagesRoot), '/');
+        $probe = $base . substr($dir, strlen($root));
+        while (strlen($probe) > strlen($base)) {
+            $page = $pages->get($probe);
+            if ($page instanceof PageInterface && !$page->root()) {
+                $this->assertPageUpdatable($request, $page);
+                return;
+            }
+            $probe = dirname($probe);
         }
     }
 

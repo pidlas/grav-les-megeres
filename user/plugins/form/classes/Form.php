@@ -25,6 +25,7 @@ use Grav\Framework\Route\Route;
 use RocketTheme\Toolbox\ArrayTraits\NestedArrayAccessWithGetters;
 use RocketTheme\Toolbox\Event\Event;
 use RocketTheme\Toolbox\ResourceLocator\UniformResourceLocator;
+use LengthException;
 use RuntimeException;
 use stdClass;
 use function is_array;
@@ -572,7 +573,8 @@ class Form implements FormInterface, ArrayAccess
         /** @var Config $config */
         $config = $grav['config'];
 
-        $settings = $this->getBlueprint()->schema()->getProperty($name);
+        $schemaSettings = $this->getBlueprint()->schema()->getProperty($name);
+        $isDeclared = is_array($schemaSettings) && ($schemaSettings['type'] ?? null) === 'file';
         $settings = (object) array_merge(
             ['destination' => $config->get('plugins.form.files.destination', 'self@'),
                 'avoid_overwriting' => $config->get('plugins.form.files.avoid_overwriting', false),
@@ -581,12 +583,23 @@ class Form implements FormInterface, ArrayAccess
                 'limit' => $config->get('plugins.form.files.limit', 10),
                 'filesize' => static::getMaxFilesize(),
             ],
-            (array) $settings,
+            (array) $schemaSettings,
             ['name' => $name]
         );
+        $defaultSettings = (array) $settings;
+
         // Allow plugins to adapt settings for a given post name
         // Useful if schema retrieval is not an option, e.g. dynamically created forms
         $grav->fireEvent('onFormUploadSettings', new Event(['settings' => &$settings, 'post' => $post]));
+
+        // Only accept an upload for a file field the form declares, or one a plugin changed the settings for.
+        if (!$isDeclared && (array) $settings == $defaultSettings) {
+            return [
+                'status'  => 'error',
+                'message' => sprintf($language->translate('PLUGIN_FORM.FILEUPLOAD_UNABLE_TO_UPLOAD', null),
+                    Utils::basename((string) ($post['filename'] ?? $name)), 'Unknown upload field')
+            ];
+        }
 
         $upload = json_decode(json_encode($this->normalizeFiles($_FILES['data'], $settings->name)), true);
         // Strip any path component from the POST-supplied filename. The admin
@@ -729,7 +742,30 @@ class Form implements FormInterface, ArrayAccess
 
         // Special Sanitization for SVG
         if (method_exists('Grav\Common\Security', 'sanitizeSVG') && Utils::contains($mime, 'svg', false)) {
-            Security::sanitizeSVG($upload['file']['tmp_name']);
+            $tmp_name = $upload['file']['tmp_name'];
+            $sanitized = false;
+            try {
+                Security::sanitizeSVG($tmp_name);
+                $sanitized = true;
+            } catch (\Throwable $e) {
+                // The sanitizer failed. Core quarantines the file in most cases, but never rely on that.
+            }
+
+            // The sanitizer writes back whatever its parser kept, which is
+            // nothing for a file that isn't SVG markup. Refuse the upload
+            // rather than save an empty file or a file that was not sanitized.
+            clearstatcache(true, $tmp_name);
+            if (!$sanitized || !is_file($tmp_name) || filesize($tmp_name) === 0) {
+                if (is_file($tmp_name)) {
+                    @unlink($tmp_name);
+                }
+
+                // json_response
+                return [
+                    'status' => 'error',
+                    'message' => sprintf($language->translate('PLUGIN_FORM.INVALID_SVG', null, true), $filename)
+                ];
+            }
         }
 
         // We need to store the file into flash object or it will not be available upon save later on.
@@ -754,7 +790,18 @@ class Form implements FormInterface, ArrayAccess
             ];
         }
 
-        $flash->save();
+        try {
+            $flash->save();
+        } catch (RuntimeException $e) {
+            // The form state is over the size or depth limit of the flash storage.
+            $flash->removeFile($filename, $field);
+
+            // json_response
+            return [
+                'status' => 'error',
+                'message' => $language->translate('PLUGIN_FORM.FORM_STATE_TOO_LARGE', null, true)
+            ];
+        }
 
         // json_response
         $json_response = [
@@ -1309,7 +1356,15 @@ class Form implements FormInterface, ArrayAccess
 
         $this->values = new Data($post);
 
-        $json_response = $callable($post);
+        try {
+            $json_response = $callable($post);
+        } catch (LengthException $e) {
+            http_response_code(400);
+            $json_response = [
+                'status' => 'error',
+                'message' => $grav['language']->translate('PLUGIN_FORM.FORM_STATE_TOO_LARGE', null, true)
+            ];
+        }
 
         // Return JSON
         header('Content-Type: application/json');
@@ -1328,7 +1383,23 @@ class Form implements FormInterface, ArrayAccess
     {
         $flash = $this->getFlash();
         $flash->removeFile($filename, $field);
-        $flash->save();
+        $this->saveFlash($flash);
+    }
+
+    /**
+     * Save the flash object. Form state over the size or depth limit of the flash storage is refused with a
+     * LengthException, which sendJsonResponse() answers as a Bad Request.
+     *
+     * @param FormFlash $flash
+     * @return void
+     */
+    protected function saveFlash(FormFlash $flash): void
+    {
+        try {
+            $flash->save();
+        } catch (RuntimeException $e) {
+            throw new LengthException('Form state is too large or nested too deep', 400, $e);
+        }
     }
 
     /**
@@ -1352,7 +1423,7 @@ class Form implements FormInterface, ArrayAccess
         $this->data->merge($data);
 
         $flash->setData($this->data->toArray());
-        $flash->save();
+        $this->saveFlash($flash);
     }
 
     /**

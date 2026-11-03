@@ -267,6 +267,115 @@ class MediaController extends AbstractApiController
     }
 
     /**
+     * POST /pages/{route}/media/batch/meta - Apply metadata to several page
+     * media files at once. The site media counterpart is the oldest batch
+     * route; this mirrors it so a page gallery does not need one request per
+     * image.
+     *
+     * The shared field map is validated once before anything is written, so an
+     * invalid value (or a `required` field sent empty) fails the whole request
+     * with a 422. Each filename is then handled on its own: a filename that is
+     * invalid or missing is reported in its own `results` row without stopping
+     * the rest.
+     */
+    public function batchPageMediaMeta(ServerRequestInterface $request): ResponseInterface
+    {
+        $this->requirePermission($request, 'api.media.write');
+
+        $page = $this->findPageOrFail($request, 'update');
+        $pagePath = $page->path();
+        if (!$pagePath || !is_dir($pagePath)) {
+            throw new NotFoundException('Page directory does not exist on disk.');
+        }
+
+        $body = $this->getRequestBody($request);
+        $this->requireFields($body, ['files', 'fields']);
+
+        $files = $body['files'];
+        $fields = $body['fields'];
+
+        if (!is_array($files) || $files === []) {
+            throw new ValidationException("The 'files' field must be a non-empty array of media filenames.");
+        }
+        if (!is_array($fields)) {
+            throw new ValidationException("The 'fields' field must be an object of metadata values.");
+        }
+
+        $maxBatch = (int) $this->config->get('plugins.api.batch.max_items', 50);
+        if (count($files) > $maxBatch) {
+            throw new ValidationException("Batch metadata updates are limited to {$maxBatch} files.");
+        }
+
+        // The same fields apply to every file, so validate them once: an
+        // invalid value (or a required field sent empty) fails the whole
+        // request instead of producing one identical error row per file.
+        $changes = $this->sanitizeMetaInput($fields);
+
+        $results = [];
+        foreach ($files as $filename) {
+            $label = is_string($filename) ? $filename : '';
+            try {
+                $filename = $this->sanitizePageMediaFilename($label);
+                $filePath = $this->requirePageMediaFile($pagePath, $filename);
+
+                $this->applyMetaChanges($filePath, $changes);
+                $this->fireEvent('onApiMediaMetadataUpdated', ['page' => $page, 'filename' => $filename]);
+
+                $results[] = ['filename' => $filename, 'status' => 'success'];
+            } catch (\Throwable $e) {
+                $results[] = ['filename' => $label, 'status' => 'error', 'message' => $e->getMessage()];
+            }
+        }
+
+        $route = $this->getRouteParam($request, 'route') ?? '';
+        return ApiResponse::create(
+            [
+                'results' => $results,
+                'total' => count($results),
+                'successful' => count(array_filter($results, static fn($r) => $r['status'] === 'success')),
+                'failed' => count(array_filter($results, static fn($r) => $r['status'] === 'error')),
+            ],
+            200,
+            $this->invalidationHeaders([
+                'media:update:pages/' . $route,
+                'pages:update:/' . $route,
+            ]),
+        );
+    }
+
+    /**
+     * Validate a page media filename supplied in a request body.
+     *
+     * The single-file routes take their filename from the `{filename}` route
+     * parameter, where a slash cannot arrive. The batch takes names from JSON,
+     * so they are checked here rather than joined onto the page path and looked
+     * up: page media is flat, and `../` would otherwise reach a file outside
+     * the page folder.
+     *
+     * Both separators are refused on every platform, where the containment
+     * checks only fold `\` on Windows: an entry here is one flat name, so
+     * refusing both keeps it addressing the same file on Unix and Windows.
+     */
+    private function sanitizePageMediaFilename(mixed $filename): string
+    {
+        if (!is_string($filename) || $filename === '') {
+            throw new ValidationException('Filename is required.');
+        }
+
+        if (
+            str_contains($filename, '/')
+            || str_contains($filename, '\\')
+            || str_contains($filename, '..')
+            || str_contains($filename, "\0")
+            || str_starts_with($filename, '.')
+        ) {
+            throw new ValidationException('Invalid filename.');
+        }
+
+        return $filename;
+    }
+
+    /**
      * Absolute paths of every file backing a medium in $dir: the base file
      * `<stem>.<ext>`, its retina variants `<stem>@<N>x.<ext>`, and the
      * `.meta.yaml` sidecar of each. Used by deletion so retina-only images
@@ -727,7 +836,7 @@ class MediaController extends AbstractApiController
         $this->requirePermission($request, 'api.media.write');
 
         $mediaPath = $this->getSiteMediaPath();
-        $body = json_decode((string) $request->getBody(), true) ?? [];
+        $body = $this->getRequestBody($request);
 
         if (empty($body['path'])) {
             throw new ValidationException('Folder path is required.');
@@ -812,7 +921,7 @@ class MediaController extends AbstractApiController
         $this->requirePermission($request, 'api.media.write');
 
         $mediaPath = $this->getSiteMediaPath();
-        $body = json_decode((string) $request->getBody(), true) ?? [];
+        $body = $this->getRequestBody($request);
 
         if (empty($body['from']) || empty($body['to'])) {
             throw new ValidationException("Both 'from' and 'to' paths are required.");
@@ -830,6 +939,13 @@ class MediaController extends AbstractApiController
         $toDir = trim(dirname($rawTo), '/.');
         $toName = $this->sanitizeMediaFilename(basename($rawTo), $originalExt);
         $to = $this->validateRelativePath(($toDir !== '' ? $toDir . '/' : '') . $toName, $mediaPath);
+
+        foreach ([$from, $rawTo, $to] as $name) {
+            $basename = strtolower(basename($name));
+            if (str_ends_with($basename, '.meta.yaml') || $basename === 'media_order.yaml') {
+                throw new ValidationException('Media sidecar files cannot be renamed directly.');
+            }
+        }
 
         $fromAbsolute = $mediaPath . '/' . $from;
         $toAbsolute = $mediaPath . '/' . $to;
@@ -898,7 +1014,7 @@ class MediaController extends AbstractApiController
         $this->requirePermission($request, 'api.media.write');
 
         $mediaPath = $this->getSiteMediaPath();
-        $body = json_decode((string) $request->getBody(), true) ?? [];
+        $body = $this->getRequestBody($request);
 
         if (empty($body['from']) || empty($body['to'])) {
             throw new ValidationException("Both 'from' and 'to' paths are required.");
@@ -952,7 +1068,7 @@ class MediaController extends AbstractApiController
         $this->requirePermission($request, 'api.media.write');
 
         $mediaPath = $this->getSiteMediaPath();
-        $body = json_decode((string) $request->getBody(), true) ?? [];
+        $body = $this->getRequestBody($request);
 
         $relativePath = '';
         if (!empty($body['path'])) {
@@ -1208,11 +1324,17 @@ class MediaController extends AbstractApiController
         }
 
         // A page's media lives inside the page, so rules in its frontmatter
-        // apply here too: a page nobody may edit is a page whose attachments
-        // nobody may replace (getgrav/grav-plugin-admin2#150). This only takes
-        // authority away — permission to touch media still comes from
-        // `api.media.*`, never from a page-level grant.
-        if ($pageAction !== null) {
+        // apply here too (getgrav/grav-plugin-admin2#150). Permission to touch
+        // media at all still comes from `api.media.*`, checked by the caller.
+        //
+        // Changing media needs the right to update THIS page: its own `update`
+        // rule, or the account's `api.pages.write` where it has none — the
+        // same verdict as the page's `permissions.update`, so an editor who
+        // may only read a page can't change its attachments either
+        // (getgrav/grav-plugin-admin2#209). Reading media only honors a deny.
+        if ($pageAction === 'update') {
+            $this->assertPageUpdatable($request, $page);
+        } elseif ($pageAction !== null) {
             $this->assertPageNotDenied($request, $page, $pageAction);
         }
 
@@ -1721,6 +1843,8 @@ class MediaController extends AbstractApiController
             $value = $value ? '1' : '';
         }
 
+        $this->assertLiteralMetadata((string) $value);
+
         if ($type === 'select') {
             $str = trim((string) $value);
             if ($str === '') {
@@ -1750,7 +1874,16 @@ class MediaController extends AbstractApiController
             $str = mb_substr($str, 0, $maxLen);
         }
 
+        $this->assertLiteralMetadata($str);
+
         return $str;
+    }
+
+    private function assertLiteralMetadata(string $value): void
+    {
+        if (preg_match('/\{(?:\{|%|#)/', $value)) {
+            throw new ValidationException('Media metadata must contain literal text.');
+        }
     }
 
     /**

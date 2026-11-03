@@ -1,3 +1,86 @@
+# v1.1.10
+## 11/03/2026
+
+1. [](#new)
+    * The page list has an `editable=true` filter that shows only the pages you can edit, plus the folders that lead to them, for editors who only look after a few pages ([admin2#209](https://github.com/getgrav/grav-plugin-admin2/issues/209))
+    * Passkey sign-in for Admin2, with Login 3.12 or later on Grav 2 (`plugins.login.passkeys.enabled`): `GET /auth/passkey` says whether it is on, `POST /auth/passkey/options` and `POST /auth/passkey` sign in with a passkey alone (it is both factors, so no 2FA challenge) or finish a `requires_2fa` challenge in place of the code. Same token pair as `POST /auth/token`
+    * `/users/{username}/passkeys` lists, adds, renames and removes an account's passkeys. Adding and renaming are for your own account only and take the current password (or 2FA code); removing someone else's, for a lost device, takes `api.users.write`. The user resource now carries a `passkeys` count
+1. [](#improved)
+    * Page-level permissions now decide what the page list shows: pages your groups may not read or list are left out of the list, the tree and the page navigator, and the counts match. A folder you can't open still appears, marked `ancestor_only`, when there is a page inside it you can read, so you can still reach that page. Such a folder shows only its title and place in the tree, nothing else about it ([admin2#209](https://github.com/getgrav/grav-plugin-admin2/issues/209))
+    * Large page lists load faster for editors on sites with page-level permissions, as each page's rules are no longer read from disk for every row, and saving, creating, moving, copying, deleting or reordering a page no longer makes the next list rebuild them all (about 0.1 s on a 500-page site) ([admin2#209](https://github.com/getgrav/grav-plugin-admin2/issues/209))
+    * A single page's `permissions` now has a `media` entry: whether you can change that page's media. It can be true on a page with no rules where `update` is false, so Admin can keep the media panel working while the page's fields are read-only ([admin2#209](https://github.com/getgrav/grav-plugin-admin2/issues/209))
+    * With `editable=true`, a folder you can read but not edit that leads to pages you can edit is still marked `ancestor_only`, but now comes back as a full row so it can be opened read-only ([admin2#209](https://github.com/getgrav/grav-plugin-admin2/issues/209))
+    * `passkeys` and `webauthn_id` are never written through `PATCH /users/{username}` or `POST /users`, so a user editor can't plant a passkey on another account
+1. [](#bugfix)
+    * A parent page whose collection is ordered by `publish_date` or `unpublish_date` now lists its children in that order in the admin, instead of falling back to folder order ([admin2#208](https://github.com/getgrav/grav-plugin-admin2/issues/208))
+    * Dragging pages into a new order no longer gives a page the same number as a sibling you can't see: the server numbers against every page in the folder, and moves a hidden page along only when it has to. Reordering with a partial list keeps the pages you didn't list in their place, and an error from a reorder no longer names a folder you can't see: a page you can't see is treated as not there ([admin2#209](https://github.com/getgrav/grav-plugin-admin2/issues/209))
+    * On a page with page-level rules, changing its media (and file fields that save into its folder) now needs the right to update that page, so an editor who may only read the page can't change its images. Pages without rules work as before with `api.media.write` ([admin2#209](https://github.com/getgrav/grav-plugin-admin2/issues/209))
+
+# v1.1.9
+## 11/01/2026
+
+1. [](#new)
+    * `POST /reports/twig-content/trusted-partial` adds a theme or plugin template to `security.twig_sandbox.trusted_partials`, the fix for a page whose include of a partial shows its Twig as plain text since Grav 2.2.18. Super admins only, needs Grav 2.2.18 or later
+1. [](#improved)
+    * The Twig in Content report names the template each block happened in, and when it's a partial the page includes, offers trusting that partial instead of allowing what it uses (such as `raw`) for all page content. Blocks from partials the site now trusts drop out of the report
+    * The report's hints no longer suggest turning the Twig sandbox off, and say that an allowed filter or function is open to every page editor
+    * A page that keeps getting blocked is listed once in the Twig in Content report, instead of once per visit
+
+# v1.1.8
+## 10/31/2026
+
+1. [](#bugfix)
+    * JSON request bodies are now read once instead of twice, and with Grav 2.2.20 or later a body over the site's JSON limits gets a clear "Payload Too Large" error.
+
+# v1.1.7
+## 10/31/2026
+
+1. [](#bugfix)
+    * Deleting a user now removes the account when the site uses Flex accounts, instead of reporting success and leaving it in place.
+
+# v1.1.6
+## 10/31/2026
+
+1. [](#bugfix)
+    * [security] The security fixes below were found by Anthropic's OSS Scanner
+    * [security] Page dates that are too long are now ignored when preparing API responses.
+    * [security] Pages edited in demo mode now keep their safe rendering settings.
+    * [security] SVG upload checks now finish before files become publicly available.
+    * [security] Media descriptions must now be plain text.
+    * [security] Media renaming now keeps metadata and ordering files reserved for their intended use.
+    * [security] Two-factor sign-in attempts now have a separate limit for each account.
+    * [security] Saving an account that has changed elsewhere now returns a conflict response.
+    * [security] Saving unsupported settings now returns a validation error.
+    * [security] Account email addresses must be text, and existing invalid addresses can be corrected.
+    * [security] Disabled groups no longer grant API permissions.
+    * [security] First-run setup now refuses to replace an existing account.
+
+# v1.1.5
+## 10/30/2026
+
+1. [](#improved)
+    * Listing environments (`GET /system/environments`) needs only `api.access` instead of `api.system.read`, so Admin2 can show every user the right environment and hide its switcher when there's nothing to switch. It lists names only; creating and deleting environments keep their permissions
+2. [](#bugfix)
+    * A PNG or other image whose binary data happened to contain the text `<svg` was taken for SVG and saved as an empty file. Raster images are no longer sent through the SVG sanitizer, and an SVG upload the sanitizer empties is refused instead of saved as 0 bytes [#70](https://github.com/getgrav/grav-plugin-api/issues/70)
+    * Thumbnails of photos taken sideways or upside down (most phone photos) are now turned upright using their EXIF orientation, as the full image already is. Existing thumbnails are made again. Needs PHP's `exif` extension [#68](https://github.com/getgrav/grav-plugin-api/issues/68)
+
+# v1.1.4
+## 10/29/2026
+
+1. [](#bugfix)
+    * [security] Changing your own email address through the API (Admin2's account screen) now needs your current password, as changing your password does and as the Login plugin's profile form asks from 3.11.1, so whoever holds a signed-in session can't move the account to an address they control. An account with no password yet, and an admin changing someone else's address, aren't asked. A wrong password counts against the sign-in limits
+    * [security] Settings file fields can no longer upload into or delete from theme and plugin folders without config access, template folders and anything outside `user/` need super-admin access, and file names ending in a space or dot, or carrying control or invisible characters, are refused. Thanks @sagarbanwa
+
+# v1.1.3
+## 10/29/2026
+
+1. [](#new)
+    * Page records include `uuid`, the page folder's permanent id (Grav 2.2.15 page ids), or null when it has none, and a page copied with the copy action or a batch copy gets its own id instead of sharing the original's
+    * Several media files on one page can have the same details (title, alt text, tags and so on) written in a single request, the page counterpart of the site media batch route. Thanks to @phmg701 [#67](https://github.com/getgrav/grav-plugin-api/pull/67)
+    * **Undo a page delete**: a plugin can attach an undo to a delete by filling the new `undo` slot of `onApiPageDeleted` (`method`, `endpoint` relative to the API, optional `body` and `label`). `DELETE /pages/{route}` then answers `200` with `{"data": {"undo": {...}}}` instead of `204`, and Admin2 offers an Undo button on the delete toast. See "Undo a page delete" in the README
+    * A plugin that keeps deleted pages so they can be restored says so on the new `onApiPageDeleteInfo` event, and page records then carry `delete_recoverable: true`, so Admin2's delete confirmation can say the page can be restored instead of "This cannot be undone"
+    * A sidebar item can set `placement: footer` to show in Admin2's bottom group, above Settings, instead of among the plugin items
+
 # v1.1.2
 ## 10/26/2026
 

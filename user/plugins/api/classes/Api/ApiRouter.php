@@ -361,16 +361,22 @@ class ApiRouter extends ProcessorBase
             // CORS headers on error responses so browsers don't block them
             $response = (new CorsMiddleware($this->config))->addHeaders($request, $response);
         } catch (Throwable $e) {
-            $this->container['log']->error('API unhandled exception: ' . $e->getMessage(), [
-                'file' => $e->getFile(),
-                'line' => $e->getLine(),
-                'trace' => $e->getTraceAsString(),
-            ]);
-            $response = ErrorResponse::create(
-                500,
-                'Internal Server Error',
-                $this->config->get('system.debugger.enabled') ? $e->getMessage() : 'An unexpected error occurred.'
-            );
+            if ($e instanceof \RuntimeException && $e->getMessage() === "Encoding YAML failed: '<<' cannot be used as a key") {
+                $response = ErrorResponse::create(422, 'Unprocessable Entity', "'<<' cannot be used as a YAML key.");
+            } elseif ($e instanceof \RuntimeException && $e->getCode() === 409) {
+                $response = ErrorResponse::create(409, 'Conflict', 'The saved record has changed. Reload it before saving again.');
+            } else {
+                $this->container['log']->error('API unhandled exception: ' . $e->getMessage(), [
+                    'file' => $e->getFile(),
+                    'line' => $e->getLine(),
+                    'trace' => $e->getTraceAsString(),
+                ]);
+                $response = ErrorResponse::create(
+                    500,
+                    'Internal Server Error',
+                    $this->config->get('system.debugger.enabled') ? $e->getMessage() : 'An unexpected error occurred.'
+                );
+            }
             // CORS headers on error responses so browsers don't block them
             $response = (new CorsMiddleware($this->config))->addHeaders($request, $response);
         }
@@ -710,6 +716,9 @@ class ApiRouter extends ProcessorBase
         // Auth (no auth required for these)
         $r->addRoute('POST', '/auth/token', [AuthController::class, 'token']);
         $r->addRoute('POST', '/auth/2fa/verify', [AuthController::class, 'verify2fa']);
+        $r->addRoute('GET',  '/auth/passkey', [AuthController::class, 'passkeyStatus']);
+        $r->addRoute('POST', '/auth/passkey/options', [AuthController::class, 'passkeyOptions']);
+        $r->addRoute('POST', '/auth/passkey', [AuthController::class, 'passkey']);
         $r->addRoute('POST', '/auth/refresh', [AuthController::class, 'refresh']);
         $r->addRoute('POST', '/auth/revoke', [AuthController::class, 'revoke']);
         $r->addRoute('POST', '/auth/forgot-password', [AuthController::class, 'forgotPassword']);
@@ -764,6 +773,10 @@ class ApiRouter extends ProcessorBase
         $r->addRoute('GET', '/pages/{route:.+}/media/{filename}/meta', [MediaController::class, 'getPageMediaMeta']);
         $r->addRoute('PATCH', '/pages/{route:.+}/media/{filename}/meta', [MediaController::class, 'savePageMediaMeta']);
         $r->addRoute('DELETE', '/pages/{route:.+}/media/{filename}/meta', [MediaController::class, 'deletePageMediaMeta']);
+        // Batch metadata for page media, the counterpart of `/media/batch/meta`
+        // below. It only answers POST, so it cannot be shadowed by (or shadow)
+        // the per-file routes above.
+        $r->addRoute('POST', '/pages/{route:.+}/media/batch/meta', [MediaController::class, 'batchPageMediaMeta']);
         $r->addRoute('POST', '/pages/{route:.+}/move', [PagesController::class, 'move']);
         $r->addRoute('POST', '/pages/{route:.+}/copy', [PagesController::class, 'copy']);
         $r->addRoute('GET', '/pages/{route:.+}', [PagesController::class, 'show']);
@@ -836,6 +849,11 @@ class ApiRouter extends ProcessorBase
         $r->addRoute('POST', '/users/{username}/2fa', [UsersController::class, 'generate2fa']);
         $r->addRoute('POST', '/users/{username}/2fa/enable', [UsersController::class, 'enable2fa']);
         $r->addRoute('POST', '/users/{username}/2fa/disable', [UsersController::class, 'disable2fa']);
+        $r->addRoute('GET', '/users/{username}/passkeys', [UsersController::class, 'passkeys']);
+        $r->addRoute('POST', '/users/{username}/passkeys/options', [UsersController::class, 'passkeyOptions']);
+        $r->addRoute('POST', '/users/{username}/passkeys', [UsersController::class, 'addPasskey']);
+        $r->addRoute('PATCH', '/users/{username}/passkeys/{id}', [UsersController::class, 'renamePasskey']);
+        $r->addRoute('DELETE', '/users/{username}/passkeys/{id}', [UsersController::class, 'removePasskey']);
         $r->addRoute('DELETE', '/users/{username}/email-change', [UsersController::class, 'cancelEmailChange']);
         $r->addRoute('POST', '/users/{username}/email-change/resend', [UsersController::class, 'resendEmailChange']);
         $r->addRoute('GET', '/users/{username}/api-keys', [UsersController::class, 'apiKeys']);
@@ -926,6 +944,7 @@ class ApiRouter extends ProcessorBase
         $r->addRoute('GET', '/systeminfo', [SchedulerController::class, 'systemInfo']);
         $r->addRoute('GET', '/reports', [ReportsController::class, 'index']);
         $r->addRoute('POST', '/reports/twig-content/allowlist', [ReportsController::class, 'allowlistAdd']);
+        $r->addRoute('POST', '/reports/twig-content/trusted-partial', [ReportsController::class, 'trustedPartialAdd']);
         $r->addRoute('DELETE', '/reports/twig-content/events', [ReportsController::class, 'clearTwigEvents']);
         $r->addRoute('GET', '/reports/twig-content/page', [ReportsController::class, 'twigContentPageStatus']);
         $r->addRoute('GET', '/reports/twig-content/scan', [ReportsController::class, 'twigContentScan']);

@@ -1,3 +1,15 @@
+# v1.1.21
+## 11/01/2026
+
+1. [](#bugfix)
+    * Markdown Notices are readable in dark mode, with tinted dark backgrounds instead of the plugin's pale ones under light text
+
+# v1.1.20
+## 10/29/2026
+
+1. [](#new)
+    * New Fluid Layout option stretches the header, content and footer to the full window width, site-wide or per page with `body_classes: layout-fluid` [#30](https://github.com/getgrav/grav-theme-quark2/issues/30)
+
 # v1.1.19
 ## 10/26/2026
 

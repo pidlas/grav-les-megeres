@@ -497,6 +497,20 @@ blockquote footer {
   --alert-accent: #e5534b;
 }
 
+/* Markdown Notices plugin: its pale backgrounds sit under our light text in dark mode */
+:root[data-theme="dark"] .notices.yellow {
+  background: rgba(240, 173, 78, 0.12);
+}
+:root[data-theme="dark"] .notices.red {
+  background: rgba(217, 83, 79, 0.12);
+}
+:root[data-theme="dark"] .notices.blue {
+  background: rgba(91, 192, 222, 0.12);
+}
+:root[data-theme="dark"] .notices.green {
+  background: rgba(92, 184, 92, 0.12);
+}
+
 /* ---------- Layout ---------- */
 
 .container {
@@ -508,6 +522,12 @@ blockquote footer {
 .container-narrow {
   max-width: 880px;
   margin-inline: auto;
+}
+
+/* layout-fluid: full-width header, content and footer */
+body.layout-fluid .container,
+body.layout-fluid #body-wrapper > .container > .content-item {
+  max-width: none;
 }
 
 /* Default content column — white rounded "card" sitting on the gray canvas */

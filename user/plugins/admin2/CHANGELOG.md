@@ -1,3 +1,39 @@
+# v2.2.5
+## 10/30/2026
+
+1. [](#improved)
+    * Needs API 1.1.5, which checks the current password the account screen asks for when you change your own email address, and lets every admin user list environments so the switcher shows the right one
+    * The environment switcher in the top bar only shows when the site has an environment, one is selected, or you can write config and so create one, instead of an "Env: Default" badge for everyone [admin-next#44](https://github.com/getgrav/grav-admin-next/pull/44)
+2. [](#bugfix)
+    * Signing in no longer starts on a made-up `localhost` environment, which stuck in the top bar for users who can't list environments
+    * The Pages tree, list and columns show a page's menu label again, as classic admin did, with its title in a tooltip when the two differ [#205](https://github.com/getgrav/grav-plugin-admin2/issues/205)
+
+# v2.2.4
+## 10/29/2026
+
+1. [](#improved)
+    * [security] Changing your own email address on your account screen asks for your current password first, in a small "Confirm it's you" dialog, so someone using a signed-in browser can't move the account to an address they control. A wrong password is answered in the dialog, Cancel saves nothing and keeps the new address typed, and with auto-save on the dialog opens when you leave the email field. Accounts with no password, and admins changing someone else's address, aren't asked. Needs API 1.1.4
+2. [](#bugfix)
+    * With collaboration on, switching to Expert mode while someone else edits the same page in Editor Pro (or back again while they're in Expert mode) now makes your content editor read-only until you switch back, instead of letting the two editors silently overwrite each other's text [getgrav/grav-admin-next#43](https://github.com/getgrav/grav-admin-next/issues/43)
+    * With collaboration on, a change made to a page's file outside the admin (a git pull, a text editor, another API client) now shows in the editor instead of the older text from the editing session, which the next save used to write back over it. When the session also has unsaved changes, those are kept and a warning says that saving replaces the file's version [getgrav/grav-admin-next#43](https://github.com/getgrav/grav-admin-next/issues/43)
+    * On a site installed in a subfolder, media files no longer show broken previews or wrong Open and copy links (the subfolder was added twice) in the media panels, the page media list, media and file pickers, and the full-size images Editor Pro shows [#203](https://github.com/getgrav/grav-plugin-admin2/issues/203)
+
+# v2.2.3
+## 10/29/2026
+
+1. [](#new)
+    * **Undo a delete**: when a plugin keeps deleted pages (Revisions Pro's trash), the toast after deleting a page or one of its translations, from the editor or the Pages list, has an Undo button. From the editor it opens the page again in the language that was deleted; from the list the list refreshes. Needs API 1.1.3
+    * A plugin sidebar item can sit in the sidebar's bottom group, above Settings (`placement: footer`), for site-wide tools like a trash, so it isn't mixed in with the plugins' own screens
+    * Page media files can be selected and their details edited together, the same way as in Media. Needs API 1.1.3 [getgrav/grav-admin-next#42](https://github.com/getgrav/grav-admin-next/pull/42)
+2. [](#improved)
+    * With a custom logo set, the sign-in screen no longer prints the admin title as a heading under it, since the logo already names the site. The title is still read out by screen readers and still names the browser tab
+    * Deleting a page on a multi-language site says which language goes and that the others are kept ("Delete the German translation of “Rechenoptionen”? The other 6 languages are kept."), and warns when it is the page's only language that the whole folder goes, with its media and child pages. When a plugin keeps deleted pages, the dialog says the page can be restored from Trash instead of "This cannot be undone."
+3. [](#bugfix)
+    * A plugin page drawn by its own component (Crosspost, Forms Pro, KahunaCart's settings) now asks before you leave with unsaved changes through the sidebar or another admin link, the same as a blueprint page. Admin2 already got the page's `dirty` state for the Save button but never checked it before leaving
+    * Saving a form now checks the required fields inside list rows, so a scheduler job added with Add item and saved untouched is stopped with a message naming the row and the missing field instead of being stored with no command [getgrav/grav-plugin-scheduler-webhook#10](https://github.com/getgrav/grav-plugin-scheduler-webhook/issues/10)
+    * With collaboration on, Editor Pro no longer shows old content after the page was edited in Expert mode, and no longer saves that old content over the Expert edit [getgrav/grav-admin-next#43](https://github.com/getgrav/grav-admin-next/issues/43)
+    * A file field's image preview, such as a theme logo, works again when Grav is installed in a subfolder [#203](https://github.com/getgrav/grav-plugin-admin2/issues/203)
+
 # v2.2.2
 ## 10/26/2026
 

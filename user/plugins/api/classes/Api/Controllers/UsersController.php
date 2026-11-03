@@ -70,6 +70,10 @@ class UsersController extends AbstractApiController
         // Two-factor state only changes through the /2fa endpoints, which
         // check a code; a plain PATCH must never switch it on or off.
         'twofa_enabled', 'twofa_secret',
+        // Passkeys only change through the /passkeys endpoints (Login's
+        // Passkeys service). Writing them here would let anyone who can edit
+        // an account plant a passkey of their own on it.
+        'passkeys', 'webauthn_id',
         // Credentials / identity — never mass-assigned through the sweep.
         'password', 'current_password', 'hashed_password', 'username',
         // Server-managed bookkeeping.
@@ -958,6 +962,7 @@ class UsersController extends AbstractApiController
 
         $body = $this->getRequestBody($request);
         $this->requireFields($body, ['username', 'password', 'email']);
+        $this->validateEmailType($body);
 
         $username = $body['username'];
 
@@ -1087,6 +1092,8 @@ class UsersController extends AbstractApiController
 
         $body = $this->getRequestBody($request);
 
+        $this->validateEmailType($body);
+
         if (empty($body)) {
             throw new ValidationException('Request body must contain fields to update.');
         }
@@ -1179,7 +1186,23 @@ class UsersController extends AbstractApiController
         // the link mailed to it is opened. Checked before anything is written,
         // so a refused or rate limited change leaves the rest of the request
         // unsaved too. An admin editing another account saves at once.
-        $oldEmail = mb_strtolower(trim((string) $user->get('email', '')));
+        $storedEmail = $user->get('email', '');
+        $oldEmail = is_string($storedEmail) ? mb_strtolower(trim($storedEmail)) : '';
+
+        // Your own new address needs your current password too, as a new
+        // password does and as the Login plugin's profile form asks (3.11.1):
+        // whoever holds a signed-in session must not be able to move the
+        // account to an address they control. Asked once when both change.
+        if ($isSelf && !$passwordChanged && isset($body['email']) && is_string($body['email'])
+            && mb_strtolower(trim($body['email'])) !== $oldEmail) {
+            $this->assertCurrentPassword(
+                $request,
+                $user,
+                $body['current_password'] ?? null,
+                'Enter your current password to change your email address.'
+            );
+        }
+
         $pendingEmail = null;
         if ($isSelf && isset($body['email']) && is_string($body['email'])) {
             $pendingEmail = $this->screenOwnEmailChange($user, $body['email']);
@@ -1326,7 +1349,8 @@ class UsersController extends AbstractApiController
         }
 
         $newEmail = trim($email);
-        $oldEmail = trim((string) $user->get('email', ''));
+        $storedEmail = $user->get('email', '');
+        $oldEmail = is_string($storedEmail) ? trim($storedEmail) : '';
         if ($newEmail === '' || mb_strtolower($newEmail) === mb_strtolower($oldEmail)) {
             return null;
         }
@@ -1492,20 +1516,24 @@ class UsersController extends AbstractApiController
     }
 
     /**
-     * Refuse a change of your own password unless `current_password` is right.
+     * Refuse a change of your own password or email unless `current_password` is right.
      * Each try counts against the Login plugin's sign-in limits for the
      * account and the IP (429 once they are used up), so this can't be used to
      * guess the password, and a right one clears the count like a sign-in.
      * An account with no password yet passes without one.
      */
-    private function assertCurrentPassword(ServerRequestInterface $request, UserInterface $user, mixed $current): void
-    {
+    private function assertCurrentPassword(
+        ServerRequestInterface $request,
+        UserInterface $user,
+        mixed $current,
+        string $requiredMessage = 'Enter your current password to set a new one.',
+    ): void {
         if (!$this->accountHasPassword($user)) {
             return;
         }
 
         if (!is_string($current) || $current === '') {
-            $message = 'Enter your current password to set a new one.';
+            $message = $requiredMessage;
             throw new ValidationException($message, [['field' => 'current_password', 'message' => $message]]);
         }
 
@@ -1587,10 +1615,10 @@ class UsersController extends AbstractApiController
 
         $this->fireEvent('onApiBeforeUserDelete', ['user' => $user]);
 
-        // Remove user file
-        $file = $user->file();
-        if ($file) {
-            $file->delete();
+        // Remove the account through the accounts collection: a Flex account has no
+        // file() to delete, and both account types take the per-account lock there.
+        if (!$this->grav['accounts']->delete($username)) {
+            throw new \RuntimeException('Failed to delete user account.');
         }
 
         $this->fireEvent('onApiUserDeleted', ['username' => $username]);
@@ -1961,6 +1989,177 @@ class UsersController extends AbstractApiController
         return (bool) (new \Grav\Plugin\Login\TwoFactorAuth\TwoFactorAuth())->verifyCode($secret, $code);
     }
 
+    // ─── Passkeys ────────────────────────────────────────────────────────────
+
+    /**
+     * GET /users/{username}/passkeys
+     *
+     * The account's passkeys (names and dates, never keys). Self, or anyone
+     * who may read users.
+     */
+    public function passkeys(ServerRequestInterface $request): ResponseInterface
+    {
+        $username = $this->getRouteParam($request, 'username');
+        $this->requireApiKeyPermission($request, $username);
+        $user = $this->loadUserOrFail($username);
+        $passkeys = $this->passkeyService();
+
+        return ApiResponse::create([
+            'enabled' => $passkeys !== null,
+            'passkeys' => $passkeys !== null ? $passkeys->list($user) : [],
+            // What adding or removing your own passkey asks for. Only on your
+            // own account: someone else's sign-in setup is not theirs to know.
+            // 'unavailable': an account with neither can't change its passkeys.
+            'proof' => $this->getUser($request)->username !== $username ? null
+                : ($this->accountHasPassword($user) ? 'password' : ($this->hasActiveTwoFactor($user) ? 'code' : 'unavailable')),
+        ]);
+    }
+
+    /**
+     * POST /users/{username}/passkeys/options
+     *
+     * Start adding a passkey to your own account. Body: { current_password }
+     * (or { code } for an account without a password and with 2FA on).
+     * Returns { options, ticket } for navigator.credentials.create().
+     */
+    public function passkeyOptions(ServerRequestInterface $request): ResponseInterface
+    {
+        [$user, $passkeys] = $this->ownPasskeyAccount($request);
+        $login = $this->grav['login'];
+        $limiter = $login->getRateLimiter('passkey_options');
+        if ($limiter->hasReachedLimit($login->getIpKey(), 'ip')) {
+            throw new TooManyRequestsException('Too many passkey attempts. Try again in a few minutes.', max(60, (int) $limiter->getInterval() * 60));
+        }
+        $limiter->registerRateLimitedAction($login->getIpKey(), 'ip');
+        $this->assertPasskeyProof($request, $user, $this->getRequestBody($request));
+
+        return ApiResponse::create($passkeys->registrationOptions($user));
+    }
+
+    /**
+     * POST /users/{username}/passkeys
+     *
+     * Finish adding a passkey. Body: { ticket, credential }.
+     */
+    public function addPasskey(ServerRequestInterface $request): ResponseInterface
+    {
+        [$user, $passkeys] = $this->ownPasskeyAccount($request);
+        $body = $this->getRequestBody($request);
+        $this->requireFields($body, ['ticket', 'credential']);
+
+        try {
+            $passkey = $passkeys->finishRegistration($user, (string) $body['ticket'], is_array($body['credential']) ? $body['credential'] : []);
+        } catch (\Grav\Plugin\Login\Passkeys\PasskeyException $e) {
+            $message = (string) $this->grav['language']->translate($e->getMessage());
+            throw new ValidationException($message, [['field' => 'credential', 'message' => $message]]);
+        }
+
+        $this->fireEvent('onApiUserPasskeyAdded', ['user' => $user, 'passkey' => $passkey]);
+
+        return ApiResponse::create($passkey, 201);
+    }
+
+    /**
+     * PATCH /users/{username}/passkeys/{id}
+     *
+     * Rename one of your own passkeys. Body: { name }.
+     */
+    public function renamePasskey(ServerRequestInterface $request): ResponseInterface
+    {
+        [$user, $passkeys] = $this->ownPasskeyAccount($request);
+        $body = $this->getRequestBody($request);
+        $this->requireFields($body, ['name']);
+        $name = \Grav\Plugin\Login\Passkeys\Passkeys::cleanName((string) $body['name']);
+        if ($name === '') {
+            throw new ValidationException('Give the passkey a name.', [['field' => 'name', 'message' => 'Give the passkey a name.']]);
+        }
+        if (!$passkeys->rename($user, (string) $this->getRouteParam($request, 'id'), $name)) {
+            throw new NotFoundException('That passkey is not on this account.');
+        }
+
+        return ApiResponse::create(['id' => (string) $this->getRouteParam($request, 'id'), 'name' => $name]);
+    }
+
+    /**
+     * DELETE /users/{username}/passkeys/{id}
+     *
+     * Remove a passkey. Your own takes the same proof as adding one (body or
+     * query: current_password / code). Removing someone else's (a lost
+     * device) takes api.users.write and no proof, the same split as 2FA.
+     * Nobody can add a passkey to another account.
+     */
+    public function removePasskey(ServerRequestInterface $request): ResponseInterface
+    {
+        $username = $this->getRouteParam($request, 'username');
+        $currentUser = $this->getUser($request);
+        $isSelf = $currentUser->username === $username;
+        // @scope-cap-exempt: the cap is applied by the scopeAllows() conjunct on
+        // this same expression, so the super branch cannot be reached uncapped.
+        $isAdmin = $this->scopeAllows($request, 'api.users.write')
+            && ($this->isSuperAdmin($currentUser) || $this->hasPermission($currentUser, 'api.users.write'));
+        if (!$isSelf && !$isAdmin) {
+            throw new ForbiddenException('You do not have permission to remove passkeys from this user.');
+        }
+        if ($isSelf && !$isAdmin) {
+            $this->requirePermission($request, 'api.access');
+        }
+
+        $passkeys = $this->passkeyService() ?? throw new ForbiddenException('Passkeys are not available on this site.');
+        $user = $this->loadUserOrFail($username);
+        $this->requireNotSuperTarget($request, $user);
+
+        if ($isSelf) {
+            $this->assertPasskeyProof($request, $user, $this->getRequestBody($request) + $request->getQueryParams());
+        }
+
+        $name = $passkeys->remove($user, (string) $this->getRouteParam($request, 'id'));
+        if ($name === null) {
+            throw new NotFoundException('That passkey is not on this account.');
+        }
+
+        $this->fireEvent('onApiUserPasskeyRemoved', ['user' => $user, 'name' => $name, 'by' => $currentUser->username]);
+
+        return ApiResponse::noContent();
+    }
+
+    /** @return array{0: UserInterface, 1: \Grav\Plugin\Login\Passkeys\Passkeys} */
+    private function ownPasskeyAccount(ServerRequestInterface $request): array
+    {
+        $username = $this->getRouteParam($request, 'username');
+        // Ownership first, so a caller can't probe which accounts exist.
+        if ($this->getUser($request)->username !== $username) {
+            throw new ForbiddenException('Only the account owner can add or rename passkeys.');
+        }
+        $this->requirePermission($request, 'api.access');
+        $passkeys = $this->passkeyService() ?? throw new ForbiddenException('Passkeys are not available on this site.');
+
+        return [$this->loadUserOrFail($username), $passkeys];
+    }
+
+    /**
+     * Proof for changing your own passkeys: the current password, or for an
+     * account without one the current 2FA code when 2FA is on. An account with
+     * neither (made by a sign-in service) can't change its passkeys: a token
+     * alone must not add a way in that outlives it.
+     */
+    private function assertPasskeyProof(ServerRequestInterface $request, UserInterface $user, array $body): void
+    {
+        if ($this->accountHasPassword($user)) {
+            $this->assertCurrentPassword($request, $user, $body['current_password'] ?? null, 'Enter your current password to change your passkeys.');
+        } elseif ($this->hasActiveTwoFactor($user)) {
+            $this->assertCurrentTwoFactorCode($user, $body['code'] ?? null);
+        } else {
+            throw new ForbiddenException('Set a password or 2FA on your account first. Passkeys can\'t be added or removed with a signed-in session alone.');
+        }
+    }
+
+    private function passkeyService(): ?\Grav\Plugin\Login\Passkeys\Passkeys
+    {
+        $login = $this->grav['login'] ?? null;
+
+        return is_object($login) && method_exists($login, 'passkeys') ? $login->passkeys() : null;
+    }
+
     public function apiKeys(ServerRequestInterface $request): ResponseInterface
     {
         $username = $this->getRouteParam($request, 'username');
@@ -2137,6 +2336,15 @@ class UsersController extends AbstractApiController
         return false;
     }
 
+    private function validateEmailType(array $body): void
+    {
+        if (array_key_exists('email', $body) && !is_string($body['email'])) {
+            throw new ValidationException('The email must be a string.', [
+                ['field' => 'email', 'message' => 'The email must be a string.'],
+            ]);
+        }
+    }
+
     /**
      * Detect whether an `access` payload would confer super-admin privileges
      * (admin.super or api.super), in either nested (`['admin' => ['super' => 1]]`)
@@ -2154,6 +2362,8 @@ class UsersController extends AbstractApiController
             return false;
         }
 
+        $this->assertAccessKeys($access);
+
         foreach (['admin', 'api'] as $scope) {
             if (isset($access[$scope]) && !is_array($access[$scope]) && Utils::isPositive($access[$scope])) {
                 return true;
@@ -2165,6 +2375,18 @@ class UsersController extends AbstractApiController
         }
 
         return false;
+    }
+
+    private function assertAccessKeys(array $access): void
+    {
+        if (array_key_exists('<<', $access)) {
+            throw new ValidationException("'<<' cannot be used as an access key.");
+        }
+        foreach ($access as $value) {
+            if (is_array($value)) {
+                $this->assertAccessKeys($value);
+            }
+        }
     }
 
     private function loadUserOrFail(?string $username): UserInterface

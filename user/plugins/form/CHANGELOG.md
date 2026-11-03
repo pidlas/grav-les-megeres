@@ -1,3 +1,26 @@
+# v9.1.39
+## 11/01/2026
+
+1. [](#improved)
+    * Form runs on PHP 7.3 and newer again, so Grav 1.7 sites on older PHP get updates; only the Cap captcha needs PHP 8.1 [#662](https://github.com/getgrav/grav-plugin-form/issues/662)
+1. [](#bugfix)
+    * A form using the Cap captcha on PHP older than 8.1 is now refused instead of skipping the captcha
+
+# v9.1.38
+## 10/31/2026
+
+1. [](#bugfix)
+    * [security] The security fixes below were found by Anthropic's OSS Scanner
+    * [security] A file upload is now accepted only for a file field the form declares, or one a plugin has set up through `onFormUploadSettings`
+    * [security] A form that holds too much data, or nests it too deeply, to keep between steps now answers with an error message instead of failing
+    * [security] An SVG upload that can't be cleaned is now refused and removed, instead of being kept as it was sent
+
+# v9.1.37
+## 10/30/2026
+
+1. [](#bugfix)
+    * An SVG upload that can't be read as SVG markup is refused with an error, instead of the sanitizer quietly saving it as an empty file
+
 # v9.1.36
 ## 10/26/2026
 
