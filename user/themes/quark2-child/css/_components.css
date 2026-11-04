@@ -341,7 +341,7 @@ button.box {
     position: fixed;
     inset: 0 auto 0 0; /* top:0, right:auto, bottom:0, left:0 */
     overflow-y: auto;
-    padding: var(--menu-panel-padding);
+    padding: var(--padding-menu-mobile-top);
     width: var(--menu-panel-width);
     z-index: 4500;
 }
@@ -1236,6 +1236,16 @@ footer p {
     padding: 0.625rem;
     width: 80%;
 }
+.reglement-interieur p {
+    border-left: 0.75rem solid var(--color-brand-accent);
+    border-radius: 0.5rem;
+    margin-bottom: 2rem;
+    padding-left: 1.875rem;
+}
+.reglement-interieur .important p {
+    border-left-color: var(--color-border-alizarine);
+    background-color: var(--color-highlight-alizarine);
+}
 .contact p {
     text-align: center;
 }
@@ -1524,7 +1534,7 @@ th.sep {
 
     /* 4. LES RÉSEAUX SOCIAUX : Ils complètent le ruban orange et l'arrondi droit */
     .navbar > div.rs {
-        display: flex !important; 
+        display: flex; 
         flex-direction: row;
         align-items: center;
         justify-content: center;
@@ -1574,23 +1584,20 @@ th.sep {
         grid-template-columns: 1fr 1fr;
     }
     .g_equipe .item {
-        grid-column: auto !important;
+        grid-column: auto;
         width: 15.625rem;
     }
     .g_fondatrices,
     .g_comediens {
-        display: flex !important;
+        display: flex;
         gap: 20rem;
         justify-content: center;
         max-width: var(--content-max-desktop);
         margin: 3.125rem auto;
     }
     .g_permanents {
-        display: grid !important;
-        grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
-        max-width: var(--content-max-desktop);
-        column-gap:3.125rem;
-        margin: 3.125rem 0 auto;
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
         justify-items: center;
     }
     .g_partenaires {
@@ -1654,7 +1661,7 @@ th.sep {
     }
 }
 
-@media screen and (max-height: 392px) and (orientation: landscape) {
+@media screen and (max-width: 599px) and (max-height: 392px) and (orientation: landscape) {
     :root {
         --menu-panel-padding: 1.75rem 0 0.25rem;
         --menu-item-min-height: 2.2rem;
@@ -1681,14 +1688,33 @@ th.sep {
         grid-template-columns: repeat(5, minmax(0, 1fr));
         justify-content: space-evenly;
     }
+    /* ADDITION : Le correctif pour la barre de contrôle de la vidéo */
+    .custom-video-controls {
+        flex-wrap: wrap;      /* Autorise le passage à la ligne */
+        justify-content: space-between;
+        padding: 8px 12px;    /* Évite le débordement vertical */
+    }
+
+    /* La barre de progression orange monte en haut et prend 100% de la largeur */
+    #progress {
+        order: 1;             
+        flex-basis: 100%;     
+        margin-bottom: 6px;   
+    }
+
+    /* Les autres boutons se rangent proprement en dessous sur la deuxième ligne */
+    #playPauseBtn { order: 2; }
+    .time-display { order: 3; }
+    .volume-control-zone { order: 4; }
+    #fullscreenBtn { order: 5; }
 }
 
 .button-container label.card:focus-within {
-    display: flex !important;
-    filter: none !important;
-    flex-grow: 1 !important;
-    transform: none !important;
-    width: 100% !important;
+    display: flex;
+    filter: none;
+    flex-grow: 1;
+    transform: none;
+    width: 100%;
 }
 .button-container label.card:focus-within .description {
     font-size: clamp(0.5rem, 3vw, 1.25rem);
@@ -1708,5 +1734,5 @@ th.sep {
     padding: 2rem 0 1rem 0;
 }
 .button-container label.card:focus-within .radio-title {
-    color: var(--color-brand-accent) !important;
+    color: var(--color-brand-accent);
 }
