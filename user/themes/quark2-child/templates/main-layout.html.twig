@@ -28,43 +28,15 @@
     <meta property="og:image" content="{{ uri.rootUrl(true) ~ url('theme://images/logohumous-notext-blue.png', false) }}" />
     <meta property="og:image:alt" content="Logo de la compagnie {{ site.title|e }}" />
     {% endblock %}
- 
-    {# <!-- Base & Transition -->
-    <link rel="stylesheet" href="{{ url('theme://css/all.min.css') }}" type="text/css" />
-    <link rel="stylesheet" href="{{ url('theme://css/_variables.css') }}" type="text/css" />
-    {# <link rel="stylesheet" href="{{ url('theme://css/style.css') }}" type="text/css" /> #}
-    <link rel="stylesheet" href="{{ url('theme://css/_layout.css') }}" type="text/css" />
-    <link rel="stylesheet" href="{{ url('theme://css/_components.css') }}" type="text/css" />
 
-    <!-- Spécificités (Après les modules) -->
-    <link rel="stylesheet" href="{{ url('theme://css/video.css') }}" type="text/css" />
-    <link rel="stylesheet" href="{{ url('theme://css/audio.css') }}" type="text/css" />
-    <link rel="stylesheet" href="{{ url('theme://css/spectacle-opression.css') }}" type="text/css" />
-
-    <!-- Ajustements de dernière minute -->
-    <link rel="stylesheet" href="{{ url('theme://css/custom.css') }}" type="text/css" /> #}
-
-    {# 4. FEUILLES DE STYLE (Prises en charge par l'Asset Manager de Grav) #}
+    {# 4. FEUILLES DE STYLE #}
     {% block stylesheets %}
-        {# 1. Outils tiers #}
-        {% do assets.addCss('theme://css/all.min.css', {'priority': 100, 'group': 'mes-styles'}) %}
-        
-        {# 2. Votre nouvelle architecture de style #}
-        {% do assets.addCss('theme://css/_variables.css', {'priority': 95, 'group': 'mes-styles'}) %}
-        {% do assets.addCss('theme://css/_layout.css', {'priority': 80, 'group': 'mes-styles'}) %}
-        {% do assets.addCss('theme://css/_components.css', {'priority': 70, 'group': 'mes-styles'}) %}
-
-        {# 3. Spécificités médias et pages #}
-        {% do assets.addCss('theme://css/video.css', {'priority': 60, 'group': 'mes-styles'}) %}
-        {% do assets.addCss('theme://css/audio.css', {'priority': 60, 'group': 'mes-styles'}) %}
-        {% do assets.addCss('theme://css/spectacle-opression.css', {'priority': 50, 'group': 'mes-styles'}) %}
-
-        {# 4. Ajustements rapides #}
-        {% do assets.addCss('theme://css/custom.css', {'priority': 40, 'group': 'mes-styles'}) %}
+        {# COMMENTAIRE : Ce bloc reste vide par défaut. Tous les fichiers CSS globaux 
+        et spécifiques (video, audio, etc.) sont désormais injectés via quark2-child.php #}
     {% endblock %}
 
-    {# 🌟 ON FORCE L'AFFICHAGE DU GROUPE ICI, AU DÉBUT DU HEAD #}
-    {{ assets.css('mes-styles') | raw }}
+    {# COMMENTAIRE : Ancre système souveraine de Grav qui va injecter le pipeline CSS unifié et minifié #}
+    {{ assets.css() | raw }}
 
     <link rel="icon" type="image/png" href="{{ url('theme://images/favicon/favicon-48x48.png') }}" />
     <link rel="icon" type="image/svg+xml" href="{{ url('theme://images/favicon/favicon.svg') }}" />

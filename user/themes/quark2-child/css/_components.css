@@ -317,10 +317,7 @@ button.box {
         top: max(clamp(0.875rem, 5vw, 1.25rem), env(safe-area-inset-top));
     }
 }
-/* ==========================================================================
-   BARRE DE NAVIGATION : LOGIQUE COMMUNE ET MOBILE PAR DÉFAUT
-   ========================================================================== */
-
+/*Barre de navigation*/
 /* Le parent se cale dans sa ligne de grille native du .wrapper */
 .navbar {
     grid-area: nav;
@@ -911,23 +908,68 @@ figure.bio {
 .g_compagnie3 img {
     border-radius: var(--radius-standard);
 }
-.g_partenaires {
-    display:grid;
-    align-items: center;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+.g-partenaires-top {
+    margin-top: var(--space-l);
+}
+/* Conteneur principal de la grille */
+.g-partenaires-container {
+    display: flex;
+    flex-wrap: wrap; 
     justify-content: center;
-    justify-items: center;
-    width: 90%;
-    grid-gap: 1.25rem;
-    margin: var(--space-l) auto 0;
 }
-.g_partenaires > :nth-child(7) {
-    grid-column: 1/-1;
-    justify-self: center;
+/* Cellule de chaque partenaire (1 colonne complète par défaut sur mobile vertical) */
+.col-partenaire {
+    flex: 0 0 100%; 
+    max-width: 100%;
+    padding:0.6rem;
 }
-.g_partenaires img {
-    object-fit: cover;
-    width: 9.375rem;
+/* Habillage graphique de vos fiches partenaires d'origine avec l'encadré */
+.partenaire-carte-pro {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    box-shadow: 0 2px 5px hsla(0, 0%, 0%, 0.05);
+    background: var(--color-sacred-white);
+    border: 1px solid hsla(264, 28%, 23%, 0.2); /* L'encadré autour de chaque fiche */
+    border-radius: var(--radius-standard);
+    padding: 1rem;
+    min-height: 160px;
+    box-sizing: border-box;
+}
+/* Zone réservée au logo */
+.partenaire-lien-logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 80px;
+    width: 100%;
+    margin-bottom: 0.5rem;
+}
+/* Sécurité et lissage sur les logos (Agglo, Département, DRAC) */
+.partenaire-logo-image {
+    max-height: 100%;
+    max-width: 100%;
+    object-fit: contain; 
+    width: auto;
+    height: auto;
+}
+.partenaire-btn-pro {
+    display: block;
+    width: 100%;
+    text-align: center;
+    color: var(--color-brand-secondary);
+    text-decoration: none;
+    font-family: var(--font-main);
+    font-weight:;
+    padding: 8px 4px;
+    font-size: 0.9rem;
+    line-height: 1.2;
+    transition: color 0.18s ease;
+}
+.partenaire-btn-pro:hover {
+    background-color: var(--color-menu-contact-hover); /* Votre survol marron/beige */
+    border-radius:var(--radius-standard);
+    color: var(--color-brand-primary);
 }
 .spectacle-gresilhette {
     display:flex;
@@ -1320,6 +1362,10 @@ th.sep {
         flex-basis: min(60vw, 16rem);
         /*flex-basis: min(68vw, 10.8rem);*/
     }
+    .col-partenaire {
+        flex: 0 0 50%; /* 2 colonnes par ligne */
+        max-width: 50%;
+    }
 }
 
 @media screen and (min-width: 621px) {
@@ -1335,10 +1381,6 @@ th.sep {
     input:checked + label.card {
         flex: 1 0 min(58vw, 18rem);
         min-width: 13rem;
-    }
-    .g_partenaires {
-        grid-auto-rows: 1fr;
-        grid-template-columns: repeat(auto-fit, minmax(12.5rem, 1fr));
     }
 }
 
@@ -1381,6 +1423,10 @@ th.sep {
     .e_fin_bio {
         grid-column: 1 / span 2;
         grid-row: 3;
+    }
+    .col-partenaire {
+        flex: 0 0 33.333%; /* 3 colonnes par ligne */
+        max-width: 33.333%;
     }
     .spectacle-gresilhette {
         display:grid;
@@ -1600,10 +1646,24 @@ th.sep {
         grid-template-columns: repeat(4, minmax(0, 1fr));
         justify-items: center;
     }
-    .g_partenaires {
-        display: flex;
-        flex-wrap: nowrap;
-        justify-content: flex-start;
+    .g-partenaires-container {
+        flex-wrap: nowrap !important; /* VERROU : Force les 7 éléments à s'aligner sur UNE SEULE LIGNE */
+    }
+    
+    .col-partenaire {
+        flex: 1 1 0% !important; /* Force chaque cellule à se diviser l'espace équitablement (1/7ème) */
+        max-width: calc(100% / 7) !important;
+    }
+    
+    .partenaire-carte-pro {
+        min-height: 150px;
+        max-height: 150px;
+    }
+    
+    .partenaire-btn-pro {
+        font-size: 0.75rem !important;
+        padding: 4px 6px !important;
+        line-height: 1.2;
     }
     .encadre,
     .encadre-extrait,
