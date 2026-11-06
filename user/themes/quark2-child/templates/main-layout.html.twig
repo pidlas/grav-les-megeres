@@ -84,9 +84,6 @@
 
     {% block meta %}{% endblock %}
 
-    {# 🌟 ANCRE SYSTEME 1 : Permet à Grav d'injecter les CSS internes de sa barre de débogage #}
-    {{ assets.css() | raw }}
-
 </head>
 
 <body>
@@ -115,12 +112,16 @@
                     {% endif %}
                 </div>
 
-                {# LE BLOC MAGIQUE DU DIAPORAMA #}
-                {% block avant_conteneur_texte %}{% endblock %}
+                {# AVANT LE BLOC MAGIQUE DU DIAPORAMA ETAIT DANS LA SECTION 
+                {% block avant_conteneur_texte %}{% endblock %} #}
 
                 {# LE CŒUR UNIQUE DU SITE : Tout le contenu spécifique s'injectera ici #}
                 {% block content %}{% endblock %}
             </section>
+
+            {# MAINTENANT LE BLOC MAGIQUE DU DIAPORAMA EST EN DEHORS DE LA SECTION mais le texte s'affiche au-dessus #}
+            {% block avant_conteneur_texte %}{% endblock %}
+
         </main>
 
         {# Zone commune du bas (Feuilles) #}

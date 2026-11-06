@@ -6,14 +6,16 @@ Architecture : Mobile-First / Sans Cadres / Sans Filtres / Ancrages Fixes
 /* --------------------------------------------------------------------------
 1. STRUCTURE GLOBALE & ISOLEMENT
 -------------------------------------------------------------------------- */
-/*section.les-scolaires {
-  position: relative;
-  width: 100%;
-  padding: 0; 
+/*.page-container {
+    position: relative;
+    width: 100%;
+    padding: 0; 
 }*/
 .section-spectacle {
     position: relative;
     overflow: hidden; /* Empêche les bulles de créer un scroll horizontal */
+    width:100%;
+    padding:0;
 }
 .opression-wrapper {
     position: relative;
@@ -22,6 +24,10 @@ Architecture : Mobile-First / Sans Cadres / Sans Filtres / Ancrages Fixes
 }
 
 /* --- Styles des contenus internes --- */
+.sous-titre-page{
+    text-align: center;
+    font-size: clamp(1rem, 1vw + 0.4rem, 2rem);
+}
 .opression-corps h3 {
     font-family: CocoGothic;
     font-variant-caps: all-petite-caps;
@@ -64,7 +70,6 @@ Architecture : Mobile-First / Sans Cadres / Sans Filtres / Ancrages Fixes
     z-index:1;
     pointer-events: none;
 }
-
 /* --------------------------------------------------------------------------
    3. RÉPARTITION DES TAILLES ET POSITIONS STABLES (ANCRAGE PAR LE HAUT)
    -------------------------------------------------------------------------- */
@@ -73,26 +78,26 @@ Architecture : Mobile-First / Sans Cadres / Sans Filtres / Ancrages Fixes
 
 /* Bulle 1 */
 .b-haut-gauche {
-    width: 120px !important;
-    height: 120px !important;
-    top: -15px !important;       
-    left: -20px !important;      
+    width: 120px;
+    height: 120px;
+    top: -15px;       
+    left: -20px;      
 }
 
 /* Bulle 2 : La plus grosse */
 .b-milieu-droite {
-    width: 140px !important;
-    height: 140px !important;
-    top: 90px !important;        
-    right: 15px !important;      
+    width: 140px;
+    height: 140px;
+    top: 90px;        
+    right: 15px;      
 }
 
 /* Bulle 3 : Petite et fixe */
 .b-objectifs-gauche {
-    width: 90px !important;
-    height: 90px !important;
-    top: 360px !important;       
-    left: 45px !important;       
+    width: 90px;
+    height: 90px;
+    top: 360px;       
+    left: 45px;       
 }
 
 /* --- 📱 SMARTPHONES (Paysage) --- */
@@ -122,55 +127,56 @@ screen and (min-width: 1201px) and (orientation: landscape),
 screen and (min-width: 1920px) {
        
     .opression-formats { flex-direction: row; gap: var(--space-m); }
-  
-  .b-haut-gauche {
-    width: 300px !important;
-    height: 300px !important;
-    top: -40px !important;
-    left: 0px !important;
-  }
-  
-  .b-milieu-droite {
-    width: 310px !important;
-    height: 310px !important;
-    top: 90px !important;     
-    right: 180px !important;    
-  }
-  
-  .b-objectifs-gauche {
-    width: 200px !important;
-    height: 200px !important;
-    top: 260px !important;     
-    left: 300px !important;    
-  }
+    
+    .b-haut-gauche {
+        width: 300px !important;
+        height: 300px !important;
+        top: -40px !important;
+        left: 0px !important;
+    }
+    
+    .b-milieu-droite {
+        width: 310px !important;
+        height: 310px !important;
+        top: 90px !important;     
+        right: 180px !important;    
+    }
+    
+    .b-objectifs-gauche {
+        width: 200px !important;
+        height: 200px !important;
+        top: 260px !important;     
+        left: 300px !important;    
+    }
 }
-
 /* --------------------------------------------------------------------------
    4. ANCRAGE DE LA BULLE FINALE (BULLE 4 EN FLUX RELATIF - SANS CADRE NI OMBRE)
    --------------------------------------------------------------------------
 .bloc-bulle-finale {
-    position: relative;
-    width: 100%;
-    height: 80px;         
-    overflow: hidden;     
-    margin-top: 20px;     
+  position: relative;
+  width: 100%;
+  height: 80px;         
+  overflow: hidden;     
+  margin-top: 20px;     
 }
 
 .page-container img.bulle-bas-centre {
-    display: block !important;
-    visibility: visible !important;
-    position: relative !important; /* Reste ancrée sous le texte
-    border-radius: 50% !important;
-    object-fit: cover !important;
-    z-index: 1 !important;
-    pointer-events: none;    
-    opacity: 1 !important;
-    filter: none !important;
-    mix-blend-mode: normal !important;
+  display: block !important;
+  visibility: visible !important;
+  position: relative !important; /* Reste ancrée sous le texte
+  border-radius: 50% !important;
+  object-fit: cover !important;
+  z-index: 1 !important;
+  pointer-events: none;
+  
+  opacity: 1 !important;
+  filter: none !important;
+  mix-blend-mode: normal !important;
   
   /* ❌ NETTOYAGE : Suppression du cadre blanc et de l'ombre
   border: none !important;
   box-shadow: none !important;
+
   width: 200px !important;
   height: 200px !important;
   margin: 0 auto !important; 
@@ -178,14 +184,14 @@ screen and (min-width: 1920px) {
 }
 
 @media screen and (min-width: 768px) {
-    .bloc-bulle-finale { height: 100px; margin-top: 25px; }
-    .page-container img.bulle-bas-centre { width: 300px !important; height: 300px !important; }
+  .bloc-bulle-finale { height: 100px; margin-top: 25px; }
+  .page-container img.bulle-bas-centre { width: 300px !important; height: 300px !important; }
 }
 
 @media screen and (min-width: 1025px) and (max-width: 1200px) and (orientation: portrait),
 screen and (min-width: 1201px) and (orientation: landscape),
 screen and (min-width: 1920px) {
   
-    .bloc-bulle-finale { height: 120px; margin-top: 30px; }
-    .page-container img.bulle-bas-centre { width: 440px !important; height: 440px !important; }
+  .bloc-bulle-finale { height: 120px; margin-top: 30px; }
+  .page-container img.bulle-bas-centre { width: 440px !important; height: 440px !important; }
 }*/

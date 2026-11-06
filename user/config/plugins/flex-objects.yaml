@@ -8,3 +8,4 @@ directories:
   - 'blueprints://flex-objects/contact.yaml'
   - 'blueprints://flex-objects/gresilhette.yaml'
   - 'blueprints://flex-objects/compagnie.yaml'
+  - 'blueprints://flex-objects/ta-grand-mere.yaml'

@@ -1,0 +1,134 @@
+type: flex-objects
+title: Ta grand-mère sous le figuier
+description: Gestion des médias audio, questions et rédactionnel pour le projet Ta grand-mère sous le figuier
+
+config:
+  data:
+    storage:
+      className: 'Grav\Framework\Flex\Storage\FolderStorage'
+      options:
+        formatter:
+          class: 'Grav\Framework\File\Formatter\YamlFormatter'
+        # 🌟 ANCRAGE : Fichier unique global de collection stocké dans user/data/flex-objects/ta-grand-mere
+        folder: 'user/data/flex-objects/ta-grand-mere' 
+    media:
+      per_object: false
+      accept:
+        - audio/mpeg
+        - audio/ogg
+        - image/avif
+        - application/pdf
+
+  site:
+    templates:
+      object:
+        route: /spectacles/ta-grand-mere-sous-le-figuier
+
+  admin:
+    router:
+      path: /ta-grand-mere
+    menu:
+      list:
+        route: /ta-grand-mere
+        title: Page Grand-Mère
+        priority: 2
+        icon: fa fa-female
+    list:
+      title: Liste des Collectes
+      fields:
+        title:
+          title: Titre du projet
+          field: title
+          link: edit
+
+form:
+  fields:
+    tabs:
+      type: tabs
+      active: 1
+      fields:
+
+        tab_general:
+          type: tab
+          title: "Général & Audio"
+          fields:
+            title:
+              type: text
+              label: Titre de la page
+              validate:
+                required: true
+            menu:
+              type: text
+              label: Titre dans le menu du site
+            
+            section_audio:
+              type: section
+              title: "Lecteur Audio Maître"
+              underline: true
+            spectacle.audio.mp3:
+              type: filepicker
+              label: Sélectionner le fichier audio MP3
+              folder: 'user-data://flex-objects/ta-grand-mere'
+              preview_images: false
+              accept:
+                - .mp3
+            spectacle.audio.ogg:
+              type: filepicker
+              label: Sélectionner le fichier audio OGG (Secours)
+              folder: 'user-data://flex-objects/ta-grand-mere'
+              preview_images: false
+              accept:
+                - .ogg
+
+            section_intro:
+              type: section
+              title: "Introduction du projet"
+              underline: true
+            spectacle.texte_intro:
+              type: markdown
+              label: "Premier bloc de texte (ex: Le spectacle Ta grand-mère...)"
+
+        tab_collecte:
+          type: tab
+          title: "Collecte & Interview"
+          fields:
+            section_lampe:
+              type: section
+              title: "Illustration de la Lampe"
+              underline: true
+            spectacle.image_lampe:
+              type: filepicker
+              label: Sélectionner l'image de la lampe (AVIF)
+              folder: 'user-data://flex-objects/ta-grand-mere'
+              preview_images: true
+              accept:
+                - .avif
+
+            section_corps:
+              type: section
+              title: "Corps du récit"
+              underline: true
+            spectacle.texte_corps:
+              type: markdown
+              label: "Deuxième bloc de texte (ex: Sous le prisme du féminisme...)"
+
+            section_questions:
+              type: section
+              title: "Liste des Questions de l'Interview"
+              underline: true
+            spectacle.questions_interview:
+              type: list
+              label: "Questions posées aux dames lors des collectes"
+              btnLabel: "Ajouter une question"
+              fields:
+                .texte_question:
+                  type: text
+                  label: "Intitulé de la question"
+
+            section_conclusion:
+              type: section
+              title: "Conclusion de la page"
+              underline: true
+            spectacle.texte_conclusion:
+              type: markdown
+              label: "Troisième bloc de texte (ex: Nous finissons l’entretien...)"

@@ -2,69 +2,107 @@
 
 {% block content %}
 
-{# 1. Zone du Lecteur Audio #}
-{% if page.media['spectacle5EHPAD.mp3'] or page.media['spectacle5EHPAD.ogg'] %}
-<div class="wrapper-audio">
-    <audio id="audio" preload="metadata">
-        {% if page.media['spectacle5EHPAD.mp3'] %}
-            <source src="{{ page.media['spectacle5EHPAD.mp3'].url }}" type="audio/mpeg" />
+{# 🌟 APPEL DE LA COLLECTION FLEX OBJECT UNIQUE DE LA PAGE GRAND-MÈRE #}
+{% set donnees_page = grav['flex'].collection('ta-grand-mere')|first %}
+
+{% if donnees_page is not empty %}
+
+    {# CORRECTIF : Plus de div.encadre parasite ici. On déploie votre bloc blanc 
+       directement dans la structure avec la marge haute var(--space-l) d'origine #}
+    <div class="{{ page.slug }} p-3 rounded">
+
+        {# ==========================================================================
+           1. ZONE DU LECTEUR AUDIO SUR MESURE
+           ========================================================================== #}
+        {% set fichier_mp3 = donnees_page.spectacle.audio.mp3 | default('') %}
+        {% set fichier_ogg = donnees_page.spectacle.audio.ogg | default('') %}
+
+        {% if fichier_mp3 != '' or fichier_ogg != '' %}
+        <div class="wrapper-audio mb-3">
+            <audio id="audio" preload="metadata">
+                {% if fichier_mp3 != '' %}
+                    <source src="{{ base_url_simple ~ '/user/data/flex-objects/ta-grand-mere/' ~ fichier_mp3 }}" type="audio/mpeg" />
+                {% endif %}
+                {% if fichier_ogg != '' %}
+                    <source src="{{ base_url_simple ~ '/user/data/flex-objects/ta-grand-mere/' ~ fichier_ogg }}" type="audio/ogg" />
+                {% endif %}
+            </audio>
+            
+            <button id="audioPlayPauseBtn" class="audio-control-btn" aria-label="Lecture/Pause">
+                <svg class="play-icon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                <svg class="pause-icon" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+            </button>
+            <span id="audioTime" class="audio-time-display">0:00 / 0:00</span>
+            <input type="range" id="audioProgress" min="0" max="100" value="0" step="0.1">
+            
+            <div class="audio-volume-zone">
+                <button id="audioMuteBtn" class="audio-control-btn" aria-label="Mute/Unmute">
+                    <svg class="sound-icon" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.8.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
+                </button>
+                <input type="range" id="audioVolumeSlider" min="0" max="1" step="0.05" value="1" aria-label="Volume">
+            </div>
+        </div>
         {% endif %}
-        {% if page.media['spectacle5EHPAD.ogg'] %}
-            <source src="{{ page.media['spectacle5EHPAD.ogg'].url }}" type="audio/ogg" />
+
+
+        {# ==========================================================================
+           2. SECTION 1 : L'INTRODUCTION (TEXTE DU HAUT)
+           ========================================================================== #}
+        {% if donnees_page.spectacle.texte_intro is not empty %}
+            <div class="spectacle-texte-intro my-3">
+                {{ donnees_page.spectacle.texte_intro | markdown | raw }}
+            </div>
         {% endif %}
-        {% if page.media['spectacle5EHPAD.mp3'] %}
-            <a href="{{ page.media['spectacle5EHPAD.mp3'].url }}">Télécharger l'audio</a>
+
+
+        {# ==========================================================================
+           3. SECTION 2 : LE BLOC MIXTE FLUIDE (LAMPE + TEXTE CENTRAL)
+           ========================================================================== #}
+        <div class="columns my-3 align-items-center">
+            
+            {# A. LA CELLULE DE LA LAMPE #}
+            {% set logo_lampe = donnees_page.spectacle.image_lampe | default('') %}
+            {% if logo_lampe != '' %}
+                <div class="column col-4 col-sm-12 text-center p-2">
+                    <img src="{{ base_url_simple ~ '/user/data/flex-objects/ta-grand-mere/' ~ logo_lampe }}" alt="Lampe et horloge, les contes occitans" class="img-responsive mx-auto forme-lampe" loading="lazy">
+                </div>
+            {% endif %}
+
+            {# B. LA CELLULE DU TEXTE CENTRAL DU RÉCIT #}
+            {% if donnees_page.spectacle.texte_corps is not empty %}
+                <div class="column col-8 col-sm-12 p-2">
+                    {{ donnees_page.spectacle.texte_corps | markdown | raw }}
+                </div>
+            {% endif %}
+
+        </div>
+
+
+        {# ==========================================================================
+           4. SECTION 3 : LA LISTE DES QUESTIONS DE L'INTERVIEW
+           ========================================================================== #}
+        {% if donnees_page.spectacle.questions_interview is not empty %}
+            <ul class="jolie-ombres slide-list my-3">
+                {% for item in donnees_page.spectacle.questions_interview %}
+                    <li>{{ item.texte_question | raw }}</li>
+                {% endfor %}
+            </ul>
         {% endif %}
-    </audio>
-    
-    <button id="audioPlayPauseBtn" class="audio-control-btn" aria-label="Lecture/Pause">
-        <svg class="play-icon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-        <svg class="pause-icon" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
-    </button>
-    <span id="audioTime" class="audio-time-display">0:00 / 0:00</span>
-    <input type="range" id="audioProgress" min="0" max="100" value="0" step="0.1">
-    
-    <div class="audio-volume-zone">
-        <button id="audioMuteBtn" class="audio-control-btn" aria-label="Mute/Unmute">
-            <svg class="sound-icon" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.9.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
-            <svg class="mute-icon" viewBox="0 0 24 24"><path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.21.05-.42.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/></svg>
-        </button>
-        <input type="range" id="audioVolumeSlider" min="0" max="1" step="0.05" value="1" aria-label="Volume">
+
+
+        {# ==========================================================================
+           5. SECTION 4 : LES PARAGRAPHES DE CONCLUSION (TEXTE DU BAS)
+           ========================================================================== #}
+        {# CORRECTIF : Remplacement de la div.container parasite par une simple classe neutre 
+           qui hérite du fond blanc global de la page #}
+        {% if donnees_page.spectacle.texte_conclusion is not empty %}
+            <div class="spectacle-texte-conclusion mt-3">
+                {{ donnees_page.spectacle.texte_conclusion | markdown | shortcodes | raw }}
+            </div>
+        {% endif %}
+
     </div>
-</div>
-{% endif %}
 
-{# 🔍 DECOUPAGE SECURISE : On sépare par le mot-clé textuel qui survit à la compilation HTML #}
-{% set parties_texte = page.content|split('---SEPARATEUR---') %}
-
-{# 2. Section 1 : L'introduction (Index 0) #}
-{% if parties_texte is defined %}
-    {{ parties_texte[0] | shortcodes | raw }}
-{% endif %}
-
-{# 3. Section 2 : Le bloc mixte (Image flottante + texte du milieu index 1) #}
-{% if parties_texte is defined and parties_texte[1] is defined %}
-    <div class="lampe-wrapper">
-        {% if page.header.image_lampe %}
-            {{ ('[img name="' ~ page.header.image_lampe ~ '" alt="Lampe et horloge, les contes occitans" class="forme-lampe"]')|shortcodes | raw }}
-        {% endif %}
-        {# On nettoie les restes de balises de paragraphe que Grav aurait pu mettre autour du séparateur #}
-        {{ parties_texte[1] | replace({'<p></p>': '', '<p> </p>': ''}) | shortcodes | raw }}
-    </div>
-{% endif %}
-
-{# 4. Section 3 : La liste des questions #}
-{% if page.header.questions_interview is not empty %}
-    <ul class="jolie-ombres slide-list">
-        {% for question in page.header.questions_interview %}
-            <li>{{ question | raw }}</li>
-        {% endfor %}
-    </ul>
-{% endif %}
-
-{# 5. Section 4 : Les paragraphes de conclusion (Index 2) #}
-{% if parties_texte is defined and parties_texte[2] is defined %}
-    {{ parties_texte[2] | replace({'<p></p>': '', '<p> </p>': ''}) | shortcodes | raw }}
 {% endif %}
 
 {% endblock %}

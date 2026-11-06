@@ -1,0 +1,191 @@
+/* ==========================================================================
+FICHIER INTÉGRAL STABILISÉ : SPECTACLE O'PRESSION
+Architecture : Mobile-First / Sans Cadres / Sans Filtres / Ancrages Fixes
+========================================================================== */
+
+/* --------------------------------------------------------------------------
+1. STRUCTURE GLOBALE & ISOLEMENT
+-------------------------------------------------------------------------- */
+/*section.les-scolaires {
+  position: relative;
+  width: 100%;
+  padding: 0; 
+}*/
+.section-spectacle {
+    position: relative;
+    overflow: hidden; /* Empêche les bulles de créer un scroll horizontal */
+}
+.opression-wrapper {
+    position: relative;
+    z-index: 5; /* Force le texte à passer AU-DESSUS des illustrations */
+    margin:0 2vw;
+}
+
+/* --- Styles des contenus internes --- */
+.opression-corps h3 {
+    font-family: CocoGothic;
+    font-variant-caps: all-petite-caps;
+    margin-top: var(--space-s);
+    color: #382b4c;
+}
+.opression-formats {
+    position:relative;
+    display: flex;
+    justify-content: center;
+    justify-items: center;
+    flex-direction: column; 
+    gap: var(--space-s); 
+    margin: var(--space-s) 0; 
+    z-index: 6; 
+}
+.format-bloc { 
+    background: rgba(255, 255, 255, 0.9); 
+    padding: 0 var(--space-s); 
+    border-radius: 0.5rem; 
+    border: 1px solid rgba(56, 43, 76, 0.15);
+}
+.opression-tarifs {
+    position:relative;
+    font-weight: bold; 
+    margin-top: var(--space-m); 
+    text-align: center;
+    z-index: 6; 
+}
+
+/* --------------------------------------------------------------------------
+2. CONFIGURATION DE BASE DES BULLES (100% Nettes, Sans Bordures ni Ombres)
+-------------------------------------------------------------------------- */
+.section-spectacle img.bulle-fond {
+    position:absolute;
+    display:block;
+    visibility:visible;
+    border-radius:50%;
+    object-fit:cover;
+    z-index:1;
+    pointer-events: none;
+}
+
+/* --------------------------------------------------------------------------
+   3. RÉPARTITION DES TAILLES ET POSITIONS STABLES (ANCRAGE PAR LE HAUT)
+   -------------------------------------------------------------------------- */
+
+/* --- 📱 SMARTPHONES (Portrait de base) --- */
+
+/* Bulle 1 */
+.b-haut-gauche {
+    width: 120px !important;
+    height: 120px !important;
+    top: -15px !important;       
+    left: -20px !important;      
+}
+
+/* Bulle 2 : La plus grosse */
+.b-milieu-droite {
+    width: 140px !important;
+    height: 140px !important;
+    top: 90px !important;        
+    right: 15px !important;      
+}
+
+/* Bulle 3 : Petite et fixe */
+.b-objectifs-gauche {
+    width: 90px !important;
+    height: 90px !important;
+    top: 360px !important;       
+    left: 45px !important;       
+}
+
+/* --- 📱 SMARTPHONES (Paysage) --- */
+@media screen and (min-width: 481px) and (max-width: 900px) and (orientation: landscape),
+screen and (max-width: 800px) and (max-height: 392px) and (orientation: landscape) {
+  
+    .b-haut-gauche { width: 110px !important; height: 110px !important; top: -10px !important; left: -15px !important; }
+    .b-milieu-droite { width: 130px !important; height: 130px !important; top: 85px !important; right: 25px !important; }
+    .b-objectifs-gauche { width: 85px !important; height: 85px !important; top: 320px !important; left: 50px !important; }
+}
+
+/* --- 📐 TABLETTES (Portrait) --- */
+@media screen and (min-width: 768px),
+screen and (min-width: 481px) and (max-width: 1024px) and (orientation: portrait),
+screen and (min-width: 1112px) and (max-width: 1504px) and (orientation: portrait) {
+  
+    .opression-formats { flex-direction: row; gap: var(--space-m); }
+    
+    .b-haut-gauche { width: 180px !important; height: 180px !important; top: -20px !important; left: -30px !important; }
+    .b-milieu-droite { width: 220px !important; height: 220px !important; top: 140px !important; right: 40px !important; }
+    .b-objectifs-gauche { width: 140px !important; height: 140px !important; top: 480px !important; left: 80px !important; }
+}
+
+/* --- 💻 ORDINATEURS & ECRANS LARGES (PC Desktop) --- */
+@media screen and (min-width: 1025px) and (max-width: 1200px) and (orientation: portrait),
+screen and (min-width: 1201px) and (orientation: landscape),
+screen and (min-width: 1920px) {
+       
+    .opression-formats { flex-direction: row; gap: var(--space-m); }
+  
+  .b-haut-gauche {
+    width: 300px !important;
+    height: 300px !important;
+    top: -40px !important;
+    left: 0px !important;
+  }
+  
+  .b-milieu-droite {
+    width: 310px !important;
+    height: 310px !important;
+    top: 90px !important;     
+    right: 180px !important;    
+  }
+  
+  .b-objectifs-gauche {
+    width: 200px !important;
+    height: 200px !important;
+    top: 260px !important;     
+    left: 300px !important;    
+  }
+}
+
+/* --------------------------------------------------------------------------
+   4. ANCRAGE DE LA BULLE FINALE (BULLE 4 EN FLUX RELATIF - SANS CADRE NI OMBRE)
+   --------------------------------------------------------------------------
+.bloc-bulle-finale {
+    position: relative;
+    width: 100%;
+    height: 80px;         
+    overflow: hidden;     
+    margin-top: 20px;     
+}
+
+.page-container img.bulle-bas-centre {
+    display: block !important;
+    visibility: visible !important;
+    position: relative !important; /* Reste ancrée sous le texte
+    border-radius: 50% !important;
+    object-fit: cover !important;
+    z-index: 1 !important;
+    pointer-events: none;    
+    opacity: 1 !important;
+    filter: none !important;
+    mix-blend-mode: normal !important;
+  
+  /* ❌ NETTOYAGE : Suppression du cadre blanc et de l'ombre
+  border: none !important;
+  box-shadow: none !important;
+  width: 200px !important;
+  height: 200px !important;
+  margin: 0 auto !important; 
+  top: 0 !important;
+}
+
+@media screen and (min-width: 768px) {
+    .bloc-bulle-finale { height: 100px; margin-top: 25px; }
+    .page-container img.bulle-bas-centre { width: 300px !important; height: 300px !important; }
+}
+
+@media screen and (min-width: 1025px) and (max-width: 1200px) and (orientation: portrait),
+screen and (min-width: 1201px) and (orientation: landscape),
+screen and (min-width: 1920px) {
+  
+    .bloc-bulle-finale { height: 120px; margin-top: 30px; }
+    .page-container img.bulle-bas-centre { width: 440px !important; height: 440px !important; }
+}*/

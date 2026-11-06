@@ -22,3 +22,6 @@ Thumbs.db
 *.mp3
 *.ogg
 *.webm
+*.mov
+*.wav
+*.flac

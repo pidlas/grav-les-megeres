@@ -25,12 +25,12 @@
   }
 }*/
 
-/* 1. Le cadre blanc : on réduit sa hauteur minimale pour qu'il soit moins imposant */
+/* 1. Le cadre blanc : on réduit sa hauteur minimale pour qu'il soit moins imposant
 .g_partenaires li .partenaire-carte-pro {
     background: #ffffff;
     border: 1px solid #eeeeee;
     border-radius: 8px;
-    padding: 15px; /* Un peu moins de padding pour resserrer le tout */
+    padding: 15px; /* Un peu moins de padding pour resserrer le tout
     text-align: center;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
     
@@ -38,28 +38,28 @@
     flex-direction: column;
     align-items: center;
     justify-content: space-between;
-    min-height: 130px; /* 👇 Réduit de 160px à 130px pour un cadre plus compact */
+    min-height: 130px; /* 👇 Réduit de 160px à 130px pour un cadre plus compact
     height: 100%;
 }
 
-/* 2. Le logo : on lui donne plus d'espace pour s'exprimer */
+/* 2. Le logo : on lui donne plus d'espace pour s'exprimer
 .g_partenaires li .partenaire-logo-pro {
     max-width: 100%;
     height: auto;
-    max-height: 85px; /* 👇 Augmenté de 60px à 85px pour que l'image soit plus visible */
+    max-height: 85px; /* 👇 Augmenté de 60px à 85px pour que l'image soit plus visible
     display: block;
-    margin: auto auto 10px auto; /* Centre verticalement l'image dans l'espace disponible */
+    margin: auto auto 10px auto; /* Centre verticalement l'image dans l'espace disponible
     object-fit: contain;
 }
 
-/* 3. Le bouton "Visiter le site" */
+/* 3. Le bouton "Visiter le site"
 .g_partenaires li .partenaire-btn-pro {
     font-size: 0.75em;
     padding: 4px 10px;
     white-space: nowrap;
     display: inline-block;
     margin-top: auto; 
-}
+}*/
 
 .actu-resume p{
     margin-top:var(--space-xs);
@@ -155,35 +155,6 @@
 .p_le-tout-public img.image-ronde{
     width:200px;
     height:auto;
-}
-
-/* ==========================================================================
-   CORRECTIF PLEINE LARGEUR POUR LE DIAPORAMA EN CSS GRID
-   ========================================================================== */
-
-/* 1. On cible le fieldset de l'accueil pour l'afficher proprement */
-.home fieldset.visually-hidden {
-    display: block !important; 
-    visibility: visible !important;
-    border: none;
-    padding: 0;
-    
-    /* Le mécanisme d'échappement qui a fonctionné pour la pleine largeur */
-    width: 100vw;
-    position: relative;
-    left: 50%;
-    right: 50%;
-    margin-left: -50vw;
-    margin-right: -50vw;
-}
-
-/* 2. On s'assure que le conteneur interne s'étale sur toute la largeur */
-.home .button-container {
-    width: 100%;
-    max-width: 100%;
-
-    padding-left: 7%;
-    padding-right: 7%;
 }
 
 /* Cibler le texte de la citation */

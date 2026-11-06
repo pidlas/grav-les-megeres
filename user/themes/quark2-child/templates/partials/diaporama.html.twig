@@ -1,43 +1,44 @@
 {% set cible_page = la_page_accueil | default(page) %}
 
 {% if cible_page.header.slides %}
-<fieldset class="visually-hidden">
-    <legend>Diaporama</legend>
-    <div class="button-container">
-        
-        {% for slide in cible_page.header.slides %}
-            {# Génère l'ID automatique (c1, c2, c3...) #}
-            {% set slide_id = 'c' ~ loop.index %}
+<fieldset class="diaporama-fieldset">
+    <legend class="visually-hidden">Diaporama de visualisation des spectacles</legend>
+    <div class="diaporama-zone-maitre">
+        <div class="button-container">
             
-            <input type="radio" name="slide" id="{{ slide_id }}" {{ loop.first ? 'checked' : '' }}>
-            
-            {# Gestion dynamique des formats d'images #}
-            {% set style_bg = '' %}
-            {% if slide.image %}
-                {# On récupère directement votre image .avif attachée à la page #}
-                {% set img_avif = cible_page.media[slide.image] %}
+            {% for slide in cible_page.header.slides %}
+                {# Génère l'ID automatique (c1, c2, c3...) #}
+                {% set slide_id = 'c' ~ loop.index %}
                 
-                {% if img_avif %}
-                    {% set url_avif = img_avif.url %}
+                <input type="radio" name="slide" id="{{ slide_id }}" {{ loop.first ? 'checked' : '' }}>
+                
+                {# Gestion dynamique des formats d'images #}
+                {% set style_bg = '' %}
+                {% if slide.image %}
+                    {# On récupère directement votre image .avif attachée à la page #}
+                    {% set img_avif = cible_page.media[slide.image] %}
                     
-                    {# Version épurée : Plus de remplacement de chaîne, on injecte directement l'AVIF d'origine #}
-                    {% set style_bg %}
-                        style="background-image: url('{{ url_avif }}');"
-                    {% endset %}
+                    {% if img_avif %}
+                        {% set url_avif = img_avif.url %}
+                        
+                        {# Version épurée : Plus de remplacement de chaîne, on injecte directement l'AVIF d'origine #}
+                        {% set style_bg %}
+                            style="background-image: url('{{ url_avif }}');"
+                        {% endset %}
+                    {% endif %}
                 {% endif %}
-            {% endif %}
-            
-            <label for="{{ slide_id }}" class="card" {{ style_bg | raw }}>
-                <div class="row">
-                    <div class="description">
-                        <a href="{{ base_url }}{{ slide.lien }}">
-                            <h3 class="radio-title">{{ slide.titre }}</h3>
-                        </a>
+                
+                <label for="{{ slide_id }}" class="card" {{ style_bg | raw }}>
+                    <div class="row">
+                        <div class="description">
+                            <a href="{{ base_url }}{{ slide.lien }}">
+                                <h3 class="radio-title">{{ slide.titre }}</h3>
+                            </a>
+                        </div>
                     </div>
-                </div>
-            </label>
-        {% endfor %}
-
-    </div>
+                </label>
+            {% endfor %}
+        </div>
+         <div class="diaporama-masque-fondu"></div>
 </fieldset>
 {% endif %}

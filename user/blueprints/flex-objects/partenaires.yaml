@@ -28,7 +28,7 @@ config:
       list:
         route: /partenaires
         title: Page Partenaires
-        priority: 3
+        priority: 4
         icon: fa fa-handshake-o
     list:
       title: Liste des Partenaires

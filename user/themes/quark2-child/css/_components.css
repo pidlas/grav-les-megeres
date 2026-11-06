@@ -317,7 +317,10 @@ button.box {
         top: max(clamp(0.875rem, 5vw, 1.25rem), env(safe-area-inset-top));
     }
 }
-/*Barre de navigation*/
+/* ==========================================================================
+   BARRE DE NAVIGATION : LOGIQUE COMMUNE ET MOBILE PAR DÉFAUT
+   ========================================================================== */
+
 /* Le parent se cale dans sa ligne de grille native du .wrapper */
 .navbar {
     grid-area: nav;
@@ -523,37 +526,62 @@ button.box {
 .actu-action {
     margin: 0.65rem 0 0;
 }
+.diaporama-fieldset{
+    border: none;
+    padding: 0;
+    margin: 0;
+    min-width: 0;
+    max-width: 100%;
+    width: 100%;
+}
 .visually-hidden {
     border: none;
     margin: 0;
     padding: 0;
-}
-.visually-hidden legend {
     height: 1px;
     overflow: hidden;
     position: absolute;
     width: 1px;
     clip: rect(0, 0, 0, 0);
 }
+.diaporama-zone-maitre {
+    position: relative;
+    width: 100%;
+    max-width: 100%;
+    overflow: visible;
+}
+.diaporama-masque-fondu {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 26%; 
+    height: calc(100% - 0.25rem);
+    background: linear-gradient(90deg, transparent, var(--color-white));
+    pointer-events: none;
+    z-index: 99;
+}
 .button-container {
     display: flex;
     flex-wrap: nowrap;
+    position:relative;
     height: auto;
     justify-content: flex-start;
     margin: var(--space-m) auto 0;
     max-width: 100%;
     width: 100%;
-    mask-image: linear-gradient(90deg, #000 74%, transparent);
-    -webkit-mask-image: linear-gradient(90deg, #000 74%, transparent);
-    overflow-x: auto;
+    mask-image:none;
+    -webkit-mask-image:none;
+    overflow-x: scroll;
     overflow-y: hidden;
-    padding-bottom: 0.25rem;
     scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling:touch;
+    padding-bottom: 0.25rem;
 }
 .button-container .card {
-    flex: 0 0 2.9rem;
-    min-width: 2.9rem;
-    height: min(12.5rem, 25vh);
+    flex: 0 0 clamp(1.4rem, 4vw, 4.5rem);
+    min-width: clamp(1.4rem, 4vw, 4.5rem);
+    height: clamp(11rem, 25vh, 13.5rem);
     margin: 0 0.1rem;
     scroll-snap-align: start;
     transition: all 0.3s ease;
@@ -598,14 +626,12 @@ input:checked + label.card {
     cursor:pointer;
     filter: none;
     transform: none;
-    height: min(12.5rem, 25vh);
+    height: clamp(11rem, 25vh, 13.5rem);
     min-width: 6.6rem;
     width: 100%;
     background-repeat:no-repeat;
-    /*flex: 0 0 min(70vw, 9.2rem);*/
-    /*flex: 0 0 min(64vw, 13rem)*/
-    flex: 0 0 min(60vw, 16rem); 
-    
+    flex: 0 0 calc(100vw - 24vw - 1rem); 
+    scroll-snap-align: start;
 }
 input:checked + label .description {
     font-size: clamp(0.5rem, 3vw, 1.25rem);
@@ -908,68 +934,63 @@ figure.bio {
 .g_compagnie3 img {
     border-radius: var(--radius-standard);
 }
-.g-partenaires-top {
-    margin-top: var(--space-l);
-}
-/* Conteneur principal de la grille */
+/* Le parent utilise Flexbox Wrap pour gérer le saut de ligne fluide des logos */
 .g-partenaires-container {
     display: flex;
-    flex-wrap: wrap; 
-    justify-content: center;
-}
-/* Cellule de chaque partenaire (1 colonne complète par défaut sur mobile vertical) */
-.col-partenaire {
-    flex: 0 0 100%; 
-    max-width: 100%;
-    padding:0.6rem;
-}
-/* Habillage graphique de vos fiches partenaires d'origine avec l'encadré */
-.partenaire-carte-pro {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    box-shadow: 0 2px 5px hsla(0, 0%, 0%, 0.05);
-    background: var(--color-sacred-white);
-    border: 1px solid hsla(264, 28%, 23%, 0.2); /* L'encadré autour de chaque fiche */
-    border-radius: var(--radius-standard);
-    padding: 1rem;
-    min-height: 160px;
+    flex-flow: row wrap;
+    justify-content: center; /* 🌟 CENTRALISATION DES ÉLÉMENTS ORPHELINS */
+    align-items: stretch;    /* Aligne toutes les cartes à la même hauteur par ligne */
+    gap: 1.25rem;            /* Espacement uniforme entre les blocs */
+    width: 100%;
+    margin-top: var(--space-l);
     box-sizing: border-box;
 }
-/* Zone réservée au logo */
+/* La cellule (Mobile par défaut : 1 logo par ligne en colonne pure) */
+.col-partenaire {
+    flex: 0 0 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+/* Habillage de la carte et du bouton (Conformité charte) */
+.partenaire-carte-pro {
+    background-color: var(--color-white);
+    border-radius: var(--radius-standard);
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    height: 100%;
+    min-height: 11rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+}
 .partenaire-lien-logo {
     display: flex;
     align-items: center;
     justify-content: center;
-    height: 80px;
+    flex-grow: 1;
     width: 100%;
-    margin-bottom: 0.5rem;
 }
-/* Sécurité et lissage sur les logos (Agglo, Département, DRAC) */
 .partenaire-logo-image {
-    max-height: 100%;
-    max-width: 100%;
-    object-fit: contain; 
-    width: auto;
+    object-fit: contain;
+    width: 9.375rem;
     height: auto;
 }
 .partenaire-btn-pro {
-    display: block;
-    width: 100%;
-    text-align: center;
+    display: inline-block;
+    margin-top: 0.75rem;
+    padding: 0.35rem 0.75rem;
+    font-size: 0.85rem;
     color: var(--color-brand-secondary);
-    text-decoration: none;
-    font-family: var(--font-main);
-    font-weight:;
-    padding: 8px 4px;
-    font-size: 0.9rem;
-    line-height: 1.2;
-    transition: color 0.18s ease;
+    border: 1px solid var(--color-brand-secondary);
+    border-radius: var(--radius-standard);
+    transition: all 0.2s ease;
+    text-align: center;
+    width: 100%;
 }
 .partenaire-btn-pro:hover {
-    background-color: var(--color-menu-contact-hover); /* Votre survol marron/beige */
-    border-radius:var(--radius-standard);
-    color: var(--color-brand-primary);
+    background-color: var(--color-brand-secondary);
+    color: var(--color-white);
 }
 .spectacle-gresilhette {
     display:flex;
@@ -1357,14 +1378,14 @@ th.sep {
         flex: 0 0 3.75rem;
         min-width: 3.75rem;
         margin: 0 0.15rem;
+        
     }
     input:checked + label.card {
         flex-basis: min(60vw, 16rem);
-        /*flex-basis: min(68vw, 10.8rem);*/
     }
     .col-partenaire {
-        flex: 0 0 50%; /* 2 colonnes par ligne */
-        max-width: 50%;
+        flex: 0 0 calc(50% - 0.65rem);
+        max-width: calc(50% - 0.65rem);
     }
 }
 
@@ -1377,10 +1398,16 @@ th.sep {
         flex: 0 0 3.75rem;
         min-width: 3.75rem;
         margin: 0 0.12rem;
+        height: clamp(11rem, 25vh, 13.5rem);
     }
     input:checked + label.card {
         flex: 1 0 min(58vw, 18rem);
         min-width: 13rem;
+        height: clamp(11rem, 25vh, 13.5rem);
+    }
+    .col-partenaire {
+        flex: 0 0 calc(33.333% - 0.85rem);
+        max-width: calc(33.333% - 0.85rem);
     }
 }
 
@@ -1395,9 +1422,13 @@ th.sep {
         mask-image: none;    /* Annule le fondu mobile */
         -webkit-mask-image: none;
     }
+    .button-container .card{
+        height: clamp(11rem, 25vh, 13.5rem);
+    }
     input:checked + label.card {
         flex: 1 0 min(58vw, 18rem);
         min-width: 13rem;
+        height: clamp(11rem, 25vh, 13.5rem);
     }
     .g_co-item7 img,
     .g_co-item8 img {
@@ -1423,10 +1454,6 @@ th.sep {
     .e_fin_bio {
         grid-column: 1 / span 2;
         grid-row: 3;
-    }
-    .col-partenaire {
-        flex: 0 0 33.333%; /* 3 colonnes par ligne */
-        max-width: 33.333%;
     }
     .spectacle-gresilhette {
         display:grid;
@@ -1594,7 +1621,6 @@ th.sep {
         border-bottom-right-radius: var(--radius-standard);
         border-left: 0px solid var(--color-border-divider);
     }
-
     .navbar > div.rs a {
         display: flex;
         align-items: center;
@@ -1606,7 +1632,6 @@ th.sep {
         box-shadow: var(--shadow-neon-outer);
         transition: background-color 0.18s ease, border-radius 0.18s ease, box-shadow 0.18s ease;
     }
-
     .navbar > div.rs a:hover {
         background: var(--color-menu-contact-hover);
         border-radius: 3.125rem;
@@ -1616,10 +1641,21 @@ th.sep {
         display: none;
     }
     .button-container {
+        overflow-x:visible;
         margin-top: var(--space-l);
     }
     .button-container .card {
+        flex:0 0 4.5rem;
+        min-width:4.5rem;
         height:68vh;
+    }
+    .diaporama-zone-maitre .diaporama-masque-fondu,
+    fieldset .diaporama-masque-fondu {
+        display: none;
+        visibility: hidden;
+        opacity: 0;
+        background: none;
+        z-index: -1;
     }
     input:checked + label.card{
         flex-basis:min(58vw, 18rem);
@@ -1646,38 +1682,9 @@ th.sep {
         grid-template-columns: repeat(4, minmax(0, 1fr));
         justify-items: center;
     }
-    .g-partenaires-container {
-        flex-wrap: nowrap !important; /* VERROU : Force les 7 éléments à s'aligner sur UNE SEULE LIGNE */
-    }
-    
     .col-partenaire {
-        flex: 1 1 0% !important; /* Force chaque cellule à se diviser l'espace équitablement (1/7ème) */
-        max-width: calc(100% / 7) !important;
-    }
-    
-    .partenaire-carte-pro {
-        min-height: 150px;
-        max-height: 150px;
-    }
-    
-    .partenaire-btn-pro {
-        font-size: 0.75rem !important;
-        padding: 4px 6px !important;
-        line-height: 1.2;
-    }
-    .encadre,
-    .encadre-extrait,
-    .encadre-lenga {
-        margin-top: var(--space-l);
-    }
-    .image-wrapper:after,
-    .images-spectacle:after {
-        content: "";
-    }
-    .forme-montage {
-        height: 350px;
-        padding: 2.5rem 0 0 4rem;
-        shape-outside: circle(58%) padding-box;
+        flex: 0 0 calc((100% / 7) - 1.1rem);
+        max-width: calc((100% / 7) - 1.1rem);
     }
     .d_projet-pedagogique,
     .d_sieste-contee,
@@ -1733,8 +1740,9 @@ th.sep {
     }
     input:checked + label.card,
     .button-container .card {
-        height: clamp(6.25rem, 68vh, 24rem);
+        height: clamp(11rem, 78vh, 16rem);
     }
+    
     .g_sp_e-generique {
         grid-column: 1/6;
         grid-row: 6/7;

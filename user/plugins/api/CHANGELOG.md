@@ -1,3 +1,25 @@
+# v1.1.14
+## 11/05/2026
+
+1. [](#new)
+    * Admin Next web components from plugins and themes are now also served as public same-origin modules, so Admin2 can run under a strict Content-Security-Policy [admin2#212](https://github.com/getgrav/grav-plugin-admin2/issues/212)
+1. [](#bugfix)
+    * Adding your own media metadata field no longer takes alt, title, caption, description or tags out of the editor. The built-in fields stay unless a field with the same key sets the new **Hide from editor** option (`remove: true`) [#76](https://github.com/getgrav/grav-plugin-api/issues/76)
+    * Editing a page's group permissions in Admin2 no longer rewrites rules written as a map, such as `{ update: true, delete: false }`, into letters that grant different actions. Those rules are saved back as a map, keeping keys the C/R/U/D buttons don't show
+
+# v1.1.13
+## 11/05/2026
+
+1. [](#improved)
+    * [security] Changing the settings of the Login, Email, Git Sync and Admin2 plugins, and of Login and Email provider plugins, now needs an API super user, like the API plugin's own settings. A configuration editor without super-admin can still change other plugins' settings. Demo mode keeps these plugins read-only too. Thanks @rng70
+
+# v1.1.12
+## 11/04/2026
+
+1. [](#improved)
+    * [security] A user manager without super-admin (`api.users.write`) can only grant permissions their own account holds, through their own access or a group. Creating a user, editing a user's access and presetting an invitation's access all check it, so a manager can no longer give anyone, themselves included, `api.gpm.write`, `api.config.write` or anything else they don't have. Permissions the account already has are left alone when it's saved, including children of a blanket grant such as `api.pages: true`, and taking permissions away is always allowed
+    * `GET /blueprints/users/permissions` marks each permission `grantable`, so Admin2 can lock the toggles a user manager can't grant
+
 # v1.1.11
 ## 11/03/2026
 
