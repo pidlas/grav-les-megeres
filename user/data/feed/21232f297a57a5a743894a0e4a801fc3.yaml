@@ -1,5 +1,10 @@
-last_checked: 1793944903
+last_checked: 1794133846
 data:
+  -
+    title: 'Introducing Grav Guard'
+    url: 'https://getgrav.org/blog/introducing-grav-guard'
+    date: '2026-11-06T12:00:00+00:00'
+    summary: ''
   -
     title: "Grav and Anthropic's OSS Scanner: 99 Findings, Fixed and Released"
     url: 'https://getgrav.org/blog/oss-scanner-security-releases'
@@ -44,9 +49,4 @@ data:
     title: 'Grav 2.1 Released: Every Page Speaks Markdown'
     url: 'https://getgrav.org/blog/grav-2-1-released'
     date: '2026-09-11T12:00:00+00:00'
-    summary: ''
-  -
-    title: 'KahunaCart: A Real Store, Inside Your Grav Site'
-    url: 'https://getgrav.org/blog/kahunacart-coming-soon'
-    date: '2026-08-25T11:00:00+00:00'
     summary: ''

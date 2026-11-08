@@ -1,5 +1,50 @@
-last_checked: 1793987978
+last_checked: 1794145225
 data:
+  dashboard-banner:
+    -
+      id: 216
+      date: '2026-11-06 12:02'
+      type: promo
+      location:
+        - dashboard-banner
+      title: KahunaCart
+      message: 'A complete **store inside your Grav site**: products, orders, customers and payments, all managed right here in the admin.'
+      image: 'https://kahunacart.com/user/themes/kahuna-site/images/kahunacart-wordmark-white.svg?v=2'
+      image_height: 38
+      accent: teal
+      reappear_after: '+3 days'
+      action:
+        label: 'Learn more'
+        url: 'https://kahunacart.com'
+    -
+      id: 217
+      date: '2026-11-06 12:01'
+      type: promo
+      location:
+        - dashboard-banner
+      title: 'Grav Premium'
+      message: 'Premium **plugins & themes** from the creators of Grav: Editor Pro, Forum Pro, AI Pro, Revisions Pro and more.'
+      image: 'https://getgrav.org/user/themes/planetoid/images/grav-premium-logo-white.svg'
+      accent: purple
+      reappear_after: '+3 days'
+      action:
+        label: 'Learn more'
+        url: 'https://getgrav.org/premium'
+    -
+      id: 218
+      date: '2026-11-06 12:00'
+      type: promo
+      location:
+        - dashboard-banner
+      title: 'Grav Guard'
+      message: 'Keep every Grav site you run **secure and up to date**, all from one place. Free for up to 3 sites.'
+      image: 'https://getgrav.org/user/themes/planetoid/images/grav-guard-logo-white.svg'
+      image_height: 30
+      accent: blue
+      reappear_after: '+3 days'
+      action:
+        label: 'Learn more'
+        url: 'https://getgrav.org/blog/introducing-grav-guard'
   dashboard-row:
     -
       id: 215

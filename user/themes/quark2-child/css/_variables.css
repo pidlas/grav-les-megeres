@@ -54,18 +54,23 @@
     --font-auteur: The Seasons Regular;
 
     /* --- VOS COULEURS DE MARQUE OFFICIELLES --- */
-    --color-brand-primary: hsla(15, 69%, 65%, 1);          /* terracotta claire */
-    --color-brand-active: hsla(16, 37%, 36%, 1);           /* terracotta foncée */
-    --color-brand-secondary: hsla(264, 28%, 23%, 1);       /* prune foncée */
-    --color-brand-accent: hsla(33, 91%, 65%, 1);           /* abricot clair */
-    --color-skip-link: hsla(15, 71%, 26%, 1);              /* terre de Sienne brûlée */
-    --color-menu-contact-hover: hsla(15, 37%, 36%, 1);     /* terracotta */
-    --color-border-menu: hsla(0, 0%, 96%, 1);
-    --color-white: hsla(0, 0%, 100%, 1);
-    --color-sacred-white: hsla(40, 100%, 99.6%, 1);
-    --color-border-alizarine: hsla(6, 78%, 57%, 1);        /* rouge Alizarine */
-    --color-highlight-alizarine: hsla(6, 78%, 57%, 0.05);  /* rose de sécurité */
-    --color-jauge:hsla(0, 0%, 27%, 1);                     /* gris foncé */
+    --color-brand-primary:hsla(15, 69%, 65%, 1);          /* terracotta claire */
+    --color-brand-active:hsla(16, 37%, 36%, 1);           /* terracotta foncée */
+    --color-brand-secondary:hsla(264, 28%, 23%, 1);       /* prune foncée */
+    --color-brand-accent:hsla(33, 91%, 65%, 1);           /* abricot clair */
+    --color-skip-link:hsla(15, 71%, 26%, 1);              /* terre de Sienne brûlée */
+    --color-button-container:hsla(15, 70%, 39%, 1);       /* terre de Sienne brûlée, variante */
+    --color-menu-contact-hover:hsla(15, 37%, 36%, 1);     /* terracotta */
+    --color-border-menu:var(--color-whitesmoke);
+    --color-white:hsla(0, 0%, 100%, 1);
+    --color-black:hsla(0, 0%, 0%, 1);
+    --color-whitesmoke:hsla(0, 0%, 96%, 1);
+    --color-sacred-white:hsla(40, 100%, 99.6%, 1);
+    --color-border-alizarine:hsla(6, 78%, 57%, 1);        /* rouge Alizarine */
+    --color-highlight-alizarine:hsla(6, 78%, 57%, 0.05);  /* rose de sécurité */
+    --color-jauge:hsla(0, 0%, 27%, 1);                    /* gris foncé */
+    --color-fb:hsla(214, 89%, 52%, 1);                    /* bleu faceboo*/
+    --color-insta:hsla(340, 75%, 54%, 1);                 /* rose instagram*/
     
     /* --- VARIANTES TRANSPARENTES ACCESSIBLES --- */
     --color-border-divider: hsla(264, 28%, 23%, 0.18);  /* Fines bordures PC */

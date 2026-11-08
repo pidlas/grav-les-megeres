@@ -5,7 +5,7 @@ metadata:
 visible: false
 ---
 
-Merci de signaler toute vulnérabilité de sécurité à l'adresse [a url="mailto:security&#64;lesmegeresdelhumus.fr?subject=Message du site, page Politique de Sécurité"]security&#64;lesmegeresdelhumus.fr[/a].
+Merci de signaler toute vulnérabilité de sécurité à l'adresse [a url="mailto:security&#64;lesmegeresdelhumus.fr?subject=Message du site, page Politique de Sécurité"]security&#64;lesmegeresdelhumus.fr[/a]
 
 Nous vous remercions de ne pas publier publiquement la vulnérabilité avant que nous ayons eu le temps d'y répondre.
 

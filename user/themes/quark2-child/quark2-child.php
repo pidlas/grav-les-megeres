@@ -9,7 +9,7 @@ class Quark2Child extends Theme
     public static function getSubscribedEvents()
     {
         return [
-            'onThemeInitialized'  => ['onThemeInitialized', 0],
+            /*'onThemeInitialized'  => ['onThemeInitialized', 0],*/
             'onShortcodeHandlers' => ['onShortcodeHandlers', 0],
             'onAssetsInitialized' => ['onAssetsInitialized', 0]
         ];

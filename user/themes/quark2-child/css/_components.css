@@ -11,7 +11,7 @@ a {
     color: inherit;
 }
 body {
-    background: #fff;
+    background:var(--color-whitesmoke);
     font-family: var(--font-main);
     font-weight: 300;
 }
@@ -27,7 +27,7 @@ body {
     z-index: 2000;
 }
 .skip-link:focus-visible {
-    background: #fff;
+    background:var(--color-whitesmoke);
     bottom: 0.625rem;
     box-shadow: 0 2px 0.75rem 0 hsla(264, 28%, 23%, 0.18);
     outline: 2px solid var(--color-skip-link);
@@ -82,7 +82,7 @@ h2:not(.display-title) {
     color: var(--color-brand-accent);
     font-size: clamp(0.5rem, 2vw + 0.2rem, 1.5rem);
     margin: 0;
-    text-shadow: 0.0625rem 0.0625rem 0.1875rem rgba(0, 0, 0, 0.5);
+    text-shadow: 0.0625rem 0.0625rem 0.1875rem hsla(0, 0%, 0%, 0.5);
 }
 .description h3 {
     display: block;
@@ -105,11 +105,11 @@ p.traduction {
 .g_equipe.g_permanents p {
     margin-top:0;
 }
-main p:nth-of-type(1){
+main p:nth-of-type(1):not(.reglement-interieur p):not(.actu-resume):not(.page_equipe p):not(.mentions-legales p){
     margin-top: var(--space-m);
 }
-.mentions-legales .p_no-margin-top{
-    margin-top:0;
+.marge-haute{
+    margin-top: var(--space-m);
 }
 .p_centrer {
     text-align: center;
@@ -175,7 +175,7 @@ header a:visited {
 .lien-i-seul:before {
     color: var(--color-brand-accent);
     content: "\f0c1";
-    font-family: 'Font Awesome 5 Free';
+    font-family: 'Font Awesome 5 Free', 'FontAwesome 6 Free', 'FontAwesome';
     font-size: 0.8rem;
     font-weight: 900;
 }
@@ -192,7 +192,7 @@ header a:visited {
 .lien-e-seul:before {
     color: var(--color-brand-primary);
     content: "\f35d";
-    font-family: 'Font Awesome 6 Free';
+    font-family: 'Font Awesome 5 Free', 'FontAwesome 6 Free', 'FontAwesome';
     font-size: 0.8rem;
     font-weight: 900;
     vertical-align: super;
@@ -257,7 +257,7 @@ button.box {
     width: 1.5625rem;
 }
 .ligne {
-    background-color: #f5f5f5;
+    background-color:var(--color-whitesmoke);
     border-radius: 0.25rem;
     height: 0.1875rem;
     position: absolute;
@@ -317,35 +317,29 @@ button.box {
         top: max(clamp(0.875rem, 5vw, 1.25rem), env(safe-area-inset-top));
     }
 }
-/* ==========================================================================
-   BARRE DE NAVIGATION : LOGIQUE COMMUNE ET MOBILE PAR DÉFAUT
-   ========================================================================== */
-
 /* Le parent se cale dans sa ligne de grille native du .wrapper */
 .navbar {
     grid-area: nav;
-    display: none; /* Masqué par défaut sur mobile */
+    display: none;
     width: 100%;
 }
-
 /* Panneau mobile volant ouvert (activé via la classe .responsive injectée par le JS) */
 .navbar.responsive {
     align-items: stretch;
     background: hsla(15, 69%, 65%, 0.96);
-    border-top: 1px solid hsla(264, 28%, 23%, 0.25);
+    border-top: 1px solid hsla(264, 28%, 23%, 0.25);/*violet foncé*/
     box-shadow: 0 0 0 100vmax var(--color-overlay-bg);
     display: flex;
     flex-direction: column;
     gap: var(--menu-panel-gap);
     height: 100vh;
     position: fixed;
-    inset: 0 auto 0 0; /* top:0, right:auto, bottom:0, left:0 */
+    inset: 0 auto 0 0;
     overflow-y: auto;
     padding: var(--padding-menu-mobile-top);
     width: var(--menu-panel-width);
     z-index: 4500;
 }
-
 /* Alignement en colonne des menus de premier niveau dans le volet mobile */
 .navbar.responsive > .menu,
 .navbar.responsive > .rs {
@@ -354,7 +348,6 @@ button.box {
     height: auto;
     margin: 0;
 }
-
 /* Liens principaux et boutons déclencheurs ("Infos", "Spectacles"...) en mobile */
 .navbar.responsive .menu-trigger,
 .navbar.responsive > .menu > a,
@@ -371,15 +364,13 @@ button.box {
     color: var(--color-brand-secondary);
     cursor: pointer;
 }
-
 .navbar.responsive .menu-trigger:focus-visible,
 .navbar.responsive > .menu > a:focus-visible {
     background: var(--color-focus-light);
     outline: 2px solid var(--color-brand-secondary);
     outline-offset: 2px;
 }
-
-/* Sous-menus mobiles (.niv1) */
+/* Sous-menus mobiles*/
 .navbar.responsive .niv1 {
     background: var(--color-hover-medium);
     border-radius: var(--radius-standard);
@@ -387,19 +378,16 @@ button.box {
     margin: 0;
     width: 100%;
 }
-
-/* Ouverture du sous-menu mobile au clic (Synchro toggleSubmenu JS) */
+/* Ouverture du sous-menu mobile au clic (synchro toggleSubmenu JS) */
 .navbar.responsive .menu.is-open .niv1 {
     display: flex;
     flex-direction: column;
 }
-
-/* Mode focus exclusif mobile (votre règle de masquage JS) */
+/* Mode focus exclusif mobile (règle de masquage JS) */
 .navbar.responsive.submenu-active .menu:not(.is-open),
 .navbar.responsive.submenu-active .rs {
     display: none;
 }
-
 /* Liens internes des sous-menus mobiles */
 .navbar.responsive .niv1 > a {
     display: flex;
@@ -412,16 +400,13 @@ button.box {
     transition: background-color 0.18s ease, color 0.18s ease, border-top-color 0.18s ease;
     width: 100%;
 }
-
 .navbar.responsive .niv1 > a:focus-visible {
     background: var(--color-focus-light);
     border-top-color: var(--color-border-menu);
     outline: 2px solid var(--color-brand-secondary);
     outline-offset: 2px;
 }
-
 .navbar.responsive .niv1 > a:hover { border-top-color: var(--color-whitesmoke); }
-
 /* Réseaux sociaux (Mode Mobile) */
 .navbar.responsive .rs {
     flex-direction: row;
@@ -429,7 +414,6 @@ button.box {
     justify-content: flex-start;
     padding: 0.35rem 0.5rem;
 }
-
 .navbar.responsive .rs a {
     display: flex;
     align-items: center;
@@ -440,13 +424,11 @@ button.box {
     border-radius: 50%;
     transition: background-color 0.18s ease, color 0.18s ease;
 }
-
 .navbar.responsive .rs a:focus-visible {
     background: var(--color-focus-light);
     outline: 2px solid var(--color-brand-secondary);
     outline-offset: 2px;
 }
-/*fin barre de navigation*/
 .conteneur-champignons,
 .conteneur-feuilles {
     margin-top: var(--space-m);
@@ -476,7 +458,7 @@ button.box {
 .actu-item {
     display:grid;
     background: hsla(0, 0%, 100%, 0.55);
-    border: 1px solid hsla(264, 28%, 23%, 0.2);
+    border: 1px solid hsla(264, 28%, 23%, 0.2);/*violet foncé*/
     border-radius: 0.625rem;
     gap: 0.625rem;
     grid-auto-rows: minmax(auto, max-content);
@@ -595,7 +577,7 @@ button.box {
 .button-container a,
 .button-container a:hover,
 .button-container a:visited {
-    color: #a9411e;
+    color:var(--color-button-container);
 }
 .card {
     display:flex;
@@ -604,7 +586,7 @@ button.box {
     background-repeat: no-repeat;
     background-size: cover;
     border-radius:1rem;
-    box-shadow: 0.3125rem 0.3125rem 1.875rem rgba(0, 0, 0, 0.1);
+    box-shadow: 0.3125rem 0.3125rem 1.875rem hsla(0, 0%, 0%, 0.1);
     cursor: pointer;
     filter: opacity(0.6);
     flex-basis: 5%;
@@ -646,7 +628,7 @@ input:checked + label .row {
     backdrop-filter: none;
     background: linear-gradient(
         0deg, 
-        hsla(264, 28%, 23%, 0.95) 0%, 
+        hsla(264, 28%, 23%, 0.95) 0%,/*violet foncé*/
         hsla(264, 28%, 23%, 0.7) 50%, 
         transparent 100%
     );
@@ -724,7 +706,7 @@ input:checked + label .row {
     display:flex;
     position:absolute;
     align-items: center;
-    background: hsla(264, 28%, 23%, 0.65);
+    background: hsla(264, 28%, 23%, 0.65);/*violet foncé*/
     border-radius: 0;
     bottom:0;
     left:0;
@@ -953,16 +935,16 @@ figure.bio {
 }
 /* Habillage de la carte et du bouton (Conformité charte) */
 .partenaire-carte-pro {
+    display:flex;
     background-color: var(--color-white);
-    border-radius: var(--radius-standard);
-    padding: 1.25rem;
-    display: flex;
+    border-radius:var(--radius-standard);
+    padding:1.25rem;
     flex-direction: column;
     align-items: center;
     justify-content: space-between;
     height: 100%;
-    min-height: 11rem;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+    min-height:8.125rem;/*11rem;*/
+    box-shadow: 12px 4px 12px hsla(0, 0%, 0%, 0.3);
 }
 .partenaire-lien-logo {
     display: flex;
@@ -1003,6 +985,9 @@ figure.bio {
     justify-content:center;
     gap:20px;
 }
+.image-ronde{
+    width:12.5rem;
+}
 .images-spectacle,
 .versions-spectacle + p {
     margin-top: var(--space-m);
@@ -1014,7 +999,7 @@ figure.bio {
     bottom: 0.625rem;
     color: #fff;
     content: "\f25a";
-    font-family:'Font Awesome 6 Free';
+    font-family:"FontAwesome 5 Free", "Font Awesome 6 Free", "FontAwesome";
     font-size: 1.5rem;
     font-weight: 900;
     left: 50%;
@@ -1083,7 +1068,7 @@ figure.bio {
     bottom: 0.625rem;
     color: #fff;
     content: "\f25a";
-    font-family: 'Font Awesome 6 Free';
+    font-family:"FontAwesome 5 Free", "Font Awesome 6 Free", "FontAwesome";
     font-size: 1rem;
     font-weight: 900;
     left: 50%;
@@ -1151,7 +1136,7 @@ figure.bio {
     }
 }
 footer p {
-    color: rgba(56, 43, 76, 0.75);
+    color:hsla(264, 28%, 23%, 0.75);/*violet foncé*/
     font-size: 1rem;
     text-align: center;
 }
@@ -1169,11 +1154,12 @@ footer p {
     background-image: linear-gradient(0deg, #71007f, #004afe, #028124, #ffed03, #ff8e00, #e60000);
     border-color: hsla(93, 48%, 87%, 0.52);
     box-shadow:
-        inset 0 1px 0 rgba(250, 255, 244, 0.18),
-        inset 0 0 0 1px rgba(20, 32, 24, 0.18),
-        0 16px 1.875rem rgba(7, 16, 10, 0.28);
+        inset 0 1px 0 hsla(87, 100%, 98%, 0.18),
+        inset 0 0 0 1px hsla(140, 23%, 10%, 0.18),
+        0 16px 1.875rem hsla(140, 39%, 5%, 0.28);
     cursor: pointer;
     display: inline-flex;
+    color:#71007f;
 }
 .e_faire-un-don:before {
     color: var(--color-brand-secondary);
@@ -1181,7 +1167,7 @@ footer p {
     font-size: 1.5rem;
 }
 .e_faire-un-don:hover:before {
-    color: red;
+    color: #71007f;
 }
 .accueil-intro {
     margin: 0 auto;
@@ -1251,7 +1237,7 @@ footer p {
 .forme-lampe {
     float: right;
     height: 180px;
-    margin: 1rem 0 1rem 1.5rem;
+    margin-left:3rem;
     shape-image-threshold: 0.5;
     shape-outside: circle(43%) margin-box;
 }
@@ -1294,7 +1280,7 @@ footer p {
     display:block;
     border: 0.3125rem solid var(--color-brand-primary);
     border-radius: 2rem;
-    box-shadow: -0.5rem 0.5rem 0.75rem rgba(0, 0, 0, 0.3);
+    box-shadow: -0.5rem 0.5rem 0.75rem hsla(0, 0%, 0%, 0.3);
     margin:0 auto;
     padding: 0.625rem;
     width: 80%;
@@ -1330,7 +1316,7 @@ table.com {
     border: 3px solid var(--color-brand-primary);
     border-collapse: separate;
     border-radius: 1rem;
-    box-shadow: -0.5rem 0.5rem 0.75rem rgba(0, 0, 0, 0.3);
+    box-shadow: -0.5rem 0.5rem 0.75rem hsla(0, 0%, 0%, 0.3);
     margin: var(--space-m) auto 0;
     text-align: center;
     width: 80%;
@@ -1352,7 +1338,7 @@ th.sep {
     justify-content: center;
 }
 .fb:before {
-    color: #1877f2;
+    color:var(--color-fb);
     content: "\f09a";
 }
 .fb:before,
@@ -1363,7 +1349,7 @@ th.sep {
     margin-right: 0.4rem;
 }
 .insta:before {
-    color: #e1306c;
+    color:var(--color-insta);
     content: "\f16d";
 }
 .icone-mail {
@@ -1418,8 +1404,8 @@ th.sep {
 }
 @media screen and (min-width: 768px) {
     .button-container {
-        overflow-x: visible; /* Annule le défilement mobile */
-        mask-image: none;    /* Annule le fondu mobile */
+        overflow-x: visible;
+        mask-image: none;
         -webkit-mask-image: none;
     }
     .button-container .card{
@@ -1469,6 +1455,10 @@ th.sep {
     }
     .images-spectacle {
         margin-top:0;
+    }
+    .image-wrapper::after,
+    .images-spectacle::after{
+        content:"";
     }
     .g_sp_e-generique {
         text-align: center;
@@ -1558,7 +1548,7 @@ th.sep {
         flex-direction: column;
         position: absolute;
         top: 3.75rem;
-        background: hsla(15, 69%, 65%, 0.9);
+        background: hsla(15, 69%, 65%, 0.9);/*terracotta clair*/
         border-radius: var(--radius-standard);
         z-index: 11;
     }
@@ -1574,7 +1564,7 @@ th.sep {
         left: 0;
         right: 0;
         width: auto;
-        background: hsla(15, 69%, 65%, 0.9);
+        background: hsla(15, 69%, 65%, 0.9);/*terracotta clair*/
         border-radius: var(--radius-standard);
         z-index: 11;
         box-shadow: var(--shadow-standard);
@@ -1758,19 +1748,17 @@ th.sep {
     }
     /* ADDITION : Le correctif pour la barre de contrôle de la vidéo */
     .custom-video-controls {
-        flex-wrap: wrap;      /* Autorise le passage à la ligne */
+        flex-wrap: wrap;
         justify-content: space-between;
-        padding: 8px 12px;    /* Évite le débordement vertical */
+        padding: 8px 12px;
     }
 
-    /* La barre de progression orange monte en haut et prend 100% de la largeur */
     #progress {
         order: 1;             
         flex-basis: 100%;     
         margin-bottom: 6px;   
     }
 
-    /* Les autres boutons se rangent proprement en dessous sur la deuxième ligne */
     #playPauseBtn { order: 2; }
     .time-display { order: 3; }
     .volume-control-zone { order: 4; }
@@ -1795,7 +1783,7 @@ th.sep {
     width: 100%;
     background: linear-gradient(
         0deg, 
-        hsla(264, 28%, 23%, 0.95) 0%, 
+        hsla(264, 28%, 23%, 0.95) 0%,/*violet foncé*/
         hsla(264, 28%, 23%, 0.7) 50%,
         transparent 100%
     );

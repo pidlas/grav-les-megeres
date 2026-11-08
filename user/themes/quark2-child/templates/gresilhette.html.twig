@@ -97,17 +97,17 @@
     <p class="versions-spectacle">
         {% if gresilhette_flex.spectacle.grille.ombres %}
             <a class="images-spectacle morph" href="{{ page.url ~ '/theatre-d-ombres' }}">
-                <img src="{{ base_url_simple ~ '/user/data/flex-objects/gresilhette/' ~ gresilhette_flex.spectacle.grille.ombres }}" alt="Version Théâtre d'elles" class="img-menu-spectacle" loading="lazy">
+                <img src="{{ base_url_simple ~ '/user/data/flex-objects/gresilhette/' ~ gresilhette_flex.spectacle.grille.ombres }}" alt="Version Théâtre d'elles" loading="lazy">
             </a>
         {% endif %}
         {% if gresilhette_flex.spectacle.grille.sieste %}
             <a class="images-spectacle morph" href="{{ page.url ~ '/sieste-contee' }}">
-                <img src="{{ base_url_simple ~ '/user/data/flex-objects/gresilhette/' ~ gresilhette_flex.spectacle.grille.sieste }}" alt="Version Sieste contée" class="img-menu-spectacle" loading="lazy">
+                <img src="{{ base_url_simple ~ '/user/data/flex-objects/gresilhette/' ~ gresilhette_flex.spectacle.grille.sieste }}" alt="Version Sieste contée" loading="lazy">
             </a>
         {% endif %}
         {% if gresilhette_flex.spectacle.grille.projet %}
             <a class="images-spectacle morph" href="{{ page.url ~ '/projet-pedagogique' }}">
-                <img src="{{ base_url_simple ~ '/user/data/flex-objects/gresilhette/' ~ gresilhette_flex.spectacle.grille.projet }}" alt="Version Projet pédagogique" class="img-menu-spectacle" loading="lazy">
+                <img src="{{ base_url_simple ~ '/user/data/flex-objects/gresilhette/' ~ gresilhette_flex.spectacle.grille.projet }}" alt="Version Projet pédagogique" loading="lazy">
             </a>
         {% endif %}
     </p>
@@ -132,7 +132,7 @@
                 {% endif %}
 
                 <div class="content-list">
-                    {% set html_brut = version_active.texte_version|markdown|shortcodes %}
+                    {% set html_brut = version_active.texte_version|shortcodes|markdown %}
                     {% set html_brut = html_brut|replace({'<ul>': '<ul class="jolie-ombres slide-list">'}) %}
                     {{ html_brut | raw }}
                 </div>
