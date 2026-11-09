@@ -1,7 +1,8 @@
 {% extends 'main-layout.html.twig' %}
 
-{# 🌟 ÉTAPE 1 : ON ÉTEINT L'AFFICHAGE DU HAUT D'ORIGINE #}
+{# 🌟 ÉTAPE 1 : ON ÉTEINT L'AFFICHAGE DU HAUT D'ORIGINE et celui des feuilles qui seraient affichées sous le titre #}
 {% block content %}{% endblock %}
+{% block decor_feuilles %}{% endblock %}
 
 {# 🌟 ÉTAPE 2 : LE BLOC MAÎTRE POUR L'ACCUEIL #}
 {% block avant_conteneur_texte %}
@@ -21,5 +22,9 @@
             </div>
         </div>
     </div>
+    {# 🌟 C. TÉLÉPORTATION DU DÉCOR
+       Justification : On rappelle le contenu du bloc d'origine du fichier maître,
+       mais on force son affichage au sol, juste au-dessus du footer. #}
+    {{ block('decor_feuilles', 'main-layout.html.twig') }}
 
 {% endblock %}

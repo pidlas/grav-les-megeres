@@ -1140,6 +1140,28 @@ footer p {
     font-size: 1rem;
     text-align: center;
 }
+/*Sous-footer Copyright seul*/
+.sub-footer-copyright {
+    grid-area: copyright;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    padding: 1.25rem 0;
+    background-color: transparent;
+    border-top: 1px solid hsla(0, 0%, 0%, 0.05);
+}
+.sub-footer-copyright p {
+    margin: 0;
+    text-align:center;
+    font-family: system-ui, -apple-system, sans-serif;
+    font-size: 0.725rem;            /* Taille de police réduite */
+    color: hsla(0, 0%, 0%, 0.35);
+    letter-spacing: 0.06em;
+    font-weight: 400;
+    -webkit-font-smoothing: antialiased;
+}
+
 .e_faire-un-don {
     display:flex;
     align-items: center;
@@ -1743,7 +1765,7 @@ th.sep {
     }
     .images-spectacle:after,
     footer {
-        grid-template-columns: repeat(5, minmax(0, 1fr));
+        grid-template-columns: repeat(4, minmax(0, 1fr));
         justify-content: space-evenly;
     }
     /* ADDITION : Le correctif pour la barre de contrôle de la vidéo */

@@ -32,7 +32,7 @@ Le site *https://lesmegeresdelhumus.fr* permet à l'Utilisateur un accès gratui
 
 ### Article 2 : Collecte des données
 
-Le site est exempté de déclaration à la Commission Nationale Informatique et Libertés (CNIL) dans la mesure où il ne collecte aucune donnée personnelle concernant les Utilisateurs.
+Le site <em>Les Mégères de l'Humus</em> est un site purement institutionnel. Il ne collecte, ne stocke et ne traite aucune donnée à caractère personnel. Il ne requiert l'usage d'aucun cookie non essentiel au fonctionnement technique de la navigation. Le site est, par conséquent, exempté de déclaration à la Commission Nationale Informatique et Libertés (CNIL) dans la mesure où il ne collecte aucune donnée personnelle sous forme de formulaire de contact, d'espace membre ou de traceur/cookie statistique.
 
 ### Article 3 : Propriété intellectuelle
 
