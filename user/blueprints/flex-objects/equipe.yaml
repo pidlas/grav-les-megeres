@@ -28,7 +28,7 @@ config:
       list:
         route: /equipe
         title: Page Équipe
-        priority: 5
+        priority: 14
         icon: fa fa-users
     list:
       title: Liste de l'Équipe

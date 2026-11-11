@@ -34,32 +34,34 @@ body {
     outline-offset: 2px;
     top: auto;
 }
-h1 {
-    font-size: clamp(1.5rem, 3vw + 0.5rem, 2rem);
-    font-variant-caps: all-petite-caps;
-    line-height: 1.2;
-    text-align: center;
-}
 h1,
 h2,
 h3,
 h4{
-    font-family: var(--font-display);
+    font-family:var(--font-display);
+}
+h1,
+h2,
+h3{
+    font-variant-caps:all-petite-caps;
+}
+h1 {
+    font-size: clamp(1.5rem, 3vw + 0.5rem, 2rem);
+    line-height: 1.2;
+    text-align: center;
     margin-top: var(--space-m);
 }
-h2 {
+h2{
     font-size: clamp(0.75rem, 2vw + 0.5rem, 1.5rem);
-    font-variant-caps: all-petite-caps;
     line-height: 1.3;
     margin-top:0;
 }
-h3 {
+h3{
     font-size: clamp(0.5rem, 1vw + 0.7rem, 1.4rem);
-    font-variant-caps: all-petite-caps;
     line-height: 1.4;
     margin-top: var(--space-m);
 }
-h4 {
+h4{
     margin-top:0;
 }
 .e_debut_bio h1 {
@@ -105,7 +107,7 @@ p.traduction {
 .g_equipe.g_permanents p {
     margin-top:0;
 }
-main p:nth-of-type(1):not(.reglement-interieur p):not(.actu-resume):not(.page_equipe p):not(.mentions-legales p){
+main p:nth-of-type(1):not(.reglement-interieur p):not(.actu-resume):not(.page_equipe p):not(.mentions-legales p):not(.credits p){
     margin-top: var(--space-m);
 }
 .marge-haute{
@@ -1313,7 +1315,7 @@ footer p {
     margin-bottom: 2rem;
     padding-left: 1.875rem;
 }
-.reglement-interieur .important p {
+.reglement-interieur h2:nth-of-type(4) + p {
     border-left-color: var(--color-border-alizarine);
     background-color: var(--color-highlight-alizarine);
 }

@@ -1,33 +1,24 @@
-{% set cible_page = la_page_accueil | default(page) %}
+{% set cible_accueil = donnees_accueil | default(grav.flex.directory('accueil').getCollection().first()) %}
 
-{% if cible_page.header.slides %}
+{% if cible_accueil.accueil_slides %}
 <fieldset class="diaporama-fieldset">
     <legend class="visually-hidden">Diaporama de visualisation des spectacles</legend>
     <div class="diaporama-zone-maitre">
         <div class="button-container">
-            
-            {% for slide in cible_page.header.slides %}
-                {# Génère l'ID automatique (c1, c2, c3...) #}
+
+            {% for slide in cible_accueil.accueil_slides %}
                 {% set slide_id = 'c' ~ loop.index %}
-                
+
                 <input type="radio" name="slide" id="{{ slide_id }}" {{ loop.first ? 'checked' : '' }}>
-                
-                {# Gestion dynamique des formats d'images #}
+
                 {% set style_bg = '' %}
                 {% if slide.image %}
-                    {# On récupère directement votre image .avif attachée à la page #}
-                    {% set img_avif = cible_page.media[slide.image] %}
-                    
-                    {% if img_avif %}
-                        {% set url_avif = img_avif.url %}
-                        
-                        {# Version épurée : Plus de remplacement de chaîne, on injecte directement l'AVIF d'origine #}
-                        {% set style_bg %}
-                            style="background-image: url('{{ url_avif }}');"
-                        {% endset %}
-                    {% endif %}
+                    {% set url_avif = base_url_simple ~ '/user/data/flex-objects/accueil/' ~ slide.image %}
+                    {% set style_bg %}
+                        style="background-image: url('{{ url_avif }}');"
+                    {% endset %}
                 {% endif %}
-                
+
                 <label for="{{ slide_id }}" class="card" {{ style_bg | raw }}>
                     <div class="row">
                         <div class="description">
@@ -38,7 +29,9 @@
                     </div>
                 </label>
             {% endfor %}
+
         </div>
-         <div class="diaporama-masque-fondu"></div>
+        <div class="diaporama-masque-fondu"></div>
+    </div>
 </fieldset>
 {% endif %}

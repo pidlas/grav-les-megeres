@@ -1,24 +1,62 @@
 {% extends 'main-layout.html.twig' %}
 
 {% block content %}
-            
-    {# On récupère dynamiquement le sous-titre défini dans le fichier .md #}
-    <h2 class="coco sous-titre-page">{{ page.header.sous_titre }}</h2>
+<div class="container mt-2">
+    
+    {# ==========================================================================
+       1. EXTRACT DE LA COLLECTION DYNAMIQUES DEPUIS GRAV.FLEX
+       ========================================================================== #}
+    {% set collection = grav.flex.directory('le-spectacle').getCollection() %}
+    {% set opression_flex = collection.first() %}
 
-    {# 2. Affichage automatique des 2 images contenant le mot-clé 'top' #}
-    <div class="img-centre">
-        {% set images_affichees = 0 %}
-        
-        {% for image in page.media.images %}
-            {# On cherche 'top' dans le nom du fichier et on limite le compteur à 2 #}
-            {% if 'top' in image.filename and images_affichees < 2 %}
-                {{ image.html('Un spectacle du Théâtre Forum : 0\'Pression', 'Un spectacle du Théâtre Forum : 0\'Pression', 'photo-stages-ateliers')|raw }}
-                {% set images_affichees = images_affichees + 1 %}
-            {% endif %}
-        {% endfor %}
+    {# 2. LE SOUS-TITRE DE L'EN-TÊTE #}
+    {% if opression_flex.sous_titre %}
+        <h2 class="coco sous-titre-page t-center my-1">{{ opression_flex.sous_titre }}</h2>
+    {% endif %}
+
+    {# 3. LES DEUX PHOTOS D'ILLUSTRATION SUPÉRIEURES (EN-TÊTE) #}
+    <div class="img-centre my-2">
+        {% if opression_flex.spectacle.photo_top1 %}
+            <img src="{{ base_url_simple ~ '/user/data/flex-objects/le-spectacle/' ~ opression_flex.spectacle.photo_top1 }}" class="photo-stages-ateliers mx-1" alt="Illustration 1" loading="lazy">
+        {% endif %}
+        {% if opression_flex.spectacle.photo_top2 %}
+            <img src="{{ base_url_simple ~ '/user/data/flex-objects/le-spectacle/' ~ opression_flex.spectacle.photo_top2 }}" class="photo-stages-ateliers mx-1" alt="Illustration 2" loading="lazy">
+        {% endif %}
     </div>
 
-    {# 3. Le reste de votre contenu Markdown ("C'EST QUOI ?", paragraphes, etc.) #}
-    {{ page.content|raw }}
+    {# 4. BANDEAU DE NAVIGATION (IMAGES RONDES MORPH AVEC LIENS) #}
+    <div class="img-centre my-2">
+        {% if opression_flex.spectacle.nav_scolaires %}
+            <a class="images-spectacle morph mx-2" href="{{ url('/theatre-forum/le-spectacle/les-scolaires') }}">
+                <img src="{{ base_url_simple ~ '/user/data/flex-objects/le-spectacle/' ~ opression_flex.spectacle.nav_scolaires }}" class="image-ronde" alt="vers les scolaires" loading="lazy">
+            </a>
+        {% endif %}
+        {% if opression_flex.spectacle.nav_tout_public %}
+            <a class="images-spectacle morph mx-2" href="{{ url('/theatre-forum/le-spectacle/le-tout-public') }}">
+                <img src="{{ base_url_simple ~ '/user/data/flex-objects/le-spectacle/' ~ opression_flex.spectacle.nav_tout_public }}" class="image-ronde" alt="vers le tout public" loading="lazy">
+            </a>
+        {% endif %}
+    </div>
 
+    {# 5. LE CORPS ÉDITORIAL DYNAMIQUE (LES 3 PARTIES DE LA PRÉSENTATION)
+       Justification : On boucle proprement sur votre liste répétable, exactement comme 
+       votre boucle des paragraphes occitans, en appliquant les classes et filtres requis. #}
+    {% if opression_flex.spectacle.presentation_blocs %}
+        <div class="columns">
+            <div class="column col-12">
+                <div class="opression-corps">
+                    {% for bloc in opression_flex.spectacle.presentation_blocs %}
+                        {% if bloc.titre_bloc %}
+                            <h2 class="display-title {% if loop.first %}marge-haute{% endif %}">{{ bloc.titre_bloc }}</h2>
+                        {% endif %}
+                        {% if bloc.texte_bloc %}
+                            <div>{{ bloc.texte_bloc | markdown | shortcodes | raw }}</div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+</div>
 {% endblock %}

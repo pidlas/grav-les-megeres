@@ -1,0 +1,55 @@
+{% extends 'main-layout.html.twig' %}
+
+{% set collection = grav.flex.directory('ateliers').getCollection() %}
+{% set ateliers_flex = collection.first() %}
+
+{# 1. SURCHARGE SEO & TITRE DE L'ONGLET #}
+{% block head_title %}
+    {% set seo_title = ateliers_flex.title | default(page.title) %}
+    <title>{{ seo_title|e }} | {{ site.title|e }}</title>
+{% endblock %}
+
+{% block head_meta %}
+    {% set seo_description = ateliers_flex.meta_description | default(page.header.metadata.description) %}
+    <meta name="description" content="{{ seo_description|e('html_attr') }}" />
+    <meta name="robots" content="{% if page.header.metadata.robots %}{{ page.header.metadata.robots|e }}{% else %}index, follow{% endif %}" />
+    <link class="can" rel="canonical" href="{{ page.url(true, true)|e }}" />
+{% endblock %}
+
+{# 2. CONTENU DE LA PAGE (Structure Spectre.css) #}
+{% block content %}
+
+<script>
+    (function() {
+        var h1 = document.querySelector(".conteneur-champignons h1");
+        if (h1 && "{{ ateliers_flex.title|default('')|e('js') }}") {
+            h1.textContent = "{{ ateliers_flex.title|split('|')|first|trim|e('js') }}";
+        }
+    })();
+</script>
+
+<div class="container mt-2">
+
+    {# 1. PHOTO PRINCIPALE EN HAUT #}
+    {% if ateliers_flex.ateliers_photo_principale %}
+    <div class="columns my-2">
+        <div class="column col-12">
+            <div class="img-centre">
+                <img class="photo-stages-ateliers" src="{{ base_url_simple ~ '/user/data/flex-objects/ateliers/' ~ ateliers_flex.ateliers_photo_principale }}" alt="{{ ateliers_flex.ateliers_alt_photo|default('')|e('html_attr') }}" loading="lazy">
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    {# 2. TEXTE DE PRÉSENTATION #}
+    {% if ateliers_flex.ateliers_description %}
+    <div class="columns my-2">
+        <div class="column col-12">
+            {% set html_desc = ateliers_flex.ateliers_description | markdown | shortcodes %}
+            {{ html_desc | replace({'<ul>': '<ul class="jolie-ombres">'}) | raw }}
+        </div>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}

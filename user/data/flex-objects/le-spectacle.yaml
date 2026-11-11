@@ -1,0 +1,66 @@
+a729e09e40c88192ffb1f2dc30365948:
+  title: "Le Spectacle : 0'Pression"
+  menu: "Le spectacle 0'pression"
+  sous_titre: 'Spectacle de Théâtre Forum - 1h45'
+  spectacle:
+    presentation_blocs:
+      -
+        titre_bloc: "C'est quoi ?"
+        texte_bloc: 'Le spectacle contient deux à trois scènes courtes qui mettent en évidence les situations conflictuelles dont on peut être témoins ou dont on peut souffrir au quotidien. Ce sont donc des scénettes qui se terminent mal.'
+      -
+        titre_bloc: 'Comment on joue ?'
+        texte_bloc: "Dans un premier temps, les comédien·e·s jouent une scène sans interruption. Puis, la scène est rejouée une seconde fois. À n’importe quel moment une personne du public peut lever la main, la scène est mise sur pause et lae spectateur·ice est alors invité·e à venir remplacer ou ajouter un personnage. Une fois sur scène, lae spectAct·eurice devra tenter d’agir, de proposer des solutions concrètes afin de déjouer le problème initial. La\n\nscène est rejouée plusieurs fois afin de permettre à plusieurs personnes du public d’expérimenter leurs idées. Un·e médiateurice appelé·e lae joker, gère le bon déroulement de la séance. Iel favorise le débat, analyse avec le public les interventions proposées et leurs répercussions sur la situation. Iel emmène la réflexion collective le plus loin possible. Ensemble, comédien·ne·s, médiateurice et spectAct·eurice·s cherchent et expérimentent sur scène différentes issues possibles à une situation de conflits. La question présente dans la tête de chaque spectateurice·s est : “Qu’est ce que je peux faire pour que cela change ?”"
+      -
+        texte_bloc: 'Le théâtre forum est un formidable outil pédagogique et préventif. Nous suscitons la participation active des spectateurices afin d’encourager leur capacité à réfléchir et à agir face à une situation de conflit ou d’oppression. Le jeu théâtral amène un échange complice où chacun·e est libre de réfléchir et de s’exprimer sans jugement.'
+        titre_bloc: "C'est quoi la différence avec le théâtre tout court ?"
+    photo_top1: theatre-forum-top-2.avif
+    photo_top2: theatre-forum-top-3.avif
+    nav_scolaires: les-scolaires.avif
+    nav_tout_public: le-tout-public.avif
+    scolaires_intro: "## Sensibilisation interactive par le Théâtre-Forum\n\nNous proposons le spectacle de Théâtre-Forum 0'Pression afin de sensibiliser les jeunes de 11 à 18 ans à des problématiques sociales de manière interactive (discriminations, oppressions, conflits, questions d’actualité…).\n\nDans un cadre bienveillant et ludique, les élèves peuvent alors réfléchir, s’exprimer et agir autour de problématiques parfois difficiles à aborder."
+    scolaires_bulle1: bulle-scolaire-1.avif
+    scolaires_bulle2: bulle-scolaire-2.avif
+    scolaires_bulle3: bulle-scolaire-3.avif
+    scolaires_objectifs:
+      -
+        texte: 'Libérer la parole sur la problématique abordée.'
+      -
+        texte: "Favoriser l'expression et la confrontation des points de vue."
+      -
+        texte: "Développer les compétences relationnelles (écoute, empathie, respect d'autrui...)."
+      -
+        texte: 'Favoriser la capacité à agir et à prendre la parole.'
+      -
+        texte: "Expérimenter collectivement des alternatives pour sortir d'une situation difficile."
+      -
+        texte: 'Introduire des informations et des éléments clés sur les thématiques abordées.'
+    scolaires_formats:
+      -
+        titre_format: 'Format 1h30'
+        details_format: '3 scènes au choix — 35 participants maximum.'
+    scolaires_tarifs: 'Pour connaître les tarifs, [a href="/contact" title="Accès à notre page Contact"]contactez-nous[/a]'
+    tout_public_intro: "Sensibilisation interactive par le Théâtre-Forum pour les entreprises, associations, équipes pédagogiques, centres de loisirs, théâtres, festivals, collectivités territoriales, écoles supérieures et toutes autres structures intéressées.\n\nNous proposons le spectacle de Théâtre-Forum *O'Pression* afin de sensibiliser les adultes de 18 à 99 ans à des problématiques sociales de manière interactive (discriminations, oppressions, conflits, questions d'actualité...).\n\nDans un cadre bienveillant et ludique, le public peut alors réfléchir, s'exprimer et agir autour de problématiques parfois difficiles à aborder."
+    tout_public_bulle1: bulle-tout-public-1.avif
+    tout_public_bulle2: bulle-tout-public-2.avif
+    tout_public_bulle3: bulle-tout-public-3.avif
+    tout_public_objectifs:
+      -
+        texte: 'Libérer la parole sur la thématique abordée.'
+      -
+        texte: "Favoriser l'expression et la confrontation des points de vue."
+      -
+        texte: "Développer les compétences relationnelles (écoute, empathie, respect d'autrui...)."
+      -
+        texte: 'Favoriser la capacité à agir et à prendre la parole.'
+      -
+        texte: "Expérimenter collectivement des alternatives pour sortir d'une situation difficile."
+      -
+        texte: 'Introduire des informations et des éléments clés sur la thématique abordée.'
+    tout_public_formats:
+      -
+        titre_format: 'Format 1h'
+        details_format: '2 scènes au choix — 35 participants maximum.'
+      -
+        titre_format: 'Format 1h30'
+        details_format: '3 scènes au choix — 35 participants maximum.'
+    tout_public_tarifs: 'Pour connaître les tarifs, [a href="/contact" title="Accès à notre page contact"]contactez-nous[/a]'

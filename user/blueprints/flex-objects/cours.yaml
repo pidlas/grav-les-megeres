@@ -1,0 +1,122 @@
+type: flex-objects
+title: Cours de théâtre
+description: Gestion des médias audio, visuels et informations de la page Cours de théâtre
+
+config:
+  data:
+    storage:
+      className: 'Grav\Framework\Flex\Storage\FolderStorage'
+      options:
+        formatter:
+          class: 'Grav\Framework\File\Formatter\YamlFormatter'
+        folder: 'user/data/flex-objects/cours'
+    media:
+      per_object: false
+
+  site:
+    templates:
+      object:
+        route: /prestations/cours
+
+  admin:
+    router:
+      path: /cours
+    menu:
+      list:
+        route: /cours
+        title: Page Cours
+        priority: 8
+        icon: fa fa-graduation-cap
+    list:
+      title: Configuration de la page Cours
+      fields:
+        title:
+          title: Titre de la page
+          field: title
+          link: edit
+
+form:
+  fields:
+    tabs:
+      type: tabs
+      active: 1
+      fields:
+
+        tab_general:
+          type: tab
+          title: "Contenu de la page Cours"
+          fields:
+            title:
+              type: text
+              label: Titre de la page (S'affichera dans le H1)
+              validate:
+                required: true
+            menu:
+              type: text
+              label: Titre dans le menu du site
+            meta_description:
+              type: textarea
+              label: Meta Description (SEO)
+              rows: 2
+
+            section_audio:
+              type: section
+              title: "1. Lecteur Audio"
+              underline: true
+            cours_audio_mp3:
+              type: filepicker
+              label: "Fichier Audio MP3"
+              folder: 'user-data://flex-objects/cours'
+              preview_images: false
+              accept:
+                - .mp3
+            cours_audio_ogg:
+              type: filepicker
+              label: "Fichier Audio OGG"
+              folder: 'user-data://flex-objects/cours'
+              preview_images: false
+              accept:
+                - .ogg
+
+            section_texte:
+              type: section
+              title: "2. Paragraphe de présentation"
+              underline: true
+            cours_description:
+              type: markdown
+              label: "Texte de présentation des cours"
+
+            section_images_haut:
+              type: section
+              title: "3. Les deux images côte à côte"
+              underline: true
+            cours_img_tarifs:
+              type: filepicker
+              label: "Image 1 : Affiche / Tarifs des cours (AVIF)"
+              folder: 'user-data://flex-objects/cours'
+              preview_images: true
+              accept:
+                - .avif
+            cours_img_photo:
+              type: filepicker
+              label: "Image 2 : Photo d'illustration du cours (AVIF)"
+              folder: 'user-data://flex-objects/cours'
+              preview_images: true
+              accept:
+                - .avif
+
+            section_objectifs:
+              type: section
+              title: "4. Section Objectifs Pédagogiques"
+              underline: true
+            cours_titre_objectifs:
+              type: text
+              label: "Titre de la section"
+              default: "Les objectifs pédagogiques"
+            cours_img_objectifs:
+              type: filepicker
+              label: "Image des objectifs pédagogiques (AVIF)"
+              folder: 'user-data://flex-objects/cours'
+              preview_images: true
+              accept:
+                - .avif

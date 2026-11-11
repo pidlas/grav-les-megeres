@@ -1,0 +1,95 @@
+type: flex-objects
+title: Pages Textuelles & Légales
+description: Gestion centralisée des pages textuelles (Laboratoire, Règlement, Crédits, Mentions légales, Sécurité)
+
+config:
+  data:
+    storage:
+      className: 'Grav\Framework\Flex\Storage\FolderStorage'
+      options:
+        formatter:
+          class: 'Grav\Framework\File\Formatter\YamlFormatter'
+        folder: 'user/data/flex-objects/pages-textuelles'
+    media:
+      per_object: false
+
+  admin:
+    router:
+      path: /pages-textuelles
+    menu:
+      list:
+        route: /pages-textuelles
+        title: Pages Textuelles
+        priority: 5
+        icon: fa fa-file-text
+    list:
+      title: Liste des Pages Textuelles
+      fields:
+        title:
+          title: Titre de la page
+          field: title
+          link: edit
+        slug_page:
+          title: Identifiant (Slug)
+          field: slug_page
+
+form:
+  fields:
+    tabs:
+      type: tabs
+      active: 1
+      fields:
+
+        tab_general:
+          type: tab
+          title: "Contenu de la page"
+          fields:
+            slug_page:
+              type: select
+              label: "Page cible associée"
+              validate:
+                required: true
+              options:
+                le-laboratoire: "Le laboratoire"
+                reglement-interieur: "Règlement intérieur"
+                credits: "Crédits"
+                mentions-legales: "Mentions légales"
+                politique-de-securite: "Politique de sécurité"
+
+            title:
+              type: text
+              label: Titre de la page (S'affichera dans le H1)
+              validate:
+                required: true
+            menu:
+              type: text
+              label: Titre dans le menu du site
+            meta_description:
+              type: textarea
+              label: Meta Description (SEO)
+              rows: 2
+
+            section_intro:
+              type: section
+              title: "1. Introduction (Paragraphe ou liste initiale)"
+              underline: true
+            page_intro:
+              type: markdown
+              label: "Contenu d'introduction (Optionnel)"
+              help: "Utilisé pour le paragraphe unique du Laboratoire, la liste initiale des Mentions légales ou le premier paragraphe de la Politique de sécurité."
+
+            section_blocs:
+              type: section
+              title: "2. Articles & Sections (Titre + Contenu)"
+              underline: true
+            page_sections:
+              type: list
+              label: "Blocs éditoriaux (Articles, Rubriques...)"
+              btn_add: "Ajouter une section (Titre + Contenu)"
+              fields:
+                .titre_section:
+                  type: text
+                  label: "Titre de la section ou de l'article (H2)"
+                .contenu_section:
+                  type: markdown
+                  label: "Paragraphes et listes à puces"

@@ -1,0 +1,115 @@
+{% extends 'main-layout.html.twig' %}
+
+{% block content %}
+
+{# ==========================================================================
+   1. EXTRACTION DES DONNÉES DEPUIS LA COLLECTION MAÎTRESSE
+   ========================================================================== #}
+{% set collection = grav.flex.directory('le-spectacle').getCollection() %}
+{% set opression_flex = collection.first() %}
+
+{# On cible le dictionnaire interne 'spectacle' qui contient toutes vos clés #}
+{% set data_source = opression_flex.spectacle %}
+{% set prefixe = page.slug == 'les-scolaires' ? 'scolaires_' : 'tout_public_' %}
+
+{# ==========================================================================
+   2. RE-ÉCRITURE DYNAMIQUE DU H1 DE LA PAGE (LOGIQUE GRÉSILHETTE)
+   ========================================================================== #}
+<script>
+    (function() {
+        var h1 = document.querySelector(".conteneur-champignons h1");
+        if (h1) {
+            h1.textContent = "{% if page.slug == 'les-scolaires' %}Les Scolaires{% else %}Le Tout Public{% endif %}";
+        }
+    })();
+</script>
+
+{# ==========================================================================
+   3. BANDEAU DE NAVIGATION MORPH HISTORIQUE (RECRÉÉ DEPUIS LE DOSSIER UNIQUE)
+   ========================================================================== #}
+<div class="{% if page.slug == 'les-scolaires' %}p_les-scolaires{% else %}p_le-tout-public{% endif %} my-2"> 
+    <a class="images-spectacle {% if page.slug != 'les-scolaires' %}morph{% endif %}" href="{{ url('/theatre-forum/le-spectacle/les-scolaires') }}">
+        {% if opression_flex.spectacle.nav_scolaires %}
+            <img src="{{ base_url_simple ~ '/user/data/flex-objects/le-spectacle/' ~ opression_flex.spectacle.nav_scolaires }}" class="{% if page.slug == 'les-scolaires' %}image-ronde{% endif %}" alt="vers les scolaires" loading="lazy">
+        {% endif %}
+    </a> 
+    <a class="images-spectacle {% if page.slug == 'les-scolaires' %}morph{% endif %}" href="{{ url('/theatre-forum/le-spectacle/le-tout-public') }}">
+        {% if opression_flex.spectacle.nav_tout_public %}
+            <img src="{{ base_url_simple ~ '/user/data/flex-objects/le-spectacle/' ~ opression_flex.spectacle.nav_tout_public }}" class="{% if page.slug != 'les-scolaires' %}image-ronde{% endif %}" alt="vers le tout public" loading="lazy">
+        {% endif %}
+    </a> 
+</div>
+
+{# ==========================================================================
+   4. L'ANCRE RELATIVE AVEC LES 3 BULLS DE FOND (DÉTECTION PAR TABLEAU)
+   ========================================================================== #}
+<div class="section-spectacle container">
+
+    {# Lecture dynamique des 3 clés de bulles (ex: scolaires_bulle1 ou tout_public_bulle1) #}
+    {% if data_source[prefixe ~ 'bulle1'] %}
+        <img src="{{ base_url_simple ~ '/user/data/flex-objects/le-spectacle/' ~ data_source[prefixe ~ 'bulle1'] }}" class="bulle-fond b-haut-gauche" alt="" loading="lazy">
+    {% endif %}
+    {% if data_source[prefixe ~ 'bulle2'] %}
+        <img src="{{ base_url_simple ~ '/user/data/flex-objects/le-spectacle/' ~ data_source[prefixe ~ 'bulle2'] }}" class="bulle-fond b-milieu-droite" alt="" loading="lazy">
+    {% endif %}
+    {% if data_source[prefixe ~ 'bulle3'] %}
+        <img src="{{ base_url_simple ~ '/user/data/flex-objects/le-spectacle/' ~ data_source[prefixe ~ 'bulle3'] }}" class="bulle-fond b-objectifs-gauche" alt="" loading="lazy">
+    {% endif %}
+
+    {# ==========================================================================
+       5. LE CORPS DE TEXTE DÉPLOYÉ AVEC SES CLASSES GÉOMÉTRIQUES
+       ========================================================================== #}
+    <div class="opression-wrapper">
+        <div class="opression-corps">
+            
+            {# A. Le texte d'introduction générale (converti en Markdown) #}
+            {% if data_source[prefixe ~ 'intro'] %}
+                <div class="opression-introduction-bloc">
+                    {{ data_source[prefixe ~ 'intro'] | markdown | shortcodes | raw }}
+                </div>
+            {% endif %}
+
+            {# B. La liste animée des objectifs pédagogiques #}
+            {% if data_source[prefixe ~ 'objectifs'] %}
+                <h2 class="display-title">Objectifs pédagogiques</h2>
+                <ul class="jolie-ombres slide-list">
+                    {% for obj in data_source[prefixe ~ 'objectifs'] %}
+                        {% if obj.texte %}
+                            <li>{{ obj.texte }}</li>
+                        {% endif %}
+                    {% endfor %}
+                </ul>
+            {% endif %}
+
+            {# C. La grille réactive Spectre pour les formats d'intervention #}
+            {% if data_source[prefixe ~ 'formats'] %}
+                <h2 class="display-title">Nos formats</h2>
+                <div class="columns opression-formats my-1">
+                    {% for fmt in data_source[prefixe ~ 'formats'] %}
+                        <div class="column col-6 col-md-12">
+                            <div class="format-bloc p-2">
+                                {% if fmt.titre_format %}
+                                    <h3>{{ fmt.titre_format }}</h3>
+                                {% endif %}
+                                {% if fmt.details_format %}
+                                    {{ fmt.details_format | markdown | shortcodes | raw }}
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            {# D. La section tarification au sol #}
+            {% if data_source[prefixe ~ 'tarifs'] %}
+                <h2 class="display-title">Tarifs</h2>
+                <div class="opression-tarifs">
+                    {{ data_source[prefixe ~ 'tarifs'] | markdown | shortcodes | raw }}
+                </div>
+            {% endif %}
+
+        </div>{# fermeture .opression-corps #}
+    </div>{# fermeture .opression-wrapper #}
+</div>{# fermeture .section-spectacle #}
+
+{% endblock %}

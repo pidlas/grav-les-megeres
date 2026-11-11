@@ -1,0 +1,275 @@
+type: flex-objects
+title: Théâtre Forum - O'Pression
+description: Gestion unifiée pour la pièce maîtresse O'Pression et ses déclinaisons Scolaires et Tout Public
+
+config:
+  data:
+    storage:
+      className: 'Grav\Framework\Flex\Storage\FolderStorage'
+      options:
+        formatter:
+          class: 'Grav\Framework\File\Formatter\YamlFormatter'
+        folder: 'user/data/flex-objects/le-spectacle' 
+    media:
+      per_object: false
+
+  site:
+    templates:
+      object:
+        route: /theatre-forum/le-spectacle
+
+  admin:
+    router:
+      path: /theatre-forum/le-spectacle
+    menu:
+      list:
+        route: /theatre-forum/le-spectacle
+        title: Spectacle O'Pression
+        priority: 10
+        icon: fa fa-masks-theater
+    list:
+      title: Liste des Spectacles
+      fields:
+        title:
+          title: Titre du spectacle
+          field: title
+          link: edit
+
+form:
+  fields:
+    tabs:
+      type: tabs
+      active: 1
+      fields:
+
+        # ==================================================================
+        # ONGLET 1 : LA PAGE MAÎTRESSE PRÉSENTATION
+        # ==================================================================
+        tab_general:
+          type: tab
+          title: "Informations Générales"
+          fields:
+            title:
+              type: text
+              label: Titre de la page (S'affichera dans le H1)
+              validate:
+                required: true
+            menu:
+              type: text
+              label: Titre dans le menu du site
+            sous_titre:
+              type: text
+              label: "Sous-titre de l'en-tête"
+              placeholder: "Spectacle de Théâtre Forum - 1h45"
+
+            section_photos_top:
+              type: section
+              title: "Photos d'Illustration Supérieures (En-tête)"
+              underline: true
+            spectacle.photo_top1:
+              type: filepicker
+              label: "Première photo d'illustration (Top 1) - AVIF"
+              folder: 'user-data://flex-objects/le-spectacle'
+              preview_images: true
+              accept:
+                - .avif
+            spectacle.photo_top2:
+              type: filepicker
+              label: "Seconde photo d'illustration (Top 2) - AVIF"
+              folder: 'user-data://flex-objects/le-spectacle'
+              preview_images: true
+              accept:
+                - .avif
+
+            section_navigation_images:
+              type: section
+              title: "Bandeau de Navigation (Images Rondes Morph)"
+              underline: true
+            spectacle.nav_scolaires:
+              type: filepicker
+              label: "Rond de lien vers Les Scolaires - AVIF"
+              folder: 'user-data://flex-objects/le-spectacle'
+              preview_images: true
+              accept:
+                - .avif
+            spectacle.nav_tout_public:
+              type: filepicker
+              label: "Rond de lien vers Le Tout Public - AVIF"
+              folder: 'user-data://flex-objects/le-spectacle'
+              preview_images: true
+              accept:
+                - .avif
+
+            section_corps_editorial:
+              type: section
+              title: "Contenu de la Présentation (Les 3 Parties)"
+              underline: true
+            spectacle.presentation_blocs:
+              type: list
+              label: "Parties éditoriales de la présentation"
+              btn_add: "Ajouter une partie textuelle"
+              fields:
+                .titre_bloc:
+                  type: text
+                  label: "Titre de la partie (ex: C'EST QUOI ?)"
+                .texte_bloc:
+                  type: markdown
+                  label: "Paragraphe de description"
+
+        # ==================================================================
+        # ONGLET 2 : LA DÉCLINAISON SCOLAIRES
+        # ==================================================================
+        tab_scolaires:
+          type: tab
+          title: "2. Version Scolaires"
+          fields:
+            section_scolaires_intro:
+              type: section
+              title: "Introduction et Présentation"
+              underline: true
+            spectacle.scolaires_intro:
+              type: textarea
+              label: "Texte d'introduction de la section Scolaires"
+              rows: 4
+
+            section_scolaires_bulles:
+              type: section
+              title: "Graphismes & Les 3 Bulles de Fond (Absolute)"
+              underline: true
+            spectacle.scolaires_bulle1:
+              type: filepicker
+              label: "Bulle de fond 1 (Haut Gauche) - AVIF"
+              folder: 'user-data://flex-objects/le-spectacle'
+              preview_images: true
+              accept:
+                - .avif
+            spectacle.scolaires_bulle2:
+              type: filepicker
+              label: "Bulle de fond 2 (Milieu Droite) - AVIF"
+              folder: 'user-data://flex-objects/le-spectacle'
+              preview_images: true
+              accept:
+                - .avif
+            spectacle.scolaires_bulle3:
+              type: filepicker
+              label: "Bulle de fond 3 (Objectifs Gauche) - AVIF"
+              folder: 'user-data://flex-objects/le-spectacle'
+              preview_images: true
+              accept:
+                - .avif
+
+            section_scolaires_obj:
+              type: section
+              title: "Objectifs Pédagogiques (Liste Animée)"
+              underline: true
+            spectacle.scolaires_objectifs:
+              type: list
+              label: "Liste des objectifs pédagogiques (Scolaires)"
+              btn_add: "Ajouter un objectif"
+              fields:
+                .texte:
+                  type: text
+                  label: "Ligne d'objectif"
+
+            section_scolaires_fmt:
+              type: section
+              title: "Formats d'Intervention (Grille de Blocs)"
+              underline: true
+            spectacle.scolaires_formats:
+              type: list
+              label: "Les Blocs de Formats d'intervention (Scolaires)"
+              btn_add: "Ajouter un format d'intervention"
+              fields:
+                .titre_format:
+                  type: text
+                  label: "Titre du format (ex: Format 1h30)"
+                .details_format:
+                  type: markdown
+                  label: "Descriptif technique du format"
+
+            section_scolaires_prix:
+              type: section
+              title: "Tarifications"
+              underline: true
+            spectacle.scolaires_tarifs:
+              type: markdown
+              label: "Zone des Tarifs (Scolaires)"
+
+        # ==================================================================
+        # 🌟 ONGLET 3 : LA DÉCLINAISON TOUT PUBLIC (COMPLET & ALIGNÉ)
+        # ==================================================================
+        tab_tout_public:
+          type: tab
+          title: "3. Version Tout Public"
+          fields:
+            section_tout_public_intro:
+              type: section
+              title: "Introduction et Présentation"
+              underline: true
+            spectacle.tout_public_intro:
+              type: markdown
+              label: "Texte d'introduction de la section Tout Public"
+              rows: 4
+
+            section_tout_public_bulles:
+              type: section
+              title: "Graphismes & Les 3 Bulles de Fond (Absolute)"
+              underline: true
+            spectacle.tout_public_bulle1:
+              type: filepicker
+              label: "Bulle de fond 1 (Haut Gauche) - AVIF"
+              folder: 'user-data://flex-objects/le-spectacle'
+              preview_images: true
+              accept:
+                - .avif
+            spectacle.tout_public_bulle2:
+              type: filepicker
+              label: "Bulle de fond 2 (Milieu Droite) - AVIF"
+              folder: 'user-data://flex-objects/le-spectacle'
+              preview_images: true
+              accept:
+                - .avif
+            spectacle.tout_public_bulle3:
+              type: filepicker
+              label: "Bulle de fond 3 (Objectifs Gauche) - AVIF"
+              folder: 'user-data://flex-objects/le-spectacle'
+              preview_images: true
+              accept:
+                - .avif
+
+            section_tout_public_obj:
+              type: section
+              title: "Objectifs Pédagogiques (Liste Animée)"
+              underline: true
+            spectacle.tout_public_objectifs:
+              type: list
+              label: "Liste des objectifs pédagogiques (Tout Public)"
+              btn_add: "Ajouter un objectif"
+              fields:
+                .texte:
+                  type: text
+                  label: "Ligne d'objectif"
+
+            section_tout_public_fmt:
+              type: section
+              title: "Formats d'Intervention (Grille de Blocs)"
+              underline: true
+            spectacle.tout_public_formats:
+              type: list
+              label: "Les Blocs de Formats d'intervention (Tout Public)"
+              btn_add: "Ajouter un format d'intervention"
+              fields:
+                .titre_format:
+                  type: text
+                  label: "Titre du format (ex: Format 1h)"
+                .details_format:
+                  type: markdown
+                  label: "Descriptif technique du format"
+
+            section_tout_public_prix:
+              type: section
+              title: "Tarifications"
+              underline: true
+            spectacle.tout_public_tarifs:
+              type: markdown
+              label: "Zone des Tarifs (Tout Public)"

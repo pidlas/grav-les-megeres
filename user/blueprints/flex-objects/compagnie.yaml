@@ -27,7 +27,7 @@ config:
       list:
         route: /compagnie
         title: Page Compagnie
-        priority: 6
+        priority: 15
         icon: fa fa-university
     list:
       title: Contenu de la Compagnie

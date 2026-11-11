@@ -2,32 +2,26 @@
 FICHIER INTÉGRAL STABILISÉ : SPECTACLE O'PRESSION
 Architecture : Mobile-First / Sans Cadres / Sans Filtres / Ancrages Fixes
 ========================================================================== */
-
-/* --------------------------------------------------------------------------
-1. STRUCTURE GLOBALE & ISOLEMENT
--------------------------------------------------------------------------- */
+/*1.Structure globale et isolement*/
 .section-spectacle {
     position: relative;
-    overflow: hidden; /* Empêche les bulles de créer un scroll horizontal */
+    overflow: hidden;
     width:100%;
     padding:0;
 }
 .opression-wrapper {
     position: relative;
-    z-index: 5; /* Force le texte à passer AU-DESSUS des illustrations */
+    z-index: 5;
     margin:0 2vw;
 }
-
-/* --- Styles des contenus internes --- */
+/*2.Styles des contenus internes*/
 .sous-titre-page{
     text-align: center;
     font-size: clamp(1rem, 1vw + 0.4rem, 2rem);
 }
 .opression-corps h3 {
     font-family: CocoGothic;
-    font-variant-caps: all-petite-caps;
-    margin-top: var(--space-s);
-    color: #382b4c;
+    color:hsla(264, 28%, 23%, 1);
 }
 .opression-formats {
     position:relative;
@@ -41,10 +35,13 @@ Architecture : Mobile-First / Sans Cadres / Sans Filtres / Ancrages Fixes
 }
 .format-bloc { 
     background:var(--color-white);
-    padding:0 var(--space-s); 
+    padding:var(--space-s); 
     border-radius:var(--radius-standard); 
     border:2px solid hsla(264, 28%, 23%, 0.15);
     box-shadow:12px 4px 12px hsla(0, 0%, 0%, .3);
+}
+.format-bloc h3{
+    margin-top:0;
 }
 .opression-tarifs {
     position:relative;

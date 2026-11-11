@@ -1,30 +1,55 @@
 {% extends 'main-layout.html.twig' %}
 
-{# 🌟 ÉTAPE 1 : ON ÉTEINT L'AFFICHAGE DU HAUT D'ORIGINE et celui des feuilles qui seraient affichées sous le titre #}
+{% set collection = grav.flex.directory('accueil').getCollection() %}
+{% set accueil_flex = collection.first() %}
+
+{# 1. SURCHARGE SEO & TITRE DE L'ONGLET #}
+{% block head_title %}
+    {% set seo_title = accueil_flex.title | default(page.title) %}
+    <title>{{ seo_title|e }} | {{ site.title|e }}</title>
+{% endblock %}
+
+{% block head_meta %}
+    {% set seo_description = accueil_flex.meta_description | default(page.header.metadata.description) %}
+    <meta name="description" content="{{ seo_description|e('html_attr') }}" />
+    <meta name="robots" content="{% if page.header.metadata.robots %}{{ page.header.metadata.robots|e }}{% else %}index, follow{% endif %}" />
+    <link class="can" rel="canonical" href="{{ page.url(true, true)|e }}" />
+{% endblock %}
+
+{# 2. EXTINCTION DES BLOCS D'ORIGINE #}
 {% block content %}{% endblock %}
 {% block decor_feuilles %}{% endblock %}
 
-{# 🌟 ÉTAPE 2 : LE BLOC MAÎTRE POUR L'ACCUEIL #}
+{# 3. LE BLOC MAÎTRE POUR L'ACCUEIL #}
 {% block avant_conteneur_texte %}
-    
-    {# A. L'ACCORDÉON DIAPORAMA (1200,03px de front) #}
-    {% include 'partials/diaporama.html.twig' with {'la_page_accueil': page} %}
-    
-    {# B. LA MISE AU DIAPASON SPECTRE AVEC VOTRE <SECTION CLASS="INDEX">
-       Justification : Le texte éditorial s'installe au cœur de la grille élastique,
-       parfaitement encapsulé dans votre balise sémantique dédiée. #}
+
+    {# Mise à jour dynamique du H1 principal #}
+    <script>
+        (function() {
+            var h1 = document.querySelector(".conteneur-champignons h1");
+            if (h1 && "{{ accueil_flex.title|default('')|e('js') }}") {
+                h1.textContent = "{{ accueil_flex.title|split('|')|first|trim|e('js') }}";
+            }
+        })();
+    </script>
+
+    {# A. L'ACCORDÉON DIAPORAMA #}
+    {% include 'partials/diaporama.html.twig' with {'donnees_accueil': accueil_flex} %}
+
+    {# B. LA MISE AU DIAPASON SPECTRE AVEC VOTRE <SECTION CLASS="INDEX"> #}
+    {% if accueil_flex.accueil_intro %}
     <div class="container mt-2">
         <div class="columns">
             <div class="column col-12">
                 <section class="index">
-                    {{ page.content | shortcodes | raw }}
+                    {{ accueil_flex.accueil_intro | markdown | shortcodes | raw }}
                 </section>
             </div>
         </div>
     </div>
-    {# 🌟 C. TÉLÉPORTATION DU DÉCOR
-       Justification : On rappelle le contenu du bloc d'origine du fichier maître,
-       mais on force son affichage au sol, juste au-dessus du footer. #}
+    {% endif %}
+
+    {# C. TÉLÉPORTATION DU DÉCOR DES FEUILLES #}
     {{ block('decor_feuilles', 'main-layout.html.twig') }}
 
 {% endblock %}

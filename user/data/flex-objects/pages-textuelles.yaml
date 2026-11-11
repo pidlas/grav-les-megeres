@@ -1,0 +1,107 @@
+c798fe966a1c883a48f9b511ee512425:
+  slug_page: le-laboratoire
+  title: 'Le Laboratoire'
+  menu: 'Le laboratoire'
+  meta_description: "Séances de théâtre forum pour adultes en milieu associatif, culturel ou professionnel, avec interventions dans l'Aude et en Occitanie."
+  page_intro: "Toute l'équipe de la compagnie *Les Mégères de l'Humus* travaille d'arrache-pieds, ne vous en faîtes pas, personne ne vas souffrir, pour vous apporter dans les délais les plus brefs un contenu adapté à cette page qui pour l'instant semble bien vide ! Mais cela va changer... prochainement."
+8b09464eef774cb5a33f4ffd9b790277:
+  slug_page: reglement-interieur
+  title: 'Règlement intérieur'
+  menu: 'Règlement Intérieur'
+  meta_description: "Consultez le règlement intérieur applicable aux cours et stages proposés par la compagnie Les Mégères de l'Humus."
+  page_sections:
+    -
+      titre_section: 'Article 1 - Introduction'
+      contenu_section: 'L’inscription à une prestation avec la compagnie Les Mégères de l’Humus implique d’avoir pris connaissance et accepté les conditions de ce règlement intérieur. '
+    -
+      titre_section: 'Article 2 - Dispositions légales'
+      contenu_section: "La Compagnie *Les Mégères de l’Humus* est une compagnie de théâtre professionnelle qui existe sur le Territoire de l’Aude depuis 2022.\nCette association loi 1901 est dirigée par un bureau. Celui-ci est dirigé par Madame Delphine Verniol. Les intervenant·e·s des prestations dispensées\npar la compagnie, sont doté·e·s d’une expérience professionnelle pédagogique et scénique. Les tarifs de ces prestations sont établis\nannuellement. Toute personne le souhaitant peut participer aux prestations  ;  seuls des critères d’âge limitent l’admission. L’âge minimum requis\nest de 8 ans. L’élève ou son/sa responsable légal ·e s’engage à souscrire à une assurance responsabilité civile couvrant son activité lors\ndu suivi des prestations, des répétitions et du spectacle de fin d’année. Les élèves mineur·e·s ne sont sous la responsabilité de l’association et de\nl’intervenant ·e que pendant la durée des prestations. Iels ne peuvent être ni accueilli·e·s avant, ni gardé·e·s après la séance. La compagnie\n*Les Mégères de l’Humus* se dégage de toute responsabilité dès la fin de la séance."
+    -
+      titre_section: 'Article 3 - Fréquence, Lieu et Durée'
+      contenu_section: "Les prestations se déroulent aux jours, horaires et lieux définis en début d’année. Elles ont lieu tout au long de l'année. Le lieu, le jour et les horaires des séances sont susceptibles d’être modifiés. Des répétitions supplémentaires peuvent être ajoutées pour le bon déroulement du spectacle. La compagnie *Les Mégères de l’Humus* s’engage à prévenir les participant·e·s de toutes modifications pouvant survenir. Si l'intervenant·e ne peut assurer une séance, celle-ci sera reportée dans la mesure du possible, ou annulée."
+    -
+      titre_section: 'Article 4 - Tenues et Comportements'
+      contenu_section: "Afin que les séances commencent à l’heure et pour le bon déroulement de celles-ci, il est demandé aux élèves d’arriver avec 5 minutes d'avance. Une fréquentation régulière est souhaitable pour l'intégration de chacun·e au sein du groupe et pour l'acquisition des compétences tout au long de l'année. Le théâtre est un loisir qui repose sur le sens du collectif et la responsabilité de chacun·e vis-à-vis du groupe. Toute absence doit être signalée à l’intervenant·e, tout retard exceptionnel également. Les téléphones portables devront être éteints pendant la séance afin de bien respecter l’ambiance de travail et de concentration nécessaires au théâtre. Le théâtre est un art qui engage le corps. La tenue des élèves doit être adaptée aux séances de théâtre, qui demandent souvent une mobilité corporelle et une aisance dans les mouvements. Il est vivement conseillé de laisser à la maison bijoux et objets de valeur. En cas de perte, détérioration ou vol, la compagnie *Les Mégères de l’Humus* se dégage de toute responsabilité. Les élèves s’engagent à respecter les règles de rangement et à prendre soin du matériel, des accessoires, décors et costumes mis à disposition par la compagnie *Les Mégères de l’Humus* pour le bien des répétitions et de l’enseignement. Tout élève se doit aussi de respecter le matériel et le bâtiment communal *La Maison du Temps Libre*, mis à disposition par la mairie. Aucune dégradation ne sera autorisée sous peine d’exclusion. Pour finir, les élèves s’engagent à ne pas tenir de propos racistes, validistes, grossophobes, psychophobes, homophobes et transphobes."
+b365e6d9f242aa7f93fb749d80ab02c8:
+  slug_page: credits
+  title: Crédits
+  menu: Crédits
+  meta_description: 'Crédits du site et remerciements aux personnes ayant contribué aux photographies, graphismes, contenus et ressources.'
+  page_sections:
+    -
+      titre_section: 'Conception du site'
+      contenu_section: "Le site a été conçu en collaboration entre Philippe Guerrini Idlas et Les Mégères de l'Humus. "
+    -
+      contenu_section: "Les Conditions Générales d'Utilisation - CGU - ont été réalisées à partir des conseils fournis par le portail de la transformation numérique des entreprises, article publié le 8 février 2021 et mis à jour le 21 janvier 2025."
+      titre_section: "Conditions Générales d'Utilisation"
+    -
+      titre_section: 'Crédit photographique'
+      contenu_section: "La *Compagnie Les Mégères de l'Humus* a bénéficié pour les photographies de ces équipes du travail de [a url=\"http://laeve.fr\" title=\"Accès au site de la photographe\"]Laetitia Van Eersel[/a],\nphotographe professionnelle. Nous vous conseillons d'aller visiter son site pour vous rendre compte de la qualité et de l'originalité de son\ntravail artistique."
+    -
+      contenu_section: "Le site a été développé par Quiligus en HTML5, CSS3, Javascript et PHP pour gérer le référencement et la sécurité. Quiligus est en passe de migrer ce site vers le CMS GRAV. Pour ce faire, une réécriture complète a été nécessaire pour répondre aux exigences techniques du CMS, pour intégrer les règles de l'art en matière de développement d'un site reposant sur des fichiers de contenus utilisant l'éditeur Markdown, sur le framework Spectre pour la gestion du design et le langage twig pour la logique applicative."
+      titre_section: Développement
+    -
+      titre_section: Graphismes
+      contenu_section: "Les graphismes ont été conçus et réalisés par la graphiste Juliette Gaubert.\n"
+    -
+      titre_section: Hébergement
+      contenu_section: 'Le site est hébergé chez Philippe Guerrini Idlas. Le serveur est un matériel Open Source doté d''un processeur anglais ARM construit sur une carte hongroise de la société Olimex. Le serveur tourne sous armbian, une version Debian pour le processeur ARM. La gestion internet est assurée par une solution Open Source, [a url="https://yunohost.org/#/" title="Accès au site YunoHost"]YunoHost[/a]. Le nom de domaine *lesmegeresdelhumus.fr* est géré par le registrar [a url="https://www.gandi.net/fr" title="Accès au site de Gandi"]Gandi[/a].'
+    -
+      titre_section: Icônes
+      contenu_section: 'L''icône représentant l''association dans la page Contacts provient de la banque d''icônes du site [a url="https://www.flaticon.com/free-icons/join" title="join icons"]Join icons created by Freepik - Flaticon[/a].'
+    -
+      titre_section: Logo
+      contenu_section: "Le logo a été conçu et réalisé par l'illustrateurice Geminga."
+    -
+      titre_section: 'Mentions Légales'
+      contenu_section: 'Les mentions légales ont été réalisées à partir des conseils fournis par le portail de la transformation numérique des entreprises, article publié le 8 février 2021 et mis à jour le 21 janvier 2025.'
+3379dbc58e06277215e0eda2fdbc55d1:
+  slug_page: mentions-legales
+  title: 'Mentions Légales'
+  menu: 'Mentions légales'
+  meta_description: "Mentions légales et Conditions Générales d'Utilisation du site Les Mégères de l'Humus."
+  page_intro: "- Nom: \"Les Mégères de l'Humus\"\n- Adresse du siège: \"7 rue du 19 mars 1962 11170 Moussoulens\"\n- Coordonnées: \"06 95 19 25 35 ou pour nous \"\n- SIRET: \"917 798 191 00016\"\n- Forme juridique: \"Association loi 1901\"\n- Propriétaires: \"M. Sabine Rance, M. Suzie Idlas\"\n- Responsables de publication: \"M. Sabine Rance, M. Suzie Idlas\"\n- Conception et réalisation: \"conçu par M. Sabine Rance et M. Suzie Idlas - réalisé par M. Philippe Guerrini Idlas dit Quiligus\"\n- Hébergement: \"le site, propulsé par [a url=\"https://yunohost.org\" title=\"Accès au site de YunoHost\"]YunoHost[/a], est auto-hébergé sur du matériel libre la [a url=\"https://labriqueinter.net\" title=\"Accès au site de la Brique Internet\"]Brique Internet[/a] et promeut les logiciels libres."
+  page_sections:
+    -
+      titre_section: 'Article 1 - Accès au site'
+      contenu_section: "Les informations et documents du site sont présentés à titre indicatif, sans de caractère exhaustif, et ne peuvent engager la responsabilité des propriétaires du site. Les propriétaires du site ne peuvent être tenues responsables des dommages directs et indirects consécutifs à l’accès au site. Le site est accessible gratuitement en tout lieu à tout Utilisateur ayant un accès à Internet. Tous les frais supportés par l'Utilisateur pour accéder au service (matériel informatique, logiciels, connexion Internet, etc.) sont à sa charge.\n\nLe site _https://lesmegeresdelhumus.fr_ permet à l'Utilisateur un accès gratuit aux services suivants :\n\n* des informations générales sur la compagnie de théâtre\n* des informations spécifiques sur la compagnie de théâtre\n* des informations spécifiques sur les spectacles de la compagnie\n* des témoignages de participant·e·s à des séances de travail autour de recueil de la parole de personnes âgées\n* des informations spécifiques sur les cours et les stages donnés par la compagnie de théâtre"
+    -
+      titre_section: 'Article 2 - Collecte des données'
+      contenu_section: "Le site _Les Mégères de l'Humus_ est un site purement institutionnel. Il ne collecte, ne stocke et ne traite aucune donnée à caractère personnel. Il ne requiert l'usage d'aucun cookie non essentiel au fonctionnement technique de la navigation. Le site est, par conséquent, exempté de déclaration à la Commission Nationale Informatique et Libertés (CNIL) dans la mesure où il ne collecte aucune donnée personnelle sous forme de formulaire de contact, d'espace membre ou de traceur/cookie statistique."
+    -
+      titre_section: 'Article 3 - Propriétés Intellectuelles'
+      contenu_section: "Sauf mention contraire, tous les éléments accessibles sur le site (textes, images, graphismes, logo, icônes, sons, logiciels, etc.) restent la propriété exclusive de leurs auteur·e·s, en ce qui concerne les droits de propriété intellectuelle ou les droits d’usage. L'Utilisateur doit solliciter l'autorisation préalable du site pour toute reproduction, publication, copie des différents contenus. Il s'engage à une utilisation des contenus du site dans un cadre strictement privé, toute utilisation à des fins commerciales et publicitaires est strictement interdite. Toute représentation totale ou partielle de ce site par quelque procédé que ce soit, sans l’autorisation expresse de l’exploitant du site Internet, constituerait une contrefaçon sanctionnée par l’article L. 335-2 et suivants du Code de la propriété intellectuelle. Il est rappelé conformément à l’article L.122-5 du Code de propriété intellectuelle que l’Utilisateur qui reproduit, copie ou publie le contenu protégé doit citer l’auteur·e et sa source."
+    -
+      titre_section: 'Article 4 - Responsabilité'
+      contenu_section: "Les sources des informations diffusées sur le site _https://lesmegeresdelhumus.fr_ sont réputées fiables mais le site ne garantit pas qu’il soit exempt de défauts, d’erreurs ou d’omissions. Les informations communiquées sont présentées à titre indicatif et général sans valeur contractuelle. Malgré des mises à jour régulières, le site _https://lesmegeresdelhumus.fr_ ne peut être tenu responsable de la modification des dispositions administratives et juridiques survenant après la publication. De même, le site ne peut être tenu responsable de l’utilisation et de l’interprétation de l’information contenue dans le site. Le site _https://lesmegeresdelhumus.fr_ ne peut être tenu pour responsable d’éventuels virus qui pourraient infecter l’ordinateur ou tout matériel informatique de l’Utilisateur, suite à une utilisation, à l’accès, ou au téléchargement provenant de ce site. La responsabilité du site ne peut être engagée en cas de force majeure ou du fait imprévisible et insurmontable d'un tiers."
+    -
+      titre_section: 'Article 5 - Liens hypertextes'
+      contenu_section: "*Liens sortants* : Des liens hypertextes peuvent être présents sur le site. L’Utilisateur est informé qu’en cliquant sur ces liens, il sortira du site _https://lesmegeresdelhumus.fr_. Les liens sortants ouvrent une nouvelle fenêtre de navigation. Les responsables du site n’ont pas de contrôle sur les pages web sur lesquelles aboutissent ces liens. Iels ne sauraient, en aucun cas, être tenu·e·s responsables de leur contenu.\n\n*Liens entrants* : Les propriétaires du site autorisent les liens hypertextes vers l’une des pages de ce site uniquement sur demande spécifique et à condition que ceux-ci ouvrent une nouvelle fenêtre et soient présentées de manière non équivoque afin d’éviter tout risque de confusion entre le site citant et les propriétaires du site ainsi que toute présentation tendancieuse, ou contraire aux lois en vigueur. Les propriétaires du site se réservent le droit de demander la suppression d’un lien s’iels estiment que le site source ne respecte pas les règles ainsi définies.\n\n*Liens entre les pages du site* : D'autres liens hypertextes peuvent être présents entre les pages du site. L’Utilisateur est informé qu’en cliquant sur ces liens, il restera sur le site _https://lesmegeresdelhumus.fr_. Les liens entre les pages du site n'ouvrent pas une nouvelle fenêtre de navigation.\n"
+    -
+      titre_section: 'Article 6 - Cookies'
+      contenu_section: 'L’Utilisateur est informé que lors de ses visites sur le site, un cookie système peut s’installer automatiquement sur son logiciel de navigation. Les cookies sont de petits fichiers stockés temporairement sur le disque dur de l’ordinateur de l’Utilisateur par le navigateur. Ils sont nécessaires à l’utilisation du site _https://lesmegeresdelhumus.fr_. Les cookies ne contiennent pas d’information personnelle et ne peuvent pas être utilisés pour identifier quelqu’un. Un cookie contient un identifiant unique, généré aléatoirement et donc anonyme. Certains cookies expirent à la fin de la visite de l’Utilisateur, d’autres restent plus longtemps. L’information contenue dans les cookies est utilisée pour améliorer le site _https://lesmegeresdelhumus.fr_. En naviguant sur le site, l’Utilisateur les accepte. L’Utilisateur pourra désactiver ces cookies par l’intermédiaire des paramètres figurant au sein de son logiciel de navigation.'
+    -
+      titre_section: 'Article 7 - Confidentialité'
+      contenu_section: "L'Utilisateur disposerait d’un droit d’accès, de rectification et d’opposition aux données personnelles le concernant, si le site stockait des informations personnelles. Le site _https://lesmegeresdelhumus.fr_ ne recueille pas d’informations personnelles, et n’est pas assujetti à déclaration à la CNIL."
+    -
+      titre_section: 'Article 8 - Crédits'
+      contenu_section: "Les photos appartiennent au site *https://lesmegeresdelhumus.fr*. Les logos sont la propriété des entreprises dépositaires des marques associées. Pour connaître la liste complète des crédits, vous pouvez vous reporter sur la page interne au site [a url='/credits' title=\"Accès à la page Crédits\" class=\"lien-interne\"]Crédits[/a].\n"
+    -
+      titre_section: 'Article 9 - Droit applicable et juridiction compétente'
+      contenu_section: "La législation française s'applique au présent contrat. En cas d'absence de résolution amiable d'un litige né entre les parties, les tribunaux français seront seuls compétents. Pour toute question relative à l'application des présentes CGU, vous pouvez joindre l'éditeur aux coordonnées inscrites dans les mentions légales."
+    -
+      titre_section: 'Article 10 - Les textes de loi'
+      contenu_section: "* Articles L.111-1 et suivants du Code de la Propriété Intellectuelle du 1^er^ juillet 1992\n* Article L.41 de la loi du 11 mars 1957\n* Article L.226-13 du Code pénal et la Directive Européenne du 24 octobre 1995\n* Articles L.335-2 et suivants du Code de Propriété Intellectuelle\n* Loi n° 78-87 du 6 janvier 1978, modifiée par la loi n° 2004-801 du 6 août 2004, relative à l’informatique, aux fichiers et aux libertés\n* Articles 38 et suivants de la loi L.78-17 du 6 janvier 1978 relative à l’informatique, aux fichiers et aux libertés\n* Loi du 1^er^ juillet 1998 transposant la directive 96/9 du 11 mars 1996 relative à la protection juridique des bases de données\n* Loi n° 2004-801 du 6 août 2004\n* Article 6 de la loi n° 2004-575 du 21 juin 2004 pour la confiance dans l’économie numérique"
+7f4a7ce14fd4435847ef12fba44359cc:
+  slug_page: politique-de-securite
+  title: 'Politique de Sécurité'
+  menu: 'Politique de sécurité'
+  meta_description: 'Modalités de signalement des vulnérabilités et engagement de traitement de la sécurité du site.'
+  page_intro: 'Merci de signaler toute vulnérabilité de sécurité à l''adresse [a url="mailto:security&#64;lesmegeresdelhumus.fr?subject=Message du site, page Politique de Sécurité"]security&#64;lesmegeresdelhumus.fr[/a]. Nous vous remercions de ne pas publier publiquement la vulnérabilité avant que nous ayons eu le temps d''y répondre.'
+  page_sections:
+    -
+      titre_section: 'Ce que nous demandons'
+      contenu_section: "- de ne pas perturber les services ou les données\n- de ne pas accéder à davantage de données que nécessaire\n- de ne pas modifier ou supprimer des contenus sans autorisation\n- de nous fournir un rapport détaillé avec les étapes de reproduction"
+    -
+      titre_section: 'Ce que vous pouvez attendre de nous'
+      contenu_section: "- une confirmation rapide de réception\n- une prise en compte sérieuse du signalement\n- une réponse raisonnable dans un délai adapté\n"

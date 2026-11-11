@@ -1,0 +1,87 @@
+type: flex-objects
+title: Page d'Accueil
+description: Gestion du diaporama et du texte d'accueil de la compagnie
+
+config:
+  data:
+    storage:
+      className: 'Grav\Framework\Flex\Storage\FolderStorage'
+      options:
+        formatter:
+          class: 'Grav\Framework\File\Formatter\YamlFormatter'
+        folder: 'user/data/flex-objects/accueil'
+    media:
+      per_object: false
+
+  admin:
+    router:
+      path: /accueil
+    menu:
+      list:
+        route: /accueil
+        title: Page Accueil
+        priority: 1
+        icon: fa fa-home
+    list:
+      title: Configuration de l'Accueil
+      fields:
+        title:
+          title: Titre de la page
+          field: title
+          link: edit
+
+form:
+  fields:
+    tabs:
+      type: tabs
+      active: 1
+      fields:
+
+        tab_general:
+          type: tab
+          title: "Contenu de l'Accueil"
+          fields:
+            title:
+              type: text
+              label: Titre de la page (S'affichera dans le H1)
+              validate:
+                required: true
+            menu:
+              type: text
+              label: Titre dans le menu du site
+              default: "Accueil"
+            meta_description:
+              type: textarea
+              label: Meta Description (SEO)
+              rows: 2
+
+            section_diaporama:
+              type: section
+              title: "1. Diaporama Accordéon (Slides)"
+              underline: true
+            accueil_slides:
+              type: list
+              label: "Cartes du diaporama"
+              btn_add: "Ajouter une carte au diaporama"
+              fields:
+                .titre:
+                  type: text
+                  label: "Titre affiché sur la carte"
+                .lien:
+                  type: text
+                  label: "Lien de destination (ex: /infos/compagnie)"
+                .image:
+                  type: filepicker
+                  label: "Image de fond (AVIF)"
+                  folder: 'user-data://flex-objects/accueil'
+                  preview_images: true
+                  accept:
+                    - .avif
+
+            section_intro:
+              type: section
+              title: "2. Texte de présentation (Section Index)"
+              underline: true
+            accueil_intro:
+              type: markdown
+              label: "Paragraphe d'introduction de la compagnie"

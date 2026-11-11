@@ -1,0 +1,84 @@
+type: flex-objects
+title: Ateliers de théâtre
+description: Gestion des médias et informations de la page Ateliers de théâtre
+
+config:
+  data:
+    storage:
+      className: 'Grav\Framework\Flex\Storage\FolderStorage'
+      options:
+        formatter:
+          class: 'Grav\Framework\File\Formatter\YamlFormatter'
+        folder: 'user/data/flex-objects/ateliers'
+    media:
+      per_object: false
+
+  site:
+    templates:
+      object:
+        route: /prestations/ateliers
+
+  admin:
+    router:
+      path: flex/ateliers
+    menu:
+      list:
+        route: flex/ateliers
+        title: Page Ateliers
+        priority: 6
+        icon: fa fa-users
+    list:
+      title: Configuration de la page Ateliers
+      fields:
+        title:
+          title: Titre de la page
+          field: title
+          link: edit
+
+form:
+  fields:
+    tabs:
+      type: tabs
+      active: 1
+      fields:
+
+        tab_general:
+          type: tab
+          title: "Contenu de la page Ateliers"
+          fields:
+            title:
+              type: text
+              label: Titre de la page (S'affichera dans le H1)
+              validate:
+                required: true
+            menu:
+              type: text
+              label: Titre dans le menu du site
+            meta_description:
+              type: textarea
+              label: Meta Description (SEO)
+              rows: 2
+
+            section_photo_haut:
+              type: section
+              title: "1. Photo principale d'illustration"
+              underline: true
+            ateliers_photo_principale:
+              type: filepicker
+              label: "Photo d'illustration de l'atelier (AVIF)"
+              folder: 'user-data://flex-objects/ateliers'
+              preview_images: true
+              accept:
+                - .avif
+            ateliers_alt_photo:
+              type: text
+              label: "Texte alternatif de la photo (SEO / Accessibilité)"
+              default: "Un atelier de théâtre de la Compagnie Les Mégères de l'Humus"
+
+            section_texte:
+              type: section
+              title: "2. Texte de présentation"
+              underline: true
+            ateliers_description:
+              type: markdown
+              label: "Paragraphes de présentation des ateliers"

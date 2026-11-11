@@ -1,3 +1,23 @@
+# v1.1.18
+## 11/10/2026
+
+1. [](#new)
+    * The Page Groups picker in Admin2 has a Media column, so a group can be allowed or denied managing a page's media separately from editing it. Left unset, the group's Update setting decides, as before. Thanks @phmg701 [#79](https://github.com/getgrav/grav-plugin-api/pull/79)
+    * Pages include `unpublished_by`, the raw route of the parent page that unpublishes them through Grav 2.2.29's `cascade_unpublish` (null otherwise). `published` stays the page's own setting, so its toggle in Admin2 still shows what is in its frontmatter
+1. [](#bugfix)
+    * A backup job's switch on the Scheduler page and the Scheduled Backup switch on its backup profile are now the same setting: changing either one changes the other, and an old Enabled or Disabled entry for a backup job in `scheduler.yaml` is no longer shown and is removed when the scheduler or the backups are saved [grav#4397](https://github.com/getgrav/grav/issues/4397)
+    * The Page Access and Page Groups pickers in Admin2 are laid out like Admin2's other lists: each row's remove button is at the end of the row, one Add button sits below the list, and on phones the buttons move below the name instead of running off the screen
+    * A page whose folder name matches one of a page's API sub-resources, such as `languages`, `media`, `compare` or `neighbors`, can be opened, saved and deleted in Admin2 again. Requests for the page itself now carry `?resource=page`, so they no longer reach that sub-resource of the parent page [admin2#213](https://github.com/getgrav/grav-plugin-admin2/issues/213)
+
+# v1.1.17
+## 11/09/2026
+
+1. [](#improved)
+    * The bundled Cap captcha library is updated to 1.2.0, the same version the Form plugin ships, so both plugins load matching code on sites that use them together
+1. [](#bugfix)
+    * A solved login captcha can no longer be used on several login attempts sent at the same moment. Cap now keeps its records as files in `tmp/cap-api`, unless the site's cache is Redis or Memcached
+    * Wrong 2FA codes sent at the same moment are all counted before any is checked, so a burst can't get past the limit (needs Login 3.13.1)
+
 # v1.1.16
 ## 11/07/2026
 

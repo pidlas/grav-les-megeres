@@ -28,7 +28,7 @@ config:
       list:
         route: /contact
         title: Page Contact
-        priority: 1
+        priority: 4
         icon: fa fa-envelope
     list:
       title: Liste des Coordonnées
