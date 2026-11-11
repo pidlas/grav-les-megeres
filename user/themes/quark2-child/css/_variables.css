@@ -73,11 +73,11 @@
     --color-insta:hsla(340, 75%, 54%, 1);                 /* rose instagram*/
     
     /* --- VARIANTES TRANSPARENTES ACCESSIBLES --- */
-    --color-border-divider: hsla(264, 28%, 23%, 0.18);  /* Fines bordures PC */
-    --color-overlay-bg: hsla(264, 28%, 23%, 0.35);      /* Masque arrière-plan mobile */
-    --color-hover-light: hsla(0, 0%, 100%, 0.18);       /* Luminescence de survol PC */
-    --color-hover-medium: hsla(0, 0%, 100%, 0.2);       /* Fond sous-menus mobiles */
-    --color-focus-light: hsla(0, 0%, 100%, 0.25);       /* Focus accessibilité clavier */
+    --color-border-divider: hsla(264, 28%, 23%, 0.18);    /* Fines bordures PC */
+    --color-overlay-bg: hsla(264, 28%, 23%, 0.35);        /* Masque arrière-plan mobile */
+    --color-hover-light: hsla(0, 0%, 100%, 0.18);         /* Luminescence de survol PC */
+    --color-hover-medium: hsla(0, 0%, 100%, 0.2);         /* Fond sous-menus mobiles */
+    --color-focus-light: hsla(0, 0%, 100%, 0.25);         /* Focus accessibilité clavier */
     
     /* --- NUANCES POUR L'EFFET NÉOMORPHIQUE (.rs) --- */
     --color-neon-dark: hsla(15, 48%, 56%, 1);           

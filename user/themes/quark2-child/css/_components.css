@@ -1565,6 +1565,28 @@ th.sep {
         border-radius: var(--radius-standard);
         color: var(--color-brand-active);
     }
+        .navbar > .menu-contact:hover > a {
+        border-top-right-radius: 0;
+        border-bottom-right-radius: 0;
+    }
+    .navbar > .menu-contact:hover + div.rs {
+        background-image: linear-gradient(var(--color-hover-light), var(--color-hover-light));
+        border-radius: var(--radius-standard);
+        border-top-left-radius: 0;
+        border-bottom-left-radius: 0;
+    }
+    .navbar:has(div.rs:hover) .menu-contact > a {
+        background: var(--color-hover-light);
+        border-radius: var(--radius-standard);
+        border-top-right-radius: 0;
+        border-bottom-right-radius: 0;
+        color: var(--color-brand-active);
+    }
+    .navbar > div.rs:hover {
+        background-image: linear-gradient(var(--color-hover-light), var(--color-hover-light));
+        border-top-left-radius: 0;
+        border-bottom-left-radius: 0;
+    }
 
     /* 3. LES SOUS-MENUS : Cachés par défaut, ils ne s'ouvrent qu'au survol */
     .navbar .niv1 {
