@@ -20,7 +20,7 @@ config:
       list:
         route: /accueil
         title: Page Accueil
-        priority: 1
+        priority: 13
         icon: fa fa-home
     list:
       title: Configuration de l'Accueil

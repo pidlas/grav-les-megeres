@@ -29,7 +29,7 @@
 - Vider le cache :
 
 ```bash
-bin/grav cache:clear
+bin/grav cacheclear
 ```
 
 - Vérifier le rendu local via nginx (URL habituelle du site) :

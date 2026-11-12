@@ -25,7 +25,7 @@ config:
       list:
         route: /theatre-forum/le-spectacle
         title: Page Théâtre-Forum
-        priority: 7
+        priority: 6
         icon: fa fa-masks-theater
     list:
       title: Liste des Spectacles

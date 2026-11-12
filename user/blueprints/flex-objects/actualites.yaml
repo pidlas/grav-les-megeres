@@ -28,7 +28,7 @@ config:
       list:
         route: /actualites
         title: Page Actualités
-        priority: 13
+        priority: 12
         icon: fa fa-newspaper-o
     list:
       title: Liste des catégories d'Actualités

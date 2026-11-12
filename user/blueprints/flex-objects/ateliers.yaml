@@ -25,7 +25,7 @@ config:
       list:
         route: flex/ateliers
         title: Page Ateliers
-        priority: 4
+        priority: 3
         icon: fa fa-users
     list:
       title: Configuration de la page Ateliers
