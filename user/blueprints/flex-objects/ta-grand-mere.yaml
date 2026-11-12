@@ -31,7 +31,7 @@ config:
       list:
         route: /ta-grand-mere
         title: Page Grand-Mère
-        priority: 11
+        priority: 8
         icon: fa fa-female
     list:
       title: Liste des Collectes

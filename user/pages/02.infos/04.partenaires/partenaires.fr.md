@@ -1,5 +1,5 @@
 ---
-title: "Nos Partenaires | Culturels et Institutionnels - Les Mégères de l'Humus"
+title: "Nos Partenaires | Les partenaires culturels et Institutionnels de la compagnie Les Mégères de l'Humus"
 metadata:
     description: "Découvrez les partenaires qui soutiennent les actions artistiques et culturelles des Mégères de l'Humus dans l'Aude."
 menu: 'Nos Partenaires'

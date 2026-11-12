@@ -5,25 +5,30 @@
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
- 
+
+    {# Calcul centralisé des variables SEO et H1 (Priorité Flex -> Page MD -> Site) #}
+    {% set seo_titre_complet = flex_seo.page_title | default(flex_seo.title) | default(page.title) | default(site.title) %}
+    {% set seo_description = flex_seo.meta_description | default(page.header.metadata.description) | default(site.metadata.description) %}
+    {% set seo_robots = flex_seo.meta_robots | default(page.header.metadata.robots) | default('index, follow') %}
+
     {# 1. TITRE D'ONGLET SEO #}
     {% block head_title %}
-    <title>{% if page.title %}{{ page.title|e }}{% else %}{{ site.title|e }}{% endif %}</title>
+    <title>{{ seo_titre_complet|e }}</title>
     {% endblock %}
- 
+
     {# 2. BALISES MÉTADONNÉES SEO #}
     {% block head_meta %}
-        <meta name="description" content="{% if page.header.metadata.description %}{{ page.header.metadata.description|e }}{% else %}{{ site.metadata.description|e }}{% endif %}" />
-        <meta name="robots" content="{% if page.header.metadata.robots %}{{ page.header.metadata.robots|e }}{% else %}index, follow{% endif %}" />
+        <meta name="description" content="{{ seo_description|e('html_attr') }}" />
+        <meta name="robots" content="{{ seo_robots|e }}" />
         <link rel="canonical" href="{{ page.url(true, true)|e }}" />
     {% endblock %}
- 
+
     {# 3. BALISES POUR LES RÉSEAUX SOCIAUX (OPENGRAPH) #}
     {% block head_opengraph %}
     <meta property="og:site_name" content="{{ site.title|e }}" />
     <meta property="og:type" content="website" />
-    <meta property="og:title" content="{% if page.title %}{{ page.title|e }}{% else %}{{ site.title|e }}{% endif %}" />
-    <meta property="og:description" content="{% if page.header.metadata.description %}{{ page.header.metadata.description|e }}{% else %}{{ site.metadata.description|e }}{% endif %}" />
+    <meta property="og:title" content="{{ seo_titre_complet|e }}" />
+    <meta property="og:description" content="{{ seo_description|e('html_attr') }}" />
     <meta property="og:url" content="{{ page.url(true, true)|e }}" />
     <meta property="og:image" content="{{ uri.rootUrl(true) ~ url('theme://images/logohumous-notext-blue.png', false) }}" />
     <meta property="og:image:alt" content="Logo de la compagnie {{ site.title|e }}" />
@@ -101,7 +106,8 @@
                             
                     {% set vraie_page_url = page.find(uri.path) %}
 
-                    {% set titre_brut = vraie_page_url.title | default(page.title) %}
+                    {# Priorité absolue au nouveau champ page_title (ou ancien title Flex), sinon page MD #}
+                    {% set titre_brut = flex_seo.page_title | default(flex_seo.title) | default(vraie_page_url.title) | default(page.title) %}
 
                     {% set titre_decoupe = titre_brut|split('|') %}
                     <h1>{{ titre_decoupe[0]|trim }}</h1>
@@ -111,9 +117,6 @@
                         <p class="sous-titre">{{ sous_titre | raw }}</p>
                     {% endif %}
                 </div>
-
-                {# AVANT LE BLOC MAGIQUE DU DIAPORAMA ETAIT DANS LA SECTION 
-                {% block avant_conteneur_texte %}{% endblock %} #}
 
                 {# LE CŒUR UNIQUE DU SITE : Tout le contenu spécifique s'injectera ici #}
                 {% block content %}{% endblock %}

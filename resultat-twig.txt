@@ -1,0 +1,275 @@
+user/themes/quark2-child/templates/stages.html.twig:3:{% set collection = grav.flex.directory('stages').getCollection() %}
+user/themes/quark2-child/templates/stages.html.twig:7:{% block head_title %}
+user/themes/quark2-child/templates/stages.html.twig:8:    {% set seo_title = stages_flex.title | default(page.title) %}
+user/themes/quark2-child/templates/stages.html.twig:9:    <title>{{ seo_title|e }} | {{ site.title|e }}</title>
+user/themes/quark2-child/templates/stages.html.twig:12:{% block head_meta %}
+user/themes/quark2-child/templates/stages.html.twig:13:    {% set seo_description = stages_flex.meta_description | default(page.header.metadata.description) %}
+user/themes/quark2-child/templates/stages.html.twig:14:    <meta name="description" content="{{ seo_description|e('html_attr') }}" />
+user/themes/quark2-child/templates/stages.html.twig:15:    <meta name="robots" content="{% if page.header.metadata.robots %}{{ page.header.metadata.robots|e }}{% else %}index, follow{% endif %}" />
+user/themes/quark2-child/templates/stages.html.twig:25:        if (h1 && "{{ stages_flex.title|default('')|e('js') }}") {
+user/themes/quark2-child/templates/stages.html.twig:26:            h1.textContent = "{{ stages_flex.title|split('|')|first|trim|e('js') }}";
+user/themes/quark2-child/templates/stages.html.twig:34:    {% if stages_flex.stages_photo_principale %}
+user/themes/quark2-child/templates/stages.html.twig:38:                <img class="photo-stages-ateliers" src="{{ base_url_simple ~ '/user/data/flex-objects/stages/' ~ stages_flex.stages_photo_principale }}" alt="{{ stages_flex.stages_alt_photo|default('')|e('html_attr') }}" loading="lazy">
+user/themes/quark2-child/templates/stages.html.twig:45:    {% if stages_flex.stages_description %}
+user/themes/quark2-child/templates/stages.html.twig:48:            {% set html_desc = stages_flex.stages_description | markdown | shortcodes %}
+user/themes/quark2-child/templates/stages.html.twig:55:    {% if stages_flex.stages_affiche_recto or stages_flex.stages_affiche_verso %}
+user/themes/quark2-child/templates/stages.html.twig:59:                {% if stages_flex.stages_affiche_recto %}
+user/themes/quark2-child/templates/stages.html.twig:60:                    <img class="affiche-stage" src="{{ base_url_simple ~ '/user/data/flex-objects/stages/' ~ stages_flex.stages_affiche_recto }}" alt="Le tarif des stages de théâtre" loading="lazy">
+user/themes/quark2-child/templates/stages.html.twig:62:                {% if stages_flex.stages_affiche_verso %}
+user/themes/quark2-child/templates/stages.html.twig:63:                    <img class="affiche-stage" src="{{ base_url_simple ~ '/user/data/flex-objects/stages/' ~ stages_flex.stages_affiche_verso }}" alt="Les objectifs pédagogiques des stages de théâtre" loading="lazy">
+user/themes/quark2-child/templates/ta-grand-mere.html.twig:22:            <audio id="audio" preload="metadata">
+user/themes/quark2-child/templates/actualites.html.twig:13:    {% set actualites_flex = grav.flex.directory('actualites').getCollection() %}
+user/themes/quark2-child/templates/actualites.html.twig:16:    {% if actualites_flex is not empty %}
+user/themes/quark2-child/templates/actualites.html.twig:18:        {% for item in actualites_flex %}
+user/themes/quark2-child/templates/actualites.html.twig:29:                <h2 class="display-title">{{ item.categorie }}</h2>
+user/themes/quark2-child/templates/equipe.html.twig:6:{% block head_title %}
+user/themes/quark2-child/templates/equipe.html.twig:7:    {% set directory = grav.flex.directory('equipe') %}
+user/themes/quark2-child/templates/equipe.html.twig:9:    {% set seo_title = page.title %}
+user/themes/quark2-child/templates/equipe.html.twig:17:            {% set seo_title = m.nom ~ ' | ' ~ seo_title %}
+user/themes/quark2-child/templates/equipe.html.twig:21:    <title>{{ seo_title|e }} | {{ site.title|e }}</title>
+user/themes/quark2-child/templates/equipe.html.twig:27:{% block head_meta %}
+user/themes/quark2-child/templates/equipe.html.twig:28:    {% set directory = grav.flex.directory('equipe') %}
+user/themes/quark2-child/templates/equipe.html.twig:30:    {% set seo_description = page.header.metadata.description %}
+user/themes/quark2-child/templates/equipe.html.twig:43:    <meta name="description" content="{{ seo_description|e('html_attr') }}" />
+user/themes/quark2-child/templates/equipe.html.twig:44:    <meta name="robots" content="{% if page.header.metadata.robots %}{{ page.header.metadata.robots|e }}{% else %}index, follow{% endif %}" />
+user/themes/quark2-child/templates/equipe.html.twig:49:    <meta property="og:site_name" content="{{ site.title|e }}" />
+user/themes/quark2-child/templates/equipe.html.twig:50:    <meta property="og:type" content="website" />
+user/themes/quark2-child/templates/equipe.html.twig:51:    <meta property="og:title" content="{{ page.title|e }}" />
+user/themes/quark2-child/templates/equipe.html.twig:52:    <meta property="og:description" content="{{ seo_description|e('html_attr') }}" />
+user/themes/quark2-child/templates/equipe.html.twig:53:    <meta property="og:url" content="{{ page.url(true, true)|e }}" />
+user/themes/quark2-child/templates/equipe.html.twig:54:    <meta property="og:image" content="{{ uri.rootUrl(true) ~ url('theme://images/logohumous-notext-blue.png', false) }}" />
+user/themes/quark2-child/templates/equipe.html.twig:61:    {% set directory = grav.flex.directory('equipe') %}
+user/themes/quark2-child/templates/gresilhette.html.twig:6:{% block head_title %}
+user/themes/quark2-child/templates/gresilhette.html.twig:7:    {% set collection = grav.flex.directory('gresilhette').getCollection() %}
+user/themes/quark2-child/templates/gresilhette.html.twig:9:    {% set seo_title = gresilhette_flex.title | default(page.title) %}
+user/themes/quark2-child/templates/gresilhette.html.twig:16:        {% for version in gresilhette_flex.spectacle.versions if version.slug_version == target_slug %}
+user/themes/quark2-child/templates/gresilhette.html.twig:17:            {% set seo_title = version.nom_version ~ ' | ' ~ seo_title %}
+user/themes/quark2-child/templates/gresilhette.html.twig:21:    <title>{{ seo_title|e }} | {{ site.title|e }}</title>
+user/themes/quark2-child/templates/gresilhette.html.twig:27:{% block head_meta %}
+user/themes/quark2-child/templates/gresilhette.html.twig:28:    {% set collection = grav.flex.directory('gresilhette').getCollection() %}
+user/themes/quark2-child/templates/gresilhette.html.twig:34:    {% set seo_description = gresilhette_flex.meta_description | default(page.header.metadata.description) %}
+user/themes/quark2-child/templates/gresilhette.html.twig:37:        {% for version in gresilhette_flex.spectacle.versions if version.slug_version == target_slug %}
+user/themes/quark2-child/templates/gresilhette.html.twig:43:    <meta name="description" content="{{ seo_description|e('html_attr') }}" />
+user/themes/quark2-child/templates/gresilhette.html.twig:44:    <meta name="robots" content="{% if page.header.metadata.robots %}{{ page.header.metadata.robots|e }}{% else %}index, follow{% endif %}" />
+user/themes/quark2-child/templates/gresilhette.html.twig:49:    <meta property="og:site_name" content="{{ site.title|e }}" />
+user/themes/quark2-child/templates/gresilhette.html.twig:50:    <meta property="og:type" content="website" />
+user/themes/quark2-child/templates/gresilhette.html.twig:51:    <meta property="og:title" content="{{ seo_title|default(page.title)|e }}" />
+user/themes/quark2-child/templates/gresilhette.html.twig:52:    <meta property="og:description" content="{{ seo_description|e('html_attr') }}" />
+user/themes/quark2-child/templates/gresilhette.html.twig:53:    <meta property="og:url" content="{{ page.url(true, true)|e }}" />
+user/themes/quark2-child/templates/gresilhette.html.twig:54:    <meta property="og:image" content="{{ uri.rootUrl(true) ~ url('theme://images/logohumous-notext-blue.png', false) }}" />
+user/themes/quark2-child/templates/gresilhette.html.twig:62:{% set collection = grav.flex.directory('gresilhette').getCollection() %}
+user/themes/quark2-child/templates/gresilhette.html.twig:72:    {% for version in gresilhette_flex.spectacle.versions if version.slug_version == target_slug %}
+user/themes/quark2-child/templates/gresilhette.html.twig:81:            h1.textContent = "{% if version_active %}{{ version_active.nom_version|e('js') }}{% else %}{{ gresilhette_flex.title|default('Grésilhette et la Salimonde')|e('js') }}{% endif %}";
+user/themes/quark2-child/templates/gresilhette.html.twig:98:        {% if gresilhette_flex.spectacle.grille.ombres %}
+user/themes/quark2-child/templates/gresilhette.html.twig:100:                <img src="{{ base_url_simple ~ '/user/data/flex-objects/gresilhette/' ~ gresilhette_flex.spectacle.grille.ombres }}" alt="Version Théâtre d'elles" loading="lazy">
+user/themes/quark2-child/templates/gresilhette.html.twig:103:        {% if gresilhette_flex.spectacle.grille.sieste %}
+user/themes/quark2-child/templates/gresilhette.html.twig:105:                <img src="{{ base_url_simple ~ '/user/data/flex-objects/gresilhette/' ~ gresilhette_flex.spectacle.grille.sieste }}" alt="Version Sieste contée" loading="lazy">
+user/themes/quark2-child/templates/gresilhette.html.twig:108:        {% if gresilhette_flex.spectacle.grille.projet %}
+user/themes/quark2-child/templates/gresilhette.html.twig:110:                <img src="{{ base_url_simple ~ '/user/data/flex-objects/gresilhette/' ~ gresilhette_flex.spectacle.grille.projet }}" alt="Version Projet pédagogique" loading="lazy">
+user/themes/quark2-child/templates/gresilhette.html.twig:128:                <h2 class="display-title">Nos sources d'inspiration</h2>
+user/themes/quark2-child/templates/gresilhette.html.twig:177:                <a href="{{ base_url_simple ~ '/user/data/flex-objects/gresilhette/' ~ version_active.pdf_technique }}" title="Télécharger la fiche technique {{ version_active.nom_version }}">
+user/themes/quark2-child/templates/gresilhette.html.twig:189:            <h2 class="coco">{{ gresilhette_flex.spectacle.age_duree }}</h2>
+user/themes/quark2-child/templates/gresilhette.html.twig:193:                <video id="video" preload="auto" loading="metadata" width="640" height="360" disablePictureInPicture="true" playsinline>
+user/themes/quark2-child/templates/gresilhette.html.twig:194:                    {% if gresilhette_flex.spectacle.video.mp4 %}
+user/themes/quark2-child/templates/gresilhette.html.twig:195:                        <source src="{{ base_url_simple ~ '/user/data/flex-objects/gresilhette/' ~ gresilhette_flex.spectacle.video.mp4 }}" type="video/mp4" />
+user/themes/quark2-child/templates/gresilhette.html.twig:197:                    {% if gresilhette_flex.spectacle.video.webm %}
+user/themes/quark2-child/templates/gresilhette.html.twig:198:                        <source src="{{ base_url_simple ~ '/user/data/flex-objects/gresilhette/' ~ gresilhette_flex.spectacle.video.webm }}" type="video/webm" />
+user/themes/quark2-child/templates/gresilhette.html.twig:236:                {% if gresilhette_flex.spectacle.texte_intro %}
+user/themes/quark2-child/templates/gresilhette.html.twig:237:                    {{ gresilhette_flex.spectacle.texte_intro|markdown|shortcodes|raw }}
+user/themes/quark2-child/templates/gresilhette.html.twig:242:                {% if gresilhette_flex.spectacle.texte_suite %}
+user/themes/quark2-child/templates/gresilhette.html.twig:243:                    {{ gresilhette_flex.spectacle.texte_suite|markdown|shortcodes|raw }}
+user/themes/quark2-child/templates/gresilhette.html.twig:246:                {% if gresilhette_flex.spectacle.dossier_pdf and gresilhette_flex.spectacle.dossier_img %}
+user/themes/quark2-child/templates/gresilhette.html.twig:248:                        <a href="{{ base_url_simple ~ '/user/data/flex-objects/gresilhette/' ~ gresilhette_flex.spectacle.dossier_pdf }}" title="Dossier artistique">
+user/themes/quark2-child/templates/gresilhette.html.twig:249:                            <img src="{{ base_url_simple ~ '/user/data/flex-objects/gresilhette/' ~ gresilhette_flex.spectacle.dossier_img }}" alt="Dossier" class="btn-pdf">
+user/themes/quark2-child/templates/gresilhette.html.twig:254:                {% if gresilhette_flex.spectacle.texte_distribution %}
+user/themes/quark2-child/templates/gresilhette.html.twig:255:                    {% set dist_html = gresilhette_flex.spectacle.texte_distribution|markdown|shortcodes %}
+user/themes/quark2-child/templates/gresilhette.html.twig:264:    {% if gresilhette_flex.titre_occitan %}
+user/themes/quark2-child/templates/gresilhette.html.twig:267:            <h2 class="display-title">{{ gresilhette_flex.titre_occitan }}</h2>
+user/themes/quark2-child/templates/gresilhette.html.twig:268:            {% for bloc in gresilhette_flex.occitan_paragraphes %}
+user/themes/quark2-child/templates/gresilhette.html.twig:272:            {% if gresilhette_flex.traduction_signature %}
+user/themes/quark2-child/templates/gresilhette.html.twig:273:                <p class="traduction">traduction : {{ gresilhette_flex.traduction_signature }}</p>
+user/themes/quark2-child/templates/gresilhette.html.twig:280:    {% if gresilhette_flex.bio_extrait|trim is not empty %}
+user/themes/quark2-child/templates/gresilhette.html.twig:283:            <h2 class="display-title">{{ gresilhette_flex.titre_extrait|default('Un extrait du texte...') }}</h2>
+user/themes/quark2-child/templates/gresilhette.html.twig:284:            {{ gresilhette_flex.bio_extrait | shortcodes | markdown | raw }}
+user/themes/quark2-child/templates/compagnie.html.twig:5:    {% set collection_compagnie = grav.flex.directory('compagnie').getCollection() %}
+user/themes/quark2-child/templates/compagnie.html.twig:13:            {% if compagnie_flex.intro.texte_principal %}
+user/themes/quark2-child/templates/compagnie.html.twig:14:                {{ compagnie_flex.intro.texte_principal | markdown | shortcodes | raw }}
+user/themes/quark2-child/templates/compagnie.html.twig:17:            {% if compagnie_flex.intro.image_principale is not empty %}
+user/themes/quark2-child/templates/compagnie.html.twig:18:                {% set path_intro = compagnie_flex.intro.image_principale | keys | first %}
+user/themes/quark2-child/templates/compagnie.html.twig:31:            {% if compagnie_flex.details.texte_debut %}
+user/themes/quark2-child/templates/compagnie.html.twig:32:                {{ compagnie_flex.details.texte_debut | markdown | shortcodes | raw }}
+user/themes/quark2-child/templates/compagnie.html.twig:37:        {% if compagnie_flex.details.citation_texte %}
+user/themes/quark2-child/templates/compagnie.html.twig:40:                    <p class="theseasonsbold">&ldquo;&nbsp;{{ compagnie_flex.details.citation_texte }}&nbsp;&rdquo;</p>
+user/themes/quark2-child/templates/compagnie.html.twig:42:                {% if compagnie_flex.details.citation_auteur %}
+user/themes/quark2-child/templates/compagnie.html.twig:44:                        <span class="theseasonsregular">{{ compagnie_flex.details.citation_auteur }}</span>
+user/themes/quark2-child/templates/compagnie.html.twig:52:            {% if compagnie_flex.details.texte_fin %}
+user/themes/quark2-child/templates/compagnie.html.twig:53:                {{ compagnie_flex.details.texte_fin | markdown | shortcodes | raw }}
+user/themes/quark2-child/templates/compagnie.html.twig:65:            {% if compagnie_flex.galerie.rapport_2024_img is not empty %}
+user/themes/quark2-child/templates/compagnie.html.twig:66:                {% set path_img_2024 = compagnie_flex.galerie.rapport_2024_img | keys | first %}
+user/themes/quark2-child/templates/compagnie.html.twig:67:                {% if compagnie_flex.galerie.rapport_2024_pdf is not empty %}
+user/themes/quark2-child/templates/compagnie.html.twig:68:                    {% set path_pdf_2024 = compagnie_flex.galerie.rapport_2024_pdf | keys | first %}
+user/themes/quark2-child/templates/compagnie.html.twig:69:                    <a target="_blank" rel="noopener noreferrer" href="{{ base_url_simple ~ '/' ~ path_pdf_2024 }}" title="Visualiser le rapport 2024">
+user/themes/quark2-child/templates/compagnie.html.twig:72:                {% if compagnie_flex.galerie.rapport_2024_pdf is not empty %}</a>{% endif %}
+user/themes/quark2-child/templates/compagnie.html.twig:78:            {% if compagnie_flex.galerie.rapport_2025_img is not empty %}
+user/themes/quark2-child/templates/compagnie.html.twig:79:                {% set path_img_2025 = compagnie_flex.galerie.rapport_2025_img | keys | first %}
+user/themes/quark2-child/templates/compagnie.html.twig:80:                {% if compagnie_flex.galerie.rapport_2025_pdf is not empty %}
+user/themes/quark2-child/templates/compagnie.html.twig:81:                    {% set path_pdf_2025 = compagnie_flex.galerie.rapport_2025_pdf | keys | first %}
+user/themes/quark2-child/templates/compagnie.html.twig:82:                    <a target="_blank" rel="noopener noreferrer" href="{{ base_url_simple ~ '/' ~ path_pdf_2025 }}" title="Visualiser le rapport 2025">
+user/themes/quark2-child/templates/compagnie.html.twig:85:                {% if compagnie_flex.galerie.rapport_2025_pdf is not empty %}</a>{% endif %}
+user/themes/quark2-child/templates/compagnie.html.twig:90:            <h2 class="display-title">Et pourquoi les Mégères ?</h2>
+user/themes/quark2-child/templates/compagnie.html.twig:95:            {% if compagnie_flex.galerie.gorgone_img is not empty %}
+user/themes/quark2-child/templates/compagnie.html.twig:96:                {% set path_gorgone = compagnie_flex.galerie.gorgone_img | keys | first %}
+user/themes/quark2-child/templates/compagnie.html.twig:97:                <img class="forme-masque" alt="{{ compagnie_flex.galerie.gorgone_alt }}" src="{{ base_url_simple ~ '/' ~ path_gorgone }}" loading="lazy">
+user/themes/quark2-child/templates/compagnie.html.twig:99:            {% if compagnie_flex.galerie.gorgone_texte %}
+user/themes/quark2-child/templates/compagnie.html.twig:100:                <p>{{ compagnie_flex.galerie.gorgone_texte | markdown | raw }}</p>
+user/themes/quark2-child/templates/compagnie.html.twig:106:            {% if compagnie_flex.galerie.erinyes_img is not empty %}
+user/themes/quark2-child/templates/compagnie.html.twig:107:                {% set path_erinyes = compagnie_flex.galerie.erinyes_img | keys | first %}
+user/themes/quark2-child/templates/compagnie.html.twig:108:                <img class="forme-erinyes" alt="{{ compagnie_flex.galerie.erinyes_alt }}" src="{{ base_url_simple ~ '/' ~ path_erinyes }}" loading="lazy">
+user/themes/quark2-child/templates/compagnie.html.twig:110:            {% if compagnie_flex.galerie.erinyes_texte %}
+user/themes/quark2-child/templates/compagnie.html.twig:111:                <p>{{ compagnie_flex.galerie.erinyes_texte | markdown(false) | raw }}</p>
+user/themes/quark2-child/templates/compagnie.html.twig:118:                {% if compagnie_flex.galerie.oreste_img is not empty %}
+user/themes/quark2-child/templates/compagnie.html.twig:119:                    {% set path_oreste = compagnie_flex.galerie.oreste_img | keys | first %}
+user/themes/quark2-child/templates/compagnie.html.twig:120:                    <img alt="{{ compagnie_flex.galerie.oreste_alt }}" src="{{ base_url_simple ~ '/' ~ path_oreste }}" loading="lazy">
+user/themes/quark2-child/templates/compagnie.html.twig:122:                {% if compagnie_flex.galerie.oreste_legende %}
+user/themes/quark2-child/templates/compagnie.html.twig:123:                    <figcaption class="p_centrer legende">{{ compagnie_flex.galerie.oreste_legende }}</figcaption>
+user/themes/quark2-child/templates/compagnie.html.twig:130:            <h2 class="display-title">Et l'humus dans tout ça ?</h2>
+user/themes/quark2-child/templates/compagnie.html.twig:131:            {% if compagnie_flex.galerie.humus_texte %}
+user/themes/quark2-child/templates/compagnie.html.twig:132:                <p>{{ compagnie_flex.galerie.humus_texte | markdown(false) | raw }}</p>
+user/themes/quark2-child/templates/compagnie.html.twig:135:                {% if compagnie_flex.galerie.humus_img is not empty %}
+user/themes/quark2-child/templates/compagnie.html.twig:136:                    {% set path_humus = compagnie_flex.galerie.humus_img | keys | first %}
+user/themes/quark2-child/templates/compagnie.html.twig:137:                    <img alt="{{ compagnie_flex.galerie.humus_alt }}" src="{{ base_url_simple ~ '/' ~ path_humus }}" loading="lazy">
+user/themes/quark2-child/templates/compagnie.html.twig:139:                {% if compagnie_flex.galerie.humus_legende %}
+user/themes/quark2-child/templates/compagnie.html.twig:140:                    <figcaption class="p_centrer legende">{{ compagnie_flex.galerie.humus_legende }}</figcaption>
+user/themes/quark2-child/templates/sub-spectacle.html.twig:8:{% set collection = grav.flex.directory('le-spectacle').getCollection() %}
+user/themes/quark2-child/templates/sub-spectacle.html.twig:12:{% set data_source = opression_flex.spectacle %}
+user/themes/quark2-child/templates/sub-spectacle.html.twig:32:        {% if opression_flex.spectacle.nav_scolaires %}
+user/themes/quark2-child/templates/sub-spectacle.html.twig:33:            <img src="{{ base_url_simple ~ '/user/data/flex-objects/le-spectacle/' ~ opression_flex.spectacle.nav_scolaires }}" class="{% if page.slug == 'les-scolaires' %}image-ronde{% endif %}" alt="vers les scolaires" loading="lazy">
+user/themes/quark2-child/templates/sub-spectacle.html.twig:37:        {% if opression_flex.spectacle.nav_tout_public %}
+user/themes/quark2-child/templates/sub-spectacle.html.twig:38:            <img src="{{ base_url_simple ~ '/user/data/flex-objects/le-spectacle/' ~ opression_flex.spectacle.nav_tout_public }}" class="{% if page.slug != 'les-scolaires' %}image-ronde{% endif %}" alt="vers le tout public" loading="lazy">
+user/themes/quark2-child/templates/sub-spectacle.html.twig:74:                <h2 class="display-title">Objectifs pédagogiques</h2>
+user/themes/quark2-child/templates/sub-spectacle.html.twig:86:                <h2 class="display-title">Nos formats</h2>
+user/themes/quark2-child/templates/sub-spectacle.html.twig:105:                <h2 class="display-title">Tarifs</h2>
+user/themes/quark2-child/templates/contact.html.twig:6:    {% set collection_contact = grav.flex.directory('contact').getCollection() %}
+user/themes/quark2-child/templates/contact.html.twig:12:    {% if contact_flex.poles_contact is not empty %}
+user/themes/quark2-child/templates/contact.html.twig:16:        {% if contact_flex.telephone_icone is not empty %}
+user/themes/quark2-child/templates/contact.html.twig:17:            {% set path_tel_icone = contact_flex.telephone_icone | keys | first %}
+user/themes/quark2-child/templates/contact.html.twig:25:            {% for groupe in contact_flex.poles_contact %}
+user/themes/quark2-child/templates/contact.html.twig:62:    {% if contact_flex.email_adresse %}
+user/themes/quark2-child/templates/contact.html.twig:66:        {% if contact_flex.email_icone is not empty %}
+user/themes/quark2-child/templates/contact.html.twig:67:            {% set path_mail_icone = contact_flex.email_icone | keys | first %}
+user/themes/quark2-child/templates/contact.html.twig:74:            <a href="mailto:{{ contact_flex.email_adresse }}?subject={{ 'Demande de renseignement'|url_encode }}">
+user/themes/quark2-child/templates/contact.html.twig:81:    {% if contact_flex.reseaux_facebook %}
+user/themes/quark2-child/templates/contact.html.twig:83:        <a href="{{ contact_flex.reseaux_facebook }}" target="_blank" rel="noopener noreferrer">
+user/themes/quark2-child/templates/contact.html.twig:90:    {% if contact_flex.reseaux_instagram %}
+user/themes/quark2-child/templates/contact.html.twig:92:        <a href="{{ contact_flex.reseaux_instagram }}" target="_blank" rel="noopener noreferrer">
+user/themes/quark2-child/templates/contact.html.twig:101:    {% if contact_flex.adresse_lignes is not empty %}
+user/themes/quark2-child/templates/contact.html.twig:105:        {% if contact_flex.adresse_icone is not empty %}
+user/themes/quark2-child/templates/contact.html.twig:106:            {% set path_adr_icone = contact_flex.adresse_icone | keys | first %}
+user/themes/quark2-child/templates/contact.html.twig:113:        {% for ligne in contact_flex.adresse_lignes %}
+user/themes/quark2-child/templates/contact.html.twig:122:    {% if contact_flex.association_details is not empty %}
+user/themes/quark2-child/templates/contact.html.twig:126:        {% if contact_flex.association_icone is not empty %}
+user/themes/quark2-child/templates/contact.html.twig:127:            {% set path_asso_icone = contact_flex.association_icone | keys | first %}
+user/themes/quark2-child/templates/contact.html.twig:135:            {% for detail in contact_flex.association_details %}
+user/themes/quark2-child/templates/le-spectacle.html.twig:9:    {% set collection = grav.flex.directory('le-spectacle').getCollection() %}
+user/themes/quark2-child/templates/le-spectacle.html.twig:13:    {% if opression_flex.sous_titre %}
+user/themes/quark2-child/templates/le-spectacle.html.twig:14:        <h2 class="coco sous-titre-page t-center my-1">{{ opression_flex.sous_titre }}</h2>
+user/themes/quark2-child/templates/le-spectacle.html.twig:19:        {% if opression_flex.spectacle.photo_top1 %}
+user/themes/quark2-child/templates/le-spectacle.html.twig:20:            <img src="{{ base_url_simple ~ '/user/data/flex-objects/le-spectacle/' ~ opression_flex.spectacle.photo_top1 }}" class="photo-stages-ateliers mx-1" alt="Illustration 1" loading="lazy">
+user/themes/quark2-child/templates/le-spectacle.html.twig:22:        {% if opression_flex.spectacle.photo_top2 %}
+user/themes/quark2-child/templates/le-spectacle.html.twig:23:            <img src="{{ base_url_simple ~ '/user/data/flex-objects/le-spectacle/' ~ opression_flex.spectacle.photo_top2 }}" class="photo-stages-ateliers mx-1" alt="Illustration 2" loading="lazy">
+user/themes/quark2-child/templates/le-spectacle.html.twig:29:        {% if opression_flex.spectacle.nav_scolaires %}
+user/themes/quark2-child/templates/le-spectacle.html.twig:31:                <img src="{{ base_url_simple ~ '/user/data/flex-objects/le-spectacle/' ~ opression_flex.spectacle.nav_scolaires }}" class="image-ronde" alt="vers les scolaires" loading="lazy">
+user/themes/quark2-child/templates/le-spectacle.html.twig:34:        {% if opression_flex.spectacle.nav_tout_public %}
+user/themes/quark2-child/templates/le-spectacle.html.twig:36:                <img src="{{ base_url_simple ~ '/user/data/flex-objects/le-spectacle/' ~ opression_flex.spectacle.nav_tout_public }}" class="image-ronde" alt="vers le tout public" loading="lazy">
+user/themes/quark2-child/templates/le-spectacle.html.twig:44:    {% if opression_flex.spectacle.presentation_blocs %}
+user/themes/quark2-child/templates/le-spectacle.html.twig:48:                    {% for bloc in opression_flex.spectacle.presentation_blocs %}
+user/themes/quark2-child/templates/le-spectacle.html.twig:50:                            <h2 class="display-title {% if loop.first %}marge-haute{% endif %}">{{ bloc.titre_bloc }}</h2>
+user/themes/quark2-child/templates/cours.html.twig:3:{% set collection = grav.flex.directory('cours').getCollection() %}
+user/themes/quark2-child/templates/cours.html.twig:9:{% block head_title %}
+user/themes/quark2-child/templates/cours.html.twig:10:    {% set seo_title = cours_flex.title | default(page.title) %}
+user/themes/quark2-child/templates/cours.html.twig:11:    <title>{{ seo_title|e }} | {{ site.title|e }}</title>
+user/themes/quark2-child/templates/cours.html.twig:14:{% block head_meta %}
+user/themes/quark2-child/templates/cours.html.twig:15:    {% set seo_description = cours_flex.meta_description | default(page.header.metadata.description) %}
+user/themes/quark2-child/templates/cours.html.twig:16:    <meta name="description" content="{{ seo_description|e('html_attr') }}" />
+user/themes/quark2-child/templates/cours.html.twig:17:    <meta name="robots" content="{% if page.header.metadata.robots %}{{ page.header.metadata.robots|e }}{% else %}index, follow{% endif %}" />
+user/themes/quark2-child/templates/cours.html.twig:30:        if (h1 && "{{ cours_flex.title|default('')|e('js') }}") {
+user/themes/quark2-child/templates/cours.html.twig:31:            h1.textContent = "{{ cours_flex.title|split('|')|first|trim|e('js') }}";
+user/themes/quark2-child/templates/cours.html.twig:39:    {% if cours_flex.cours_audio_mp3 or cours_flex.cours_audio_ogg %}
+user/themes/quark2-child/templates/cours.html.twig:43:                <audio id="audio" preload="metadata">
+user/themes/quark2-child/templates/cours.html.twig:44:                    {% if cours_flex.cours_audio_mp3 %}
+user/themes/quark2-child/templates/cours.html.twig:45:                        <source src="{{ base_url_simple ~ '/user/data/flex-objects/cours/' ~ cours_flex.cours_audio_mp3 }}" type="audio/mpeg" />
+user/themes/quark2-child/templates/cours.html.twig:47:                    {% if cours_flex.cours_audio_ogg %}
+user/themes/quark2-child/templates/cours.html.twig:48:                        <source src="{{ base_url_simple ~ '/user/data/flex-objects/cours/' ~ cours_flex.cours_audio_ogg }}" type="audio/ogg" />
+user/themes/quark2-child/templates/cours.html.twig:50:                    {% if cours_flex.cours_audio_mp3 %}
+user/themes/quark2-child/templates/cours.html.twig:51:                        <a href="{{ base_url_simple ~ '/user/data/flex-objects/cours/' ~ cours_flex.cours_audio_mp3 }}">Télécharger l'audio</a>
+user/themes/quark2-child/templates/cours.html.twig:73:    {% if cours_flex.cours_description %}
+user/themes/quark2-child/templates/cours.html.twig:76:            {{ cours_flex.cours_description | markdown | shortcodes | raw }}
+user/themes/quark2-child/templates/cours.html.twig:82:    {% if cours_flex.cours_img_tarifs or cours_flex.cours_img_photo %}
+user/themes/quark2-child/templates/cours.html.twig:86:                {% if cours_flex.cours_img_tarifs %}
+user/themes/quark2-child/templates/cours.html.twig:87:                    <img class="affiche-cours" alt="Le tarif des cours de théâtre" src="{{ base_url_simple ~ '/user/data/flex-objects/cours/' ~ cours_flex.cours_img_tarifs }}" loading="lazy">
+user/themes/quark2-child/templates/cours.html.twig:89:                {% if cours_flex.cours_img_photo %}
+user/themes/quark2-child/templates/cours.html.twig:90:                    <img class="photo-cours" alt="Photo d'un cours de théâtre" src="{{ base_url_simple ~ '/user/data/flex-objects/cours/' ~ cours_flex.cours_img_photo }}" loading="lazy">
+user/themes/quark2-child/templates/cours.html.twig:98:    {% if cours_flex.cours_titre_objectifs or cours_flex.cours_img_objectifs %}
+user/themes/quark2-child/templates/cours.html.twig:101:            {% if cours_flex.cours_titre_objectifs %}
+user/themes/quark2-child/templates/cours.html.twig:102:                <h2 class="display-title">{{ cours_flex.cours_titre_objectifs }}</h2>
+user/themes/quark2-child/templates/cours.html.twig:104:            {% if cours_flex.cours_img_objectifs %}
+user/themes/quark2-child/templates/cours.html.twig:106:                    <img class="objectifs-pedagogiques" alt="Les objectifs pédagogiques du cours de théâtre" src="{{ base_url_simple ~ '/user/data/flex-objects/cours/' ~ cours_flex.cours_img_objectifs }}" loading="lazy">
+user/themes/quark2-child/templates/main-layout.html.twig:5:    <meta charset="utf-8" />
+user/themes/quark2-child/templates/main-layout.html.twig:6:    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+user/themes/quark2-child/templates/main-layout.html.twig:7:    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+user/themes/quark2-child/templates/main-layout.html.twig:10:    {% block head_title %}
+user/themes/quark2-child/templates/main-layout.html.twig:11:    <title>{% if page.title %}{{ page.title|e }}{% else %}{{ site.title|e }}{% endif %}</title>
+user/themes/quark2-child/templates/main-layout.html.twig:15:    {% block head_meta %}
+user/themes/quark2-child/templates/main-layout.html.twig:16:        <meta name="description" content="{% if page.header.metadata.description %}{{ page.header.metadata.description|e }}{% else %}{{ site.metadata.description|e }}{% endif %}" />
+user/themes/quark2-child/templates/main-layout.html.twig:17:        <meta name="robots" content="{% if page.header.metadata.robots %}{{ page.header.metadata.robots|e }}{% else %}index, follow{% endif %}" />
+user/themes/quark2-child/templates/main-layout.html.twig:23:    <meta property="og:site_name" content="{{ site.title|e }}" />
+user/themes/quark2-child/templates/main-layout.html.twig:24:    <meta property="og:type" content="website" />
+user/themes/quark2-child/templates/main-layout.html.twig:25:    <meta property="og:title" content="{% if page.title %}{{ page.title|e }}{% else %}{{ site.title|e }}{% endif %}" />
+user/themes/quark2-child/templates/main-layout.html.twig:26:    <meta property="og:description" content="{% if page.header.metadata.description %}{{ page.header.metadata.description|e }}{% else %}{{ site.metadata.description|e }}{% endif %}" />
+user/themes/quark2-child/templates/main-layout.html.twig:27:    <meta property="og:url" content="{{ page.url(true, true)|e }}" />
+user/themes/quark2-child/templates/main-layout.html.twig:28:    <meta property="og:image" content="{{ uri.rootUrl(true) ~ url('theme://images/logohumous-notext-blue.png', false) }}" />
+user/themes/quark2-child/templates/main-layout.html.twig:29:    <meta property="og:image:alt" content="Logo de la compagnie {{ site.title|e }}" />
+user/themes/quark2-child/templates/main-layout.html.twig:59:          "name": "{{ site.title|e }}",
+user/themes/quark2-child/templates/main-layout.html.twig:76:          "name": "{{ site.title|e }}",
+user/themes/quark2-child/templates/main-layout.html.twig:85:    {% block meta %}{% endblock %}
+user/themes/quark2-child/templates/main-layout.html.twig:104:                    {% set titre_brut = vraie_page_url.title | default(page.title) %}
+user/themes/quark2-child/templates/main-layout.html.twig:109:                    {% set sous_titre = vraie_page_url.header.subtitle | default(page.header.subtitle) %}
+user/themes/quark2-child/templates/home.html.twig:3:{% set collection = grav.flex.directory('accueil').getCollection() %}
+user/themes/quark2-child/templates/home.html.twig:7:{% block head_title %}
+user/themes/quark2-child/templates/home.html.twig:8:    {% set seo_title = accueil_flex.title | default(page.title) %}
+user/themes/quark2-child/templates/home.html.twig:9:    <title>{{ seo_title|e }} | {{ site.title|e }}</title>
+user/themes/quark2-child/templates/home.html.twig:12:{% block head_meta %}
+user/themes/quark2-child/templates/home.html.twig:13:    {% set seo_description = accueil_flex.meta_description | default(page.header.metadata.description) %}
+user/themes/quark2-child/templates/home.html.twig:14:    <meta name="description" content="{{ seo_description|e('html_attr') }}" />
+user/themes/quark2-child/templates/home.html.twig:15:    <meta name="robots" content="{% if page.header.metadata.robots %}{{ page.header.metadata.robots|e }}{% else %}index, follow{% endif %}" />
+user/themes/quark2-child/templates/home.html.twig:30:            if (h1 && "{{ accueil_flex.title|default('')|e('js') }}") {
+user/themes/quark2-child/templates/home.html.twig:31:                h1.textContent = "{{ accueil_flex.title|split('|')|first|trim|e('js') }}";
+user/themes/quark2-child/templates/home.html.twig:40:    {% if accueil_flex.accueil_intro %}
+user/themes/quark2-child/templates/home.html.twig:45:                    {{ accueil_flex.accueil_intro | markdown | shortcodes | raw }}
+user/themes/quark2-child/templates/page-textuelle.html.twig:6:{% set collection = grav.flex.directory('pages-textuelles').getCollection() %}
+user/themes/quark2-child/templates/page-textuelle.html.twig:18:{% block head_title %}
+user/themes/quark2-child/templates/page-textuelle.html.twig:19:    {% set seo_title = fiche_page.title | default(page.title) %}
+user/themes/quark2-child/templates/page-textuelle.html.twig:20:    <title>{{ seo_title|e }} | {{ site.title|e }}</title>
+user/themes/quark2-child/templates/page-textuelle.html.twig:23:{% block head_meta %}
+user/themes/quark2-child/templates/page-textuelle.html.twig:24:    {% set seo_description = fiche_page.meta_description | default(page.header.metadata.description) %}
+user/themes/quark2-child/templates/page-textuelle.html.twig:25:    <meta name="description" content="{{ seo_description|e('html_attr') }}" />
+user/themes/quark2-child/templates/page-textuelle.html.twig:26:    <meta name="robots" content="{% if page.header.metadata.robots %}{{ page.header.metadata.robots|e }}{% else %}index, follow{% endif %}" />
+user/themes/quark2-child/templates/page-textuelle.html.twig:38:        if (h1 && "{{ fiche_page.title|default('')|e('js') }}") {
+user/themes/quark2-child/templates/page-textuelle.html.twig:39:            h1.textContent = "{{ fiche_page.title|split('|')|first|trim|e('js') }}";
+user/themes/quark2-child/templates/ateliers.html.twig:3:{% set collection = grav.flex.directory('ateliers').getCollection() %}
+user/themes/quark2-child/templates/ateliers.html.twig:7:{% block head_title %}
+user/themes/quark2-child/templates/ateliers.html.twig:8:    {% set seo_title = ateliers_flex.title | default(page.title) %}
+user/themes/quark2-child/templates/ateliers.html.twig:9:    <title>{{ seo_title|e }} | {{ site.title|e }}</title>
+user/themes/quark2-child/templates/ateliers.html.twig:12:{% block head_meta %}
+user/themes/quark2-child/templates/ateliers.html.twig:13:    {% set seo_description = ateliers_flex.meta_description | default(page.header.metadata.description) %}
+user/themes/quark2-child/templates/ateliers.html.twig:14:    <meta name="description" content="{{ seo_description|e('html_attr') }}" />
+user/themes/quark2-child/templates/ateliers.html.twig:15:    <meta name="robots" content="{% if page.header.metadata.robots %}{{ page.header.metadata.robots|e }}{% else %}index, follow{% endif %}" />
+user/themes/quark2-child/templates/ateliers.html.twig:25:        if (h1 && "{{ ateliers_flex.title|default('')|e('js') }}") {
+user/themes/quark2-child/templates/ateliers.html.twig:26:            h1.textContent = "{{ ateliers_flex.title|split('|')|first|trim|e('js') }}";
+user/themes/quark2-child/templates/ateliers.html.twig:34:    {% if ateliers_flex.ateliers_photo_principale %}
+user/themes/quark2-child/templates/ateliers.html.twig:38:                <img class="photo-stages-ateliers" src="{{ base_url_simple ~ '/user/data/flex-objects/ateliers/' ~ ateliers_flex.ateliers_photo_principale }}" alt="{{ ateliers_flex.ateliers_alt_photo|default('')|e('html_attr') }}" loading="lazy">
+user/themes/quark2-child/templates/ateliers.html.twig:45:    {% if ateliers_flex.ateliers_description %}
+user/themes/quark2-child/templates/ateliers.html.twig:48:            {% set html_desc = ateliers_flex.ateliers_description | markdown | shortcodes %}
+user/themes/quark2-child/templates/mentions-legales.html.twig:33:    |regex_replace('/<h3>Conditions Générales d\'Utilisation<\\/h3>/', '<h3 class="display-title">Conditions Générales d\'Utilisation</h3>')
+user/themes/quark2-child/templates/partials/diaporama.html.twig:1:{% set cible_accueil = donnees_accueil | default(grav.flex.directory('accueil').getCollection().first()) %}
+user/themes/quark2-child/templates/partials/diaporama.html.twig:26:                                <h3 class="radio-title">{{ slide.titre }}</h3>

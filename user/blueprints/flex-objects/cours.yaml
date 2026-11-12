@@ -25,7 +25,7 @@ config:
       list:
         route: /cours
         title: Page Cours
-        priority: 8
+        priority: 6
         icon: fa fa-graduation-cap
     list:
       title: Configuration de la page Cours

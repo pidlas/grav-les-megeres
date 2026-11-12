@@ -20,7 +20,7 @@ config:
       list:
         route: /pages-textuelles
         title: Pages Textuelles
-        priority: 1
+        priority: 2
         icon: fa fa-file-text
     list:
       title: Liste des Pages Textuelles

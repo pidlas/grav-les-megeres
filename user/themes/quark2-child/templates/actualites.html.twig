@@ -1,5 +1,14 @@
 {% extends 'main-layout.html.twig' %}
 
+{# Récupération globale de la collection et détection de la fiche portant les métadonnées #}
+{% set actualites_flex = grav.flex.directory('actualites').getCollection() %}
+{% set fiche_seo = null %}
+{% for item in actualites_flex %}
+    {% if fiche_seo is null and (item.page_title or item.meta_description) %}
+        {% set fiche_seo = item %}
+    {% endif %}
+{% endfor %}
+
 {# ==========================================================================
    AFFICHAGE DU CONTENU DE LA PAGE (Le corps du site)
    ========================================================================== #}
@@ -8,9 +17,6 @@
     <div class="page-content">
         {{ page.content | raw }}
     </div>
-
-    {# 2. Récupération propre de la collection via l'extracteur Flex unifié #}
-    {% set actualites_flex = grav.flex.directory('actualites').getCollection() %}
 
     {# Zone dynamique de la liste des Actualités #}
     {% if actualites_flex is not empty %}

@@ -27,7 +27,7 @@ config:
       list:
         route: /compagnie
         title: Page Compagnie
-        priority: 15
+        priority: 12
         icon: fa fa-university
     list:
       title: Contenu de la Compagnie
@@ -43,7 +43,6 @@ form:
       type: tabs
       active: 1
       fields:
-
         # ==================================================================
         # ONGLET 1 : INTRODUCTION (_1-intro)
         # ==================================================================
@@ -60,7 +59,8 @@ form:
             
             intro.texte_principal:
               type: markdown
-              label: "Texte d'introduction (Les 3 premiers paragraphes)"
+              label: "Texte d'introduction"
+              placeholder: Les 3 premiers paragraphes
             
             # 🌟 RECTIFICATION SÉMANTIQUE : Image principale relative sans "user/"
             intro.image_principale:

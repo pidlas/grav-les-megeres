@@ -1,0 +1,34 @@
+form:
+  fields:
+    tabs:
+      type: tabs
+      active: 1
+      fields:
+        onglet_general_seo:
+          type: tab
+          title: Général & Méta Données
+          fields:
+            page_title:
+              type: text
+              label: Titre principal de la page (H1 et balise Title)
+              help: Utilisez le symbole | pour séparer le titre H1 du complément SEO (ex. Actualités | Les actualités de la compagnie).
+
+            meta_section:
+              type: section
+              title: Référencement et Méta Données
+              underline: true
+
+            meta_description:
+              type: textarea
+              label: Méta Description
+              rows: 3
+              help: Résumé de la page pour les moteurs de recherche (155 caractères max conseillés).
+
+            meta_robots:
+              type: select
+              label: Indexation par les moteurs de recherche
+              default: index, follow
+              options:
+                'index, follow': Indexer et suivre les liens (Défaut)
+                'noindex, follow': Ne pas indexer, mais suivre les liens
+                'noindex, nofollow': Ne pas indexer et ne pas suivre

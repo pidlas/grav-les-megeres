@@ -24,8 +24,8 @@ config:
     menu:
       list:
         route: /theatre-forum/le-spectacle
-        title: Spectacle O'Pression
-        priority: 10
+        title: Page Théâtre-Forum
+        priority: 7
         icon: fa fa-masks-theater
     list:
       title: Liste des Spectacles

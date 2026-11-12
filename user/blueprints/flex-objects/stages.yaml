@@ -25,7 +25,7 @@ config:
       list:
         route: /stages
         title: Page Stages
-        priority: 7
+        priority: 5
         icon: fa fa-masks-theater
     list:
       title: Configuration de la page Stages

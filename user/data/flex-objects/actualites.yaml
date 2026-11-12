@@ -14,7 +14,7 @@
       titre: "Spectacle de Théâtre Forum 0'Pression"
       resume: "En partenariat avec la FDE de Montpellier, antenne de Carcassonne, à l'occasion de la semaine de lutte contre les LGBT+phobies. À l'intention des étudiants et du personnel de l'établissement."
       miniature: {  }
-      miniature_alt: "Miniature de l'affiche du spectacle de Théâtre Forum 0'Pression "
+      miniature_alt: null
     -
       date: 'mer. 16 décembre 2026'
       titre: 'Spectacle Jeune Public Grésilhette et la Salimonde'
@@ -22,6 +22,9 @@
       miniature_alt: "Miniature de l'affiche du spectacle Grésilhette et la Salimonde"
       miniature:
         user/data/flex-objects/actualites/actualite-visuel-portrait.avif: { name: actualite-visuel-portrait.avif, type: image/avif, size: 438222, path: user/data/flex-objects/actualites/actualite-visuel-portrait.avif, url: /user/data/flex-objects/actualites/actualite-visuel-portrait.avif }
+  page_title: "Actualités | Les actualités de la Compagnie Les Mégères de l'Humus"
+  meta_robots: 'noindex, nofollow'
+  meta_description: "Les dates, les  annonces et les temps forts des Mégères de l'Humus à Moussoulens, autour de Carcassonne : spectacles, cours, stages, ateliers, théâtre forum."
 cb81d4d97cea3272948649dc194c9ed2:
   categorie: 'Les réseaux sociaux'
   image_principale:
