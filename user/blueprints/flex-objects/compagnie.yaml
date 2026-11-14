@@ -37,7 +37,7 @@ config:
       fields:
         page_title:
           title: Titre principal
-          field: title
+          field: page_title
           link: edit
 
 form:

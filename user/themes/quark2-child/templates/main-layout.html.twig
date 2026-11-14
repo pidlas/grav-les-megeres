@@ -112,8 +112,9 @@
                         {% set titre_decoupe = titre_brut|split('|') %}
                         <h1>{{ titre_decoupe[0]|trim }}</h1>
                     {% endblock %}
-                           
-                    {% set sous_titre = flex_seo.subtitle | default(flex_seo.sous_titre) | default(vraie_page_url.header.subtitle) | default(page.header.subtitle) %}
+
+                    {% set sous_titre = flex_seo.subtitle | default(vraie_page_url.header.subtitle) | default(page.header.subtitle) %}
+
                     {% if sous_titre %}
                         <p class="sous-titre">{{ sous_titre | raw }}</p>
                     {% endif %}

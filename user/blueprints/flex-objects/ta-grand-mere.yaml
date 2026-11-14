@@ -42,7 +42,7 @@ config:
       fields:
         page_title:
           title: Titre du projet
-          field: title
+          field: page_title
           link: edit
 
 form:

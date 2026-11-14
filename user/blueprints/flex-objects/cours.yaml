@@ -36,7 +36,7 @@ config:
       fields:
         page_title:
           title: Titre de la page
-          field: title
+          field: page_title
           link: edit
 
 form:
