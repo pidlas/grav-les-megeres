@@ -2,6 +2,10 @@ type: flex-objects
 title: Pages Textuelles & Légales
 description: Gestion centralisée des pages textuelles (Laboratoire, Règlement, Crédits, Mentions légales, Sécurité)
 
+extends@:
+  type: partials/onglet-commun
+  context: blueprints://flex-objects
+
 config:
   data:
     storage:
@@ -25,7 +29,7 @@ config:
     list:
       title: Liste des Pages Textuelles
       fields:
-        title:
+        page_title:
           title: Titre de la page
           field: title
           link: edit
@@ -56,18 +60,9 @@ form:
                 mentions-legales: "Mentions légales"
                 politique-de-securite: "Politique de sécurité"
 
-            title:
-              type: text
-              label: Titre de la page (S'affichera dans le H1)
-              validate:
-                required: true
             menu:
               type: text
               label: Titre dans le menu du site
-            meta_description:
-              type: textarea
-              label: Meta Description (SEO)
-              rows: 2
 
             section_intro:
               type: section

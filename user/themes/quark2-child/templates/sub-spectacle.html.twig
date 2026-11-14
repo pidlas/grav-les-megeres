@@ -1,51 +1,46 @@
 {% extends 'main-layout.html.twig' %}
 
-{% block content %}
-
-{# ==========================================================================
-   1. EXTRACTION DES DONNÉES DEPUIS LA COLLECTION MAÎTRESSE
-   ========================================================================== #}
+{# 1. Récupération globale de la collection et transmission SEO #}
 {% set collection = grav.flex.directory('le-spectacle').getCollection() %}
 {% set opression_flex = collection.first() %}
 
-{# On cible le dictionnaire interne 'spectacle' qui contient toutes vos clés #}
 {% set data_source = opression_flex.spectacle %}
 {% set prefixe = page.slug == 'les-scolaires' ? 'scolaires_' : 'tout_public_' %}
+{% set titre_declinaison = page.slug == 'les-scolaires' ? 'Les Scolaires' : 'Le Tout Public' %}
 
-{# ==========================================================================
-   2. RE-ÉCRITURE DYNAMIQUE DU H1 DE LA PAGE (LOGIQUE GRÉSILHETTE)
-   ========================================================================== #}
-<script>
-    (function() {
-        var h1 = document.querySelector(".conteneur-champignons h1");
-        if (h1) {
-            h1.textContent = "{% if page.slug == 'les-scolaires' %}Les Scolaires{% else %}Le Tout Public{% endif %}";
-        }
-    })();
-</script>
+{% set titre_spectacle = opression_flex.page_title | default(opression_flex.title) | default('O\'Pression') %}
+{% set intro_pur = data_source[prefixe ~ 'intro'] | default('') | markdown | striptags | trim %}
 
-{# ==========================================================================
-   3. BANDEAU DE NAVIGATION MORPH HISTORIQUE (RECRÉÉ DEPUIS LE DOSSIER UNIQUE)
-   ========================================================================== #}
+{% set flex_seo = {
+    'page_title': titre_declinaison ~ ' | ' ~ titre_spectacle,
+    'meta_description': page.header.metadata.description | default(intro_pur|truncate(150)) | default(opression_flex.meta_description),
+    'meta_robots': page.header.metadata.robots | default(opression_flex.meta_robots)
+} %}
+
+{% block page_h1 %}
+    <h1>{{ titre_declinaison }}</h1>
+{% endblock %}
+
+{# 2. Contenu de la page #}
+{% block content %}
+
+{# BANDEAU DE NAVIGATION MORPH HISTORIQUE #}
 <div class="{% if page.slug == 'les-scolaires' %}p_les-scolaires{% else %}p_le-tout-public{% endif %} my-2"> 
     <a class="images-spectacle {% if page.slug != 'les-scolaires' %}morph{% endif %}" href="{{ url('/theatre-forum/le-spectacle/les-scolaires') }}">
         {% if opression_flex.spectacle.nav_scolaires %}
-            <img src="{{ base_url_simple ~ '/user/data/flex-objects/le-spectacle/' ~ opression_flex.spectacle.nav_scolaires }}" class="{% if page.slug == 'les-scolaires' %}image-ronde{% endif %}" alt="vers les scolaires" loading="lazy">
+            <img src="{{ base_url_simple ~ '/user/data/flex-objects/le-spectacle/' ~ opression_flex.spectacle.nav_scolaires }}" {% if page.slug == 'les-scolaires' %}class="image-ronde"{% endif %} alt="vers les scolaires" loading="lazy">
         {% endif %}
     </a> 
     <a class="images-spectacle {% if page.slug == 'les-scolaires' %}morph{% endif %}" href="{{ url('/theatre-forum/le-spectacle/le-tout-public') }}">
         {% if opression_flex.spectacle.nav_tout_public %}
-            <img src="{{ base_url_simple ~ '/user/data/flex-objects/le-spectacle/' ~ opression_flex.spectacle.nav_tout_public }}" class="{% if page.slug != 'les-scolaires' %}image-ronde{% endif %}" alt="vers le tout public" loading="lazy">
+            <img src="{{ base_url_simple ~ '/user/data/flex-objects/le-spectacle/' ~ opression_flex.spectacle.nav_tout_public }}" {% if page.slug != 'les-scolaires' %}class="image-ronde"{% endif %} alt="vers le tout public" loading="lazy">
         {% endif %}
     </a> 
 </div>
 
-{# ==========================================================================
-   4. L'ANCRE RELATIVE AVEC LES 3 BULLS DE FOND (DÉTECTION PAR TABLEAU)
-   ========================================================================== #}
+{# Ancre relative avec les 3 bulles de fond #}
 <div class="section-spectacle container">
 
-    {# Lecture dynamique des 3 clés de bulles (ex: scolaires_bulle1 ou tout_public_bulle1) #}
     {% if data_source[prefixe ~ 'bulle1'] %}
         <img src="{{ base_url_simple ~ '/user/data/flex-objects/le-spectacle/' ~ data_source[prefixe ~ 'bulle1'] }}" class="bulle-fond b-haut-gauche" alt="" loading="lazy">
     {% endif %}
@@ -56,13 +51,11 @@
         <img src="{{ base_url_simple ~ '/user/data/flex-objects/le-spectacle/' ~ data_source[prefixe ~ 'bulle3'] }}" class="bulle-fond b-objectifs-gauche" alt="" loading="lazy">
     {% endif %}
 
-    {# ==========================================================================
-       5. LE CORPS DE TEXTE DÉPLOYÉ AVEC SES CLASSES GÉOMÉTRIQUES
-       ========================================================================== #}
+    {# Le corps de texte déployé avec ses classes géométriques #}
     <div class="opression-wrapper">
         <div class="opression-corps">
             
-            {# A. Le texte d'introduction générale (converti en Markdown) #}
+            {# A. Le texte d'introduction générale #}
             {% if data_source[prefixe ~ 'intro'] %}
                 <div class="opression-introduction-bloc">
                     {{ data_source[prefixe ~ 'intro'] | markdown | shortcodes | raw }}
@@ -108,8 +101,8 @@
                 </div>
             {% endif %}
 
-        </div>{# fermeture .opression-corps #}
-    </div>{# fermeture .opression-wrapper #}
-</div>{# fermeture .section-spectacle #}
+        </div>
+    </div>
+</div>
 
 {% endblock %}

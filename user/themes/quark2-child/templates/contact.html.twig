@@ -1,18 +1,17 @@
 {% extends 'main-layout.html.twig' %}
 
+{# 1. Récupération globale de la collection #}
+{% set collection_contact = grav.flex.directory('contact').getCollection() %}
+{% set contact_flex = collection_contact.first() %}
+{% set flex_seo = contact_flex %}
+
 {% block content %}
 
-    {# 1. Récupération sémantique unifiée de la collection de contact (Comme Grésilhette/Compagnie) #}
-    {% set collection_contact = grav.flex.directory('contact').getCollection() %}
-    {% set contact_flex = collection_contact.first() %}
-
-    {# ========================================================================= #}
-    {# SECTION TÉLÉPHONE (Pôles d'équipe réancrés dans l'onglet 2)               #}
-    {# ========================================================================= #}
+    {# Section téléphone - Pôles d'équipe réancrés dans l'onglet 2 #}
     {% if contact_flex.poles_contact is not empty %}
     <div class="telephone">
         
-        {# Récupération sécurisée de l'icône téléphone depuis user/data via |keys|first #}
+        {# Récupération sécurisée de l'icône téléphone #}
         {% if contact_flex.telephone_icone is not empty %}
             {% set path_tel_icone = contact_flex.telephone_icone | keys | first %}
             <p><img src="{{ base_url_simple ~ '/' ~ path_tel_icone }}" width="50px" alt="Téléphone"></p>
@@ -56,9 +55,7 @@
     </div>
     {% endif %}
 
-    {# ========================================================================= #}
-    {# SECTION EMAIL & RÉSEAUX SOCIAUX                                           #}
-    {# ========================================================================= #}
+    {# Section email et réseaux sociaux #}
     {% if contact_flex.email_adresse %}
     <div class="infos-contact">
         
@@ -77,7 +74,7 @@
         </span>
     </div>
     {% endif %}
-    {# Extraction et rendu de la zone Facebook (CSS ::before conservé) #}
+    {# Extraction et rendu de la zone Facebook #}
     {% if contact_flex.reseaux_facebook %}
     <div class="infos-contact fb">
         <a href="{{ contact_flex.reseaux_facebook }}" target="_blank" rel="noopener noreferrer">
@@ -86,7 +83,7 @@
     </div>
     {% endif %}
 
-    {# Extraction et rendu de la zone Instagram (CSS ::before conservé) #}
+    {# Extraction et rendu de la zone Instagram #}
     {% if contact_flex.reseaux_instagram %}
     <div class="infos-contact insta">
         <a href="{{ contact_flex.reseaux_instagram }}" target="_blank" rel="noopener noreferrer">
@@ -95,9 +92,7 @@
     </div>
     {% endif %}
 
-    {# ========================================================================= #}
-    {# SECTION ADRESSE POSTALE                                                  #}
-    {# ========================================================================= #}
+    {# Section adresse postale #}
     {% if contact_flex.adresse_lignes is not empty %}
     <div class="adresse">
         
@@ -116,9 +111,7 @@
     </div>
     {% endif %}
 
-    {# ========================================================================= #}
-    {# SECTION ASSOCIATION & MENTIONS LÉGALES                                   #}
-    {# ========================================================================= #}
+    {# Section association et données juridiques #}
     {% if contact_flex.association_details is not empty %}
     <div class="association">
         

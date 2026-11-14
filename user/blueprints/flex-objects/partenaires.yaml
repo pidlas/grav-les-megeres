@@ -9,7 +9,6 @@ config:
       options:
         formatter:
           class: 'Grav\Framework\File\Formatter\YamlFormatter'
-        # 🌟 LOGIQUE CENTRALISÉE : Stockage de la liste dans user/data/
         folder: 'user/data/flex-objects/partenaires' 
     media:
       per_object: false
@@ -20,7 +19,6 @@ config:
         route: /infos/partenaires
         template: partenaires
 
-  # 🌟 LOGIQUE ADMIN ALIGNÉE SUR LES ACTUALITÉS ET GRÉSILHETTE
   admin:
     router:
       path: /partenaires
@@ -57,7 +55,6 @@ form:
       validate:
         type: url
 
-    # 🌟 MODERNISATION : Passage au type file applicatif relatif sans "user/"
     image:
       type: file
       label: Choisir le logo du partenaire

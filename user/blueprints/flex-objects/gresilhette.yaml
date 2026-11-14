@@ -2,6 +2,10 @@ type: flex-objects
 title: Grésilhette et la Salimonde
 description: Gestion des médias, vidéos et informations du spectacle Grésilhette et la Salimonde
 
+extends@:
+  type: partials/onglet-commun
+  context: blueprints://flex-objects
+
 config:
   data:
     storage:
@@ -31,7 +35,7 @@ config:
     list:
       title: Liste des Spectacles
       fields:
-        title:
+        page_title:
           title: Titre du spectacle
           field: title
           link: edit
@@ -47,11 +51,6 @@ form:
           type: tab
           title: "Informations Générales"
           fields:
-            title:
-              type: text
-              label: Titre de la page
-              validate:
-                required: true
             menu:
               type: text
               label: Titre dans le menu du site

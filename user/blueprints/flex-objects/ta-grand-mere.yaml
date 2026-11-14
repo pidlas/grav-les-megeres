@@ -2,6 +2,10 @@ type: flex-objects
 title: Ta grand-mère sous le figuier
 description: Gestion des médias audio, questions et rédactionnel pour le projet Ta grand-mère sous le figuier
 
+extends@:
+  type: partials/onglet-commun
+  context: blueprints://flex-objects
+
 config:
   data:
     storage:
@@ -36,7 +40,7 @@ config:
     list:
       title: Liste des Collectes
       fields:
-        title:
+        page_title:
           title: Titre du projet
           field: title
           link: edit
@@ -52,11 +56,6 @@ form:
           type: tab
           title: "Général & Audio"
           fields:
-            title:
-              type: text
-              label: Titre de la page
-              validate:
-                required: true
             menu:
               type: text
               label: Titre dans le menu du site

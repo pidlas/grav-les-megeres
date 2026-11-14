@@ -2,7 +2,6 @@
 
 {% block content %}
 
-    {# 🌟 ALIGNEMENT TOTAL SUR LE MODÈLE flex-objects #}
     {% set liste_partenaires = grav['flex'].collection('partenaires') %}
 
     {% if liste_partenaires is not empty %}
@@ -25,8 +24,6 @@
                         </div>
 
                         {# ZONE 2 : LE BOUTON D'ACTION BLINDÉ #}
-                        {# COMMENTAIRE : Si l'URL existe, on génère un bloc HTML brut 
-                           pour interdire à Grav ou à Firefox de nettoyer l'attribut de classe. #}
                         {% set bouton_url = partenaire.url | default('') %}
                         {% if bouton_url != '' %}
                             <a href="{{ bouton_url }}" target="_blank" rel="noopener noreferrer" class="partenaire-btn-pro text-center">

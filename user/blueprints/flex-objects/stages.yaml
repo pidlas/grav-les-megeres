@@ -2,6 +2,10 @@ type: flex-objects
 title: Stages de théâtre
 description: Gestion des médias et informations de la page Stages de théâtre
 
+extends@:
+  type: partials/onglet-commun
+  context: blueprints://flex-objects
+
 config:
   data:
     storage:
@@ -30,7 +34,7 @@ config:
     list:
       title: Configuration de la page Stages
       fields:
-        title:
+        page_title:
           title: Titre de la page
           field: title
           link: edit
@@ -46,18 +50,9 @@ form:
           type: tab
           title: "Contenu de la page Stages"
           fields:
-            title:
-              type: text
-              label: Titre de la page (S'affichera dans le H1)
-              validate:
-                required: true
             menu:
               type: text
               label: Titre dans le menu du site
-            meta_description:
-              type: textarea
-              label: Meta Description (SEO)
-              rows: 2
 
             section_photo_haut:
               type: section

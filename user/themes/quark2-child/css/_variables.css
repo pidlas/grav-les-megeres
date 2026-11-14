@@ -1,6 +1,4 @@
-/* ==========================================================================
-   [TYPOGRAPHIE] 1. CHARGEMENT DES POLICES DE CARACTÈRES
-   ========================================================================== */
+/*[TYPOGRAPHIE] 1. Chargement des polices de caractères*/
 @font-face {
     font-display: swap;
     font-family: CocoGothic;
@@ -43,17 +41,13 @@
         url(../fonts/The\ Seasons/the-seasons-bold.woff) format("woff");
 }
 
-/* ==========================================================================
-   2. BLOC DES VARIABLES RACINES CENTRALISÉES (POUR LE CMS GRAV)
-   ========================================================================== */
+/*2. Bloc des variables racines*/
 :root {
-    /* --- VOS POLICES DE CARACTÈRES --- */
     --font-main: CocoGothic, Arial, sans-serif;
     --font-display: TanMonCheri;
     --font-citation: The Seasons Bold;
     --font-auteur: The Seasons Regular;
 
-    /* --- VOS COULEURS DE MARQUE OFFICIELLES --- */
     --color-brand-primary:hsla(15, 69%, 65%, 1);          /* terracotta claire */
     --color-brand-active:hsla(16, 37%, 36%, 1);           /* terracotta foncée */
     --color-brand-secondary:hsla(264, 28%, 23%, 1);       /* prune foncée */
@@ -72,23 +66,19 @@
     --color-fb:hsla(214, 89%, 52%, 1);                    /* bleu faceboo*/
     --color-insta:hsla(340, 75%, 54%, 1);                 /* rose instagram*/
     
-    /* --- VARIANTES TRANSPARENTES ACCESSIBLES --- */
     --color-border-divider: hsla(264, 28%, 23%, 0.18);    /* Fines bordures PC */
     --color-overlay-bg: hsla(264, 28%, 23%, 0.35);        /* Masque arrière-plan mobile */
     --color-hover-light: hsla(0, 0%, 100%, 0.18);         /* Luminescence de survol PC */
     --color-hover-medium: hsla(0, 0%, 100%, 0.2);         /* Fond sous-menus mobiles */
     --color-focus-light: hsla(0, 0%, 100%, 0.25);         /* Focus accessibilité clavier */
     
-    /* --- NUANCES POUR L'EFFET NÉOMORPHIQUE (.rs) --- */
     --color-neon-dark: hsla(15, 48%, 56%, 1);           
     --color-neon-light: hsla(15, 100%, 74%, 1);         
 
-    /* --- GÉOMÉTRIE DE FLUX ET CONTENU --- */
     --content-width-mobile: clamp(320px, 92vw, 800px);
     --content-max-tablet: 64rem;
     --content-max-desktop: 75rem;
 
-    /* --- DESIGN SYSTEM DE VOS ESPACEMENTS --- */
     --space-xs: 0.625rem;
     --space-s: 1rem;
     --space-m: 1.5625rem;
@@ -97,7 +87,6 @@
     --navbar-height: 3.75rem;                         /* Hauteur fixe de la barre PC (60px) */
     --menu-desktop-width: 16vw;                       /* Largeur de vos compartiments PC */
 
-    /* --- PARAMÈTRES DU MENU HEADER ET DU PANNEAU RESPONSIVE --- */
     --menu-header-padding-right: 5.5rem;
     --menu-trigger-offset: 1.25rem;
     --menu-trigger-size: 2.5rem;
@@ -115,7 +104,6 @@
     --padding-submenu-pc-left: 0.625rem;              /* Alignement du texte des sous-menus PC (10px) */
     --padding-rs-container: 0.25rem;                  /* Calage du conteneur des icônes RS (4px) */
 
-    /* --- VOS OMBRES ET RELIEFS SÉMANTIQUES --- */
     --shadow-standard: 0 4px 12px hsla(264, 28%, 23%, 0.15);
     --shadow-neon-outer: 0.25rem 0.25rem 0.5rem var(--color-neon-dark), 
         -0.25rem -0.25rem 0.5rem var(--color-neon-light);

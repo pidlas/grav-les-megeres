@@ -1,72 +1,12 @@
 {% extends 'main-layout.html.twig' %}
 
-{# ==========================================================================
-   1. SURCHARGE DU TITRE DE L'ONGLET (S'aligne sur le spectacle ou la version)
-   ========================================================================== #}
-{% block head_title %}
-    {% set collection = grav.flex.directory('gresilhette').getCollection() %}
-    {% set gresilhette_flex = collection.first() %}
-    {% set seo_title = gresilhette_flex.title | default(page.title) %}
-    
-    {% set segments_url = uri.path|split('/') %}
-    {% set target_slug = segments_url|last|trim %}
-
-    {# Si l'URL se termine par un slug qui correspond à une version technique #}
-    {% if target_slug is not empty and target_slug != 'gresilhette-et-la-salimonde' %}
-        {% for version in gresilhette_flex.spectacle.versions if version.slug_version == target_slug %}
-            {% set seo_title = version.nom_version ~ ' | ' ~ seo_title %}
-        {% endfor %}
-    {% endif %}
-
-    <title>{{ seo_title|e }} | {{ site.title|e }}</title>
-{% endblock %}
-
-{# ==========================================================================
-   2. SURCHARGE DE LA META DESCRIPTION CLASSIQUE & OPEN GRAPH
-   ========================================================================== #}
-{% block head_meta %}
-    {% set collection = grav.flex.directory('gresilhette').getCollection() %}
-    {% set gresilhette_flex = collection.first() %}
-    
-    {% set segments_url = uri.path|split('/') %}
-    {% set target_slug = segments_url|last|trim %}
-    
-    {% set seo_description = gresilhette_flex.meta_description | default(page.header.metadata.description) %}
-
-    {% if target_slug is not empty and target_slug != 'gresilhette-et-la-salimonde' %}
-        {% for version in gresilhette_flex.spectacle.versions if version.slug_version == target_slug %}
-            {% set texte_pur = version.texte_version|markdown|striptags|trim %}
-            {% set seo_description = texte_pur|truncate(150) %}
-        {% endfor %}
-    {% endif %}
-
-    <meta name="description" content="{{ seo_description|e('html_attr') }}" />
-    <meta name="robots" content="{% if page.header.metadata.robots %}{{ page.header.metadata.robots|e }}{% else %}index, follow{% endif %}" />
-    <link class="can" rel="canonical" href="{{ page.url(true, true)|e }}" />
-{% endblock %}
-
-{% block head_opengraph %}
-    <meta property="og:site_name" content="{{ site.title|e }}" />
-    <meta property="og:type" content="website" />
-    <meta property="og:title" content="{{ seo_title|default(page.title)|e }}" />
-    <meta property="og:description" content="{{ seo_description|e('html_attr') }}" />
-    <meta property="og:url" content="{{ page.url(true, true)|e }}" />
-    <meta property="og:image" content="{{ uri.rootUrl(true) ~ url('theme://images/logohumous-notext-blue.png', false) }}" />
-{% endblock %}
-
-{# ==========================================================================
-   3. AFFICHAGE DU CONTENU DE LA PAGE (Le corps du site)
-   ========================================================================== #}
-{% block content %}
-
+{# 1. Détection de la version active et préparation SEO centralisée  #}
 {% set collection = grav.flex.directory('gresilhette').getCollection() %}
 {% set gresilhette_flex = collection.first() %}
 
-{# Détection de la route de navigation #}
 {% set segments_url = uri.path|split('/') %}
 {% set target_slug = segments_url|last|trim %}
 
-{# Identification de la version technique active #}
 {% set version_active = null %}
 {% if target_slug is not empty and target_slug != 'gresilhette-et-la-salimonde' %}
     {% for version in gresilhette_flex.spectacle.versions if version.slug_version == target_slug %}
@@ -74,25 +14,38 @@
     {% endfor %}
 {% endif %}
 
-<script>
-    (function() {
-        var h1 = document.querySelector(".conteneur-champignons h1");
-        if (h1) {
-            h1.textContent = "{% if version_active %}{{ version_active.nom_version|e('js') }}{% else %}{{ gresilhette_flex.title|default('Grésilhette et la Salimonde')|e('js') }}{% endif %}";
-        }
-    })();
-</script>
+{% set titre_base = gresilhette_flex.page_title | default(gresilhette_flex.title) | default(page.title) %}
+{% if version_active %}
+    {% set texte_pur = version_active.texte_version|markdown|striptags|trim %}
+    {% set flex_seo = {
+        'page_title': version_active.nom_version ~ ' | ' ~ titre_base,
+        'meta_description': texte_pur|truncate(150),
+        'meta_robots': gresilhette_flex.meta_robots
+    } %}
+{% else %}
+    {% set flex_seo = gresilhette_flex %}
+{% endif %}
+
+{% block page_h1 %}
+    {% if version_active %}
+        <h1>{{ version_active.nom_version|trim }}</h1>
+    {% else %}
+        <h1>{{ titre_base|split('|')|first|trim }}</h1>
+    {% endif %}
+{% endblock %}
 
 {% block custom_styles %}
     <style>
         .encadre:before, .encadre-lenga:before, .encadre-extrait:before {
-            {# 🌟 SÉCURISÉ : Chargement de l'image de fond depuis le dossier du thème #}
             background-image: url('{{ base_url_simple ~ '/' ~ "user/data/flex-objects/gresilhette/livre-blanc-fleur-remplie.avif" }}') !important;
         }
     </style>
 {% endblock %}
 
-{# MACRO UNIQUE DE LA GRILLE DES 3 RONDS PERMANENTS #}
+{# 2. Affichage du contenu de la page - le corps du site #}
+{% block content %}
+
+{# Macro unique de la grille des 3 ronds permanents #}
 {% set macro_grille_3_ronds %}
     <p class="versions-spectacle">
         {% if gresilhette_flex.spectacle.grille.ombres %}
@@ -113,15 +66,15 @@
     </p>
 {% endset %}
 
-{# SEPARATION ET CLOISONNEMENT DES VUES #}
+{# Séparation et cloisonnement des vues #}
 {% if version_active %}
     
-    {# --- VUE A : LES 3 VERSIONS SUBALTERNES (SANS L'ENCADRE DE BASE) --- #}
+    {# --- VUE A : Les 3 versions subalternes #}
     <div class="spectacle-gresilhette">
         
         {{ macro_grille_3_ronds | raw }}
 
-        {# 🌟 CAS 1 : RECONSTRUCTION NATIVE DU THEATRE D'OMBRES #}
+        {# Reconstruction du théâtre d'ombres #}
         {% if version_active.slug_version == 'theatre-d-ombres' %}
             
             <div class="montage-wrapper">
@@ -138,7 +91,7 @@
                 </div>
             </div>
 
-        {# 🌟 CAS 2 : RECONSTRUCTION NATIVE DE LA SIESTE CONTÉE #}
+        {# Reconstruction de la Siesté Contée #}
         {% elseif version_active.slug_version == 'sieste-contee' %}
             
             {% set corps_sieste = version_active.texte_version|markdown|shortcodes %}
@@ -161,7 +114,7 @@
                 <p>Voir ci-dessous{{ bloc_annonce | raw }}
             {% endif %}
 
-        {# 🌟 CAS 3 : AUTRES VERSIONS (PROJET PEDAGOGIQUE...) #}
+        {# Reconstruction Projet Pédagogique #}
         {% else %}
             {% if version_active.image_version %}
                 <div class="image-illustration-version">
@@ -171,7 +124,6 @@
             {{ version_active.texte_version|markdown|shortcodes|raw }}
         {% endif %}
         
-        {# BOUTON DE TELECHARGEMENT DE LA FICHE TECHNIQUE PDF #}
         {% if version_active.pdf_technique and version_active.btn_technique %}
             <p class="btn-dossier-technique">
                 <a href="{{ base_url_simple ~ '/user/data/flex-objects/gresilhette/' ~ version_active.pdf_technique }}" title="Télécharger la fiche technique {{ version_active.nom_version }}">
@@ -183,13 +135,12 @@
 
 {% else %}
     
-    {# --- VUE B : PAGE PRINCIPALE DU SPECTACLE (LES 3 ENCADRÉS EXCLUSIFS) --- #}
+    {# --- VUE B : Page principale du spectacle #}
     <div class="encadre">
         <div class="gresilhette-et-la-salimonde">
             <h2 class="coco">{{ gresilhette_flex.spectacle.age_duree }}</h2>
 
             <div class="wrapper-video">
-                <!-- 🌟 RESTAURATION : Suppression de 'controls' + ajout des attributs tactiles et d'intégration -->
                 <video id="video" preload="auto" loading="metadata" width="640" height="360" disablePictureInPicture="true" playsinline>
                     {% if gresilhette_flex.spectacle.video.mp4 %}
                         <source src="{{ base_url_simple ~ '/user/data/flex-objects/gresilhette/' ~ gresilhette_flex.spectacle.video.mp4 }}" type="video/mp4" />
@@ -200,7 +151,6 @@
                     Votre navigateur ne prend pas en charge la lecture vidéo HTML5.
                 </video>
             
-                <!-- 🌟 TOUTE VOTRE STRUCTURE DE CONTRÔLES SUR MESURE REVIENT ICI -->
                 <div class="custom-video-controls">
                     <!-- Bouton de lecture / pause -->
                     <button id="playPauseBtn" class="control-btn" aria-label="Play/Pause">
@@ -208,13 +158,10 @@
                         <svg class="pause-icon" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
                     </button>
                     
-                    <!-- Barre de progression orange et grise (Optimisée tactile) -->
                     <input type="range" id="progress" min="0" max="100" value="0" step="0.1">
                     
-                    <!-- Affichage du compteur de temps (ex: 1:20 / 3:45) -->
                     <span id="time" class="time-display">0:00 / 0:00</span>
                     
-                    <!-- Zone Volume : Bouton + Curseur rétractable -->
                     <div class="volume-control-zone">
                         <button id="muteBtn" class="control-btn" aria-label="Mute/Unmute">
                             <svg class="sound-icon" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
@@ -223,7 +170,6 @@
                         <input type="range" id="volumeSlider" min="0" max="1" step="0.05" value="1" aria-label="Volume">
                     </div>
             
-                    <!-- Bouton pour basculer en mode Plein Écran -->
                     <button id="fullscreenBtn" class="control-btn" aria-label="Plein écran">
                         <svg class="fs-icon" viewBox="0 0 24 24"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg>
                         <svg class="exit-fs-icon" viewBox="0 0 24 24"><path d="M5 16h3v3h2v-5H5v2zm3-8H5v2h5V5H8v3zm6 11h2v-3h3v-2h-5v5zm2-11V5h-2v5h5V8h-3z"/></svg>
@@ -260,7 +206,7 @@
         </div>
     </div>
 
-    {# ENCADRÉ 2 : LA LANGUE OCCITANE #}
+    {# Encadré 2 : La langue occitane #}
     {% if gresilhette_flex.titre_occitan %}
     <div class="encadre-lenga">
         <div class="la-lenga-occitana">
@@ -276,7 +222,7 @@
     </div>
     {% endif %}
 
-    {# ENCADRÉ 3 : L'EXTRAIT DE TEXTE #}
+    {# Encadré 3 : L'extrait de texte #}
     {% if gresilhette_flex.bio_extrait|trim is not empty %}
     <div class="encadre-extrait">
         <div class="extrait">

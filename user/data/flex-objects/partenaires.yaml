@@ -8,6 +8,9 @@ c33056d83c41c5a8fbadb7038cdbce0c:
       size: 7588
       path: user/data/flex-objects/partenaires/prefet-region-occitanie.avif
       url: /user/data/flex-objects/partenaires/prefet-region-occitanie.avif
+  meta_robots: 'noindex, nofollow'
+  page_title: 'Nos partenaires'
+  meta_description: "Nos partenaires sont ou ont été : la DRAC Occitanie, le Fondation pour le Développement de la vie associatice, le département de l'Aude, l'agglomération de Carcassonne,  la communauté de communes de la Montagne Noire, le Foyer Socio-culturel de Moussoulens et la commune de Moussoulens"
 bf524d33b6c5aa1a3d16f128e6f53c51:
   nom: 'Fond Pour le Développement de la Vie Associative'
   url: 'https://education.gouv.fr'

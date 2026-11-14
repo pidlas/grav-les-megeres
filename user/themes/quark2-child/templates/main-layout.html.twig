@@ -106,13 +106,14 @@
                             
                     {% set vraie_page_url = page.find(uri.path) %}
 
-                    {# Priorité absolue au nouveau champ page_title (ou ancien title Flex), sinon page MD #}
-                    {% set titre_brut = flex_seo.page_title | default(flex_seo.title) | default(vraie_page_url.title) | default(page.title) %}
-
-                    {% set titre_decoupe = titre_brut|split('|') %}
-                    <h1>{{ titre_decoupe[0]|trim }}</h1>
+                    {% block page_h1 %}
+                        {# Priorité absolue au nouveau champ page_title (ou ancien title Flex), sinon page MD #}
+                        {% set titre_brut = flex_seo.page_title | default(flex_seo.title) | default(vraie_page_url.title) | default(page.title) %}
+                        {% set titre_decoupe = titre_brut|split('|') %}
+                        <h1>{{ titre_decoupe[0]|trim }}</h1>
+                    {% endblock %}
                            
-                    {% set sous_titre = vraie_page_url.header.subtitle | default(page.header.subtitle) %}
+                    {% set sous_titre = flex_seo.subtitle | default(flex_seo.sous_titre) | default(vraie_page_url.header.subtitle) | default(page.header.subtitle) %}
                     {% if sous_titre %}
                         <p class="sous-titre">{{ sous_titre | raw }}</p>
                     {% endif %}

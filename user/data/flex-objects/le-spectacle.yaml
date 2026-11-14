@@ -64,3 +64,6 @@ a729e09e40c88192ffb1f2dc30365948:
         titre_format: 'Format 1h30'
         details_format: '3 scènes au choix — 35 participants maximum.'
     tout_public_tarifs: 'Pour connaître les tarifs, [a href="/contact" title="Accès à notre page contact"]contactez-nous[/a]'
+  meta_robots: 'noindex, nofollow'
+  page_title: "Le Spectacle : 0'Pression |"
+  meta_description: "Découvrez l'approche théâtre forum des Mégères de l'Humus: une pratique participative pour ouvrir le dialogue et agir collectivement."

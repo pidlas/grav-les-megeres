@@ -1,13 +1,13 @@
 {% extends 'main-layout.html.twig' %}
 
-{% block content %}
-    {# 1. Récupération de la collection globale #}
-    {% set collection_compagnie = grav.flex.directory('compagnie').getCollection() %}
-    {% set compagnie_flex = collection_compagnie.first() %}
+{# 1. Récupération de la collection globale #}
+{% set collection_compagnie = grav.flex.directory('compagnie').getCollection() %}
+{% set compagnie_flex = collection_compagnie.first() %}
+{% set flex_seo = compagnie_flex %}
 
-    {# ======================================================================
-       SECTION 1 : L'INTRODUCTION (_1-intro)
-       ====================================================================== #}
+{% block content %}
+
+    {# SECTION 1 : Introduction  #}
     <div class="g_compagnie">
         <div class="g_co-item1">
             {% if compagnie_flex.intro.texte_principal %}
@@ -21,9 +21,7 @@
         </div>
     </div>
 
-    {# ======================================================================
-       SECTION 2 : LES DÉTAILS ET LES DEUX CITATIONS (_2-details)
-       ====================================================================== #}
+    {# SECTION 2 : Les détails et la citation #}
     <div class="g_compagnie2">
         
         {# A. Partie Haute : La Création et l'Engagement #}
@@ -33,7 +31,7 @@
             {% endif %}
         {# </div> #}
 
-        {# B. Première Citation Centrale : Éloge de la lenteur #}
+        {# B. Citation Centrale : Éloge de la lenteur #}
         {% if compagnie_flex.details.citation_texte %}
             <figure>
                 <blockquote>
@@ -55,12 +53,10 @@
         </div>
 
     </div>
-    {# ======================================================================
-       SECTION 3 : LA GALERIE, LES RAPPORTS ET LA MYTHOLOGIE (_3-galerie-liens)
-       ====================================================================== #}
+    {# SECTION 3 : La galerie, les rapports, la mythologie #}
     <div class="g_compagnie3">
 
-        {# ITEM 7 : RAPPORT 2024 #}
+        {# ITEM 7 : Rapport 2024 #}
         <div class="g_co-item7">
             {% if compagnie_flex.galerie.rapport_2024_img is not empty %}
                 {% set path_img_2024 = compagnie_flex.galerie.rapport_2024_img | keys | first %}
@@ -73,7 +69,7 @@
             {% endif %}
         </div>
 
-        {# ITEM 8 : RAPPORT 2025 #}
+        {# ITEM 8 : Rapport 2025 #}
         <div class="g_co-item8">
             {% if compagnie_flex.galerie.rapport_2025_img is not empty %}
                 {% set path_img_2025 = compagnie_flex.galerie.rapport_2025_img | keys | first %}
@@ -90,7 +86,7 @@
             <h2 class="display-title">Et pourquoi les Mégères ?</h2>
         </div>
 
-        {# ITEM 10 : GORGONE #}
+        {# ITEM 10 : Gorgone #}
         <div class="g_co-item10">
             {% if compagnie_flex.galerie.gorgone_img is not empty %}
                 {% set path_gorgone = compagnie_flex.galerie.gorgone_img | keys | first %}
@@ -101,7 +97,7 @@
             {% endif %}
         </div>
 
-        {# ITEM 11 : ERINYES #}
+        {# ITEM 11 : Érynies #}
         <div class="g_co-item11">
             {% if compagnie_flex.galerie.erinyes_img is not empty %}
                 {% set path_erinyes = compagnie_flex.galerie.erinyes_img | keys | first %}
@@ -112,7 +108,7 @@
             {% endif %}
         </div>
                 
-        {# ITEM 12 : ORESTE #}
+        {# ITEM 12 : Oreste #}
         <div class="g_co-item12">
             <figure>
                 {% if compagnie_flex.galerie.oreste_img is not empty %}
@@ -125,7 +121,7 @@
             </figure>
         </div>
                 
-        {# ITEM 13 : L'HUMUS ET SA LÉGENDE BIOLOGISTE #}
+        {# ITEM 13 : L'humus et sa légende biologiste #}
         <div class="g_co-item13">
             <h2 class="display-title">Et l'humus dans tout ça ?</h2>
             {% if compagnie_flex.galerie.humus_texte %}

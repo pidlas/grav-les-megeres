@@ -2,6 +2,10 @@ type: flex-objects
 title: Page d'Accueil
 description: Gestion du diaporama et du texte d'accueil de la compagnie
 
+extends@:
+  type: partials/onglet-commun
+  context: blueprints://flex-objects
+
 config:
   data:
     storage:
@@ -25,35 +29,24 @@ config:
     list:
       title: Configuration de l'Accueil
       fields:
-        title:
+        page_title:
           title: Titre de la page
-          field: title
+          field: page_title
           link: edit
 
 form:
   fields:
     tabs:
-      type: tabs
-      active: 1
       fields:
 
         tab_general:
           type: tab
           title: "Contenu de l'Accueil"
           fields:
-            title:
-              type: text
-              label: Titre de la page (S'affichera dans le H1)
-              validate:
-                required: true
             menu:
               type: text
               label: Titre dans le menu du site
               default: "Accueil"
-            meta_description:
-              type: textarea
-              label: Meta Description (SEO)
-              rows: 2
 
             section_diaporama:
               type: section

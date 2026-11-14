@@ -1,41 +1,16 @@
 {% extends 'main-layout.html.twig' %}
 
+{# 1. Récupération de la collection globale #}
 {% set collection = grav.flex.directory('cours').getCollection() %}
 {% set cours_flex = collection.first() %}
+{% set flex_seo = cours_flex %}
 
-{# ==========================================================================
-   1. SURCHARGE SEO & TITRE DE L'ONGLET
-   ========================================================================== #}
-{% block head_title %}
-    {% set seo_title = cours_flex.title | default(page.title) %}
-    <title>{{ seo_title|e }} | {{ site.title|e }}</title>
-{% endblock %}
-
-{% block head_meta %}
-    {% set seo_description = cours_flex.meta_description | default(page.header.metadata.description) %}
-    <meta name="description" content="{{ seo_description|e('html_attr') }}" />
-    <meta name="robots" content="{% if page.header.metadata.robots %}{{ page.header.metadata.robots|e }}{% else %}index, follow{% endif %}" />
-    <link class="can" rel="canonical" href="{{ page.url(true, true)|e }}" />
-{% endblock %}
-
-{# ==========================================================================
-   2. CONTENU DE LA PAGE (Structure Spectre.css + Classes Métiers)
-   ========================================================================== #}
+{# 1. Contenu de la page - Structure Spectre.css + Classes Métiers #}
 {% block content %}
-
-{# Mise à jour dynamique du H1 principal #}
-<script>
-    (function() {
-        var h1 = document.querySelector(".conteneur-champignons h1");
-        if (h1 && "{{ cours_flex.title|default('')|e('js') }}") {
-            h1.textContent = "{{ cours_flex.title|split('|')|first|trim|e('js') }}";
-        }
-    })();
-</script>
 
 <div class="container mt-2">
 
-    {# 1. LECTEUR AUDIO SUR-MESURE #}
+    {# 1. Lecteur audio sur mesure #}
     {% if cours_flex.cours_audio_mp3 or cours_flex.cours_audio_ogg %}
     <div class="columns my-2">
         <div class="column col-12">
@@ -69,7 +44,7 @@
     </div>
     {% endif %}
 
-    {# 2. PARAGRAPHE DE PRÉSENTATION #}
+    {# 2. Paragraphe de présentation #}
     {% if cours_flex.cours_description %}
     <div class="columns my-2">
         <div class="column col-12">
@@ -78,7 +53,7 @@
     </div>
     {% endif %}
 
-    {# 3. DEUX IMAGES SUR LA MÊME LIGNE CENTRÉES #}
+    {# 3. Deux images centrées sur la même ligne #}
     {% if cours_flex.cours_img_tarifs or cours_flex.cours_img_photo %}
     <div class="columns my-2">
         <div class="column col-12">
@@ -94,7 +69,7 @@
     </div>
     {% endif %}
 
-    {# 4. TITRE & IMAGE DES OBJECTIFS PÉDAGOGIQUES CENTRÉE #}
+    {# 4. Titre et image des objectifs pédagogiques centrés #}
     {% if cours_flex.cours_titre_objectifs or cours_flex.cours_img_objectifs %}
     <div class="columns my-2">
         <div class="column col-12">

@@ -2,6 +2,10 @@ type: flex-objects
 title: Contact & Association
 description: Gestion centralisée des coordonnées, des pôles téléphoniques de l'équipe, des réseaux sociaux et des mentions légales de l'association.
 
+extends@:
+  type: partials/onglet-commun
+  context: blueprints://flex-objects
+
 config:
   data:
     storage:
@@ -9,7 +13,6 @@ config:
       options:
         formatter:
           class: 'Grav\Framework\File\Formatter\YamlFormatter'
-        # 🌟 LOGIQUE UNIFIÉE : Un fichier de collection unique sous user/data/
         folder: 'user/data/flex-objects/contact' 
     media:
       per_object: false
@@ -20,7 +23,6 @@ config:
         route: /contact
         template: contact
 
-  # 🌟 LOGIQUE ADMIN ALIGNÉE SUR GRÉSILHETTE, L'ÉQUIPE ET LA COMPAGNIE
   admin:
     router:
       path: /contact
@@ -33,7 +35,7 @@ config:
     list:
       title: Liste des Coordonnées
       fields:
-        title:
+        page_title:
           title: Nom de la page
           field: title
           link: edit
@@ -45,19 +47,11 @@ form:
       active: 1
       fields:
 
-        # ==================================================================
-        # ONGLET 1 : EN-TÊTE, MAIL & RÉSEAUX
-        # ==================================================================
+        # Onglet Sous-titre, email, réseaux
         tab_general:
           type: tab
-          title: "1. En-tête, Mail & Réseaux"
+          title: "1. Sous-titre, email, réseaux"
           fields:
-            title:
-              type: text
-              label: Titre principal de la page
-              default: "Nous Contacter"
-              validate:
-                required: true
             subtitle:
               type: text
               label: Sous-titre d'accompagnement
@@ -90,9 +84,7 @@ form:
               type: text
               label: "URL du compte Instagram"
 
-        # ==================================================================
-        # ONGLET 2 : PÔLES TÉLÉPHONIQUES
-        # ==================================================================
+        # Onglet Pôles téléphoniques
         tab_equipe:
           type: tab
           title: "2. Pôles Téléphoniques"
@@ -140,12 +132,10 @@ form:
                       type: text
                       label: "Téléphone individuel"
 
-        # ==================================================================
-        # ONGLET 3 : ADRESSE & MENTIONS LÉGALES
-        # ==================================================================
+        # Onglet Adresse, mentions juridiques
         tab_association:
           type: tab
-          title: "3. Adresse & Mentions Légales"
+          title: "3. Adresse & Mentions Juridiques"
           fields:
             section_adresse:
               type: section

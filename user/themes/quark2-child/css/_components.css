@@ -1226,7 +1226,7 @@ footer p {
 .gresilhette-et-la-salimonde {
     position:relative;
     align-items: center;
-    background-color: var(--color-sacred-white);
+    background-color: var(--color-whitesmoke);
     display: flex;
     flex-direction: column;
     padding: 1.25rem;

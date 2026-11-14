@@ -1,19 +1,16 @@
 {% extends 'main-layout.html.twig' %}
 
-{% block content %}
-
-{# 🌟 APPEL DE LA COLLECTION FLEX OBJECT UNIQUE DE LA PAGE GRAND-MÈRE #}
+{# 1. Récupération globale de la collection et transmission SEO #}
 {% set donnees_page = grav['flex'].collection('ta-grand-mere')|first %}
+{% set flex_seo = donnees_page %}
+
+{% block content %}
 
 {% if donnees_page is not empty %}
 
-    {# CORRECTIF : Plus de div.encadre parasite ici. On déploie votre bloc blanc 
-       directement dans la structure avec la marge haute var(--space-l) d'origine #}
     <div class="{{ page.slug }} p-3 rounded">
 
-        {# ==========================================================================
-           1. ZONE DU LECTEUR AUDIO SUR MESURE
-           ========================================================================== #}
+        {# 1. Zone du lecteur audio sur mesure #}
         {% set fichier_mp3 = donnees_page.spectacle.audio.mp3 | default('') %}
         {% set fichier_ogg = donnees_page.spectacle.audio.ogg | default('') %}
 
@@ -44,23 +41,17 @@
         </div>
         {% endif %}
 
-
-        {# ==========================================================================
-           2. SECTION 1 : L'INTRODUCTION (TEXTE DU HAUT)
-           ========================================================================== #}
+        {# 2. Section Introduction - texte du haut #}
         {% if donnees_page.spectacle.texte_intro is not empty %}
             <div class="spectacle-texte-intro my-3">
                 {{ donnees_page.spectacle.texte_intro | markdown | raw }}
             </div>
         {% endif %}
 
-
-        {# ==========================================================================
-           3. SECTION 2 : LE BLOC MIXTE FLUIDE (LAMPE + TEXTE CENTRAL)
-           ========================================================================== #}
+        {# 3. Section le bloc mixte fluide - lamp + texte central #}
         <div class="columns my-3 align-items-center">
             
-            {# A. LA CELLULE DE LA LAMPE #}
+            {# A. La cellule de la lamp #}
             {% set logo_lampe = donnees_page.spectacle.image_lampe | default('') %}
             {% if logo_lampe != '' %}
                 <div class="column col-4 col-sm-12 text-center p-2">
@@ -68,7 +59,7 @@
                 </div>
             {% endif %}
 
-            {# B. LA CELLULE DU TEXTE CENTRAL DU RÉCIT #}
+            {# B. La cellule du texte central du récit #}
             {% if donnees_page.spectacle.texte_corps is not empty %}
                 <div class="column col-8 col-sm-12 p-2">
                     {{ donnees_page.spectacle.texte_corps | markdown | raw }}
@@ -77,10 +68,7 @@
 
         </div>
 
-
-        {# ==========================================================================
-           4. SECTION 3 : LA LISTE DES QUESTIONS DE L'INTERVIEW
-           ========================================================================== #}
+        {# 4. Section Les questions de l'interview #}
         {% if donnees_page.spectacle.questions_interview is not empty %}
             <ul class="jolie-ombres slide-list my-3">
                 {% for item in donnees_page.spectacle.questions_interview %}
@@ -89,12 +77,7 @@
             </ul>
         {% endif %}
 
-
-        {# ==========================================================================
-           5. SECTION 4 : LES PARAGRAPHES DE CONCLUSION (TEXTE DU BAS)
-           ========================================================================== #}
-        {# CORRECTIF : Remplacement de la div.container parasite par une simple classe neutre 
-           qui hérite du fond blanc global de la page #}
+        {# 5. Section Les paragraphes de conclusion - texte du bas #}
         {% if donnees_page.spectacle.texte_conclusion is not empty %}
             <div class="spectacle-texte-conclusion mt-3">
                 {{ donnees_page.spectacle.texte_conclusion | markdown | shortcodes | raw }}

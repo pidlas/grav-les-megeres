@@ -1,7 +1,9 @@
 {% extends 'main-layout.html.twig' %}
 
-{# Récupération globale de la collection et détection de la fiche portant les métadonnées #}
+{# Récupération globale de la collection #}
 {% set actualites_flex = grav.flex.directory('actualites').getCollection() %}
+
+{# Détection de la fiche portant les métadonnées #}
 {% set fiche_seo = null %}
 {% for item in actualites_flex %}
     {% if fiche_seo is null and (item.page_title or item.meta_description) %}
@@ -9,22 +11,17 @@
     {% endif %}
 {% endfor %}
 
-{# ==========================================================================
-   AFFICHAGE DU CONTENU DE LA PAGE (Le corps du site)
-   ========================================================================== #}
+{# Affichage du contenu de la page - le corps du site #}
 {% block content %}
-    {# 1. Enveloppe sémantique globale propre pour le contenu textuel #}
-    <div class="page-content">
-        {{ page.content | raw }}
-    </div>
+    
+    {{ page.content | raw }}
 
     {# Zone dynamique de la liste des Actualités #}
     {% if actualites_flex is not empty %}
     <div class="actus-list" aria-live="polite">
         {% for item in actualites_flex %}
 
-            <article class="actu-item">
-                
+            <article class="actu-item">            
                 {# Image principale de la catégorie actu depuis le dossier user/data #}
                 {% if item.image_principale is not empty %}
                     {# 🌟 EXTRACTION SÉCURISÉE : On intercepte la clé du tableau (le chemin physique) #}

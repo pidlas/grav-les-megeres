@@ -1,8 +1,6 @@
 {% extends 'main-layout.html.twig' %}
 
-{# ==========================================================================
-   1. DÉTECTION DE LA FICHE CORRESPONDANTE VIA LE SLUG DE LA PAGE
-   ========================================================================== #}
+{# 1. Détection de la fiche correspondante via le slug de la page #}
 {% set collection = grav.flex.directory('pages-textuelles').getCollection() %}
 {% set fiche_page = null %}
 
@@ -12,46 +10,22 @@
     {% endif %}
 {% endfor %}
 
-{# ==========================================================================
-   2. SURCHARGE SEO & TITRE DE L'ONGLET
-   ========================================================================== #}
-{% block head_title %}
-    {% set seo_title = fiche_page.title | default(page.title) %}
-    <title>{{ seo_title|e }} | {{ site.title|e }}</title>
-{% endblock %}
+{% set flex_seo = fiche_page %}
 
-{% block head_meta %}
-    {% set seo_description = fiche_page.meta_description | default(page.header.metadata.description) %}
-    <meta name="description" content="{{ seo_description|e('html_attr') }}" />
-    <meta name="robots" content="{% if page.header.metadata.robots %}{{ page.header.metadata.robots|e }}{% else %}index, follow{% endif %}" />
-    <link class="can" rel="canonical" href="{{ page.url(true, true)|e }}" />
-{% endblock %}
-
-{# ==========================================================================
-   3. CONTENU DE LA PAGE (Structure Spectre.css + Classes Métiers)
-   ========================================================================== #}
+{# 2. Contenu de la page - structure Spectre.css + Classes Métiers #}
 {% block content %}
-
-<script>
-    (function() {
-        var h1 = document.querySelector(".conteneur-champignons h1");
-        if (h1 && "{{ fiche_page.title|default('')|e('js') }}") {
-            h1.textContent = "{{ fiche_page.title|split('|')|first|trim|e('js') }}";
-        }
-    })();
-</script>
 
 <div class="container mt-2">
     <div class="columns my-2">
         <div class="column col-12 {{ page.slug }}">
 
-            {# A. INTRODUCTION (Paragraphe seul ou liste initiale) #}
+            {# A. Introduction - Paragraphe seul ou liste initiale #}
             {% if fiche_page.page_intro %}
                 {% set html_intro = fiche_page.page_intro | markdown | shortcodes %}
                 {{ html_intro | replace({'<ul>': '<ul class="jolie-ombres">'}) | raw }}
             {% endif %}
 
-            {# B. SECTIONS / ARTICLES RÉPÉTABLES (Titre H2 + Paragraphes/Listes) #}
+            {# B. Sections - articles répétables - Titre H2 + Paragraphes/Listes #}
             {% if fiche_page.page_sections %}
                 {% for bloc in fiche_page.page_sections %}
                     {% if bloc.titre_section %}

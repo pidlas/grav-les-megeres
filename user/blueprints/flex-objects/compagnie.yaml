@@ -2,6 +2,10 @@ type: flex-objects
 title: La Compagnie
 description: Gestion centralisée des textes, citations, grilles, rapports d'activités et médias de la page Compagnie.
 
+extends@:
+  type: partials/onglet-commun
+  context: blueprints://flex-objects
+
 config:
   data:
     storage:
@@ -9,7 +13,6 @@ config:
       options:
         formatter:
           class: 'Grav\Framework\File\Formatter\YamlFormatter'
-        # 🌟 ALIGNEMENT TOTAL : Stockage du fichier unique compagnie.yaml dans user/data/flex-objects/
         folder: 'user/data/flex-objects/compagnie' 
     media:
       per_object: false
@@ -32,7 +35,7 @@ config:
     list:
       title: Contenu de la Compagnie
       fields:
-        title:
+        page_title:
           title: Titre principal
           field: title
           link: edit
@@ -40,8 +43,6 @@ config:
 form:
   fields:
     tabs:
-      type: tabs
-      active: 1
       fields:
         # ==================================================================
         # ONGLET 1 : INTRODUCTION (_1-intro)
@@ -50,19 +51,11 @@ form:
           type: tab
           title: "1. Introduction"
           fields:
-            title:
-              type: text
-              label: Titre principal de la page
-              default: "La Compagnie"
-              validate:
-                required: true
-            
             intro.texte_principal:
               type: markdown
               label: "Texte d'introduction"
               placeholder: Les 3 premiers paragraphes
             
-            # 🌟 RECTIFICATION SÉMANTIQUE : Image principale relative sans "user/"
             intro.image_principale:
               type: file
               label: "Image d'illustration principale (Le théâtre d'ombres)"
@@ -70,6 +63,7 @@ form:
               multiple: false
               accept:
                 - .avif
+
         # ==================================================================
         # ONGLET 2 : DÉTAILS DE L'AVENTURE (_2-details)
         # ==================================================================
@@ -77,7 +71,6 @@ form:
           type: tab
           title: "2. Détails & Citations"
           fields:
-            # --- BLOC DE DÉBUT ---
             section_debut:
               type: section
               title: "Partie Haute : Engagement et Rythme"
@@ -87,7 +80,6 @@ form:
               label: "Texte de début (Les 2 paragraphes : La compagnie a été créée...)"
               placeholder: "La compagnie a été créée pour deux raisons essentielles : travailler à notre rythme..."
 
-            # --- PREMIÈRE CITATION (CENTRALE) ---
             section_citation_1:
               type: section
               title: "Citation Centrale : Éloge de la lenteur"
@@ -101,7 +93,6 @@ form:
               label: "Auteur de la citation centrale"
               default: "La Compagnie Les Mégères de l'Humus"
 
-            # --- BLOC DE FIN ---
             section_fin:
               type: section
               title: "Partie Basse : Éducation et Sensibilité"
@@ -110,6 +101,7 @@ form:
               type: markdown
               label: "Texte de fin (Les 2 paragraphes : Rien que ça !...)"
               placeholder: "Rien que ça ! Alors nous nous nourrissons intellectuellement..."
+
         # ==================================================================
         # ONGLET 3 : GALERIE & RAPPORTS (_3-galerie-liens)
         # ==================================================================

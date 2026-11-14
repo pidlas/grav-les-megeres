@@ -1,7 +1,10 @@
 type: flex-objects
-
 title: Page Équipe
 description: Gestion conviviale des membres de l'équipe
+
+extends@:
+  type: partials/onglet-commun
+  context: blueprints://flex-objects
 
 config:
   data:
@@ -13,14 +16,12 @@ config:
         folder: 'user/data/flex-objects/equipe'
     media:
       per_object: false
-  # 🌟 LA CORRECTION HUMAINE QUI MANQUE ICI :
-  # On dit au blueprint lui-même comment calculer la route de l'objet
+
   site:
     templates:
       object:
         route: /infos/equipe
 
-  # 🌟 LE TABLEAU ICI : Parfaitement imbriqué sous "config" comme pour Partenaires
   admin:
     router:
       path: /equipe
@@ -97,7 +98,3 @@ form:
             bio_fin:
               type: markdown
               label: "Fin de la biographie"
-            meta_description:
-              type: text
-              label: "Description SEO (Meta Description)"
-              description: "Texte court (environ 150 caractères) pour les moteurs de recherche."

@@ -2,6 +2,10 @@ type: flex-objects
 title: Théâtre Forum - O'Pression
 description: Gestion unifiée pour la pièce maîtresse O'Pression et ses déclinaisons Scolaires et Tout Public
 
+extends@:
+  type: partials/onglet-commun
+  context: blueprints://flex-objects
+
 config:
   data:
     storage:
@@ -30,7 +34,7 @@ config:
     list:
       title: Liste des Spectacles
       fields:
-        title:
+        page_title:
           title: Titre du spectacle
           field: title
           link: edit
@@ -42,18 +46,11 @@ form:
       active: 1
       fields:
 
-        # ==================================================================
-        # ONGLET 1 : LA PAGE MAÎTRESSE PRÉSENTATION
-        # ==================================================================
+        # Onglet : La page maîtresse de présentation
         tab_general:
           type: tab
           title: "Informations Générales"
           fields:
-            title:
-              type: text
-              label: Titre de la page (S'affichera dans le H1)
-              validate:
-                required: true
             menu:
               type: text
               label: Titre dans le menu du site

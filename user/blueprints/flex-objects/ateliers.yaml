@@ -2,6 +2,10 @@ type: flex-objects
 title: Ateliers de théâtre
 description: Gestion des médias et informations de la page Ateliers de théâtre
 
+extends@:
+  type: partials/onglet-commun
+  context: blueprints://flex-objects
+
 config:
   data:
     storage:
@@ -30,7 +34,7 @@ config:
     list:
       title: Configuration de la page Ateliers
       fields:
-        title:
+        page_title:
           title: Titre de la page
           field: title
           link: edit
@@ -38,26 +42,15 @@ config:
 form:
   fields:
     tabs:
-      type: tabs
-      active: 1
       fields:
 
         tab_general:
           type: tab
           title: "Contenu de la page Ateliers"
           fields:
-            title:
-              type: text
-              label: Titre de la page (S'affichera dans le H1)
-              validate:
-                required: true
             menu:
               type: text
               label: Titre dans le menu du site
-            meta_description:
-              type: textarea
-              label: Meta Description (SEO)
-              rows: 2
 
             section_photo_haut:
               type: section

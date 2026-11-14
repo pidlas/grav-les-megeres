@@ -1,42 +1,21 @@
 {% extends 'main-layout.html.twig' %}
 
+{# 1. Récupération de la collection globale #}
 {% set collection = grav.flex.directory('accueil').getCollection() %}
 {% set accueil_flex = collection.first() %}
+{% set flex_seo = accueil_flex %}
 
-{# 1. SURCHARGE SEO & TITRE DE L'ONGLET #}
-{% block head_title %}
-    {% set seo_title = accueil_flex.title | default(page.title) %}
-    <title>{{ seo_title|e }} | {{ site.title|e }}</title>
-{% endblock %}
-
-{% block head_meta %}
-    {% set seo_description = accueil_flex.meta_description | default(page.header.metadata.description) %}
-    <meta name="description" content="{{ seo_description|e('html_attr') }}" />
-    <meta name="robots" content="{% if page.header.metadata.robots %}{{ page.header.metadata.robots|e }}{% else %}index, follow{% endif %}" />
-    <link class="can" rel="canonical" href="{{ page.url(true, true)|e }}" />
-{% endblock %}
-
-{# 2. EXTINCTION DES BLOCS D'ORIGINE #}
+{# 1. Extinction dess blocs d'origine #}
 {% block content %}{% endblock %}
 {% block decor_feuilles %}{% endblock %}
 
-{# 3. LE BLOC MAÎTRE POUR L'ACCUEIL #}
+{# 2. Le bloc maître pour l'Accueil / Home #}
 {% block avant_conteneur_texte %}
 
-    {# Mise à jour dynamique du H1 principal #}
-    <script>
-        (function() {
-            var h1 = document.querySelector(".conteneur-champignons h1");
-            if (h1 && "{{ accueil_flex.title|default('')|e('js') }}") {
-                h1.textContent = "{{ accueil_flex.title|split('|')|first|trim|e('js') }}";
-            }
-        })();
-    </script>
-
-    {# A. L'ACCORDÉON DIAPORAMA #}
+    {# A. Le diaporama en forme d'accordéon #}
     {% include 'partials/diaporama.html.twig' with {'donnees_accueil': accueil_flex} %}
 
-    {# B. LA MISE AU DIAPASON SPECTRE AVEC VOTRE <SECTION CLASS="INDEX"> #}
+    {# B. Mise au diapason Spectre #}
     {% if accueil_flex.accueil_intro %}
     <div class="container mt-2">
         <div class="columns">
@@ -49,7 +28,7 @@
     </div>
     {% endif %}
 
-    {# C. TÉLÉPORTATION DU DÉCOR DES FEUILLES #}
+    {# C. Téléportation du décor des feuilles #}
     {{ block('decor_feuilles', 'main-layout.html.twig') }}
 
 {% endblock %}
