@@ -1,0 +1,73 @@
+/*
+ * Quark 2 — user customizations
+ *
+ * This file is safe to edit. It is loaded last so anything here overrides
+ * theme.css without having to mark rules !important.
+ */
+.navbar-brand img {
+    width: 200px;
+    height: auto;
+}
+main .actu-resume p{
+    margin-top:0;
+}
+
+/* Les boutons pour afficher les PDF dans gresilhette-et-la-salimonde */
+.btn-pdf{
+    width:300px;
+    height:auto;
+}
+/* Style du bouton Mailto automatique avec votre charte graphique */
+.btn-mailto {
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    background-color:var(--color-brand-primary);
+    color:var(--color-black);
+    padding:8px 18px;
+    font-weight:600;
+    text-decoration:none;
+    border-radius:var(--radius-standard);
+    border:none;
+    transition: background-color 0.2s ease-in-out, transform 0.1s ease-in-out;
+    box-shadow: 0 2px 4px hsla(0, 0%, 0%, 0.1);
+    vertical-align:middle;
+    margin:2px 4px;
+}
+.btn-mailto:hover {
+    background-color:hsla(33, 76%, 57%, 1); 
+    color:var(--color-black);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px hsla(0, 0%, 0%, 0.1);
+}
+.btn-mailto:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 3px hsla(0, 0%, 0%, 0.1);
+}
+.btn-mailto::before {
+    content: "\f023";
+    font-family: "Font Awesome 5 Free", "Font Awesome 6 Free", "FontAwesome";
+    font-weight:900;
+    font-size:0.9em;
+    margin-right:0.5rem;
+    opacity:0.8;
+}
+.btn-mailto::after {
+    content: "";
+    display: inline-block;
+    width:0.875rem;
+    height:0.625rem;
+    margin-left:0.5rem;
+        background: 
+        linear-gradient(160deg, transparent 44%, hsla(0,0%,0%,1) 46%, hsla(0,0%,0%,1) 54%, transparent 56%) 0 0/100% 100%,
+        linear-gradient(200deg, transparent 44%, hsla(0,0%,0%,1) 46%, hsla(0,0%,0%,1) 54%, transparent 56%) 0 0/100% 100%,
+        linear-gradient(to bottom, hsla(0,0%,0%,1) 2px, transparent 2px) 0 0/100% 100%;
+    border: 1.5px solid hsla(0,0%,0%,1);
+    border-top:none;
+    opacity:0.8;
+    vertical-align: middle;
+}
+.book-url{
+    margin:0;
+    text-align:center;
+}

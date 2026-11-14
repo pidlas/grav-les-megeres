@@ -18,6 +18,7 @@ use Grav\Common\Media\Traits\ImageLoadingTrait;
 use Grav\Common\Media\Traits\ImageDecodingTrait;
 use Grav\Common\Media\Traits\ImageFetchPriorityTrait;
 use Grav\Common\Media\Traits\ImageMediaTrait;
+use Grav\Common\Uri;
 use Grav\Common\Utils;
 use Gregwar\Image\Image;
 use RocketTheme\Toolbox\Event\Event;
@@ -65,7 +66,8 @@ class ImageMedium extends Medium implements ImageMediaInterface, ImageManipulate
         $this->set('thumbnails.media', $path);
 
         if (!($this->offsetExists('width') && $this->offsetExists('height') && $this->offsetExists('mime'))) {
-            $image_info = getimagesize($path);
+            // Only the file name says this is an image; short or damaged content raises a notice or a warning.
+            $image_info = @getimagesize($path);
             if ($image_info) {
                 $this->def('width', (int) $image_info[0]);
                 $this->def('height', (int) $image_info[1]);
@@ -135,6 +137,7 @@ class ImageMedium extends Medium implements ImageMediaInterface, ImageManipulate
 
         $this->format = 'guess';
         $this->quality = $this->default_quality;
+        $this->queued_size = null;
 
         $this->debug_watermarked = false;
         $this->watermarked = null;
@@ -241,7 +244,7 @@ class ImageMedium extends Medium implements ImageMediaInterface, ImageManipulate
             $this->reset();
         }
 
-        return $this->withHost(trim($grav['base_url'] . '/' . $this->urlQuerystring($output), '\\'), $include_host);
+        return $this->withHost(trim($grav['base_url'] . '/' . $this->urlQuerystring(Uri::encodePath($output)), '\\'), $include_host);
     }
 
     /**
@@ -264,7 +267,7 @@ class ImageMedium extends Medium implements ImageMediaInterface, ImageManipulate
         foreach ($this->alternatives as $ratio => $medium) {
             $srcset[] = $medium->url($reset) . ' ' . $medium->get('width') . 'w';
         }
-        $srcset[] = str_replace(' ', '%20', $this->url($reset)) . ' ' . $this->get('width') . 'w';
+        $srcset[] = $this->url($reset) . ' ' . $this->get('width') . 'w';
 
         return implode(', ', $srcset);
     }
@@ -287,8 +290,7 @@ class ImageMedium extends Medium implements ImageMediaInterface, ImageManipulate
         }
 
         if ($this->saved_image_path && $this->auto_sizes) {
-            if (!array_key_exists('height', $this->attributes) && !array_key_exists('width', $this->attributes)) {
-                $info = getimagesize($this->saved_image_path);
+            if (!array_key_exists('height', $this->attributes) && !array_key_exists('width', $this->attributes) && ($info = @getimagesize($this->saved_image_path))) {
                 $width = (int)$info[0];
                 $height = (int)$info[1];
 
@@ -397,22 +399,16 @@ class ImageMedium extends Medium implements ImageMediaInterface, ImageManipulate
         if ($file === '' || $file === '1') {
             // No editor-supplied value: use the operator-configured (trusted) watermark.
             $file = $config->get('system.images.watermark.image');
+            $watermark = $file ? $locator->findResource($file) : false;
         } else {
-            // Editor-authored watermark path from page content. Constrain it to the
-            // media sandbox: the resource locator's file:// branch only collapses
-            // `..` lexically (no realpath/containment), so an unconstrained value
-            // such as `?watermark=../secret.png` resolves to an arbitrary on-disk
-            // file and composites it into a publicly-cached, anonymously-served
-            // derivative (GHSA-w3f4-8pj2-599w). Reject parent-directory traversal
-            // and absolute paths; stream URIs (user://, image://, system://, …)
-            // stay allowed because the locator's stream branch re-globs onto a
-            // registered, contained root.
-            if (strpos($file, '..') !== false || preg_match('`^(/|[a-z]:[\\\\/])`i', $file)) {
-                return $this;
-            }
+            // Editor-authored watermark from page content, composited into a
+            // publicly cached derivative. Take it from a media folder, the same as
+            // a stream image in markdown: a plain path resolves against the
+            // install root, and a stream such as `user://` or `tmp://` reaches
+            // accounts, configuration and site data. Anything else is ignored.
+            $watermark = GlobalMedia::locate($file) ?? false;
         }
 
-        $watermark = $file ? $locator->findResource($file) : false;
         if ($watermark === false) {
             return $this;
         }
@@ -510,7 +506,7 @@ class ImageMedium extends Medium implements ImageMediaInterface, ImageManipulate
             $this->image->{$method}(...$args);
 
             /** @var ImageMediaInterface $medium */
-            foreach ($this->alternatives as $medium) {
+            foreach ($this->alternatives as $key => $medium) {
                 $args_copy = $args;
 
                 // regular image: resize 400x400 -> 200x200
@@ -521,6 +517,12 @@ class ImageMedium extends Medium implements ImageMediaInterface, ImageManipulate
                             $args_copy[$param] *= $medium->get('ratio');
                         }
                     }
+
+                    // Check the canvas after scaling the arguments for this alternative.
+                    if (!$this->alternativeResizeFits($medium, $method, $args, $args_copy)) {
+                        unset($this->alternatives[$key]);
+                        continue;
+                    }
                 }
 
                 // Do the same call for alternative media.
@@ -530,5 +532,59 @@ class ImageMedium extends Medium implements ImageMediaInterface, ImageManipulate
         }
 
         return $this;
+    }
+
+    /**
+     * Check the canvas and track dimensions through alternative resize actions.
+     *
+     * @param ImageMediaInterface $medium The alternative
+     * @param string $method One of $magic_resize_actions
+     * @param array $args The arguments as given for this image
+     * @param array $scaled The arguments multiplied by the alternative's ratio
+     * @return bool
+     */
+    protected function alternativeResizeFits(ImageMediaInterface $medium, string $method, array $args, array $scaled): bool
+    {
+        foreach (array_slice(static::$magic_resize_actions[$method], -2) as $param) {
+            if (!isset($scaled[$param])) {
+                continue;
+            }
+            if (is_numeric($args[$param]) && $args[$param] >= 1 && $scaled[$param] < 1) {
+                return false;
+            }
+            // Whole pixels, as urlResizeCanvas() reads them.
+            $scaled[$param] = (string) (int) ceil((float) $scaled[$param]);
+        }
+
+        $max_pixels = (int) $this->getGrav()['config']->get('system.images.max_pixels', 25000000);
+        if ($max_pixels <= 0 || !$medium instanceof self) {
+            return true;
+        }
+
+        [$width, $height] = $medium->queued_size ?? [(int) $medium->get('width'), (int) $medium->get('height')];
+        $canvas = static::urlResizeCanvas($method, $scaled, $width, $height);
+        if ($canvas === null) {
+            return false;
+        }
+
+        [$pixels, $w, $h] = $canvas;
+        if ($method === 'cropResize' || ($method === 'resize' && empty($scaled[3]) && empty($scaled[4]))) {
+            // Neither enlarges: the result stays within the image as it is.
+            $w = min($w, $width);
+            $h = min($h, $height);
+            $pixels = $w * $h;
+        }
+        if ($pixels > $max_pixels) {
+            $this->getGrav()['log']->warning(sprintf(
+                'Refusing to %s image alternative above system.images.max_pixels: %s (%d pixels at ratio %s of %s)',
+                $method, $medium->get('filepath'), $pixels, $medium->get('ratio'), $this->get('filepath')
+            ));
+
+            return false;
+        }
+
+        $medium->queued_size = [(int) $w, (int) $h];
+
+        return true;
     }
 }

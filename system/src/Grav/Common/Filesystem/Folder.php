@@ -13,6 +13,7 @@ use DirectoryIterator;
 use Exception;
 use FilesystemIterator;
 use Grav\Common\Grav;
+use Grav\Common\Page\PageIdentity;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use RegexIterator;
@@ -52,7 +53,8 @@ abstract class Folder
                 $directory = new RecursiveDirectoryIterator($path, $flags);
             }
             $filter  = new RecursiveFolderFilterIterator($directory);
-            $iterator = new RecursiveIteratorIterator($filter, RecursiveIteratorIterator::SELF_FIRST);
+            // Step over folders which cannot be opened (no permission, path longer than the system allows).
+            $iterator = new RecursiveIteratorIterator($filter, RecursiveIteratorIterator::SELF_FIRST, RecursiveIteratorIterator::CATCH_GET_CHILD);
 
             foreach ($iterator as $dir) {
                 $dir_modified = $dir->getMTime();
@@ -89,7 +91,8 @@ abstract class Folder
             } else {
                 $directory = new RecursiveDirectoryIterator($path, $flags);
             }
-            $recursive = new RecursiveIteratorIterator($directory, RecursiveIteratorIterator::SELF_FIRST);
+            // Step over folders which cannot be opened (no permission, path longer than the system allows).
+            $recursive = new RecursiveIteratorIterator($directory, RecursiveIteratorIterator::SELF_FIRST, RecursiveIteratorIterator::CATCH_GET_CHILD);
             // Group the alternatives: without it, 'md|yaml' matched any path containing '.md' or ending in 'yaml'.
             $iterator = new RegexIterator($recursive, '/^.+\.(?:' . $extensions . ')$/i');
 
@@ -131,10 +134,15 @@ abstract class Folder
                     $directory = new RecursiveDirectoryIterator($path, $flags);
                 }
 
-                $iterator = new RecursiveIteratorIterator($directory, RecursiveIteratorIterator::SELF_FIRST);
+                // Step over folders which cannot be opened (no permission, path longer than the system allows).
+                $iterator = new RecursiveIteratorIterator($directory, RecursiveIteratorIterator::SELF_FIRST, RecursiveIteratorIterator::CATCH_GET_CHILD);
 
                 foreach ($iterator as $file) {
-                    $files[] = $file->getPathname() . '?'. $file->getMTime();
+                    try {
+                        $files[] = $file->getPathname() . '?'. $file->getMTime();
+                    } catch (Exception $e) {
+                        Grav::instance()['log']->error('Could not process file: ' . $e->getMessage());
+                    }
                 }
             }
         }
@@ -397,6 +405,8 @@ abstract class Folder
         if (is_dir($source)) {
             // Rename doesn't support moving folders across filesystems. Use copy instead.
             self::copy($source, $target);
+            // The copy leaves hidden files behind. A moved page keeps its id.
+            PageIdentity::copyIds($source, $target);
             self::delete($source);
         }
 
@@ -421,7 +431,17 @@ abstract class Folder
         }
 
         $failure = null;
-        $success = self::doDelete($target, $include_target, $failure);
+        // Grav's own error handler (Debugger::deprecatedErrorHandler) swallows warnings,
+        // which leaves error_get_last() empty, so the failure message lost its reason
+        // ("Permission denied") and the fallback became "Unknown error". Let PHP record them.
+        set_error_handler(static function () {
+            return false;
+        });
+        try {
+            $success = self::doDelete($target, $include_target, $failure);
+        } finally {
+            restore_error_handler();
+        }
 
         if (!$success) {
             // Prefer the precise reason captured at the first failing path

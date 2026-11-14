@@ -30,6 +30,15 @@ use function dirname;
  */
 class GlobalMedia extends AbstractMedia
 {
+    /**
+     * Folders page content may take media from by stream URI, as stream URIs.
+     * The default for `security.media.allowed_roots`.
+     */
+    public const ALLOWED_ROOTS = [
+        'page://', 'image://', 'media://', 'theme://', 'themes://', 'plugins://',
+        'asset://', 'system://images', 'system://assets',
+    ];
+
     /** @var self */
     protected static $instance;
 
@@ -78,13 +87,107 @@ class GlobalMedia extends AbstractMedia
      */
     protected function resolveStream($filename)
     {
+        return is_string($filename) ? static::locate($filename) : null;
+    }
+
+    /**
+     * Resolve a stream URI written in page content (a markdown image,
+     * `media['...']`, the watermark action's image) to a file in one of the
+     * media folders, or null.
+     *
+     * Every stream resolves inside a root of its own, but that says nothing
+     * about whether the file is media: the `user://` and `config://` roots also
+     * hold accounts, configuration and site data, and `tmp://`, `cache://`,
+     * `log://` and `backup://` are never content. So the resolved file must lie
+     * inside a folder listed in `security.media.allowed_roots`, compared by
+     * real path so `..` and symlinks cannot step out of it.
+     *
+     * @param string $uri
+     * @return string|null
+     */
+    public static function locate(string $uri): ?string
+    {
         /** @var UniformResourceLocator $locator */
         $locator = Grav::instance()['locator'];
-        if (!$locator->isStream($filename)) {
+        if (!$locator->isStream($uri)) {
             return null;
         }
 
-        return $locator->findResource($filename) ?: null;
+        $filename = $locator->findResource($uri);
+
+        return $filename && static::isMediaPath($filename) ? $filename : null;
+    }
+
+    /**
+     * Whether a stream URI points inside one of the media folders in
+     * `security.media.allowed_roots`, whether or not the file is there.
+     *
+     * A file that does not exist is judged by the closest folder that does,
+     * so the answer depends only on where the URI points, never on whether
+     * the file exists. Use this where page content gets a URL for a stream
+     * URI (`url()`), where a missing file still has an answer.
+     *
+     * @param string $uri
+     * @return bool
+     */
+    public static function isMediaUri(string $uri): bool
+    {
+        /** @var UniformResourceLocator $locator */
+        $locator = Grav::instance()['locator'];
+        if (!$locator->isStream($uri)) {
+            return false;
+        }
+
+        $path = $locator->findResource($uri) ?: $locator->findResource($uri, true, true);
+        while (is_string($path) && !file_exists($path)) {
+            $parent = dirname($path);
+            if ($parent === $path) {
+                return false;
+            }
+            $path = $parent;
+        }
+
+        return is_string($path) && static::isMediaPath($path);
+    }
+
+    /**
+     * Whether an existing file or folder lies inside one of the media folders
+     * in `security.media.allowed_roots`.
+     *
+     * @param string $path
+     * @return bool
+     */
+    public static function isMediaPath(string $path): bool
+    {
+        $realPath = realpath($path);
+        if ($realPath === false) {
+            return false;
+        }
+
+        $grav = Grav::instance();
+        /** @var UniformResourceLocator $locator */
+        $locator = $grav['locator'];
+        $roots = $grav['config']->get('security.media.allowed_roots') ?? self::ALLOWED_ROOTS;
+
+        foreach ((array) $roots as $root) {
+            if (!is_string($root) || !$locator->isStream($root)) {
+                continue;
+            }
+            foreach ($locator->findResources($root, true, true) as $folder) {
+                $realRoot = realpath($folder);
+                if ($realRoot === false) {
+                    continue;
+                }
+                // The trailing separator is essential. Without it `user/pages`
+                // would prefix-match `user/pages-private`.
+                $realRoot = rtrim($realRoot, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
+                if (strncmp($realPath . DIRECTORY_SEPARATOR, $realRoot, strlen($realRoot)) === 0) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -120,7 +223,7 @@ class GlobalMedia extends AbstractMedia
             }
 
             // Add original sized image as alternative.
-            $medium->addAlternative($scale, $altMedium['file']);
+            $medium->addAlternative($scale, $altMedium);
 
             // Locate or generate smaller retina images.
             for ($i = $scale-1; $i > 1; $i--) {

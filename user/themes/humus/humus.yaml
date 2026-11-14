@@ -1,0 +1,3 @@
+enabled: true
+# Ajout du favicon pour le thème enfant
+favicon: /user/themes/humus/images/favicon/favicon-48x48.png

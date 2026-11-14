@@ -1,0 +1,51 @@
+{% extends 'main-layout.html.twig' %}
+
+{# 1. Récupération de la collection globale #}
+{% set collection = grav.flex.directory('stages').getCollection() %}
+{% set stages_flex = collection.first() %}
+{% set flex_seo = stages_flex %}
+
+{# 2. Contenu de la page - Structure Spectre.css #}
+{% block content %}
+
+<div class="container mt-2">
+
+    {# 1. Photo principale en haut #}
+    {% if stages_flex.stages_photo_principale %}
+    <div class="columns my-2">
+        <div class="column col-12">
+            <div class="img-centre">
+                <img class="photo-stages-ateliers" src="{{ base_url_simple ~ '/user/data/flex-objects/stages/' ~ stages_flex.stages_photo_principale }}" alt="{{ stages_flex.stages_alt_photo|default('')|e('html_attr') }}" loading="lazy">
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    {# 2. Texte de présentation #}
+    {% if stages_flex.stages_description %}
+    <div class="columns my-2">
+        <div class="column col-12">
+            {% set html_desc = stages_flex.stages_description | markdown | shortcodes %}
+            {{ html_desc | replace({'<ul>': '<ul class="jolie-ombres">'}) | raw }}
+        </div>
+    </div>
+    {% endif %}
+
+    {# 3. Les 2 affiches centrées #}
+    {% if stages_flex.stages_affiche_recto or stages_flex.stages_affiche_verso %}
+    <div class="columns my-2">
+        <div class="column col-12">
+            <div class="img-centre">
+                {% if stages_flex.stages_affiche_recto %}
+                    <img class="affiche-stage" src="{{ base_url_simple ~ '/user/data/flex-objects/stages/' ~ stages_flex.stages_affiche_recto }}" alt="Le tarif des stages de théâtre" loading="lazy">
+                {% endif %}
+                {% if stages_flex.stages_affiche_verso %}
+                    <img class="affiche-stage" src="{{ base_url_simple ~ '/user/data/flex-objects/stages/' ~ stages_flex.stages_affiche_verso }}" alt="Les objectifs pédagogiques des stages de théâtre" loading="lazy">
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}

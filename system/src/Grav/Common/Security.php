@@ -111,6 +111,37 @@ class Security
     }
 
     /**
+     * Tell whether a file stored under the given name is going to be served as SVG.
+     *
+     * Every dot-separated extension counts, not just the last one, as in
+     * Utils::checkFilename(): Apache's mod_mime types a file by the extensions it
+     * knows and skips the ones it does not, so `drawing.svg.foo` goes out as
+     * image/svg+xml. Behind another extension only a file which starts with markup
+     * counts, so that a rendered `logo.svg.png` is left alone: a browser cannot
+     * parse anything else as XML.
+     *
+     * @param string $filename Name of the file, may include a path.
+     * @param string $file Path to the file contents.
+     * @return bool
+     */
+    public static function isSvgFile(string $filename, string $file): bool
+    {
+        $extensions = array_map('mb_strtolower', array_slice(explode('.', Utils::basename($filename)), 1));
+        if (!in_array('svg', $extensions, true)) {
+            return false;
+        }
+        if (end($extensions) === 'svg') {
+            return true;
+        }
+
+        // Skip a byte order mark, whitespace and the zero bytes of UTF-16.
+        $head = is_file($file) ? (string)file_get_contents($file, false, null, 0, 1024) : '';
+        $head = ltrim($head, "\xEF\xBB\xBF\xFE\xFF\0 \t\r\n");
+
+        return $head === '' || $head[0] === '<';
+    }
+
+    /**
      * Sanitize SVG for XSS code
      *
      * @param string $file
@@ -122,17 +153,25 @@ class Security
             $sanitizer = new DOMSanitizer(DOMSanitizer::SVG);
             $sanitizer->addDisallowedAttributes(['href', 'xlink:href']);
             $original_svg = file_get_contents($file);
-            $clean_svg = $sanitizer->sanitize($original_svg);
+
+            // Keep the stored file empty until sanitization completes.
+            file_put_contents($file, '');
+
+            try {
+                $clean_svg = $sanitizer->sanitize($original_svg);
+            } catch (\Throwable) {
+                $clean_svg = false;
+            }
 
             // Quarantine bad SVG files and throw exception
             if ($clean_svg !== false ) {
                 file_put_contents($file, $clean_svg);
             } else {
+                unlink($file);
                 $quarantine_file = Utils::basename($file);
                 $quarantine_dir = 'log://quarantine';
                 Folder::mkdir($quarantine_dir);
                 file_put_contents("$quarantine_dir/$quarantine_file", $original_svg);
-                unlink($file);
                 throw new Exception('SVG could not be sanitized, it has been moved to the logs/quarantine folder');
             }
         }
@@ -345,7 +384,11 @@ class Security
         // of the script body, not the scheme. Inside an attribute value (right
         // after `=`, optionally quoted) there is no prose to protect, so accept
         // whitespace after the colon there.
-        $protocol_attr_regex = '#=\s*[\"\'`]?\s*(' . $protocol_alt . ')(:|\&\#58)\s+\S#iu';
+        //
+        // The whitespace after the quote only exists when the quote does, and both
+        // runs are possessive: written as `\s*["'`]?\s*` they competed for the same
+        // spaces and `=` followed by N spaces took quadratic time.
+        $protocol_attr_regex = '#=\s*+(?:[\"\'`]\s*+)?(' . $protocol_alt . ')(:|\&\#58)\s+\S#iu';
 
         // Set the patterns we'll test against
         $patterns = [
@@ -554,15 +597,6 @@ class Security
         /** @var Config $config */
         $config = Grav::instance()['config'];
 
-        // Only content that Twig will actually process at render time can carry a
-        // render-time-assembled payload; anything else the raw-source validator
-        // already covers. Mirrors the render-time decision exactly, including the
-        // modular branch, so this check can never end up stricter than the render
-        // it is meant to protect. (GHSA-fg8g-663r-f366)
-        if (!static::willProcessContentTwig($page)) {
-            return null;
-        }
-
         // Mirror checkSafety's trust boundary: a user who may store literal
         // dangerous markup (superadmin, per security.xss_whitelist) is not blocked
         // from storing the assembled equivalent.
@@ -583,7 +617,16 @@ class Security
             // Body only. A module's trusted modular template is theme-authored,
             // not editor input, so rendering it here would let an inline event
             // handler in a theme's own markup fail an otherwise clean save.
-            $rendered = $twig->processPage($page, $rawContent, false);
+            //
+            // Render as a module, whatever the page is today. A module runs its
+            // body Twig no matter what its header says, and whether a page is a
+            // module is not settled at save time: moving or copying it to a `_`
+            // folder, or a `slug: _name` header, turns the same stored body into
+            // one. Scanning only when Twig runs today let a body saved with Twig
+            // off become live markup after an ordinary move.
+            $probe = clone $page;
+            $probe->modularTwig(true);
+            $rendered = $twig->processPage($probe, $rawContent, false);
         } catch (\Throwable) {
             return null;
         }
@@ -595,8 +638,10 @@ class Security
      * Will Grav process editor-authored Twig in this page's content at render time?
      *
      * Single source of truth for that decision, shared by the two render paths
-     * (Page::content(), PageContentTrait::processContent()) and by the save-time
-     * guard in detectXssInEditorContent(). Modules render their body Twig
+     * (Page::content(), PageContentTrait::processContent()). The save-time guard
+     * in detectXssInEditorContent() deliberately does not use it: a page can
+     * become a module after it is saved, so that guard always scans as if the
+     * body runs as Twig. Modules render their body Twig
      * unconditionally — a modular template is theme-controlled and renders its
      * children with Twig — so they ignore the security.twig_content.process_enabled
      * gate. Keeping the boolean in one place stops the save-time check drifting
@@ -754,14 +799,17 @@ class Security
         // diagnostic, but the policy also carries the denials so they are enforced
         // by type at call time — a denial can then never be silently dropped by a
         // mis-cased class name or re-granted through an allowed parent class or
-        // interface the object also satisfies.
+        // interface the object also satisfies. The built-in denials
+        // (SandboxDefaults::deniedMethods) ride along for the same reason: they
+        // close members on a type that an allowlisted supertype row, such as the
+        // Data row kept above with config_access on, would otherwise grant.
         self::$twigSandboxPolicy = new GravSecurityPolicy(
             $tags,
             $filters,
             $methods,
             $properties,
             $functions,
-            deniedMethods: self::normalizeMethodsMap($deniedMethods, true),
+            deniedMethods: self::normalizeMethodsMap(array_merge(SandboxDefaults::deniedMethods(), $deniedMethods), true),
             deniedProperties: self::normalizeMethodsMap($deniedProperties, false)
         );
         self::$twigSandboxPolicyKey = $cacheKey;
@@ -820,6 +868,34 @@ class Security
             if (!isset($seen[$lc])) {
                 $seen[$lc] = true;
                 $out[] = $member;
+            }
+        }
+
+        return $out;
+    }
+
+    /**
+     * Templates page content may include as trusted partials: the built-in
+     * defaults plus the site's additive `security.twig_sandbox.trusted_partials`.
+     * Names are matched exactly against the name content includes.
+     *
+     * @return list<string>
+     */
+    public static function twigTrustedPartials(?Config $config = null): array
+    {
+        if ($config === null) {
+            try {
+                $config = Grav::instance()['config'];
+            } catch (Exception) {
+                $config = null;
+            }
+        }
+
+        $user = (array) ($config?->get('security.twig_sandbox.trusted_partials', []) ?? []);
+        $out = [];
+        foreach (array_merge(SandboxDefaults::trustedPartials(), $user) as $name) {
+            if (is_string($name) && $name !== '' && !in_array($name, $out, true)) {
+                $out[] = $name;
             }
         }
 
@@ -2103,7 +2179,8 @@ class Security
 
     /**
      * Per-site HMAC key used for CSRF nonce signing, admin rate-limit key hashing,
-     * and (when configured) session-name derivation. Backed by a local PHP file
+     * binding sessions to the site which created them, and (when configured)
+     * session-name derivation. Backed by a local PHP file
      * outside the Config tree, so sandboxed Twig cannot reach it via
      * `grav.config.get('security.salt')` or `Config::toArray()` (GHSA-3f29-pqwf-v4j4).
      *
@@ -2115,8 +2192,7 @@ class Security
      *
      * To rotate the key manually, delete `user/config/security-private.php`; the
      * next request generates a fresh 64-char random value. Rotation invalidates
-     * in-flight CSRF nonces and — if `system.session.uniqueness` is set to
-     * `security` — existing sessions.
+     * in-flight CSRF nonces and existing sessions.
      */
     public static function getNonceKey(): string
     {
@@ -2132,8 +2208,15 @@ class Security
         // environment overlay first, so keeping it there gave every new
         // user/env/<host>/ folder a fresh key and broke every nonce and
         // session signed with the old one.
-        $baseFolder = $locator->findResource('user://config', true) ?: $configFolder;
+        $userConfig = $locator->findResource('user://config', true);
+        $baseFolder = $userConfig ?: $configFolder;
         $privateFile = "{$baseFolder}/security-private.php";
+        // With no user/config folder yet, only a real Grav install creates one.
+        // Code that loads Grav's classes from somewhere else (a plugin's test
+        // suite, say) has GRAV_ROOT at whatever folder it ran from, and used to
+        // leave a user/config/security-private.php there for `git add -A` to
+        // pick up; it gets a key for this process only instead.
+        $persist = $userConfig !== false || self::isGravInstall(GRAV_ROOT, GRAV_SYSTEM_PATH);
 
         $value = self::readNonceKeyFile($privateFile);
         if ($value !== null) {
@@ -2161,7 +2244,9 @@ class Security
         $config = $grav['config'];
         $legacy = $config->get('security.salt');
         if (is_string($legacy) && $legacy !== '') {
-            self::writeNonceKey($privateFile, $legacy);
+            if ($persist) {
+                self::writeNonceKey($privateFile, $legacy);
+            }
             $config->set('security.salt', null);
 
             $securityYaml = "{$configFolder}/security.yaml";
@@ -2180,9 +2265,22 @@ class Security
         }
 
         $generated = bin2hex(random_bytes(32));
-        self::writeNonceKey($privateFile, $generated);
+        if ($persist) {
+            self::writeNonceKey($privateFile, $generated);
+        }
 
         return self::$nonceKey = $generated;
+    }
+
+    /**
+     * Whether $root is a Grav install: its system folder (GRAV_SYSTEM_PATH,
+     * relative to the root unless absolute) holds Grav's defines.php.
+     */
+    private static function isGravInstall(string $root, string $systemPath): bool
+    {
+        $system = preg_match('#^(/|\\\\|[A-Za-z]:)#', $systemPath) ? $systemPath : rtrim($root, '/\\') . '/' . $systemPath;
+
+        return is_file($system . '/defines.php');
     }
 
     private static function readNonceKeyFile(string $path): ?string

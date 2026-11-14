@@ -1,0 +1,135 @@
+{% extends 'main-layout.html.twig' %}
+
+{# 1. Récupération globale de la collection #}
+{% set collection_contact = grav.flex.directory('contact').getCollection() %}
+{% set contact_flex = collection_contact.first() %}
+{% set flex_seo = contact_flex %}
+
+{% block content %}
+
+    {# Section téléphone - Pôles d'équipe réancrés dans l'onglet 2 #}
+    {% if contact_flex.poles_contact is not empty %}
+    <div class="telephone">
+        
+        {# Récupération sécurisée de l'icône téléphone #}
+        {% if contact_flex.telephone_icone is not empty %}
+            {% set path_tel_icone = contact_flex.telephone_icone | keys | first %}
+            <p><img src="{{ base_url_simple ~ '/' ~ path_tel_icone }}" width="50px" alt="Téléphone"></p>
+        {% else %}
+            {# Secours par défaut si aucune icône n'est envoyée #}
+            <p><img src="{{ base_url_simple ~ '/user/data/flex-objects/contact/iconeTel.avif' }}" width="50px" alt="Téléphone"></p>
+        {% endif %}
+        
+        <table class="com">
+            {% for groupe in contact_flex.poles_contact %}
+                <thead>
+                    <tr>
+                        <th colspan="2" class="tresgras {% if loop.index > 1 %}sep{% endif %}">
+                            {{ groupe.nom }}
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if groupe.type == 'fusionne' %}
+                        {% for membre in groupe.membres %}
+                            <tr>
+                                <td>{{ membre.nom }}</td>
+                                {% if loop.first %}
+                                    <td rowspan="{{ groupe.membres|length }}">{{ groupe.tel_commun }}</td>
+                                {% else %}
+                                    {# Rowspan : On laisse la cellule vide pour fusionner la ligne #}
+                                {% endif %}
+                            </tr>
+                        {% endfor %}
+                    {% else %}
+                        {% for membre in groupe.membres %}
+                            <tr>
+                                <td>{{ membre.nom }}</td>
+                                <td>{{ membre.tel }}</td>
+                            </tr>
+                        {% endfor %}
+                    {% endif %}
+                </tbody>
+            {% endfor %}
+        </table>
+    </div>
+    {% endif %}
+
+    {# Section email et réseaux sociaux #}
+    {% if contact_flex.email_adresse %}
+    <div class="infos-contact">
+        
+        {# Récupération sécurisée de l'icône e-mail #}
+        {% if contact_flex.email_icone is not empty %}
+            {% set path_mail_icone = contact_flex.email_icone | keys | first %}
+            <img src="{{ base_url_simple ~ '/' ~ path_mail_icone }}" width="50px" alt="Email">
+        {% else %}
+            <img src="{{ base_url_simple ~ '/user/data/flex-objects/contact/iconeMail.avif' }}" width="50px" alt="Email">
+        {% endif %}
+        
+        <span>
+            <a href="mailto:{{ contact_flex.email_adresse }}?subject={{ 'Demande de renseignement'|url_encode }}">
+                Nous écrire
+            </a>
+        </span>
+    </div>
+    {% endif %}
+    {# Extraction et rendu de la zone Facebook #}
+    {% if contact_flex.reseaux_facebook %}
+    <div class="infos-contact fb">
+        <a href="{{ contact_flex.reseaux_facebook }}" target="_blank" rel="noopener noreferrer">
+            Cie Les Mégères de l'Humus
+        </a>
+    </div>
+    {% endif %}
+
+    {# Extraction et rendu de la zone Instagram #}
+    {% if contact_flex.reseaux_instagram %}
+    <div class="infos-contact insta">
+        <a href="{{ contact_flex.reseaux_instagram }}" target="_blank" rel="noopener noreferrer">
+            @lesmegeresdelhumus
+        </a>
+    </div>
+    {% endif %}
+
+    {# Section adresse postale #}
+    {% if contact_flex.adresse_lignes is not empty %}
+    <div class="adresse">
+        
+        {# Récupération sécurisée de l'icône adresse #}
+        {% if contact_flex.adresse_icone is not empty %}
+            {% set path_adr_icone = contact_flex.adresse_icone | keys | first %}
+            <p><img src="{{ base_url_simple ~ '/' ~ path_adr_icone }}" width="50px" alt="Adresse"></p>
+        {% else %}
+            <p><img src="{{ base_url_simple ~ '/user/data/flex-objects/contact/iconeAdresse.avif' }}" width="50px" alt="Adresse"></p>
+        {% endif %}
+        
+        {# Boucle propre sur les lignes textuelles configurées #}
+        {% for ligne in contact_flex.adresse_lignes %}
+            <p>{{ ligne.value }}</p>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {# Section association et données juridiques #}
+    {% if contact_flex.association_details is not empty %}
+    <div class="association">
+        
+        {# Récupération sécurisée de l'icône d'identification #}
+        {% if contact_flex.association_icone is not empty %}
+            {% set path_asso_icone = contact_flex.association_icone | keys | first %}
+            <p><img src="{{ base_url_simple ~ '/' ~ path_asso_icone }}" width="40px" alt="Association"></p>
+        {% else %}
+            <p><img src="{{ base_url_simple ~ '/user/data/flex-objects/contact/connect.avif' }}" width="40px" alt="Association"></p>
+        {% endif %}
+        
+        <p>
+            {# Boucle et saut de ligne automatique entre chaque mention légale #}
+            {% for detail in contact_flex.association_details %}
+                {{ detail.value }}{% if not loop.last %}<br>{% endif %}
+            {% endfor %}
+        </p>
+    </div>
+    {% endif %}
+
+{% endblock %}

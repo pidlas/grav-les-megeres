@@ -1,0 +1,200 @@
+/*[TYPOGRAPHIE] 1. Chargement des polices de caractères*/
+@font-face {
+    font-display: swap;
+    font-family: CocoGothic;
+    font-style: normal;
+    font-weight: 400;
+    src:
+        url(../fonts/Coco\ Gothic/CocoGothic-Regular.woff2) format("woff2"),
+        url(../fonts/Coco\ Gothic/CocoGothic-Regular.woff) format("woff"),
+        url(../fonts/Coco\ Gothic/CocoGothic-Regular.ttf) format("truetype"),
+        url(../fonts/Coco\ Gothic/CocoGothic-Regular.otf) format("opentype");
+}
+@font-face {
+    font-display: swap;
+    font-family: TanMonCheri;
+    font-style: normal;
+    font-weight: 400;
+    src:
+        url("../fonts/TAN mon chéri/Tan-Mon-Cheri-Regular.otf") format("opentype"),
+        url("../fonts/TAN mon chéri/Tan-Mon-Cheri-Regular.ttf") format("truetype"),
+        url("../fonts/TAN mon chéri/Tan-Mon-Cheri-Regular.woff") format("woff");
+}
+@font-face {
+    font-display: swap;
+    font-family: The Seasons Regular;
+    font-style: normal;
+    font-weight: 400;
+    src:
+        url(../fonts/The\ Seasons/the-seasons-regular.otf) format("opentype"),
+        url(../fonts/The\ Seasons/the-seasons-regular.ttf) format("truetype"),
+        url(../fonts/The\ Seasons/the-seasons-regular.woff) format("woff");
+}
+@font-face {
+    font-display: swap;
+    font-family: The Seasons Bold;
+    font-style: normal;
+    font-weight: 400;
+    src:
+        url(../fonts/The\ Seasons/the-seasons-bold.otf) format("opentype"),
+        url(../fonts/The\ Seasons/the-seasons-bold.ttf) format("truetype"),
+        url(../fonts/The\ Seasons/the-seasons-bold.woff) format("woff");
+}
+
+/*2. Bloc des variables racines*/
+:root {
+    --font-main: CocoGothic, Arial, sans-serif;
+    --font-display: TanMonCheri;
+    --font-citation: The Seasons Bold;
+    --font-auteur: The Seasons Regular;
+
+    --color-brand-primary:hsla(15, 69%, 65%, 1);          /* terracotta claire */
+    --color-brand-active:hsla(16, 37%, 36%, 1);           /* terracotta foncée */
+    --color-brand-secondary:hsla(264, 28%, 23%, 1);       /* prune foncée */
+    --color-brand-accent:hsla(33, 91%, 65%, 1);           /* abricot clair */
+    --color-skip-link:hsla(15, 71%, 26%, 1);              /* terre de Sienne brûlée */
+    --color-button-container:hsla(15, 70%, 39%, 1);       /* terre de Sienne brûlée, variante */
+    --color-menu-contact-hover:hsla(15, 37%, 36%, 1);     /* terracotta */
+    --color-border-menu:var(--color-whitesmoke);
+    --color-white:hsla(0, 0%, 100%, 1);
+    --color-black:hsla(0, 0%, 0%, 1);
+    --color-whitesmoke:hsla(0, 0%, 96%, 1);
+    --color-sacred-white:hsla(40, 100%, 99.6%, 1);
+    --color-border-alizarine:hsla(6, 78%, 57%, 1);        /* rouge Alizarine */
+    --color-highlight-alizarine:hsla(6, 78%, 57%, 0.05);  /* rose de sécurité */
+    --color-jauge:hsla(0, 0%, 27%, 1);                    /* gris foncé */
+    --color-fb:hsla(214, 89%, 52%, 1);                    /* bleu faceboo*/
+    --color-insta:hsla(340, 75%, 54%, 1);                 /* rose instagram*/
+    
+    --color-border-divider: hsla(264, 28%, 23%, 0.18);    /* Fines bordures PC */
+    --color-overlay-bg: hsla(264, 28%, 23%, 0.35);        /* Masque arrière-plan mobile */
+    --color-hover-light: hsla(0, 0%, 100%, 0.18);         /* Luminescence de survol PC */
+    --color-hover-medium: hsla(0, 0%, 100%, 0.2);         /* Fond sous-menus mobiles */
+    --color-focus-light: hsla(0, 0%, 100%, 0.25);         /* Focus accessibilité clavier */
+    
+    --color-neon-dark: hsla(15, 48%, 56%, 1);           
+    --color-neon-light: hsla(15, 100%, 74%, 1);         
+
+    --content-width-mobile: clamp(320px, 92vw, 800px);
+    --content-max-tablet: 64rem;
+    --content-max-desktop: 75rem;
+
+    --space-xs: 0.625rem;
+    --space-s: 1rem;
+    --space-m: 1.5625rem;
+    --space-l: 3.125rem;
+    --radius-standard: 0.5rem;                        /* L'arrondi universel de vos blocs */
+    --navbar-height: 3.75rem;                         /* Hauteur fixe de la barre PC (60px) */
+    --menu-desktop-width: 16vw;                       /* Largeur de vos compartiments PC */
+
+    --menu-header-padding-right: 5.5rem;
+    --menu-trigger-offset: 1.25rem;
+    --menu-trigger-size: 2.5rem;
+    --menu-trigger-size-sm: 2.25rem;
+    --menu-panel-width: min(100vw, 22rem);
+    --menu-inline-padding: 0.7rem;
+    --menu-item-min-height: 2.5rem;
+    --menu-subitem-min-height: 2.25rem;
+    --menu-subitem-padding: 0.35rem 0.7rem;
+    --menu-social-icon-size: 2rem;
+    --menu-social-gap: 0.5rem;
+    --menu-panel-gap: 1rem;                           /* Espacement vertical des blocs mobiles */
+    --gap-rs-icons: 0.35rem;                          /* Écart entre Facebook et Instagram sur PC */
+    --padding-menu-mobile-top: 2.5rem;                /* Respiration haute des boutons mobiles */
+    --padding-submenu-pc-left: 0.625rem;              /* Alignement du texte des sous-menus PC (10px) */
+    --padding-rs-container: 0.25rem;                  /* Calage du conteneur des icônes RS (4px) */
+
+    --shadow-standard: 0 4px 12px hsla(264, 28%, 23%, 0.15);
+    --shadow-neon-outer: 0.25rem 0.25rem 0.5rem var(--color-neon-dark), 
+        -0.25rem -0.25rem 0.5rem var(--color-neon-light);
+    --shadow-neon-inner: inset 0.3125rem 0.3125rem 0.625rem var(--color-neon-dark), 
+        inset -0.3125rem -0.3125rem 0.625rem var(--color-neon-light);
+}
+/* 3. Pont vers spectre.min.css - Alignement des classes natives du framework */
+html {
+    font-size: 16px;
+}
+body {
+    font-family: var(--font-main);
+    font-size:1rem;
+    color: var(--color-brand-secondary);
+    background-color: var(--color-whitesmoke);
+}
+h1, .display-title {
+    font-family: var(--font-display);
+}
+a {
+    color: var(--color-brand-active);
+}
+a:hover, a:focus, a:active {
+    color: var(--color-brand-primary);
+}
+/* 1. Rétablit l'héritage naturel des liens dans les zones structurelles (Header, Nav, Footer) */
+header a,
+header a:visited,
+header a:hover,
+header a:focus,
+.navbar a,
+.navbar a:visited,
+.navbar a:hover,
+.navbar a:focus,
+footer a,
+footer a:visited,
+footer a:hover,
+footer a:focus {
+    color: inherit;
+    text-decoration: none;
+}
+
+/* 2. Neutralise la classe .menu de Spectre dans votre navigation */
+.navbar .menu {
+    background: transparent;
+    box-shadow: none;
+    padding: 0;
+    min-width: 0;
+}
+
+/* 3. Liens éditoriaux standards (dans le contenu <main>) */
+main a,
+main a:visited {
+    color: var(--color-brand-active);
+}
+main a:hover,
+main a:focus,
+main a:active {
+    color: var(--color-brand-primary);
+}
+.btn {
+    border-color: var(--color-brand-primary);
+    color: var(--color-brand-active);
+    border-radius: var(--radius-standard);
+}
+.btn:hover, .btn:focus {
+    background-color: var(--color-whitesmoke);
+    border-color: var(--color-brand-active);
+    color: var(--color-brand-active);
+}
+.btn.btn-primary {
+    background-color: var(--color-brand-primary);
+    border-color: var(--color-brand-primary);
+    color: var(--color-white);
+}
+.btn.btn-primary:hover, .btn.btn-primary:focus {
+    background-color: var(--color-brand-active);
+    border-color: var(--color-brand-active);
+    color: var(--color-white);
+}
+.container {
+    max-width: var(--content-max-desktop);
+}
+/* Rétablit la pleine largeur de l'en-tête sur la barre de navigation */
+.navbar {
+    width: 100%;
+}
+/* Empêche Spectre (.navbar { flex-wrap: wrap; }) de renvoyer vos menus à la ligne */
+@media (min-width: 960px) {
+    nav.navbar {
+        flex-wrap: nowrap;
+        max-width:none;
+    }
+}

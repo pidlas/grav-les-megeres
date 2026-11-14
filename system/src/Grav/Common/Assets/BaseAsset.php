@@ -128,6 +128,18 @@ abstract class BaseAsset extends PropertyObject
 
                 $locator = Grav::instance()['locator'];
 
+                // An asset given as a URL of this site, such as url('theme://x.css', true) or a link
+                // that starts with the subfolder, is a file under the web root: drop the root so the
+                // link below is not built with the host or subfolder twice.
+                if (!$locator->isStream($asset)) {
+                    foreach ([$uri->rootUrl(true), $uri->rootUrl()] as $root) {
+                        if ($root !== '' && str_starts_with($asset, $root . '/')) {
+                            $asset = substr($asset, strlen($root));
+                            break;
+                        }
+                    }
+                }
+
                 if ($locator->isStream($asset)) {
                     $path = $locator->findResource($asset, true);
                 } else {
@@ -226,7 +238,21 @@ abstract class BaseAsset extends PropertyObject
         $uri = $grav['uri'];
 
         if (!self::isRemoteLink($input)) {
-            $input = preg_replace('#^' . $uri->rootUrl() . '#', '', $input);
+            // Local asset URLs start with the absolute root when system.absolute_urls is on
+            // and with the relative root otherwise; strip whichever one is there to get the
+            // path under the web root.
+            foreach ([$uri->rootUrl(true), $uri->rootUrl()] as $root) {
+                if ($root !== '' && str_starts_with($input, $root . '/')) {
+                    $input = substr($input, strlen($root));
+                    break;
+                }
+            }
+
+            // Anything still carrying a scheme or host is not a file under the web root.
+            if (str_contains($input, '://') || str_starts_with($input, '//')) {
+                return '';
+            }
+
             $asset = File::instance(GRAV_WEBROOT . $input);
 
             if ($asset->exists()) {
@@ -311,6 +337,6 @@ abstract class BaseAsset extends PropertyObject
      */
     protected function jsRewrite($file, $dir, $local)
     {
-        return '';
+        return (string) $file;
     }
 }

@@ -1,0 +1,34 @@
+{% extends 'main-layout.html.twig' %}
+
+{# 1. Récupération de la collection globale #}
+{% set collection = grav.flex.directory('accueil').getCollection() %}
+{% set accueil_flex = collection.first() %}
+{% set flex_seo = accueil_flex %}
+
+{# 1. Extinction dess blocs d'origine #}
+{% block content %}{% endblock %}
+{% block decor_feuilles %}{% endblock %}
+
+{# 2. Le bloc maître pour l'Accueil / Home #}
+{% block avant_conteneur_texte %}
+
+    {# A. Le diaporama en forme d'accordéon #}
+    {% include 'partials/diaporama.html.twig' with {'donnees_accueil': accueil_flex} %}
+
+    {# B. Mise au diapason Spectre #}
+    {% if accueil_flex.accueil_intro %}
+    <div class="container mt-2">
+        <div class="columns">
+            <div class="column col-12">
+                <section class="index">
+                    {{ accueil_flex.accueil_intro | markdown | shortcodes | raw }}
+                </section>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    {# C. Téléportation du décor des feuilles #}
+    {{ block('decor_feuilles', 'main-layout.html.twig') }}
+
+{% endblock %}

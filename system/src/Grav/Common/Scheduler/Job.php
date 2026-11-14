@@ -127,6 +127,12 @@ class Job
         } else {
             if (is_string($command)) {
                 $this->id = md5($command);
+            } elseif (is_array($command)) {
+                // A method callable such as [$this, 'method'] gets an id from its class and method
+                // name, so it stays the same on every run and can be disabled like any other job.
+                $target = reset($command);
+                $method = next($command);
+                $this->id = md5((is_object($target) ? get_class($target) : (string) $target) . '::' . (string) $method);
             } else {
                 /* @var object $command */
                 $this->id = spl_object_hash($command);
@@ -174,9 +180,9 @@ class Job
     /**
      * Set the enabled state of this job
      *
-     * Used to seed a default state at registration time (e.g. from a profile
-     * flag). An explicit entry in the scheduler `status` config still takes
-     * precedence, as that is applied in the constructor.
+     * Overrides the state the constructor read from the scheduler `status`
+     * config, for a job whose on/off switch lives elsewhere (a backup
+     * profile's Scheduled Backup flag).
      *
      * @param bool $enabled
      * @return $this
@@ -517,6 +523,18 @@ class Job
     }
 
     /**
+     * Whether the job's when() condition lets it run. A job whose condition is false is
+     * switched off for now (by its plugin's own setting, say), so the scheduler leaves it out
+     * of a run instead of recording a failed run it never attempted.
+     *
+     * @return bool
+     */
+    public function passesWhen(): bool
+    {
+        return $this->truthTest === true;
+    }
+
+    /**
      * Run the job.
      *
      * @return bool
@@ -558,7 +576,21 @@ class Job
         if (is_callable($this->command)) {
             $this->output = $this->exec();
         } else {
-            $args = is_string($this->args) ? explode(' ', $this->args) : $this->args;
+            // Process throws a ValueError for an empty program name, an Error that nothing in a
+            // scheduler run catches, so one job with no command stopped every job after it.
+            if (!is_string($this->command) || trim($this->command) === '') {
+                $this->output = 'This job has no command to run.';
+                $this->successful = false;
+                $this->removeLockFile();
+
+                return false;
+            }
+
+            // An Extra Arguments field saved empty (`args: ''`) or with a double space split into
+            // empty arguments, so `ls` ran as `ls ''` and failed with "No such file or directory".
+            $args = is_string($this->args)
+                ? array_values(array_filter(explode(' ', $this->args), static fn ($arg) => $arg !== ''))
+                : (array) $this->args;
             $command = array_merge($this->resolveCommand(), $args);
 
             // Command jobs need proc_open. Rather than letting Symfony's Process throw from
@@ -609,8 +641,13 @@ class Job
                 $this->successful = true;
                 $this->output =  $process->getOutput();
             } else {
+                // Keep both streams: console commands (Symfony's $io->error() among them) print
+                // their errors to stdout, so stderr alone is often empty and the reason is lost.
                 $this->successful = false;
-                $this->output =  $process->getErrorOutput();
+                $this->output = trim(implode("\n", array_filter([
+                    trim($process->getOutput()),
+                    trim($process->getErrorOutput()),
+                ], 'strlen')));
             }
 
             $this->postRun();
@@ -777,16 +814,19 @@ class Job
      * Execute a callable job.
      *
      * @return string
-     * @throws RuntimeException
      */
     private function exec()
     {
         $return_data = '';
         ob_start();
         try {
-            $return_data = call_user_func_array($this->command, $this->args);
+            // Arguments given as a single value rather than a list are passed as one argument.
+            $args = is_array($this->args) ? $this->args : ($this->args === null || $this->args === '' ? [] : [$this->args]);
+            $return_data = call_user_func_array($this->command, $args);
             $this->successful = true;
-        } catch (RuntimeException $e) {
+        } catch (\Throwable $e) {
+            // Any failure, not only a RuntimeException: one that escaped here used to end the
+            // whole scheduler run, so the jobs after it never ran and no job states were saved.
             $return_data = $e->getMessage();
             $this->successful = false;
         }

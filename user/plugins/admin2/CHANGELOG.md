@@ -1,3 +1,85 @@
+# v2.2.13
+## 11/10/2026
+
+1. [](#new)
+    * Labels for Grav 2.2.29's log rotation settings (Configuration → System → Error handler)
+    * Labels for Grav 2.2.29's "Unpublish child pages too" page option and its site default (Configuration → System → Content)
+    * Labels for the Page IDs option and the GFM and table Markdown options in Configuration → System, which Grav 2.2.29 now gives translation keys
+    * Pages hidden by a parent show as "Hidden" with their own icon in the tree, list and column views, with the parent named in the tooltip and in the column view's preview. A parent hides them when it is unpublished and set to "Unpublish child pages too" (Grav 2.2.29). Opening such a page shows a notice naming the parent, with a link to it, and Page Info reads "Hidden" instead of a green "Yes". A page that is a draft, scheduled or expired on its own keeps that status, with "and hidden by" the parent in its tooltip
+1. [](#improved)
+    * The dashboard's announcement banner shuffles its slides each time the dashboard loads, so a different promo leads each visit
+1. [](#bugfix)
+    * A backup job's Enabled/Disabled switch under Tools → Scheduler is the same setting as Scheduled Backup on its backup profile, and keeps showing the new state after saving [grav#4397](https://github.com/getgrav/grav/issues/4397)
+    * A page whose folder is named `languages`, `media`, `compare` or `neighbors` opens, saves and deletes in the page editor again instead of loading forever (needs API 1.1.18) [#213](https://github.com/getgrav/grav-plugin-admin2/issues/213)
+    * A row removed from a key/value list in the page editor, such as Page Groups on the Security tab, stays removed after saving instead of coming back [grav-plugin-api#79](https://github.com/getgrav/grav-plugin-api/pull/79)
+    * Scheduler jobs can be switched on and off again under Tools → Scheduler. The Enabled/Disabled control in each job's row was only a label, so a job disabled in `user/config/scheduler.yaml` could not be turned back on from the admin
+    * The External URL field on a page's Advanced tab shows its help text, and the Debugger Token field (Configuration → System → Debugger) has a proper label and help text instead of a label made up from its key
+    * Arabic, Hebrew and Japanese show the current translations of the admin's shared labels. An old copy of about 670 strings was left in those three language files and took priority over the current ones
+
+# v2.2.12
+## 11/07/2026
+
+1. [](#new)
+    * A user's page and the Users panel now have a "Sign out everywhere" button (with Login 3.13.0) [admin-next#49](https://github.com/getgrav/grav-admin-next/pull/49)
+1. [](#improved)
+    * When a plugin refuses a settings save, the reason now shows next to the field it's about [admin-next#49](https://github.com/getgrav/grav-admin-next/pull/49)
+
+# v2.2.11
+## 11/06/2026
+
+1. [](#new)
+    * The dashboard has a slim announcement banner under the stats row that slides through a few promos from getgrav.org, pausing while you hover it. Closing it hides it for a few days
+1. [](#improved)
+    * The dashboard's Notifications widget is a plain list of news again, now that the promos have moved to the banner
+1. [](#bugfix)
+    * Copying or inserting a link to a media file with `#`, `?` or `%` in its name now writes those characters percent-encoded, so the link points at the file (needs Grav 2.2.27) [admin-next#48](https://github.com/getgrav/grav-admin-next/issues/48)
+
+# v2.2.10
+## 11/05/2026
+
+1. [](#new)
+    * New **Strict Content Security Policy** setting (off by default) sends a strict `Content-Security-Policy` header with the admin and puts a fresh nonce on every script, with **Extra Policy Sources** for anything else your site needs. Plugin pages, fields, widgets, panels, modals and reports now load as same-origin modules instead of `blob:` URLs, so they keep working under it. Needs API 1.1.14 [#212](https://github.com/getgrav/grav-plugin-admin2/issues/212)
+
+# v2.2.9
+## 11/04/2026
+
+1. [](#improved)
+    * The permissions editor on a user, a new user and an invitation locks the **Allowed** toggle on any permission you can't grant because your own account doesn't have it, with a short note saying why. A permission the user already has stays switchable, and **Denied** and **Not set** always work. Super admins see no change. Needs API 1.1.12; with an older API every toggle stays open
+1. [](#bugfix)
+    * A user manager who isn't a super admin can save a user again. The save sent the user's groups, which only a super admin may change, so the API refused the whole thing
+
+# v2.2.8
+## 11/03/2026
+
+1. [](#new)
+    * The login screen and the sign-in-again dialog show only the single sign-on buttons when the site turns off **Show Password Form** in the API plugin (API 1.1.11 or later). With an older API, or while no sign-in provider is offered, the password form shows as before. A refused single sign-on now shows its error on the login screen [admin-next#46](https://github.com/getgrav/grav-admin-next/pull/46)
+    * The dashboard's Updates widget shows a homepage link and a **What's new** button for each package with an update. It opens only the changelog entries newer than the installed version, which also works for Grav itself. Package links from GPM data only open when they're real http(s) links. Thanks @patschi [admin-next#47](https://github.com/getgrav/grav-admin-next/pull/47)
+    * The dashboard's Page Views chart has a time frame picker: 7, 14, 30 or 90 days, or 12 months, remembered per browser. It shows the total for the time frame with the change against the period before it, plus today's views, and labels the date axis. Today (or this month) is drawn dashed, since it's still filling up. The old This Week and This Month figures are gone; they counted different things, so the week could read higher than the month. Needs API 1.1.11; with an older API the chart stays at 14 days
+1. [](#improved)
+    * The update UI reads better: changelogs show each version and its date on one line, with labelled New, Improved and Bugfix badges and a Security tag on security fixes; the Updates widget lines up versions and icon buttons; and the Plugins and Themes screens use one update badge and a **What's new** link everywhere. The update confirm dialogs and **Update All** are translated
+
+# v2.2.7
+## 11/03/2026
+
+1. [](#new)
+    * Pages a user can view but not edit, because of the page's own permissions, now open read-only: every field is disabled, there's no Save button, no autosave and no "unsaved changes" prompt, Cmd/Ctrl+S does nothing, and a notice at the top says "You can view this page but not edit it." Content shows in the plain markdown viewer, Expert mode is read-only too, and the page's media can be opened and its links copied but not uploaded, deleted, reordered or described. A file field shows no upload area on such a page. If the user has the right to change media and the page has no rules of its own, the media panel keeps working there even though the fields are read-only. Delete, copy and the other page actions still follow their own permissions. A media change the API refuses now says "You can't change the media of this page" instead of a generic error [#209](https://github.com/getgrav/grav-plugin-admin2/issues/209)
+    * The Pages tree, list and columns no longer show pages a user can't read. A folder they can't open is still shown, greyed out with a lock, when one of their pages is inside it, so they can expand down to it; it has no link to the editor and no row actions, and its tooltip says why. (With **Only List Editable Pages** on, a folder the user can read but not edit that leads to pages they can edit is a normal row and opens read-only.) In page pickers and the new-page parent picker such a folder opens but can't be chosen, and the page navigator skips it [#209](https://github.com/getgrav/grav-plugin-admin2/issues/209)
+    * New **Only List Editable Pages** setting (`pages.only_editable`, off by default): the Pages screen, page search and the dashboard's recent pages list only the pages each user can edit, plus the folders that lead to them, so an editor who looks after a few pages of a large site gets a short list. It's a listing convenience, not access control [#209](https://github.com/getgrav/grav-plugin-admin2/issues/209)
+    * Needs API 1.1.10, which leaves unreadable pages out of page lists, marks the folders kept to reach readable pages, and adds the `editable` list filter. With an older API, pages still open read-only when the API says the user can't update them, but the lists show every page as before
+    * Passkeys, with Login 3.12 and API 1.1.10 on a site that has `plugins.login.passkeys.enabled` on. The login screen has **Sign in with a passkey** and offers passkeys in the username field's autofill; a passkey counts as both steps, so no authenticator code follows. At the 2FA step an account with a passkey can use it instead of typing the code
+    * A **Passkeys** card on the user page: add, rename and remove your own passkeys (adding or removing asks for your current password), and remove someone else's when their device is lost, if you can edit users
+1. [](#bugfix)
+    * The Groups screen now has page controls for sites with more than 20 groups, and its search finds groups on every page, not just the first one. The group filter on the Users list, the group choices when inviting someone, and the inherited permissions shown when editing a user now include every group too [#45](https://github.com/getgrav/grav-admin-next/issues/45)
+
+# v2.2.6
+## 11/01/2026
+
+1. [](#improved)
+    * Needs Grav 2.2.18 and API 1.1.9. When a page's Twig is blocked inside a theme or plugin template it includes, **Tools → Reports → Twig in Content** names the template and offers **Trust this partial**, which adds it to `security.twig_sandbox.trusted_partials` in one click, instead of allowing what the template uses (such as `raw`) for all page content. The report links to the Learn guide on fixing Twig in content, and its hints no longer suggest turning the sandbox off
+1. [](#bugfix)
+    * Coming back to the admin after more than 30 seconds away no longer looks like a page reload on the Plugins and Groups screens: their lists stay on screen while they refresh, instead of being swapped for a full-page spinner and scrolled back to the top [#206](https://github.com/getgrav/grav-plugin-admin2/issues/206)
+    * Names marked with backticks in field help and descriptions, such as `base_url` in the Absolute URLs help, show as code instead of showing the backticks, and help that names a template like `<template>.<extension>.twig` shows the whole sentence again [#207](https://github.com/getgrav/grav-plugin-admin2/issues/207)
+
 # v2.2.5
 ## 10/30/2026
 

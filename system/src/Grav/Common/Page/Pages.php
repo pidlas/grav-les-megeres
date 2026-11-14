@@ -98,6 +98,10 @@ class Pages
     protected $ignore_folders;
     /** @var bool */
     protected $ignore_hidden;
+    /** @var array<string,string> Page folder for each page id (see PageIdentity), when ids are on. */
+    protected $uuids = [];
+    /** @var bool Whether the running build records page ids (system.pages.uuid). */
+    protected $uuid_index = false;
     /** @var string */
     protected $check_method;
     /** @var string */
@@ -392,6 +396,8 @@ class Pages
         $this->index = [];
         $this->children = [];
         $this->routes = [];
+        $this->uuids = [];
+        $this->uuid_index = PageIdentity::enabled();
 
         if (!$this->check_method) {
             $this->setCheckMethod($config->get('system.cache.check.method', 'file'));
@@ -709,8 +715,10 @@ class Pages
             foreach ($context['taxonomies'] as $taxonomy) {
                 $param = $uri->param(rawurlencode((string) $taxonomy));
                 $items = is_string($param) ? explode(',', $param) : [];
-                foreach ($items as $item) {
-                    $params['taxonomies'][$taxonomy][] = htmlspecialchars_decode(rawurldecode($item), ENT_QUOTES);
+                $items = array_map(static fn($item) => htmlspecialchars_decode(rawurldecode($item), ENT_QUOTES), $items);
+                // The list comes from the URL: a repeated value filters nothing more, so do not let it grow the list.
+                foreach (array_unique($items) as $item) {
+                    $params['taxonomies'][$taxonomy][] = $item;
                 }
             }
         }
@@ -736,7 +744,9 @@ class Pages
                 $test = $page->taxonomy()[$taxonomy] ?? [];
                 foreach ($items as $item) {
                     if (!$test || !in_array($item, $test, true)) {
+                        // One missing value is enough to drop the page, there is nothing left to test.
                         $collection->remove($page->path());
+                        break;
                     }
                 }
             }
@@ -1279,6 +1289,81 @@ class Pages
     }
 
     /**
+     * Find a page by the id of its folder (see PageIdentity).
+     *
+     * Answers from the pages index, so it only knows ids while
+     * `system.pages.uuid` is on (otherwise it returns null) and only for
+     * folders that had their id when the pages were last indexed.
+     *
+     * @param string $uuid
+     * @return PageInterface|null
+     */
+    public function findByUuid(string $uuid): ?PageInterface
+    {
+        $path = $this->uuidPath($uuid);
+
+        return $path !== null ? $this->get($path) : null;
+    }
+
+    /**
+     * Whether the pages are initialized with an index of page ids (page ids
+     * are on), so uuidPath() knows every indexed folder's id.
+     *
+     * @return bool
+     */
+    public function hasUuidIndex(): bool
+    {
+        return $this->initialized && $this->uuid_index;
+    }
+
+    /**
+     * Folder the pages index holds for a page id, or null when the pages
+     * aren't initialized, ids are off, or no folder had the id when the
+     * pages were indexed. A folder that has lost the id since is not returned.
+     *
+     * @param string $uuid
+     * @return string|null
+     */
+    public function uuidPath(string $uuid): ?string
+    {
+        if (!$this->initialized || !$this->uuid_index || !PageIdentity::isValid($uuid)) {
+            return null;
+        }
+
+        $path = $this->uuids[strtolower($uuid)] ?? null;
+        if ($path === null || PageIdentity::read($path) !== strtolower($uuid)) {
+            return null;
+        }
+
+        return $path;
+    }
+
+    /**
+     * Record a page folder's id while indexing. When two folders hold the
+     * same id, the one PageIdentity::keeper() picks is kept.
+     *
+     * @param string $uuid
+     * @param string $path
+     * @return void
+     */
+    protected function registerUuid(string $uuid, string $path): void
+    {
+        $existing = $this->uuids[$uuid] ?? null;
+        if ($existing === null || $existing === $path) {
+            $this->uuids[$uuid] = $path;
+
+            return;
+        }
+
+        $keeper = PageIdentity::keeper([$existing, $path]);
+        $this->uuids[$uuid] = $keeper;
+
+        /** @var Debugger $debugger */
+        $debugger = $this->grav['debugger'];
+        $debugger->addMessage(sprintf('Page id %s is held by both %s and %s; %s keeps it', $uuid, $existing, $path, $keeper), 'debug');
+    }
+
+    /**
      * Check site based routes.
      *
      * @param string $route
@@ -1364,8 +1449,9 @@ class Pages
         if ($page) {
             $routable = $page->routable();
             if ($redirect) {
-                if ($page->redirect()) {
-                    // Follow a redirect page.
+                if ($page->redirect() && $page->published()) {
+                    // Follow a redirect page. It does not need to be routable (a folder that
+                    // only forwards), but it has to be published, like any page that is found.
                     $this->grav->redirectLangSafe($page->redirect());
                 }
 
@@ -1411,7 +1497,11 @@ class Pages
                     /** @var string $found */
                     $found = preg_replace($pattern, (string) $replace, $source_url);
                     if ($found && $found !== $source_url) {
-                        $this->grav->redirectLangSafe($found);
+                        // Keep the configured destination after applying the request path.
+                        $found = $this->filterSiteRedirect((string) $replace, $found);
+                        if ($found !== null && $found !== $source_url) {
+                            $this->grav->redirectLangSafe($found);
+                        }
                     }
                 } catch (ErrorException $e) {
                     $this->grav['log']->error('site.redirects: ' . $pattern . '-> ' . $e->getMessage());
@@ -1420,6 +1510,32 @@ class Pages
         }
 
         return $page;
+    }
+
+    /**
+     * Keep the result of a `site.redirects` rule on the host the rule was written for.
+     *
+     * @param string $replace Redirect target as written in the configuration.
+     * @param string $found Redirect target after the request URL has been applied to it.
+     * @return string|null Redirect target, or null if the rule should not be followed for this request.
+     */
+    protected function filterSiteRedirect(string $replace, string $found): ?string
+    {
+        if (!Uri::isExternal($replace)) {
+            return '/' . ltrim($found, '/\\');
+        }
+
+        // Everything in front of the path: scheme, user info, host and port.
+        $regex = '{^(?:[a-z][a-z0-9+.-]*:)?(?://)?[^/?#]*}i';
+        preg_match($regex, $replace, $expected);
+        preg_match($regex, $found, $actual);
+
+        // A rule which builds that part from its own captures has asked for it.
+        if (strpbrk($expected[0], '$\\') !== false) {
+            return $found;
+        }
+
+        return $actual[0] === $expected[0] ? $found : null;
     }
 
     /**
@@ -1452,6 +1568,14 @@ class Pages
     {
         if ($this->blueprints === null) {
             $this->blueprints = new Blueprints(self::getTypes());
+        }
+
+        // The type is content: a page names it in its `template` header. It is
+        // looked up among the page types, but Blueprint::getFiles() also takes a
+        // stream URI or the path of an existing file as the blueprint itself,
+        // which would let a file uploaded as page media define the page's fields.
+        if ($this->grav['locator']->isStream($type) || is_file((string) $type)) {
+            $type = 'default';
         }
 
         try {
@@ -1971,8 +2095,10 @@ class Pages
 
         $cached = $cache->get($this->pages_cache_id);
 
-        if ($cached && $this->getVersion() === $cached[0]) {
+        // An index cached while page ids were off has no ids to give.
+        if ($cached && $this->getVersion() === $cached[0] && (!$this->uuid_index || is_array($cached[6] ?? null))) {
             [, $this->index, $this->routes, $this->children, $taxonomy_map, $this->sort] = $cached;
+            $this->uuids = $this->uuid_index ? $cached[6] : [];
 
             /** @var Taxonomy $taxonomy */
             $taxonomy = $this->grav['taxonomy'];
@@ -1984,6 +2110,9 @@ class Pages
         /** @var Debugger $debugger */
         $debugger = $this->grav['debugger'];
         $debugger->addMessage('Page cache missed, rebuilding Flex Pages..');
+
+        // Pages waiting for a publishing date shorten the cache lifetime while they are built.
+        $lifetime = $this->grav['cache']->getLifetime();
 
         $root = $collection->getRoot();
         $root_path = $root->path();
@@ -2039,6 +2168,15 @@ class Pages
             $this->routes[$route] = $path;
             $this->instances[$path] = $page;
             $this->index[$path] = $page->getFlexKey();
+            if ($this->uuid_index) {
+                // Flex page storage reads the id while it lists the folder.
+                // An index listed before ids were on has no `uuid`, so read it.
+                $meta = $page->getMetaData();
+                $uuid = array_key_exists('uuid', $meta) ? $meta['uuid'] : PageIdentity::read($path);
+                if (is_string($uuid) && $uuid !== '') {
+                    $this->registerUuid($uuid, $path);
+                }
+            }
             // FIXME: ... better...
             $this->children[$parent][$path] = ['slug' => $page->slug()];
             if (!isset($this->children[$path])) {
@@ -2068,8 +2206,16 @@ class Pages
             $taxonomy = $this->grav['taxonomy'];
             $taxonomy_map = $taxonomy->taxonomy();
 
+            // Expire the cached taxonomy and lists when the next page is published or unpublished.
+            $ttl = null;
+            $next = $this->grav['cache']->getLifetime();
+            if ($next < $lifetime) {
+                $configured = (int)$directory->getConfig('object.cache.index.lifetime', 60);
+                $ttl = $configured > 0 ? min($configured, $next) : $next;
+            }
+
             // save pages, routes, taxonomy, and sort to cache
-            $cache->set($this->pages_cache_id, [$this->getVersion(), $this->index, $this->routes, $this->children, $taxonomy_map, $this->sort]);
+            $cache->set($this->pages_cache_id, [$this->getVersion(), $this->index, $this->routes, $this->children, $taxonomy_map, $this->sort, $this->uuid_index ? $this->uuids : null], $ttl);
         }
     }
 
@@ -2163,8 +2309,13 @@ class Pages
      */
     protected function loadCachedPages(Cache $cache, array $pages_dirs): bool
     {
-        $cached = $cache->fetch($this->pages_cache_id);
+        $cached = $this->isIndexShared() ? $cache->fetchShared($this->pages_cache_id) : $cache->fetch($this->pages_cache_id);
         if (!$cached || $this->getVersion() !== $cached[0]) {
+            return false;
+        }
+
+        // An index cached while page ids were off has no ids to give.
+        if ($this->uuid_index && !is_array($cached[7] ?? null)) {
             return false;
         }
 
@@ -2178,6 +2329,7 @@ class Pages
 
         $this->index_store = $store;
         [, $this->index, $this->routes, $this->children, $taxonomy_map, $this->sort] = $cached;
+        $this->uuids = $this->uuid_index ? $cached[7] : [];
 
         /** @var Taxonomy $taxonomy */
         $taxonomy = $this->grav['taxonomy'];
@@ -2203,7 +2355,15 @@ class Pages
     }
 
     /**
-     * Set the pages cache id from the pages hash, the change stamp, the configuration and the language.
+     * Frontmatter Twig may put request-specific values into the page index.
+     */
+    protected function isIndexShared(): bool
+    {
+        return $this->grav['config']->get('system.pages.frontmatter.process_twig') !== true;
+    }
+
+    /**
+     * Set the pages cache id from the pages hash, the change stamp, the configuration, the language and the scope.
      *
      * @param array $pages_dirs
      * @param string|int $hash
@@ -2215,7 +2375,10 @@ class Pages
         $language = $this->grav['language'];
 
         $this->simple_pages_hash = json_encode($pages_dirs) . $hash . $this->getChangeStamp() . $this->grav['config']->checksum();
-        $this->pages_cache_id = md5($this->simple_pages_hash . $language->getActive());
+
+        // Page::header() builds a page differently in admin scope: frontmatter.yaml is not merged and
+        // frontmatter Twig is not processed. Pages built there must never be the ones the site loads.
+        $this->pages_cache_id = md5($this->simple_pages_hash . $language->getActive() . (Utils::isAdminPlugin() ? 'admin' : ''));
     }
 
     protected function getPagesPaths(): array
@@ -2248,6 +2411,7 @@ class Pages
         $this->children_lazy = false;
         $this->sort_lazy = false;
         $this->sort = [];
+        $this->uuids = [];
 
         /** @var Taxonomy $taxonomy */
         $taxonomy = $this->grav['taxonomy'];
@@ -2303,7 +2467,7 @@ class Pages
             if ($state_file && $this->writeScanFile($state_file, ['hash' => $hash, 'paths' => $this->scan_paths])) {
                 $interval = (int)$config->get('system.cache.check.interval', 0);
                 if ($interval > 0) {
-                    $this->grav['cache']->save($this->getPagesHashKey($pages_dirs, $method), $hash, $interval);
+                    $this->grav['cache']->saveShared($this->getPagesHashKey($pages_dirs, $method), $hash, $interval);
                 }
 
                 $this->setPagesCacheId($pages_dirs, $hash);
@@ -2351,11 +2515,16 @@ class Pages
                 $this->index_store = null;
             }
 
-            // save pages, routes, taxonomy, and sort to cache
+            // Save pages, routes, taxonomy, sort and UUIDs to the selected cache.
             if ($lazy) {
-                $cache->save($this->pages_cache_id, [$this->getVersion(), $index, [], [], [], [], true]);
+                $cached = [$this->getVersion(), $index, [], [], [], [], true, $this->uuid_index ? $this->uuids : null];
             } else {
-                $cache->save($this->pages_cache_id, [$this->getVersion(), $index, $this->routes, $this->children, $taxonomy->taxonomy(), $this->sort, false]);
+                $cached = [$this->getVersion(), $index, $this->routes, $this->children, $taxonomy->taxonomy(), $this->sort, false, $this->uuid_index ? $this->uuids : null];
+            }
+            if ($this->isIndexShared()) {
+                $cache->saveShared($this->pages_cache_id, $cached);
+            } else {
+                $cache->save($this->pages_cache_id, $cached);
             }
         }
     }
@@ -2462,7 +2631,8 @@ class Pages
 
         // Stable name per page dirs + language; content changes are detected via
         // the cache id stored inside the file, so the file gets rewritten in place.
-        $name = 'index-' . md5(json_encode($pagesDirs) . (string)$this->active_lang);
+        // Admin scope keeps its own file, or the two scopes would rewrite each other's index.
+        $name = 'index-' . md5(json_encode($pagesDirs) . (string)$this->active_lang . (Utils::isAdminPlugin() ? 'admin' : ''));
 
         return PageIndexStore::open($dir, $name);
     }
@@ -2574,6 +2744,14 @@ class Pages
         foreach ($this->listFolder($directory, $folder_time, $reused) as $filename => $type) {
             $filename = (string)$filename;
 
+            // The page id file is never a page file or media. With ids on, record the id.
+            if ($filename === PageIdentity::FILE) {
+                if ($this->uuid_index && $parent && $type === 'f' && ($uuid = PageIdentity::read($directory)) !== null) {
+                    $this->registerUuid($uuid, $directory);
+                }
+                continue;
+            }
+
             // Ignore all hidden files if set.
             if ($this->ignore_hidden && $filename && str_starts_with($filename, '.')) {
                 continue;
@@ -2624,6 +2802,16 @@ class Pages
                         $page_extension = $ext;
                     }
                 }
+            }
+        }
+
+        // Under a parent that is unpublished and cascades (`cascade_unpublish`), or one already unpublished
+        // by such an ancestor, this page is unpublished too. Set before init() so onPageProcessed sees it.
+        if ($parent instanceof Page) {
+            $unpublishedBy = $parent->unpublishedBy()
+                ?? (!$parent->published() && $parent->cascadesUnpublish() ? $parent->rawRoute() : null);
+            if (null !== $unpublishedBy) {
+                $page->unpublishedBy($unpublishedBy);
             }
         }
 
@@ -2743,7 +2931,7 @@ class Pages
 
             // add raw route
             if ($raw_route) {
-                if (isset($this->routes[$raw_route]) && $this->routes[$route] !== $page_path) {
+                if (isset($this->routes[$raw_route]) && $this->routes[$raw_route] !== $page_path) {
                     $this->grav['debugger']->addMessage("Raw Route '{$raw_route}' already exists: {$this->routes[$raw_route]}, overwriting with {$page_path}");
                 }
                 $this->routes[$raw_route] = $page_path;
@@ -2997,7 +3185,7 @@ class Pages
         $cache = $this->grav['cache'];
         $cacheKey = $this->getPagesHashKey($pagesDirs, $method);
         if ($interval > 0) {
-            $cached = $cache->fetch($cacheKey);
+            $cached = $cache->fetchShared($cacheKey);
             if ($cached !== false) {
                 return $cached;
             }
@@ -3036,7 +3224,7 @@ class Pages
             }
 
             if ($interval > 0) {
-                $cache->save($cacheKey, $hash, $interval);
+                $cache->saveShared($cacheKey, $hash, $interval);
             }
         } finally {
             $this->releaseLock($lock);

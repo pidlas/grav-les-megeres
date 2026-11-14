@@ -1,0 +1,37 @@
+{% set cible_accueil = donnees_accueil | default(grav.flex.directory('accueil').getCollection().first()) %}
+
+{% if cible_accueil.accueil_slides %}
+<fieldset class="diaporama-fieldset">
+    <legend class="visually-hidden">Diaporama de visualisation des spectacles</legend>
+    <div class="diaporama-zone-maitre">
+        <div class="button-container">
+
+            {% for slide in cible_accueil.accueil_slides %}
+                {% set slide_id = 'c' ~ loop.index %}
+
+                <input type="radio" name="slide" id="{{ slide_id }}" {{ loop.first ? 'checked' : '' }}>
+
+                {% set style_bg = '' %}
+                {% if slide.image %}
+                    {% set url_avif = base_url_simple ~ '/user/data/flex-objects/accueil/' ~ slide.image %}
+                    {% set style_bg %}
+                        style="background-image: url('{{ url_avif }}');"
+                    {% endset %}
+                {% endif %}
+
+                <label for="{{ slide_id }}" class="card" {{ style_bg | raw }}>
+                    <div class="row">
+                        <div class="description">
+                            <a href="{{ base_url }}{{ slide.lien }}">
+                                <h3 class="radio-title">{{ slide.titre }}</h3>
+                            </a>
+                        </div>
+                    </div>
+                </label>
+            {% endfor %}
+
+        </div>
+        <div class="diaporama-masque-fondu"></div>
+    </div>
+</fieldset>
+{% endif %}

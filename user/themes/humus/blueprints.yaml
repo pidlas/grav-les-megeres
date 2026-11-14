@@ -1,0 +1,31 @@
+name: Humus
+slug: humus
+type: theme
+version: 1.0.0
+description: "Thème autonome pour les Mégères de l'Humus"
+icon: leaf
+author:
+  name: Philippe Guerrini
+  email: philippe.guerrini@tutanota.com
+homepage: https://grav.lesmegeresdelhumus.fr/grav
+keywords: "humus, spectre, theatre, autonome"
+form:
+  fields:
+    tabs:
+      type: tabs
+      active: 1
+      fields:
+        theme:
+          type: tab
+          title: Thème
+          fields:
+            header.enabled:
+              type: toggle
+              label: Activer le thème
+              highlight: 1
+              default: 1
+              options:
+                1: Oui
+                0: Non
+              validate:
+                type: bool

@@ -1,3 +1,191 @@
+# v2.2.29
+## 11/10/2026
+
+1. [](#new)
+    * Log files in `logs/` now rotate when they reach 10 MB: `grav.log` becomes `grav.log.1`, older copies are gzipped (`grav.log.2.gz` and on), and five are kept. `grav.log`, `security.log` and `scheduler.log` rotate as they are written, an hourly `log-rotate` scheduler job catches plugin logs, and `bin/grav logrotate` runs it by hand. Change or turn it off under `system.log.rotate` (Configuration → System → Error handler)
+    * A page can unpublish everything below it along with itself. Set `cascade_unpublish: true` on a page (Options → "Unpublish child pages too"), and while that page is unpublished, by `published: false` or by its `publish_date` / `unpublish_date`, every page below it is unpublished too: left out of menus, collections, the sitemap and search, and not served. The pages below keep their own `published` setting, so they are back as they were once the parent is published again, and a section given a `publish_date` goes live all at once. `system.pages.cascade_unpublish` (Configuration → System → Content) sets the default for every page, and is off. `$page->unpublishedBy()` returns the route of the page that hides a page
+1. [](#bugfix)
+    * A backup profile's Scheduled Backup switch now decides on its own whether the backup runs. An old Enabled or Disabled entry for the backup job in `user/config/scheduler.yaml`, which classic admin wrote whenever its Scheduler page was saved, used to override it, so backups could stop with the switch on [#4397](https://github.com/getgrav/grav/issues/4397)
+    * A scheduler job that fails now keeps what it printed to standard output as well as its error output, so the reason shows in the job's history, `user/data/scheduler/status.yaml` and the output file. Most console commands print their errors to standard output, so a failed run used to be recorded with no output at all
+    * A page with a link or image whose address is longer than any file path, such as an inline image written as `/data:image/png;base64,...`, no longer turns into an error page on servers with `open_basedir` set
+    * Several Grav sites on one server no longer try to load each other's files. The class loader's APCu cache is now kept separate for each site, so a class found in one site's `vendor/` folder is never looked up at another site's path [#4392](https://github.com/getgrav/grav/issues/4392)
+    * The Page IDs option and the GFM and table Markdown options in Configuration → System use translation keys instead of English written into the blueprint, so they can be translated. The English comes from Admin2 2.2.13 and Admin 1.10.63
+
+# v2.2.28
+## 11/07/2026
+
+1. [](#bugfix)
+    * `Browser::isHuman()` no longer counts link-preview fetchers (such as `facebookexternalhit`, which loads a page each time a shared link or ad is shown), AI fetchers (`ChatGPT-User`, `ClaudeBot`, `PerplexityBot` and others), uptime and monitoring services, and headless or auditing tools like HeadlessChrome and Lighthouse as people, so page statistics stop counting requests nobody made. Facebook's and Instagram's in-app browsers are real visitors and stay human
+
+# v2.2.27
+## 11/06/2026
+
+1. [](#bugfix)
+    * Showing the same image twice with different `derivatives()` ranges, for example in two modules on one page, no longer stretches the second set of responsive images, and the second set can now go up to the full width of the original [#4389](https://github.com/getgrav/grav/issues/4389)
+    * Cropping or resizing an image after `derivatives()`, such as `derivatives(400, 800, 400).cropZoom(300, 300)`, scales its responsive images down with it instead of making them larger than the image itself
+    * Links and images to media files with `#`, `?` or `%` in their names work again, written percent-encoded (`Invoice%20%2312.pdf`) or in angle brackets. Media URLs now come out percent-encoded too, so a space is `%20` [#4388](https://github.com/getgrav/grav/issues/4388)
+
+# v2.2.26
+## 11/05/2026
+
+1. [](#bugfix)
+    * When PHP can't start sessions (for example, `session.save_path` points at a folder that no longer exists after a server move), Grav now writes the reason to `grav.log` instead of showing "Session corruption detected" on every page to every visitor
+    * A session holding an unusable user object is now actually replaced with a fresh one, instead of crashing every page with an error until the visitor clears their cookies
+    * The debug bar no longer reports Twig deprecations on every page, one for Grav's sandbox source policy and one for how page content Twig is rendered [#4387](https://github.com/getgrav/grav/issues/4387)
+
+# v2.2.25
+## 11/05/2026
+
+1. [](#bugfix)
+    * A scheduled job that its plugin switches off with `when()` (such as YetiSearch Pro's embed job while semantic search is off) is no longer run and recorded as a failure each time it comes due. The scheduler leaves it out of the run and out of the health check, and `Job::passesWhen()` tells other tools whether a job's condition lets it run
+    * [security] A media link's attributes now go through the same name check as `attribute()`, so page content can no longer put an event handler on the link. Thanks @R0X4R
+
+# v2.2.24
+## 11/04/2026
+
+1. [](#bugfix)
+    * Running a plugin's test suite against a Grav checkout no longer leaves a `user/config/security-private.php` in the plugin's folder, where a `git add -A` could commit it into the plugin's release. Grav now creates the key file only in a real Grav install, and code that loads Grav's classes from anywhere else gets a key that lasts for that process
+
+# v2.2.23
+## 11/03/2026
+
+1. [](#bugfix)
+    * When a cache file can't be deleted, the cache purge job and `bin/grav clear` now name the file and the reason (such as "Permission denied") instead of "Unknown error", and carry on with the rest of the cache instead of stopping at the first one ([#4384](https://github.com/getgrav/grav/issues/4384))
+    * [security] The `svg_image()` Twig function now escapes the classes it adds to the SVG. Thanks @manus-pi
+    * [security] The `svg_image()` Twig function only inlines real `.svg` files, so a theme that takes the image path from a page header can no longer be pointed at other files on the server
+
+# v2.2.22
+## 11/02/2026
+
+1. [](#bugfix)
+    * On servers with the PHP `yaml` extension, a YAML file with a plain `y`, `yes`, `on`, `off`, `n` or `no` key keeps that key instead of turning it into `1` or `0`, so settings such as an image's `y:` size and the `YES`/`NO` language strings load the same as on servers without the extension
+    * An asset added by the site's own full URL, such as `url('theme://css/custom.css', true)`, or by a link that starts with the site's subfolder, no longer renders with the host or subfolder twice
+
+# v2.2.21
+## 11/01/2026
+
+1. [](#bugfix)
+    * A plugin that adds a scheduler job as a class method (such as `[$this, 'method']`) without an id, or with its id where the job's arguments go, no longer crashes every scheduler run and empties the admin's job list [#4380](https://github.com/getgrav/grav/issues/4380)
+
+# v2.2.20
+## 10/31/2026
+
+1. [](#bugfix)
+    * Updating or reinstalling a plugin swaps the new copy in all at once, so the site never runs with the plugin missing or half copied, and the old copy is put back if the new one cannot be moved in
+    * JSON sent to the site is now checked against size limits before it is read, so an oversized request is turned away quickly instead of tying up the server (limits are under `request.json` in `system.yaml`)
+    * Sites behind a proxy that ends HTTPS (such as Cloudflare in front of a server on port 80) no longer redirect visitors to the address with `:80` added, for example when reloading the admin
+
+# v2.2.19
+## 10/31/2026
+
+1. [](#bugfix)
+    * A number field given a value too large for an integer no longer causes a warning on PHP 8.5
+    * The bundled `lighttpd.conf` loads on current lighttpd releases again, serves `/.well-known/` files such as ACME challenges, and keeps Markdown source files and the same folders and file types private as the Apache rules do (lighttpd sites copy the updated rules from `webserver-configs/` by hand)
+    * The bundled Caddyfiles also keep JSON files under `system/`, `vendor/` and `user/`, Markdown source files such as `CHANGELOG.md`, the `webserver-configs/` folder and hidden files inside `/.well-known/` private (Caddy sites copy the updated rules from `webserver-configs/` by hand)
+    * The bundled `nginx.conf` also keeps Markdown source files such as `CHANGELOG.md` and the `webserver-configs/` folder private, and matches root files such as `composer.json` in any letter case (nginx sites copy the updated rules from `webserver-configs/` by hand)
+    * The bundled IIS `web.config` also keeps `LICENSE.txt`, `composer.json`, `composer.lock` and Markdown source files private, covers the same file types under `system/` and `vendor/` as the Apache rules, and matches its rules however a file path is written (IIS sites copy the updated rules from `webserver-configs/` by hand)
+    * The `php -S` development router (`system/router.php`) keeps `tmp/`, `user/config/`, `user/accounts/` and `user/data/` private and refuses scripts in `images/` and `assets/`, the same as the shipped web-server rules
+    * [security] The Apache `.htaccess` exception for `/.well-known/` now covers that folder only, so other hidden files and folders whose names start with `well-known` stay blocked. Upgrading updates existing `.htaccess` files
+
+# v2.2.18
+## 10/31/2026
+
+1. [](#bugfix)
+    * [security] The security fixes below were found by Anthropic's OSS Scanner
+    * [security] Twig in page content can only read an account's name, username, e-mail, language and login state, and account secrets such as password hashes, 2FA secrets and reset tokens are no longer included in form values or in an account's array and JSON output
+    * [security] Twig in page content can no longer use `page.path`, `page.filepath` or `{% autoescape %}`, page methods it calls only change that one page for the current request, and `array_key_value()` and `sort_by_key` only work with data content Twig may read
+    * [security] Settings hidden from content Twig by `security.twig_sandbox.config_denied_paths` now stay hidden through loops, theme helpers, plugin page settings, theme aliases, unusual path separators and full config listings
+    * [security] `yaml_decode` and page frontmatter always read invalid YAML as text, never as the name of a file
+    * [security] A page's `template` setting only picks a theme or plugin template, and a page whose template names a file path gets the default blueprint
+    * [security] Media file names and metadata are always shown as text when a page's Twig runs, and a media `.meta.yaml` file can no longer change which file a medium points to
+    * [security] Media actions in Markdown only call the documented action methods, and image output formats only accept supported image types
+    * [security] SVG uploads are checked under every file extension, cleared before sanitizing, and quarantined when sanitizing fails
+    * [security] A site without a `user/env/` folder only uses a folder of its own as a host's environment folder, and host names with slashes or a leading dot get none
+    * [security] Blueprint files are only trusted when they live in a blueprint, plugin or theme folder, and forms in page frontmatter can only import blueprints from those folders and always keep their state in the default forms folder
+    * [security] Field overrides in a page's Flex form only change that form and follow the same rules for dynamic options as other page-authored fields
+    * [security] With `security.twig_content.config_access` off, forms in page frontmatter can only read the `system`, `site` and `theme` settings
+    * [security] Creating, renaming or copying user accounts, groups and other Flex objects can no longer replace an existing one or take another file's storage key, and a Flex form only resumes saved state from a form of the same type
+    * [security] Only a super admin can switch a user group on or off or edit a group that grants super admin, disabling a group now applies to regular accounts too, and a super-admin group always counts for super-admin protection
+    * [security] YAML merge keys (`<<`) are no longer saved into account or other data files
+    * [security] User accounts are counted correctly when the site's folder path contains square brackets
+    * [security] A login still waiting for its two-factor code, or a disabled account, no longer gets access through its own Flex account or its groups
+    * [security] Signed-in sessions pick up changes to their account made elsewhere, and saving an account no longer overwrites changes made to it since it was loaded. This applies to Flex accounts as well
+    * [security] Sessions are tied to the site that created them, and the session cookie is only sent to the site's own host unless `system.session.domain` is set. Sessions active at the update carry on as before
+    * [security] Looking up an account by a name that isn't a valid username no longer finds another account, an email field only takes a list when set to `multiple`, and avatar images always stay in their own folder
+    * [security] Sorting or filtering a Flex collection by a field name only reads properties and a short list of read-only page fields
+    * [security] Flex pages check permissions on the parent and translations they actually affect when they are created, moved, saved in another language or deleted, and keep the permissions inherited from their real parent folder
+    * [security] Flex pages keep their own folder, storage key and header fields when saved, and Flex media changes only touch the object's own files and media fields
+    * [security] Flex pages follow their publish and unpublish dates, and unpublished pages no longer follow their `redirect`
+    * [security] Pages built for the admin and the API keep their own cache, so site visitors always get pages built with the rules from `frontmatter.yaml`
+    * [security] The requested URL is decoded once when looking up a page, so plugins that protect page media check the same page Grav serves the file from
+    * [security] Forwarded protocol headers, including `CloudFront-Forwarded-Proto`, are only used when `system.http_x_forwarded.protocol` is enabled
+    * [security] Responses that set a cookie always stay private to the browser, error responses are never cached, and HTML and Markdown versions of a page are kept apart in shared caches
+    * [security] Host names without an environment folder share one set of compiled caches and page index instead of each getting their own
+    * [security] Saved form state is written to a new file with limits on its size and depth, so form state pending during the update starts over
+    * [security] Very long or repetitive input in form field names, number fields, dates, uploads, Markdown links, taxonomy URLs and the XSS check is handled quickly instead of slowing the site down
+    * [security] Damaged images, unusual retina file names and large image actions no longer break a page's media or get past the image pixel limit
+    * [security] Configured redirects keep their intended destination, module output is only cached for real page routes, and official package downloads require HTTPS
+    * [security] Page summaries keep escaped text escaped, image loading options only accept their defined values, and with `escape_markup` on, Twig tag lines, `special_chars` maps and script links are escaped too
+    * [security] Theme and plugin templates that page content includes, embeds or extends now follow the same Twig rules as the content itself. The Form plugin's form and data templates keep working from page content as before, and its plain-text save template stays literal in saved files but is escaped when page content or an email includes it
+    * Upgrade note: if a page that includes a theme or plugin partial now shows its Twig as plain text, add the partial's name to `security.twig_sandbox.trusted_partials` or move the include into the theme template. A listed partial renders with Grav's own page variables, and page content can only pass it plain values such as text, numbers and lists, never under a name Grav already uses such as `grav`, `page` or `form`
+    * [security] The bundled IIS `web.config` now keeps everything under `user/data` and `user/accounts` blocked except the media and avatar images those folders are meant to serve, whatever the request's query string, and media links with a query string such as `?v=2` load again; IIS sites must copy the updated rules from `webserver-configs/web.config` by hand
+    * [security] The Caddy 0.8 sample `webserver-configs/Caddyfile-0.8.x` now blocks the same folders and files as the Caddy 2 `Caddyfile`, including `backup/`, `tmp/`, `user/config`, `user/accounts`, `user/data` and hidden files such as `.env`; sites using it must copy the updated rules by hand
+    * Page change checks skip unreadable folders, invalid route aliases are ignored, saving a page with an empty header keeps its content separate, and a page with an empty default route keeps its raw route
+    * A page with an unpublish date now disappears at that moment, image derivatives with an invalid width are ignored, and long runs of punctuation after a link render quickly
+    * Asset pipeline bundles are the same for every host name a site answers to, Flex directories list folders with unusual names, the image `style` option refuses transforms, srcset derivatives keep the image options given before them, and `url()` in page content only resolves streams inside the media folders
+    * [security] `system.images.max_pixels` now also refuses to resize an image whose size PHP can't read, instead of skipping the check. Imagick can decode formats such as JPEG XL and HEIC that `getimagesize()` can't measure, so a huge image in one of those formats could get past the limit. The image is served as it is, and a warning is logged
+    * `image/avif` was listed under an `image` extension in `mime.yaml` instead of `avif`, so Grav's MIME type list gave `image` as an extension for `image/avif`, ahead of `avif`
+
+# v2.2.17
+## 10/30/2026
+
+1. [](#bugfix)
+    * With `system.absolute_urls` and asset SRI both on, Grav looked for asset files at the web root plus the full URL, so no `integrity` was added and sites with `open_basedir` got a fatal error. It now finds the real file, also in subfolders whose name has characters like `.` or `+` [#4377](https://github.com/getgrav/grav/issues/4377)
+
+# v2.2.16
+## 10/29/2026
+
+1. [](#bugfix)
+    * [security] The `string()` Twig function now applies the same sandbox checks as the `|string` filter. Thanks @dagighost
+
+# v2.2.15
+## 10/29/2026
+
+1. [](#new)
+    * **Page ids**: a page folder can carry a hidden `.page-id` file holding a permanent id (a UUID) that stays with the folder however it is renamed, reordered or moved, in Admin, with git or over FTP. Read it with `$page->uuid()` and find a page by it with `$pages->findByUuid()`; `Grav\Common\Page\PageIdentity` writes ids, finds a folder by its id after a move, and decides which folder keeps an id that a copy made outside Grav duplicated (the older `.page-id` wins). Ids are off unless a plugin needs them: it calls `PageIdentity::enable()` in `onPluginsInitialized`, or a site sets `system.pages.uuid: true`, and then saving or creating a page gives its folder an id and a copied page gets its own. `bin/grav page-ids` gives every page folder an id and reports duplicates, and tells the pages cache so the next request finds the new ids. The file is hidden, so it never shows as a page file or as media, and a page folder moved to another disk (where Grav copies it instead of renaming it) takes its ids with it. Two requests saving one new page at the same moment give it one id, not two
+2. [](#bugfix)
+    * A scheduler custom job or backup profile added in the admin and saved without being filled in no longer breaks the scheduler: it is skipped, so the other jobs still run and the job list, health check and webhook keep working [getgrav/grav-plugin-scheduler-webhook#10](https://github.com/getgrav/grav-plugin-scheduler-webhook/issues/10)
+    * A new backup profile's default schedule runs once at 3:00 instead of every minute from 3:00 to 3:59, and a job whose Extra Arguments field is saved empty no longer fails
+    * The scheduler's custom job placeholders read as examples (`e.g. bin/grav`) instead of looking like values already filled in, and Run At saves the every-minute schedule it shows when left as is
+
+# v2.2.14
+## 10/26/2026
+
+1. [](#improved)
+    * Disabled plugins are no longer loaded, so a disabled plugin with code that doesn't work on this version of Grav can't take the site down, and requests do less work. A disabled plugin is still listed with its settings, and its class still loads if another plugin asks for it. Thanks @NoNoNo [#4374](https://github.com/getgrav/grav/issues/4374)
+2. [](#bugfix)
+    * CSS with a long quoted string or comment (such as an inlined data: URI) minifies again instead of failing with a PCRE error, and a very large data: URI no longer empties the whole stylesheet from the bundle. Thanks @NoNoNo [#4372](https://github.com/getgrav/grav/issues/4372)
+    * Inline JavaScript added with `loading: 'inline'` no longer renders a stray `inline` attribute on its script tag, and an inline JS module keeps its code when the pipeline is off. Thanks @NoNoNo [#4373](https://github.com/getgrav/grav/issues/4373)
+
+# v2.2.13
+## 10/23/2026
+
+1. [](#bugfix)
+    * [security] A field in a page's Flex form override keeps the stricter rules for dynamic options after it is merged into the directory blueprint, however it is renamed or numbered. Thanks @soquip
+    * [security] Page content is now checked for unsafe markup as though its Twig runs, even when Twig is off for that page, since a later move or rename can turn it into a module. Thanks @vLWa7ch
+    * [security] Flex user accounts: an account without super-admin access can no longer edit or delete a super-admin account through a Flex form, and a submitted password hash is ignored when an account is saved. Thanks @manus-pi
+    * [security] Flex page storage now refuses a folder, template or language that is not a plain name. Thanks @shm0x00
+    * [security] Images referenced by stream URI in page content, the watermark image and `media_directory()` now only come from media folders (pages, images, media, themes, plugins), configurable with the new `security.media.allowed_roots` setting. Thanks @123abab123789
+
+# v2.2.12
+## 10/22/2026
+
+1. [](#improved)
+    * The scheduler webhook now also runs jobs that missed their time since the last call, so a site pinged hourly (or late) no longer skips jobs set for another minute. Add `?mode=due` for the old behaviour. The scheduler health check now warns when a job is behind schedule, instead of five minutes after the last run [getgrav/grav-plugin-scheduler-webhook#9](https://github.com/getgrav/grav-plugin-scheduler-webhook/issues/9)
+2. [](#bugfix)
+    * Admin listings of a folder with thousands of pages no longer reload the folder once for every page in it, which made them slow and could run out of memory with caching on [getgrav/grav-plugin-admin2#200](https://github.com/getgrav/grav-plugin-admin2/issues/200)
+    * A scheduled backup no longer fails with "ZipArchive::close(): Unexpected length of data" when another job changes a file in the site while the backup is being written. The backup is built again (up to three tries), and if it still can't be written, it is marked as failed while the rest of the scheduler run carries on. A failing job used to stop the whole run, so the jobs after it never ran and none of their results were saved
+
 # v2.2.11
 ## 10/19/2026
 

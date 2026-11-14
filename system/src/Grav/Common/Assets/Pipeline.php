@@ -34,8 +34,13 @@ class Pipeline extends PropertyObject
     protected const JS_ASSET = 2;
     protected const JS_MODULE_ASSET = 3;
 
-    /** @const Regex to match CSS urls */
-    protected const CSS_URL_REGEX = '{url\(\s*([\'\"]?)(.*?)\1\s*\)|(@import)\s+([\'\"])(.*?)\4}i';
+    /**
+     * @const Regex to match CSS urls. Group 1 is the quote and group 2 the URL of a url(), group 3
+     *        is `@import`, group 4 the quote and group 5 the URL of a quoted @import. The branch
+     *        resets keep that numbering for every form, and the possessive runs scan a long
+     *        data: URI without running into PCRE's backtrack limit.
+     */
+    protected const CSS_URL_REGEX = '{url\(\s*(?|(")((?:[^"\\\\\r\n]++|\\\\.)*+)"|(\')((?:[^\'\\\\\r\n]++|\\\\.)*+)\'|()([^)\s"\']*+))\s*\)|(@import)\s+(?|(")([^"\r\n]*+)"|(\')([^\'\r\n]*+)\')}i';
 
     /** @const Regex to match JS imports */
     protected const JS_IMPORT_REGEX = '{import.+from\s?[\'|\"](.+?)[\'|\"]}';
@@ -47,8 +52,10 @@ class Pipeline extends PropertyObject
      * @const Regex matching, in order, a quoted CSS string, a bang-prefixed license comment, or
      *        an ordinary comment. Strings come first so that comment markers inside a string are
      *        never taken for a comment, and a quote inside a comment is never taken for a string.
+     *        Every run is possessive, so a long string or comment (an inlined data: URI) costs
+     *        PCRE no stack or backtracking per character.
      */
-    protected const CSS_STRING_OR_COMMENT_REGEX = '~("(?:[^"\\\\\r\n]|\\\\(?:\r\n|.))*"|\'(?:[^\'\\\\\r\n]|\\\\(?:\r\n|.))*\')|(/\*!.*?\*/)|/\*.*?\*/~s';
+    protected const CSS_STRING_OR_COMMENT_REGEX = '~("(?:[^"\\\\\r\n]++|\\\\(?:\r\n|.))*+"|\'(?:[^\'\\\\\r\n]++|\\\\(?:\r\n|.))*+\')|(/\*![^*]*+(?:\*(?!/)[^*]*+)*+\*/)|/\*[^*]*+(?:\*(?!/)[^*]*+)*+\*/~s';
 
     protected const FIRST_FORWARDSLASH_REGEX = '{^\/{1}\w}';
 
@@ -80,6 +87,8 @@ class Pipeline extends PropertyObject
     protected $query = '';
     /** @var string */
     protected $asset;
+    /** @var string Base URL without scheme, host and port: used for everything that ends up inside a bundle */
+    protected $root_url;
 
     /**
      * Pipeline constructor.
@@ -100,6 +109,7 @@ class Pipeline extends PropertyObject
         $uri = Grav::instance()['uri'];
 
         $this->base_url = rtrim($uri->rootUrl($config->get('system.absolute_urls')), '/') . '/';
+        $this->root_url = rtrim($uri->rootUrl(false), '/') . '/';
         $this->assets_dir = $locator->findResource('asset://');
         if (!$this->assets_dir) {
             // Attempt to create assets folder if it doesn't exist yet.
@@ -135,7 +145,7 @@ class Pipeline extends PropertyObject
         $shouldMinify = $this->shouldMinify('css');
 
         // Compute uid based on assets and timestamp
-        $json_assets = json_encode($assets);
+        $json_assets = $this->serializeAssets($assets);
         $uid = md5($json_assets . (int)$this->css_minify . (int)$this->css_rewrite . $group);
         $file = $uid . '.css';
         $relative_path = "{$this->base_url}{$this->assets_url}/{$file}";
@@ -223,7 +233,7 @@ class Pipeline extends PropertyObject
         // Compute uid based on all assets. A minify failure now falls back to
         // the whole group rather than a partial bundle plus the failed assets
         // rendered separately, so there is no "successful subset" to key on.
-        $json_assets = json_encode($assets);
+        $json_assets = $this->serializeAssets($assets);
         $uid = md5($json_assets . (int)$shouldMinify . $group);
         $file = $uid . '.js';
         $relative_path = "{$this->base_url}{$this->assets_url}/{$file}";
@@ -278,6 +288,40 @@ class Pipeline extends PropertyObject
     }
 
     /**
+     * Serialize the assets of a bundle for the uid that names it.
+     *
+     * With `system.absolute_urls` on, the link of a local asset starts with the scheme, host and port
+     * of the current request, and the global cache key (the `timestamp` a remote asset keeps when
+     * `assets.enable_asset_timestamp` is on) is derived from them too. Neither takes part in the uid,
+     * so the bundle is the same for every host the site answers to.
+     *
+     * @param array $assets
+     * @return string
+     */
+    protected function serializeAssets(array $assets): string
+    {
+        $cache_key = Grav::instance()['cache']->getKey();
+
+        $list = [];
+        foreach ($assets as $key => $asset) {
+            $item = $asset->jsonSerialize();
+
+            $link = (string) ($item['elements']['asset'] ?? '');
+            if ($this->base_url !== $this->root_url && Utils::startsWith($link, $this->base_url)) {
+                $item['elements']['asset'] = $this->root_url . substr($link, strlen($this->base_url));
+            }
+
+            if (($item['elements']['timestamp'] ?? null) === $cache_key) {
+                unset($item['elements']['timestamp']);
+            }
+
+            $list[$key] = $item;
+        }
+
+        return (string) json_encode($list);
+    }
+
+    /**
      * Render each asset as its own tag, in order, the same way they render with the pipeline off.
      *
      * @param array $assets
@@ -322,7 +366,7 @@ class Pipeline extends PropertyObject
 
         // Find any css url() elements, grab the URLs and calculate an absolute path
         // Then replace the old url with the new one
-        $file = (string)preg_replace_callback(self::CSS_URL_REGEX, function ($matches) use ($dir, $local) {
+        $rewritten = preg_replace_callback(self::CSS_URL_REGEX, function ($matches) use ($dir, $local) {
             $isImport = count($matches) > 3 && strtolower($matches[3]) === '@import';
 
             if ($isImport) {
@@ -344,7 +388,8 @@ class Pipeline extends PropertyObject
                 $old_url = ltrim($old_url, '/');
             }
 
-            $new_url = ($local ? $this->base_url : '') . $old_url;
+            // Root-relative, not $this->base_url: the bundle is shared by every host the site answers to
+            $new_url = ($local ? $this->root_url : '') . $old_url;
 
             if ($isImport) {
                 return str_replace($matches[5], $new_url, $matches[0]);
@@ -353,7 +398,8 @@ class Pipeline extends PropertyObject
             }
         }, (string) $file);
 
-        return $file;
+        // On a PCRE failure keep the file as it was rather than lose it.
+        return $rewritten ?? (string) $file;
     }
 
     /**
@@ -384,7 +430,8 @@ class Pipeline extends PropertyObject
                 $old_url = ltrim($old_url, '/');
             }
 
-            $new_url = ($local ? $this->base_url : '') . $old_url;
+            // Root-relative, not $this->base_url: the bundle is shared by every host the site answers to
+            $new_url = ($local ? $this->root_url : '') . $old_url;
 
             return str_replace($matches[1], $new_url, $matches[0]);
         }, $file);

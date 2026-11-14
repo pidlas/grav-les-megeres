@@ -1,0 +1,237 @@
+{% extends 'main-layout.html.twig' %}
+
+{# 1. Détection de la version active et préparation SEO centralisée  #}
+{% set collection = grav.flex.directory('gresilhette').getCollection() %}
+{% set gresilhette_flex = collection.first() %}
+
+{% set segments_url = uri.path|split('/') %}
+{% set target_slug = segments_url|last|trim %}
+
+{% set version_active = null %}
+{% if target_slug is not empty and target_slug != 'gresilhette-et-la-salimonde' %}
+    {% for version in gresilhette_flex.spectacle.versions if version.slug_version == target_slug %}
+        {% set version_active = version %}
+    {% endfor %}
+{% endif %}
+
+{% set titre_base = gresilhette_flex.page_title | default(gresilhette_flex.title) | default(page.title) %}
+{% if version_active %}
+    {% set texte_pur = version_active.texte_version|markdown|striptags|trim %}
+    {% set flex_seo = {
+        'page_title': version_active.nom_version ~ ' | ' ~ titre_base,
+        'meta_description': texte_pur|truncate(150),
+        'meta_robots': gresilhette_flex.meta_robots
+    } %}
+{% else %}
+    {% set flex_seo = gresilhette_flex %}
+{% endif %}
+
+{% block page_h1 %}
+    {% if version_active %}
+        <h1>{{ version_active.nom_version|trim }}</h1>
+    {% else %}
+        <h1>{{ titre_base|split('|')|first|trim }}</h1>
+    {% endif %}
+{% endblock %}
+
+{% block custom_styles %}
+    <style>
+        .encadre:before, .encadre-lenga:before, .encadre-extrait:before {
+            background-image: url('{{ base_url_simple ~ '/' ~ "user/data/flex-objects/gresilhette/livre-blanc-fleur-remplie.avif" }}') !important;
+        }
+    </style>
+{% endblock %}
+
+{# 2. Affichage du contenu de la page - le corps du site #}
+{% block content %}
+
+{# Macro unique de la grille des 3 ronds permanents #}
+{% set macro_grille_3_ronds %}
+    <p class="versions-spectacle">
+        {% if gresilhette_flex.spectacle.grille.ombres %}
+            <a class="images-spectacle morph" href="{{ page.url ~ '/theatre-d-ombres' }}">
+                <img src="{{ base_url_simple ~ '/user/data/flex-objects/gresilhette/' ~ gresilhette_flex.spectacle.grille.ombres }}" alt="Version Théâtre d'elles" loading="lazy">
+            </a>
+        {% endif %}
+        {% if gresilhette_flex.spectacle.grille.sieste %}
+            <a class="images-spectacle morph" href="{{ page.url ~ '/sieste-contee' }}">
+                <img src="{{ base_url_simple ~ '/user/data/flex-objects/gresilhette/' ~ gresilhette_flex.spectacle.grille.sieste }}" alt="Version Sieste contée" loading="lazy">
+            </a>
+        {% endif %}
+        {% if gresilhette_flex.spectacle.grille.projet %}
+            <a class="images-spectacle morph" href="{{ page.url ~ '/projet-pedagogique' }}">
+                <img src="{{ base_url_simple ~ '/user/data/flex-objects/gresilhette/' ~ gresilhette_flex.spectacle.grille.projet }}" alt="Version Projet pédagogique" loading="lazy">
+            </a>
+        {% endif %}
+    </p>
+{% endset %}
+
+{# Séparation et cloisonnement des vues #}
+{% if version_active %}
+    
+    {# --- VUE A : Les 3 versions subalternes #}
+    <div class="spectacle-gresilhette">
+        
+        {{ macro_grille_3_ronds | raw }}
+
+        {# Reconstruction du théâtre d'ombres #}
+        {% if version_active.slug_version == 'theatre-d-ombres' %}
+            
+            <div class="montage-wrapper">
+                <h2 class="display-title">Nos sources d'inspiration</h2>
+                
+                {% if version_active.image_version %}
+                    <img src="{{ base_url_simple ~ '/user/data/flex-objects/gresilhette/' ~ version_active.image_version }}" alt="Inspiration" class="forme-montage" loading="lazy">
+                {% endif %}
+
+                <div class="content-list">
+                    {% set html_brut = version_active.texte_version|shortcodes|markdown %}
+                    {% set html_brut = html_brut|replace({'<ul>': '<ul class="jolie-ombres slide-list">'}) %}
+                    {{ html_brut | raw }}
+                </div>
+            </div>
+
+        {# Reconstruction de la Siesté Contée #}
+        {% elseif version_active.slug_version == 'sieste-contee' %}
+            
+            {% set corps_sieste = version_active.texte_version|markdown|shortcodes %}
+            {% set fragments_sieste = corps_sieste|split('<p>Voir ci-dessous') %}
+            
+            {% set bloc_histoire = fragments_sieste[0] | default('') %}
+            {% set bloc_annonce = fragments_sieste[1] | default('') %}
+
+            <div class="sieste-wrapper">
+                {{ bloc_histoire | raw }}
+                
+                {% if version_active.image_version %}
+                    <div class="image-centree">
+                        <img src="{{ base_url_simple ~ '/user/data/flex-objects/gresilhette/' ~ version_active.image_version }}" alt="Sigean" class="sigean-sieste-contee" loading="lazy">
+                    </div>
+                {% endif %}
+            </div>
+
+            {% if bloc_annonce is not empty %}
+                <p>Voir ci-dessous{{ bloc_annonce | raw }}
+            {% endif %}
+
+        {# Reconstruction Projet Pédagogique #}
+        {% else %}
+            {% if version_active.image_version %}
+                <div class="image-illustration-version">
+                    <img src="{{ base_url_simple ~ '/user/data/flex-objects/gresilhette/' ~ version_active.image_version }}" alt="{{ version_active.nom_version }}" loading="lazy">
+                </div>
+            {% endif %}
+            {{ version_active.texte_version|markdown|shortcodes|raw }}
+        {% endif %}
+        
+        {% if version_active.pdf_technique and version_active.btn_technique %}
+            <p class="btn-dossier-technique">
+                <a href="{{ base_url_simple ~ '/user/data/flex-objects/gresilhette/' ~ version_active.pdf_technique }}" title="Télécharger la fiche technique {{ version_active.nom_version }}">
+                    <img src="{{ base_url_simple ~ '/user/data/flex-objects/gresilhette/' ~ version_active.btn_technique }}" alt="Téléchargement" class="btn-pdf">
+                </a>
+            </p>
+        {% endif %}
+    </div>
+
+{% else %}
+    
+    {# --- VUE B : Page principale du spectacle #}
+    <div class="encadre">
+        <div class="gresilhette-et-la-salimonde">
+            <h2 class="coco">{{ gresilhette_flex.spectacle.age_duree }}</h2>
+
+            <div class="wrapper-video">
+                <video id="video" preload="auto" loading="metadata" width="640" height="360" disablePictureInPicture="true" playsinline>
+                    {% if gresilhette_flex.spectacle.video.mp4 %}
+                        <source src="{{ base_url_simple ~ '/user/data/flex-objects/gresilhette/' ~ gresilhette_flex.spectacle.video.mp4 }}" type="video/mp4" />
+                    {% endif %}
+                    {% if gresilhette_flex.spectacle.video.webm %}
+                        <source src="{{ base_url_simple ~ '/user/data/flex-objects/gresilhette/' ~ gresilhette_flex.spectacle.video.webm }}" type="video/webm" />
+                    {% endif %}
+                    Votre navigateur ne prend pas en charge la lecture vidéo HTML5.
+                </video>
+            
+                <div class="custom-video-controls">
+                    <!-- Bouton de lecture / pause -->
+                    <button id="playPauseBtn" class="control-btn" aria-label="Play/Pause">
+                        <svg class="play-icon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                        <svg class="pause-icon" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+                    </button>
+                    
+                    <input type="range" id="progress" min="0" max="100" value="0" step="0.1">
+                    
+                    <span id="time" class="time-display">0:00 / 0:00</span>
+                    
+                    <div class="volume-control-zone">
+                        <button id="muteBtn" class="control-btn" aria-label="Mute/Unmute">
+                            <svg class="sound-icon" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
+                            <svg class="mute-icon" viewBox="0 0 24 24"><path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.21.05-.42.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/></svg>
+                        </button>
+                        <input type="range" id="volumeSlider" min="0" max="1" step="0.05" value="1" aria-label="Volume">
+                    </div>
+            
+                    <button id="fullscreenBtn" class="control-btn" aria-label="Plein écran">
+                        <svg class="fs-icon" viewBox="0 0 24 24"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg>
+                        <svg class="exit-fs-icon" viewBox="0 0 24 24"><path d="M5 16h3v3h2v-5H5v2zm3-8H5v2h5V5H8v3zm6 11h2v-3h3v-2h-5v5zm2-11V5h-2v5h5V8h-3z"/></svg>
+                    </button>
+                </div>
+            </div><!--fermeture balise WRAPPER-VIDEO-->
+
+
+            <div class="spectacle-gresilhette">
+                {% if gresilhette_flex.spectacle.texte_intro %}
+                    {{ gresilhette_flex.spectacle.texte_intro|markdown|shortcodes|raw }}
+                {% endif %}
+
+                {{ macro_grille_3_ronds | raw }}
+
+                {% if gresilhette_flex.spectacle.texte_suite %}
+                    {{ gresilhette_flex.spectacle.texte_suite|markdown|shortcodes|raw }}
+                {% endif %}
+
+                {% if gresilhette_flex.spectacle.dossier_pdf and gresilhette_flex.spectacle.dossier_img %}
+                    <p class="btn-dossier-artistique">
+                        <a href="{{ base_url_simple ~ '/user/data/flex-objects/gresilhette/' ~ gresilhette_flex.spectacle.dossier_pdf }}" title="Dossier artistique">
+                            <img src="{{ base_url_simple ~ '/user/data/flex-objects/gresilhette/' ~ gresilhette_flex.spectacle.dossier_img }}" alt="Dossier" class="btn-pdf">
+                        </a>
+                    </p>
+                {% endif %}
+
+                {% if gresilhette_flex.spectacle.texte_distribution %}
+                    {% set dist_html = gresilhette_flex.spectacle.texte_distribution|markdown|shortcodes %}
+                    {% set dist_html = dist_html|replace({'<p>Écriture, mise en scène': '<p class="p_terra g_sp_e-generique">Écriture, mise en scène'}) %}
+                    {{ dist_html | raw }}
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    {# Encadré 2 : La langue occitane #}
+    {% if gresilhette_flex.titre_occitan %}
+    <div class="encadre-lenga">
+        <div class="la-lenga-occitana">
+            <h2 class="display-title">{{ gresilhette_flex.titre_occitan }}</h2>
+            {% for bloc in gresilhette_flex.occitan_paragraphes %}
+                {% if bloc.texte_fr is not empty %}<p>{{ bloc.texte_fr | markdown | raw }}</p>{% endif %}
+                {% if bloc.texte_oc is not empty %}<p class="tresgras">{{ bloc.texte_oc | markdown(false) | raw }}</p>{% endif %}
+            {% endfor %}
+            {% if gresilhette_flex.traduction_signature %}
+                <p class="traduction">traduction : {{ gresilhette_flex.traduction_signature }}</p>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+
+    {# Encadré 3 : L'extrait de texte #}
+    {% if gresilhette_flex.bio_extrait|trim is not empty %}
+    <div class="encadre-extrait">
+        <div class="extrait">
+            <h2 class="display-title">{{ gresilhette_flex.titre_extrait|default('Un extrait du texte...') }}</h2>
+            {{ gresilhette_flex.bio_extrait | shortcodes | markdown | raw }}
+        </div>
+    </div>
+    {% endif %}
+
+{% endif %}
+
+{% endblock %}

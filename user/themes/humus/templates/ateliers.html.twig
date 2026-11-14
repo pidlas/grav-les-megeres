@@ -1,0 +1,35 @@
+{% extends 'main-layout.html.twig' %}
+
+{# Récupération globale de la collection #}
+{% set collection = grav.flex.directory('ateliers').getCollection() %}
+{% set ateliers_flex = collection.first() %}
+{% set flex_seo = ateliers_flex %}
+
+{# CONTENU DE LA PAGE (Structure Spectre.css) #}
+{% block content %}
+
+<div class="container mt-2">
+
+    {# 1. PHOTO PRINCIPALE EN HAUT #}
+    {% if ateliers_flex.ateliers_photo_principale %}
+    <div class="columns my-2">
+        <div class="column col-12">
+            <div class="img-centre">
+                <img class="photo-stages-ateliers" src="{{ base_url_simple ~ '/user/data/flex-objects/ateliers/' ~ ateliers_flex.ateliers_photo_principale }}" alt="{{ ateliers_flex.ateliers_alt_photo|default('')|e('html_attr') }}" loading="lazy">
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    {# 2. TEXTE DE PRÉSENTATION #}
+    {% if ateliers_flex.ateliers_description %}
+    <div class="columns my-2">
+        <div class="column col-12">
+            {% set html_desc = ateliers_flex.ateliers_description | markdown | shortcodes %}
+            {{ html_desc | replace({'<ul>': '<ul class="jolie-ombres">'}) | raw }}
+        </div>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}

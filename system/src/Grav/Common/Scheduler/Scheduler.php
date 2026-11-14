@@ -22,7 +22,8 @@ use RocketTheme\Toolbox\File\YamlFile;
 use Symfony\Component\Yaml\Yaml;
 use Monolog\Logger;
 use Monolog\Handler\FingersCrossedHandler;
-use Monolog\Handler\StreamHandler;
+use Grav\Common\Log\LogRotator;
+use Grav\Common\Log\RotatingStreamHandler;
 use function is_callable;
 use function is_string;
 
@@ -139,6 +140,15 @@ class Scheduler
         $saved_jobs = (array) Grav::instance()['config']->get('scheduler.custom_jobs', []);
 
         foreach ($saved_jobs as $id => $j) {
+            // A row added in the admin and saved without being filled in is stored with no
+            // command (`custom_jobs: {1: {output_mode: append}}`). Queuing it handed Process an
+            // empty program name, which took the whole run down on the CLI, and on the web the
+            // missing key alone broke the webhook, the health check and the admin job list.
+            // There is nothing to run, so leave it out (grav-plugin-scheduler-webhook#10).
+            if (!is_array($j) || !is_string($j['command'] ?? null) || trim($j['command']) === '') {
+                continue;
+            }
+
             $args = $j['args'] ?? [];
             $id = Grav::instance()['inflector']->hyphenize($id);
             
@@ -206,6 +216,8 @@ class Scheduler
             $grav['backups']->init();
         }
 
+        LogRotator::registerJob($this);
+
         // Trigger event to load system jobs (cache-purge, cache-clear, backups, etc.)
         $grav->fireEvent('onSchedulerInitialized', new \RocketTheme\Toolbox\Event\Event(['scheduler' => $this]));
     }
@@ -223,7 +235,9 @@ class Scheduler
         $background = [];
         $foreground = [];
         foreach ($this->jobs as $job) {
-            if ($all || $job->getEnabled()) {
+            // A job whose when() condition is false is off for now: leave it out of the run, or
+            // it is recorded as a failed run every time it comes due.
+            if ($all || ($job->getEnabled() && $job->passesWhen())) {
                 if ($job->runInBackground()) {
                     $background[] = $job;
                 } else {
@@ -319,6 +333,55 @@ class Scheduler
             $mode = self::RUN_ALL;
         }
 
+        // A catch-up run picks a job up until its state is saved, which only happens once the job
+        // has finished. Two catch-up runs that overlap (a webhook pinged every minute while a long
+        // backup is still going) would both start it, so only one runs at a time.
+        $lock = $mode === self::RUN_OVERDUE ? $this->acquireRunLock() : null;
+        if (false === $lock) {
+            $this->jobs_run = [];
+            $this->logger?->debug('Scheduler run skipped: another catch-up run is still in progress');
+
+            return;
+        }
+
+        try {
+            $this->runJobs($runTime, $mode);
+        } finally {
+            if ($lock) {
+                flock($lock, LOCK_UN);
+                fclose($lock);
+            }
+        }
+    }
+
+    /**
+     * Take the lock that keeps catch-up runs from overlapping.
+     *
+     * @return resource|false|null The held lock, false when another run holds it, null when no lock file can be opened
+     */
+    private function acquireRunLock()
+    {
+        $handle = @fopen($this->status_path . '/run.lock', 'c');
+        if (!$handle) {
+            return null;
+        }
+
+        if (!flock($handle, LOCK_EX | LOCK_NB)) {
+            fclose($handle);
+
+            return false;
+        }
+
+        return $handle;
+    }
+
+    /**
+     * @param DateTime|null $runTime
+     * @param string $mode
+     * @return void
+     */
+    private function runJobs(?DateTime $runTime, string $mode): void
+    {
         $this->initializeJobs();
 
 
@@ -475,6 +538,11 @@ class Scheduler
      */
     public function isOverdue(Job $job, ?DateTime $runTime = null, ?array $states = null): bool
     {
+        // A job its when() condition keeps off is never late.
+        if (!$job->passesWhen()) {
+            return false;
+        }
+
         $expression = $job->getCronExpression();
         if (!$expression) {
             return false;
@@ -494,6 +562,39 @@ class Scheduler
 
         // Never run at all: every slot its schedule has had so far was missed.
         return null === $lastRun || $lastRun < $due;
+    }
+
+    /**
+     * Whether a job has been waiting on a missed slot for longer than the grace period.
+     *
+     * Counted from the first slot it missed rather than the latest one, so a job that runs every
+     * minute but was last run an hour ago counts as behind, while a daily job whose slot passed
+     * a few seconds before the trigger arrived does not.
+     *
+     * @param Job $job
+     * @param DateTime $now
+     * @param array $states Job states, as stored in status.yaml
+     * @param int $grace Seconds a missed slot may wait before it counts
+     * @return bool
+     */
+    public function isBehind(Job $job, DateTime $now, array $states, int $grace): bool
+    {
+        if (!$this->isOverdue($job, $now, $states)) {
+            return false;
+        }
+
+        $expression = $job->getCronExpression();
+        $lastRun = $states[$job->getId()]['last-run'] ?? null;
+
+        try {
+            $missed = null === $lastRun
+                ? $expression->getPreviousRunDate($now, 0, true)
+                : $expression->getNextRunDate((new DateTime())->setTimestamp((int) $lastRun));
+        } catch (\Exception $e) {
+            return false;
+        }
+
+        return $now->getTimestamp() - $missed->getTimestamp() > $grace;
     }
 
     /**
@@ -977,10 +1078,10 @@ class Scheduler
         
         // Single scheduler log file. Debug lines are held back until something at INFO or
         // above is logged, so a run where nothing was due writes nothing, while a run that
-        // did work still gets its debug context. Cron fires every minute and nothing rotates
-        // this file (#4355).
+        // did work still gets its debug context. Cron fires every minute, so the file
+        // rotates by size like grav.log (#4355).
         $logFile = $locator->findResource('log://scheduler.log', true, true);
-        $this->logger->pushHandler(new FingersCrossedHandler(new StreamHandler($logFile, Logger::DEBUG), Logger::INFO, 0, true, false));
+        $this->logger->pushHandler(new FingersCrossedHandler(new RotatingStreamHandler($logFile, Logger::DEBUG), Logger::INFO, 0, true, false));
     }
     
     /**
@@ -1451,10 +1552,16 @@ class Scheduler
         $enabledJobs = array_merge($background, $foreground);
         
         $now = new DateTime('now');
+        $states = (array) $this->getJobStates()->content();
+        $grace = (int) ($this->modernConfig['trigger_grace'] ?? 300);
         $dueJobs = 0;
-        
+
+        // Whether a job is due this very minute says nothing about health: a site pinged hourly
+        // reported "healthy" with jobs that never ran, and "warning" five minutes after every
+        // ping for a job set to run each minute. What matters is whether a job has missed a slot
+        // and is still waiting on it.
         foreach ($enabledJobs as $job) {
-            if ($job->isDue($now)) {
+            if ($this->isBehind($job, $now, $states, $grace)) {
                 $dueJobs++;
             }
         }
@@ -1478,13 +1585,9 @@ class Scheduler
             $health['last_run_age'] = $now->getTimestamp() - $lastRunTime->getTimestamp();
         }
         
-        // Determine status based on whether jobs are due
         if ($dueJobs > 0) {
-            // Jobs are due but haven't been run
-            if ($health['last_run_age'] === null || $health['last_run_age'] > 300) { // No run or older than 5 minutes
-                $health['status'] = 'warning';
-                $health['message'] = $dueJobs . ' job(s) are due to run';
-            }
+            $health['status'] = 'warning';
+            $health['message'] = $dueJobs . ' job(s) missed their scheduled run';
         } else {
             // No jobs are due - this is healthy
             $health['status'] = 'healthy';
@@ -1504,11 +1607,16 @@ class Scheduler
     /**
      * Process webhook trigger
      * 
+     * A webhook is rarely pinged on the exact minute, and often only every 5, 15 or 60 minutes,
+     * so it catches up on missed slots by default rather than running only the jobs due this
+     * minute. Pass self::RUN_DUE for the old behaviour.
+     *
      * @param string|null $token
      * @param string|null $jobId
+     * @param string $mode One of self::RUN_DUE, self::RUN_OVERDUE or self::RUN_ALL
      * @return array
      */
-    public function processWebhookTrigger($token = null, $jobId = null): array
+    public function processWebhookTrigger($token = null, $jobId = null, string $mode = self::RUN_OVERDUE): array
     {
         if (!$this->webhookEnabled) {
             return ['success' => false, 'message' => 'Webhook triggers are not enabled'];
@@ -1547,12 +1655,21 @@ class Scheduler
                 return ['success' => false, 'message' => 'Job not found: ' . $jobId];
             }
         } else {
-            // Run all due jobs
-            $this->run();
-            
+            $messages = [
+                self::RUN_DUE => 'Scheduler executed (due jobs only)',
+                self::RUN_OVERDUE => 'Scheduler executed (due and missed jobs)',
+                self::RUN_ALL => 'Scheduler executed (all jobs)',
+            ];
+            if (!isset($messages[$mode])) {
+                return ['success' => false, 'message' => "Unknown run mode '{$mode}'. Use 'due', 'overdue' or 'all'."];
+            }
+
+            $this->run(null, false, $mode);
+
             return [
                 'success' => true,
-                'message' => 'Scheduler executed (due jobs only)',
+                'message' => $messages[$mode],
+                'mode' => $mode,
                 'jobs_run' => count($this->jobs_run),
                 'timestamp' => date('c'),
             ];

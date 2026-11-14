@@ -10,6 +10,7 @@
 namespace Grav\Common;
 
 use Grav\Common\Config\Config;
+use Grav\Common\Helpers\JsonBody;
 use Grav\Common\Language\Language;
 use Grav\Common\Page\Interfaces\PageInterface;
 use Grav\Common\Page\Pages;
@@ -17,6 +18,8 @@ use Grav\Framework\Route\Route;
 use Grav\Framework\Route\RouteFactory;
 use Grav\Framework\Uri\UriFactory;
 use Grav\Framework\Uri\UriPartsFilter;
+use JsonException;
+use LengthException;
 use RocketTheme\Toolbox\Event\Event;
 use RuntimeException;
 use function array_key_exists;
@@ -818,6 +821,20 @@ class Uri implements \Stringable
     }
 
     /**
+     * Percent-encode the characters of a decoded URL path that would otherwise change
+     * its meaning: `%` (read as the start of an escape), `?` and `#` (read as the start
+     * of the query and fragment) and the space. Everything else is left as written, so
+     * a path that has none of them is returned unchanged.
+     *
+     * @param string $path A decoded path, e.g. a file name as it is on disk.
+     * @return string
+     */
+    public static function encodePath(string $path): string
+    {
+        return strtr($path, ['%' => '%25', ' ' => '%20', '#' => '%23', '?' => '%3F']);
+    }
+
+    /**
      * The opposite of built-in PHP method parse_url()
      *
      * @param array $parsed_url
@@ -859,6 +876,22 @@ class Uri implements \Stringable
         }
 
         return '/' . implode('/', $output);
+    }
+
+    /**
+     * file_exists() for a path built from a link in page content. A value longer than any
+     * real path (such as an inline `data:` image written as `/data:image/png;base64,...`)
+     * is not a file, and with open_basedir set PHP raises a warning for it instead of
+     * returning false, which turned the whole page into an error.
+     *
+     * @param string|null $path
+     * @return bool
+     */
+    protected static function pathExists($path): bool
+    {
+        $path = (string) $path;
+
+        return $path !== '' && strlen($path) < PHP_MAXPATHLEN && file_exists($path);
     }
 
     /**
@@ -919,9 +952,9 @@ class Uri implements \Stringable
                 $full_path = $url_bits['path'];
                 $raw_full_path = rawurldecode((string) $full_path);
 
-                if (file_exists($raw_full_path)) {
+                if (static::pathExists($raw_full_path)) {
                     $full_path = $raw_full_path;
-                } elseif (!file_exists($full_path)) {
+                } elseif (!static::pathExists($full_path)) {
                     $full_path = false;
                 }
 
@@ -1145,9 +1178,9 @@ class Uri implements \Stringable
         $url_bits = parse_url($normalized_path);
         $full_path = $url_bits['path'];
 
-        if (file_exists($full_path)) {
+        if (static::pathExists($full_path)) {
             // do nothing
-        } elseif (file_exists(rawurldecode($full_path))) {
+        } elseif (static::pathExists(rawurldecode((string) $full_path))) {
             $full_path = rawurldecode($full_path);
         } else {
             return $normalized_url;
@@ -1279,24 +1312,35 @@ class Uri implements \Stringable
     }
 
     /**
+     * Resolve the HTTP scheme using the configured forwarding policy.
+     */
+    public static function getSchemeFromEnvironment(array $env, bool $forwarded = false): string
+    {
+        $scheme = null;
+        if ($forwarded) {
+            $scheme = $env['HTTP_X_FORWARDED_PROTO'] ?? $env['X-FORWARDED-PROTO'] ?? $env['HTTP_CLOUDFRONT_FORWARDED_PROTO'] ?? null;
+        }
+        if ($scheme === null && empty($env['HTTPS'])) {
+            $scheme = $env['REQUEST_SCHEME'] ?? null;
+        }
+        $scheme = is_string($scheme) ? strtolower(trim($scheme)) : '';
+        if ($scheme === 'http' || $scheme === 'https') {
+            return $scheme;
+        }
+
+        $https = $env['HTTPS'] ?? '';
+
+        return empty($https) || strtolower((string)$https) === 'off' ? 'http' : 'https';
+    }
+
+    /**
      * @param array $env
      * @return void
      */
     protected function createFromEnvironment(array $env)
     {
-        // Build scheme.
-        if (isset($env['HTTP_X_FORWARDED_PROTO']) && Grav::instance()['config']->get('system.http_x_forwarded.protocol')) {
-            $this->scheme = $env['HTTP_X_FORWARDED_PROTO'];
-        } elseif (isset($env['X-FORWARDED-PROTO'])) {
-            $this->scheme = $env['X-FORWARDED-PROTO'];
-        } elseif (isset($env['HTTP_CLOUDFRONT_FORWARDED_PROTO'])) {
-            $this->scheme = $env['HTTP_CLOUDFRONT_FORWARDED_PROTO'];
-        } elseif (isset($env['REQUEST_SCHEME']) && empty($env['HTTPS'])) {
-            $this->scheme = $env['REQUEST_SCHEME'];
-        } else {
-            $https = $env['HTTPS'] ?? '';
-            $this->scheme = (empty($https) || strtolower((string) $https) === 'off') ? 'http' : 'https';
-        }
+        $forwarded_proto = (bool)Grav::instance()['config']->get('system.http_x_forwarded.protocol');
+        $this->scheme = static::getSchemeFromEnvironment($env, $forwarded_proto);
 
         // The visitor's HTTP Basic credentials are left out on purpose. They come
         // from the Authorization header, not the address, and toArray(),
@@ -1324,7 +1368,7 @@ class Uri implements \Stringable
             $this->port = (int)$env['HTTP_X_FORWARDED_PORT'];
         } elseif (isset($env['X-FORWARDED-PORT'])) {
             $this->port = (int)$env['X-FORWARDED-PORT'];
-        } elseif (isset($env['HTTP_CLOUDFRONT_FORWARDED_PROTO'])) {
+        } elseif (isset($env['HTTP_CLOUDFRONT_FORWARDED_PROTO']) && $forwarded_proto) {
            // Since AWS Cloudfront does not provide a forwarded port header,
            // we have to build the port using the scheme.
             $this->port = $this->port();
@@ -1446,8 +1490,14 @@ class Uri implements \Stringable
         if (!$this->post) {
             $content_type = $this->getContentType();
             if ($content_type === 'application/json') {
-                $json = file_get_contents('php://input');
-                $this->post = json_decode($json, true);
+                // Decoded within the configured limits; a body the request service has
+                // decoded already is not parsed again.
+                try {
+                    $post = JsonBody::decode((string)file_get_contents('php://input'));
+                    $this->post = is_array($post) ? $post : null;
+                } catch (JsonException|LengthException) {
+                    $this->post = null;
+                }
             } elseif (!empty($_POST)) {
                 $this->post = (array)$_POST;
             }

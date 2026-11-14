@@ -7,7 +7,7 @@ languages:
   include_default_lang: false
   enabled: true
 pages:
-  theme: quark2-child
+  theme: humus
   dateformat:
     short: 'd-m-y G:i'
     long: 'l jS \of F g:i A'

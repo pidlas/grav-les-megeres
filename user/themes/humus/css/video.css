@@ -1,0 +1,282 @@
+/* Conteneur principal */
+.wrapper-video {
+    aspect-ratio: 16 / 9;
+    border-radius: 1rem;
+    box-shadow: -0.5rem 0.5rem 0.75rem rgba(0, 0, 0, 0.3);
+    margin-top: var(--space-l);
+    position: relative;
+    width: 80%;
+    max-width: 100%;
+    background: #000;
+    font-family: var(--font-main);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+#video {
+    display: block;
+    width: 100%;
+    height: auto;
+    border: 0;
+}
+
+.custom-video-controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: rgba(20, 20, 20, 0.95);
+    padding: 10px 15px;
+    color: var(--color-white);
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    z-index: 10;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+}
+
+.control-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.1s ease;
+}
+
+.control-btn svg {
+    width: 20px;
+    height: 20px;
+    fill: var(--color-white);
+    transition: fill 0.2s ease;
+}
+
+.control-btn:hover svg {
+    fill:var(--color-brand-primary);
+}
+
+.control-btn:hover {
+    transform: scale(1.1);
+}
+
+/* --- GESTION DES ICÔNES AVEC LES CLASSES DYNAMIQUES (JS) --- */
+.control-btn .pause-icon { display: none; }
+.control-btn.is-playing .play-icon { display: none; }
+.control-btn.is-playing .pause-icon { display: inline; }
+
+.control-btn .mute-icon { display: none; }
+.control-btn.is-muted .sound-icon { display: none; }
+.control-btn.is-muted .mute-icon { display: inline; }
+
+.control-btn .exit-fs-icon { display: none; }
+.control-btn.is-fullscreen .fs-icon { display: none; }
+.control-btn.is-fullscreen .exit-fs-icon { display: inline; }
+
+.volume-control-zone {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+#volumeSlider {
+    -webkit-appearance: none;
+    appearance: none;
+    display: none;
+    width: 70px;
+    height: 6px; 
+    background: var(--color-jauge);
+    border-radius: 3px;
+    border: none;
+    opacity: 1;
+    visibility: visible;
+    box-shadow: none;
+    position: relative;
+    z-index: 999999;
+    pointer-events: auto;
+}
+
+.volume-control-zone:hover #volumeSlider,
+.volume-control-zone:focus-within #volumeSlider {
+    display: block;
+}
+
+/*-- LE BOUTON CURSEUR CHROME, SAFARI, EDGE --*/
+#volumeSlider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background-color: var(--color-brand-primary);
+    border: none;
+    cursor: pointer;
+    display: block;
+    opacity: 1;
+}
+
+/*-- LE BOUTON CURSEUR FIREFOX --*/
+#volumeSlider::-moz-range-thumb {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background-color: var(--color-brand-primary);
+    border: none;
+    cursor: pointer;
+    display: block;
+    opacity: 1;
+}
+
+/* Sécurité Firefox pour la ligne */
+#volumeSlider::-moz-range-track {
+    height: 6px;
+    background: var(--color-jauge);
+    border-radius: 3px;
+    border: none;
+}
+
+@media (hover: none) {
+    #volumeSlider {
+        width: 50px;
+        opacity: 1;
+    }
+}
+
+.time-display {
+    font-size: 13px;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    min-width: 85px;
+    text-align: center;
+}
+
+#progress {
+    -webkit-appearance: none;
+    appearance: none;
+    flex-grow: 1;
+    height: 10px;
+    border-radius: 5px;
+    outline: none;
+    cursor: pointer;
+    border: none;
+    background-color:var(--color-jauge);
+    display: block;
+    visibility: visible;
+    position: relative;
+    z-index: 999999;
+    pointer-events: auto;
+    touch-action: none; /*TRÈS IMPORTANT : Empêche l'écran du smartphone de défiler pendant le glissé*/
+}
+
+/* Le curseur circulaire (Chrome, Safari, Edge) */
+#progress::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--color-brand-primary);
+    border: none;
+    margin-top: -2px;
+    transition: transform 0.1s ease;
+}
+
+/* Le curseur circulaire (Firefox) */
+#progress::-moz-range-thumb {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background:var(--color-brand-primary);
+    border: none;
+    transition: transform 0.1s ease;
+}
+
+#progress::-moz-range-track {
+    height: 10px;
+    background: transparent;
+    border: none;
+}
+
+#progress:hover::-webkit-slider-thumb { transform: scale(1.2); }
+#progress:hover::-moz-range-thumb { transform: scale(1.2); }
+
+/*Masquage automatique des co,ntrôles - inactivité souris*/
+
+.wrapper-video.hide-controls .custom-video-controls {
+    opacity: 0;
+    transform: translateY(100%);
+    pointer-events: none;
+    transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.wrapper-video.hide-controls {
+    cursor: none;
+}
+
+/*Élimine les boutons système résiduels générés par les navigateurs*/
+video::-webkit-media-controls { display: none; }
+video::-moz-media-controls { display: none; }
+
+.wrapper-video:fullscreen {
+    max-width: none;
+    width: 100%;
+    height: 100%;
+    background:hsla(0, 0%, 0%, 1);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.wrapper-video:fullscreen #video {
+    width: 100%;
+    height: calc(100% - 44px);
+    object-fit: contain;
+}
+
+.wrapper-video:fullscreen .custom-video-controls {
+    width: 100%;
+    box-sizing: border-box;
+    background: rgba(15, 15, 15, 0.95);
+}
+
+.wrapper-video #video { order: 1; }
+.wrapper-video .custom-video-controls { order: 2; }
+
+/*Correctif deux lignes pour la vidéo sur mobile*/
+@media screen and (max-width: 599px) {    
+    .custom-video-controls {
+        flex-wrap: wrap;
+        justify-content: space-between;
+        padding: 4px 8px;
+        gap: 4px;
+    }
+
+    /* La jauge orange devient un fil ultra-fin pour ne pas encombrer */
+    #progress {
+        order: 1;             
+        flex-basis: 100%;     
+        height: 6px;
+        margin-bottom: 2px;
+    }
+
+    /* Réduction de la taille des boutons et des textes sur smartphone */
+    .control-btn svg {
+        width: 16px;
+        height: 16px;
+    }
+
+    /* Ajustement de la jauge de volume mobile */
+    #volumeSlider {
+        width: 40px;
+    }
+
+    /* Distribution des rangs sur la ligne du bas */
+    #playPauseBtn { order: 2; }
+    .time-display { order: 3; font-size:11px;min-width:65px;}
+    .volume-control-zone { order: 4; }
+    #fullscreenBtn { order: 5; }
+}

@@ -1,0 +1,45 @@
+{% extends 'main-layout.html.twig' %}
+
+{# 1. Détection de la fiche correspondante via le slug de la page #}
+{% set collection = grav.flex.directory('pages-textuelles').getCollection() %}
+{% set fiche_page = null %}
+
+{% for item in collection %}
+    {% if item.slug_page == page.slug %}
+        {% set fiche_page = item %}
+    {% endif %}
+{% endfor %}
+
+{% set flex_seo = fiche_page %}
+
+{# 2. Contenu de la page - structure Spectre.css + Classes Métiers #}
+{% block content %}
+
+<div class="container mt-2">
+    <div class="columns my-2">
+        <div class="column col-12 {{ page.slug }}">
+
+            {# A. Introduction - Paragraphe seul ou liste initiale #}
+            {% if fiche_page.page_intro %}
+                {% set html_intro = fiche_page.page_intro | markdown | shortcodes %}
+                {{ html_intro | replace({'<ul>': '<ul class="jolie-ombres">'}) | raw }}
+            {% endif %}
+
+            {# B. Sections - articles répétables - Titre H2 + Paragraphes/Listes #}
+            {% if fiche_page.page_sections %}
+                {% for bloc in fiche_page.page_sections %}
+                    {% if bloc.titre_section %}
+                        <h2>{{ bloc.titre_section }}</h2>
+                    {% endif %}
+                    {% if bloc.contenu_section %}
+                        {% set html_bloc = bloc.contenu_section | markdown | shortcodes %}
+                        {{ html_bloc | replace({'<ul>': '<ul class="jolie-ombres">'}) | raw }}
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
+
+        </div>
+    </div>
+</div>
+
+{% endblock %}

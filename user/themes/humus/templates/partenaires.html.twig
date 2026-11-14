@@ -1,0 +1,48 @@
+{% extends 'main-layout.html.twig' %}
+
+{% block content %}
+
+    {% set liste_partenaires = grav['flex'].collection('partenaires') %}
+
+    {% if liste_partenaires is not empty %}
+        <div class="columns g-partenaires-container g-partenaires-top my-2">
+            
+            {% for partenaire in liste_partenaires %}
+                <div class="column col-partenaire">
+                    <div class="partenaire-carte-pro">
+                        
+                        {% set alt_text = partenaire.nom is not empty ? partenaire.nom : 'Logo partenaire' %}
+                        
+                        {# ZONE 1 : L'IMAGE DU LOGO #}
+                        <div class="partenaire-lien-logo">
+                            {% if partenaire.image is not empty %}
+                                {% set path_logo = partenaire.image | keys | first %}
+                                <img src="{{ base_url_simple ~ '/' ~ path_logo }}" alt="{{ alt_text }}" class="img-responsive partenaire-logo-image" loading="lazy">
+                            {% else %}
+                                <h3 class="partenaire-titre-pro">{{ alt_text }}</h3>
+                            {% endif %}
+                        </div>
+
+                        {# ZONE 2 : LE BOUTON D'ACTION BLINDÉ #}
+                        {% set bouton_url = partenaire.url | default('') %}
+                        {% if bouton_url != '' %}
+                            <a href="{{ bouton_url }}" target="_blank" rel="noopener noreferrer" class="partenaire-btn-pro text-center">
+                                Visiter le site
+                            </a>
+                        {% endif %}
+                        
+                    </div>
+                </div>
+            {% endfor %}
+            
+        </div>
+    {% endif %}
+
+    {# [TYPOGRAPHIE] AFFICHAGE DU TEXTE RÉDACTIONNEL DU BAS #}
+    {% if page.content is not empty %}
+        <div class="container bg-sacred-white p-2 mt-2 rounded">
+            {{ page.content | raw }}
+        </div>
+    {% endif %}
+
+{% endblock %}

@@ -18,6 +18,7 @@ use Grav\Common\Data\ValidationException;
 use Grav\Common\Debugger;
 use Grav\Common\Form\FormFlash;
 use Grav\Common\Grav;
+use Grav\Common\Helpers\JsonBody;
 use Grav\Common\Twig\Twig;
 use Grav\Common\User\Interfaces\UserInterface;
 use Grav\Common\Utils;
@@ -27,6 +28,8 @@ use Grav\Framework\Form\FormFlashFile;
 use Grav\Framework\Form\Interfaces\FormFlashInterface;
 use Grav\Framework\Form\Interfaces\FormInterface;
 use Grav\Framework\Session\SessionInterface;
+use JsonException;
+use LengthException;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\UploadedFileInterface;
 use RuntimeException;
@@ -38,6 +41,7 @@ use Twig\TemplateWrapper;
 use function in_array;
 use function is_array;
 use function is_object;
+use function is_string;
 
 /**
  * Trait FormTrait
@@ -611,8 +615,14 @@ trait FormTrait
 
         $path = str_replace(array_keys($dataMap), array_values($dataMap), $flashLookupFolder);
 
-        // Make sure we only return valid paths.
-        return !str_contains($path, '!!') ? rtrim($path, '/') : null;
+        // Make sure we only return valid paths. Check for parent-directory parts
+        // only after the tokens have been filled in, as [FORM_NAME] comes from the
+        // form definition.
+        if (str_contains($path, '!!') || in_array('..', explode('/', str_replace('\\', '/', $path)), true)) {
+            return null;
+        }
+
+        return rtrim($path, '/');
     }
 
     /**
@@ -643,7 +653,14 @@ trait FormTrait
     protected function getFlashLookupFolder(): string
     {
         if (null === $this->flashFolder) {
-            $this->flashFolder = $this->getBlueprint()->get('form/flash_folder') ?? 'tmp://forms/[SESSIONID]';
+            $blueprint = $this->getBlueprint();
+
+            // Only a blueprint file (or code, see setFlashLookupFolder()) chooses
+            // where FormFlash keeps its files. A form defined in page frontmatter
+            // always uses the default folder.
+            $folder = $blueprint->isTrusted() ? $blueprint->get('form/flash_folder') : null;
+
+            $this->flashFolder = is_string($folder) && $folder !== '' ? $folder : 'tmp://forms/[SESSIONID]';
         }
 
         return $this->flashFolder;
@@ -836,21 +853,27 @@ trait FormTrait
     /**
      * Recursively JSON decode POST data.
      *
+     * All the fields of one post share the allowance of one JSON request body.
+     *
      * @param  array $data
+     * @param  int|null $allowance Shared between the recursive calls.
      * @return array
      */
-    protected function jsonDecode(array $data): array
+    protected function jsonDecode(array $data, ?int &$allowance = null): array
     {
         foreach ($data as $key => &$value) {
             if (is_array($value)) {
-                $value = $this->jsonDecode($value);
+                $value = $this->jsonDecode($value, $allowance);
             } elseif (trim((string) $value) === '') {
                 unset($data[$key]);
             } else {
-                $value = json_decode((string) $value, true);
-                if ($value === null && json_last_error() !== JSON_ERROR_NONE) {
+                try {
+                    $value = JsonBody::decode((string) $value, null, $allowance);
+                } catch (JsonException|LengthException $e) {
                     unset($data[$key]);
-                    $this->setError("Badly encoded JSON data (for {$key}) was sent to the form");
+                    $this->setError($e instanceof LengthException
+                        ? "JSON data (for {$key}) sent to the form is too large: {$e->getMessage()}"
+                        : "Badly encoded JSON data (for {$key}) was sent to the form");
                 }
             }
         }

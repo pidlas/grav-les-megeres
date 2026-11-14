@@ -38,6 +38,15 @@ class Plugins extends Iterator
     /** @var PluginAutoloader|null Index of the enabled plugins' Composer loaders, registered in front of them. */
     private $autoloader;
 
+    /** Key prefix of the entries kept for disabled plugins whose main file was not loaded. */
+    private const UNLOADED_PREFIX = 'unloaded:';
+
+    /** @var string[]|null Names of the plugins found, until load() has run. */
+    private $pending;
+
+    /** @var array<string,string> Plugin name by lowercased main class name, for plugins whose main file has not been run. */
+    private $unloaded = [];
+
     /**
      * Plugins constructor.
      */
@@ -53,7 +62,8 @@ class Plugins extends Iterator
         $plugins = [];
         /** @var SplFileInfo $directory */
         foreach ($iterator as $directory) {
-            if (!$directory->isDir()) {
+            // Hidden folders are not plugins (GPM stages a replacement in one while it swaps it in).
+            if (!$directory->isDir() || str_starts_with($directory->getFilename(), '.')) {
                 continue;
             }
             $plugins[] = $directory->getFilename();
@@ -61,7 +71,49 @@ class Plugins extends Iterator
 
         sort($plugins, SORT_NATURAL | SORT_FLAG_CASE);
 
+        // No plugin file is run here. On a cold cache this constructor is reached while the
+        // configuration is still being compiled (config -> blueprints -> form field types), so
+        // whether a plugin is enabled is not known yet. The files are loaded by load(), from
+        // setup() or init(), once it is. Until then a plugin's main class loads on first use.
+        $this->pending = $plugins;
         foreach ($plugins as $plugin) {
+            foreach ($this->pluginClassNames($plugin) as $className) {
+                $this->unloaded[strtolower($className)] = $plugin;
+            }
+        }
+
+        spl_autoload_register([$this, 'autoloadUnloadedPlugin']);
+    }
+
+    /**
+     * Load the enabled plugins. A disabled plugin's main file is not run, so code at its file
+     * scope (a require of a class that no longer matches core, say) cannot take the site down
+     * (#4374). It stays in the list as a plain Plugin entry, so its blueprints, configuration
+     * and GPM listing work as before, and its class still loads if anything refers to it.
+     *
+     * @return void
+     */
+    protected function load(): void
+    {
+        if (null === $this->pending) {
+            return;
+        }
+
+        $plugins = $this->pending;
+        $this->pending = null;
+
+        $grav = Grav::instance();
+
+        /** @var Config $config */
+        $config = $grav['config'];
+
+        foreach ($plugins as $plugin) {
+            if (!$config->get("plugins.{$plugin}.enabled") && $this->pluginFile($plugin)) {
+                $this->items[self::UNLOADED_PREFIX . $plugin] = new Plugin($plugin, $grav);
+                continue;
+            }
+
+            $this->forgetUnloaded($plugin);
             $object = $this->loadPlugin($plugin);
             if ($object) {
                 $this->add($object);
@@ -70,10 +122,58 @@ class Plugins extends Iterator
     }
 
     /**
+     * Load the main class of a plugin whose file has not been run, the first time something
+     * refers to that class (a blueprint `data-options@`, a class_exists() check, another plugin
+     * calling it), as Grav 1.7 had every plugin's main class available.
+     *
+     * @param string $className
+     * @return void
+     * @internal
+     */
+    public function autoloadUnloadedPlugin(string $className): void
+    {
+        // Class names are case-insensitive: ai-pro declares AIProPlugin, not AiProPlugin.
+        $name = $this->unloaded[strtolower($className)] ?? null;
+        if (null === $name) {
+            return;
+        }
+
+        $this->forgetUnloaded($name);
+        $file = $this->pluginFile($name);
+        if (!$file) {
+            return;
+        }
+
+        try {
+            // Local variables available in the file, as in loadPlugin(): $grav, $name, $file
+            (static function (Grav $grav, string $name, string $file) {
+                include_once $file;
+            })(Grav::instance(), $name, $file);
+        } catch (\Throwable $e) {
+            Grav::instance()['log']->error(
+                sprintf("Plugin '%s' could not be loaded: %s", $name, $e->getMessage())
+            );
+        }
+    }
+
+    /**
+     * @param string $name
+     * @return void
+     */
+    private function forgetUnloaded(string $name): void
+    {
+        foreach ($this->pluginClassNames($name) as $className) {
+            unset($this->unloaded[strtolower($className)]);
+        }
+    }
+
+    /**
      * @return $this
      */
     public function setup()
     {
+        $this->load();
+
         $blueprints = [];
         $formFields = [];
 
@@ -132,6 +232,8 @@ class Plugins extends Iterator
             return $this->items;
         }
 
+        $this->load();
+
         $grav = Grav::instance();
 
         /** @var Config $config */
@@ -141,9 +243,20 @@ class Plugins extends Iterator
         $events = $grav['events'];
 
         $loaders = [];
-        foreach ($this->items as $instance) {
+        foreach ($this->items as $key => $instance) {
             // Register only enabled plugins.
             if ($config["plugins.{$instance->name}.enabled"] && $instance instanceof Plugin) {
+                // Enabled after the list was built (config changed in between): load it for real now.
+                if (str_starts_with((string)$key, self::UNLOADED_PREFIX)) {
+                    $name = $instance->name;
+                    unset($this->items[$key]);
+                    $this->forgetUnloaded($name);
+                    $instance = $this->loadPlugin($name);
+                    if (!$instance) {
+                        continue;
+                    }
+                    $this->add($instance);
+                }
                 // Set plugin configuration.
                 $instance->setConfig($config);
                 // Register autoloader.
@@ -151,6 +264,8 @@ class Plugins extends Iterator
                     try {
                         $autoloader = $instance->autoload();
                         if ($autoloader instanceof \Composer\Autoload\ClassLoader) {
+                            // A plugin's vendor dump carries a fixed APCu prefix too.
+                            Grav::scopeApcuPrefix($autoloader);
                             // Composer registers plugin loaders prepended, which forces every
                             // core/vendor class loaded after this point through each plugin's
                             // loader first. Move the plugin loader behind the core one; the
@@ -225,6 +340,7 @@ class Plugins extends Iterator
     {
         /** @var Plugins $plugins */
         $plugins = Grav::instance()['plugins'];
+        $plugins->load();
 
         $list = [];
         foreach ($plugins as $instance) {
@@ -256,6 +372,7 @@ class Plugins extends Iterator
 
         /** @var Plugins $plugins */
         $plugins = $grav['plugins'];
+        $plugins->load();
         $list = [];
 
         foreach ($plugins as $instance) {
@@ -314,6 +431,72 @@ class Plugins extends Iterator
     }
 
     /**
+     * Lock the plugin folders: shared while a request loads its configuration and plugins,
+     * exclusive while GPM swaps an installed plugin for a new copy. A request therefore loads
+     * every plugin either before or after the swap, never while a folder is missing.
+     *
+     * A shared lock waits for the swap, which only takes two renames. An exclusive lock waits
+     * up to $timeout seconds for the requests that are loading plugins, then throws.
+     *
+     * @param bool $exclusive
+     * @param int $timeout Seconds to wait for an exclusive lock.
+     * @return resource|null The lock, or null where the filesystem cannot lock (the caller goes on without it).
+     * @throws RuntimeException When the exclusive lock is not free in time.
+     */
+    public static function lockFolders(bool $exclusive = false, int $timeout = 30)
+    {
+        $dir = Grav::instance()['locator']->findResource('tmp://', true, true);
+        if (!$dir || (!is_dir($dir) && !@mkdir($dir, 0775, true) && !is_dir($dir))) {
+            return null;
+        }
+
+        $handle = @fopen($dir . '/plugins.lock', 'c');
+        if (!$handle) {
+            return null;
+        }
+
+        if (!$exclusive) {
+            if (@flock($handle, LOCK_SH)) {
+                return $handle;
+            }
+
+            fclose($handle);
+
+            return null;
+        }
+
+        $until = microtime(true) + $timeout;
+        while (true) {
+            if (@flock($handle, LOCK_EX | LOCK_NB, $wouldBlock)) {
+                return $handle;
+            }
+            if (!$wouldBlock) {
+                fclose($handle);
+
+                return null;
+            }
+            if (microtime(true) >= $until) {
+                fclose($handle);
+
+                throw new RuntimeException('Plugins are still being loaded by other requests, please try again.');
+            }
+            usleep(10000);
+        }
+    }
+
+    /**
+     * @param resource|null $lock A lock from lockFolders().
+     * @return void
+     */
+    public static function unlockFolders($lock): void
+    {
+        if (is_resource($lock)) {
+            @flock($lock, LOCK_UN);
+            fclose($lock);
+        }
+    }
+
+    /**
      * @param string $name
      * @return Plugin|null
      */
@@ -326,8 +509,8 @@ class Plugins extends Iterator
         $class = null;
 
         // Start by attempting to load the plugin_name.php file.
-        $file = $locator->findResource('plugins://' . $name . DS . $name . PLUGIN_EXT);
-        if (is_file($file)) {
+        $file = $this->pluginFile($name);
+        if ($file) {
             // Local variables available in the file: $grav, $name, $file
             $class = include_once $file;
             if (!is_object($class) || !is_subclass_of($class, Plugin::class, true)) {
@@ -337,14 +520,7 @@ class Plugins extends Iterator
 
         // If the class hasn't been initialized yet, guess the class name and create a new instance.
         if (null === $class) {
-            $className = Inflector::camelize($name);
-            $pluginClassFormat = [
-                'Grav\\Plugin\\' . ucfirst($name). 'Plugin',
-                'Grav\\Plugin\\' . $className . 'Plugin',
-                'Grav\\Plugin\\' . $className
-            ];
-
-            foreach ($pluginClassFormat as $pluginClass) {
+            foreach ($this->pluginClassNames($name) as $pluginClass) {
                 if (is_subclass_of($pluginClass, Plugin::class, true)) {
                     $class = new $pluginClass($name, $grav);
                     break;
@@ -360,5 +536,33 @@ class Plugins extends Iterator
         }
 
         return $class;
+    }
+
+    /**
+     * @param string $name
+     * @return string|null Path of the plugin's main file, or null if it has none.
+     */
+    private function pluginFile(string $name): ?string
+    {
+        /** @var UniformResourceLocator $locator */
+        $locator = Grav::instance()['locator'];
+        $file = $locator->findResource('plugins://' . $name . DS . $name . PLUGIN_EXT);
+
+        return $file && is_file($file) ? $file : null;
+    }
+
+    /**
+     * @param string $name
+     * @return string[] Class names a plugin's main class may have, in lookup order.
+     */
+    private function pluginClassNames(string $name): array
+    {
+        $className = Inflector::camelize($name);
+
+        return [
+            'Grav\\Plugin\\' . ucfirst($name) . 'Plugin',
+            'Grav\\Plugin\\' . $className . 'Plugin',
+            'Grav\\Plugin\\' . $className,
+        ];
     }
 }

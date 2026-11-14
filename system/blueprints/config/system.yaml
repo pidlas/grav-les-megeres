@@ -248,6 +248,17 @@ form:
               validate:
                 type: bool
 
+            pages.cascade_unpublish:
+              type: toggle
+              label: PLUGIN_ADMIN.CASCADE_UNPUBLISH_DEFAULT
+              help: PLUGIN_ADMIN.CASCADE_UNPUBLISH_DEFAULT_HELP
+              highlight: 0
+              options:
+                1: PLUGIN_ADMIN.YES
+                0: PLUGIN_ADMIN.NO
+              validate:
+                type: bool
+
             pages.events:
               type: checkboxes
               label: PLUGIN_ADMIN.EVENTS
@@ -312,6 +323,18 @@ form:
               label: PLUGIN_ADMIN.IGNORE_HIDDEN
               help: PLUGIN_ADMIN.IGNORE_HIDDEN_HELP
               highlight: 1
+              options:
+                1: PLUGIN_ADMIN.YES
+                0: PLUGIN_ADMIN.NO
+              validate:
+                type: bool
+
+            pages.uuid:
+              type: toggle
+              label: PLUGIN_ADMIN.PAGE_IDS
+              help: PLUGIN_ADMIN.PAGE_IDS_HELP
+              highlight: 0
+              default: 0
               options:
                 1: PLUGIN_ADMIN.YES
                 0: PLUGIN_ADMIN.NO
@@ -685,8 +708,8 @@ form:
                 type: bool
             pages.markdown.gfm.task_lists:
               type: toggle
-              label: GFM Task Lists
-              help: 'Render `- [ ]` and `- [x]` list items as checkboxes.'
+              label: PLUGIN_ADMIN.GFM_TASK_LISTS
+              help: PLUGIN_ADMIN.GFM_TASK_LISTS_HELP
               highlight: 1
               options:
                 1: PLUGIN_ADMIN.YES
@@ -695,8 +718,8 @@ form:
                 type: bool
             pages.markdown.gfm.marks:
               type: toggle
-              label: GFM Highlight / Sub / Superscript
-              help: 'Enable ==highlight==, ~subscript~, and ^superscript^ inline syntax.'
+              label: PLUGIN_ADMIN.GFM_MARKS
+              help: PLUGIN_ADMIN.GFM_MARKS_HELP
               highlight: 1
               options:
                 1: PLUGIN_ADMIN.YES
@@ -705,8 +728,8 @@ form:
                 type: bool
             pages.markdown.gfm.tagfilter:
               type: toggle
-              label: GFM Tag Filter
-              help: 'Escape disallowed raw HTML tags (script, iframe, style, and similar) in output.'
+              label: PLUGIN_ADMIN.GFM_TAGFILTER
+              help: PLUGIN_ADMIN.GFM_TAGFILTER_HELP
               highlight: 1
               options:
                 1: PLUGIN_ADMIN.YES
@@ -715,8 +738,8 @@ form:
                 type: bool
             pages.markdown.gfm.autolinks:
               type: toggle
-              label: GFM Autolinks
-              help: 'Autolink bare www. URLs and email addresses (bare http(s):// links use Automatic HTML Links above).'
+              label: PLUGIN_ADMIN.GFM_AUTOLINKS
+              help: PLUGIN_ADMIN.GFM_AUTOLINKS_HELP
               highlight: 1
               options:
                 1: PLUGIN_ADMIN.YES
@@ -725,8 +748,8 @@ form:
                 type: bool
             pages.markdown.tables.colspan:
               type: toggle
-              label: Table Cell Colspan
-              help: 'Non-standard: an empty table cell merges into the cell on its left (colspan).'
+              label: PLUGIN_ADMIN.TABLE_COLSPAN
+              help: PLUGIN_ADMIN.TABLE_COLSPAN_HELP
               highlight: 0
               options:
                 1: PLUGIN_ADMIN.YES
@@ -735,8 +758,8 @@ form:
                 type: bool
             pages.markdown.tables.headerless:
               type: toggle
-              label: Header-less Tables
-              help: 'Non-standard: a table may start with the divider row, with no header row above it.'
+              label: PLUGIN_ADMIN.TABLE_HEADERLESS
+              help: PLUGIN_ADMIN.TABLE_HEADERLESS_HELP
               highlight: 0
               options:
                 1: PLUGIN_ADMIN.YES
@@ -745,8 +768,8 @@ form:
                 type: bool
             pages.markdown.tables.captions:
               type: toggle
-              label: Table Captions
-              help: 'Non-standard: a `[Caption]` line immediately after a table becomes a `<caption>` element.'
+              label: PLUGIN_ADMIN.TABLE_CAPTIONS
+              help: PLUGIN_ADMIN.TABLE_CAPTIONS_HELP
               highlight: 0
               options:
                 1: PLUGIN_ADMIN.YES
@@ -755,8 +778,8 @@ form:
                 type: bool
             pages.markdown.tables.attributes:
               type: toggle
-              label: Table Attributes
-              help: 'Non-standard: a `{.class #id}` (or `{:.class}`) line immediately after a table sets the class and id on the table element.'
+              label: PLUGIN_ADMIN.TABLE_ATTRIBUTES
+              help: PLUGIN_ADMIN.TABLE_ATTRIBUTES_HELP
               highlight: 0
               options:
                 1: PLUGIN_ADMIN.YES
@@ -765,8 +788,8 @@ form:
                 type: bool
             pages.markdown.tables.multiline:
               type: toggle
-              label: Multi-line Table Cells
-              help: 'Non-standard: a table row ending in a backslash continues onto the next line, joining cells with a line break.'
+              label: PLUGIN_ADMIN.TABLE_MULTILINE
+              help: PLUGIN_ADMIN.TABLE_MULTILINE_HELP
               highlight: 0
               options:
                 1: PLUGIN_ADMIN.YES
@@ -1396,6 +1419,50 @@ form:
               label: PLUGIN_ADMIN.SYSLOG_TAG
               help: PLUGIN_ADMIN.SYSLOG_TAG_HELP
               placeholder: "grav"
+
+            log.rotate.enabled:
+              type: toggle
+              label: PLUGIN_ADMIN.LOG_ROTATE
+              help: PLUGIN_ADMIN.LOG_ROTATE_HELP
+              highlight: 1
+              default: 1
+              options:
+                1: PLUGIN_ADMIN.YES
+                0: PLUGIN_ADMIN.NO
+              validate:
+                type: bool
+
+            log.rotate.max_size:
+              type: text
+              size: x-small
+              label: PLUGIN_ADMIN.LOG_ROTATE_MAX_SIZE
+              help: PLUGIN_ADMIN.LOG_ROTATE_MAX_SIZE_HELP
+              placeholder: "10M"
+              validate:
+                pattern: '\s*\d+(\.\d+)?\s*[KkMmGg]?[Bb]?\s*'
+
+            log.rotate.max_files:
+              type: number
+              size: x-small
+              label: PLUGIN_ADMIN.LOG_ROTATE_MAX_FILES
+              help: PLUGIN_ADMIN.LOG_ROTATE_MAX_FILES_HELP
+              placeholder: 5
+              validate:
+                type: int
+                min: 1
+                max: 100
+
+            log.rotate.compress:
+              type: toggle
+              label: PLUGIN_ADMIN.LOG_ROTATE_COMPRESS
+              help: PLUGIN_ADMIN.LOG_ROTATE_COMPRESS_HELP
+              highlight: 1
+              default: 1
+              options:
+                1: PLUGIN_ADMIN.YES
+                0: PLUGIN_ADMIN.NO
+              validate:
+                type: bool
 
         debugger:
           type: tab

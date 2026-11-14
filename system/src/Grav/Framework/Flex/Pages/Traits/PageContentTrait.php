@@ -251,11 +251,94 @@ trait PageContentTrait
      */
     public function published($var = null): bool
     {
-        return $this->loadHeaderProperty(
+        // Only an explicit value is kept: without one, the publishing dates decide at the time of asking.
+        $published = $this->loadHeaderProperty(
             'published',
             $var,
-            static fn($value) => (bool)($value ?? true)
+            static fn($value) => null !== $value ? (bool)$value : null
         );
+
+        // A page under an unpublished parent that cascades is unpublished whatever its own setting says.
+        return ($published ?? $this->isPublishedByDates()) && null === $this->unpublishedBy();
+    }
+
+    /**
+     * Whether unpublishing this page also unpublishes every page below it: the page's `cascade_unpublish`
+     * header, or `system.pages.cascade_unpublish` when the page doesn't set it.
+     *
+     * @return bool
+     */
+    public function cascadesUnpublish(): bool
+    {
+        $value = $this->getNestedProperty('header.cascade_unpublish');
+        if (null === $value || '' === $value) {
+            $value = Grav::instance()['config']->get('system.pages.cascade_unpublish', false);
+        }
+
+        return (bool)$value;
+    }
+
+    /**
+     * The raw route of the ancestor that unpublishes this page through `cascade_unpublish`, or null when
+     * no ancestor does. A page unpublished by its own setting or dates returns null.
+     *
+     * @return string|null
+     */
+    public function unpublishedBy(): ?string
+    {
+        if ($this->root()) {
+            return null;
+        }
+
+        $parent = $this->parent();
+        if (!$parent || $parent->root()) {
+            return null;
+        }
+
+        // The ancestor furthest up wins, the same as Pages does when it builds the tree.
+        if (method_exists($parent, 'unpublishedBy') && null !== ($by = $parent->unpublishedBy())) {
+            return $by;
+        }
+
+        if (method_exists($parent, 'cascadesUnpublish') && $parent->cascadesUnpublish() && !$parent->published()) {
+            return $parent->rawRoute();
+        }
+
+        return null;
+    }
+
+    /**
+     * Handle publishing dates when there is no explicit published option, like Page::setPublishState() does.
+     * Routing, menus, collections and taxonomy all ask published(), so the dates are applied there. The cache
+     * lifetime is shortened to the next date, so cached data does not outlive a publish or unpublish.
+     *
+     * @return bool
+     */
+    protected function isPublishedByDates(): bool
+    {
+        $grav = Grav::instance();
+        if (!$grav['config']->get('system.pages.publish_dates')) {
+            return true;
+        }
+
+        $time = time();
+        $start = $this->publishDate();
+        if ($start && $start > $time) {
+            $grav['cache']->setLifetime($start);
+
+            return false;
+        }
+
+        $stop = $this->unpublishDate();
+        if ($stop) {
+            if ($stop < $time) {
+                return false;
+            }
+
+            $grav['cache']->setLifetime($stop);
+        }
+
+        return true;
     }
 
     /**
@@ -534,7 +617,8 @@ trait PageContentTrait
      */
     protected function offsetPrepare_header($value)
     {
-        return $this->offsetLoad_header($value);
+        // A header set at runtime holds plain data only, as one loaded from storage does.
+        return $this->offsetLoad_header(Header::plainData($value));
     }
 
     /**
@@ -662,7 +746,9 @@ trait PageContentTrait
 
         $summary = Utils::truncateHTML($content, $size);
 
-        return html_entity_decode($summary, ENT_COMPAT | ENT_HTML5, 'UTF-8');
+        // Only undo the entities the truncator leaves for non-ASCII characters; decoding &lt; and friends as well
+        // would turn text that the content escaped back into markup.
+        return Utils::decodeNonAsciiEntities($summary);
     }
 
     /**
@@ -803,12 +889,15 @@ trait PageContentTrait
 
         \assert(is_string($this->_content));
 
-        // Handle summary divider
+        // Handle summary divider, only where it stands as a block of its own between tags:
+        // cut out of the middle of raw HTML, what is left would join into new markup.
+        // Mirrors Page::content().
         $delimiter = $config->get('site.summary.delimiter', '===');
-        $divider_pos = mb_strpos($this->_content, "<p>{$delimiter}</p>");
-        if ($divider_pos !== false) {
-            $this->setProperty('summary_size', $divider_pos);
-            $this->_content = str_replace("<p>{$delimiter}</p>", '', $this->_content);
+        $divider = '~(?:\G|>)\s*\K' . preg_quote("<p>{$delimiter}</p>", '~') . '(?=\s*(?:<|$))~';
+        $parts = preg_split($divider, $this->_content);
+        if ($parts && count($parts) > 1) {
+            $this->setProperty('summary_size', mb_strlen($parts[0]));
+            $this->_content = implode('', $parts);
         }
 
         // Fire event when Page::content() is called

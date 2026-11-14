@@ -1,0 +1,91 @@
+{% extends 'main-layout.html.twig' %}
+
+{# 1. Récupération globale de la collection et transmission SEO #}
+{% set donnees_page = grav['flex'].collection('ta-grand-mere')|first %}
+{% set flex_seo = donnees_page %}
+
+{% block content %}
+
+{% if donnees_page is not empty %}
+
+    <div class="{{ page.slug }} p-3 rounded">
+
+        {# 1. Zone du lecteur audio sur mesure #}
+        {% set fichier_mp3 = donnees_page.spectacle.audio.mp3 | default('') %}
+        {% set fichier_ogg = donnees_page.spectacle.audio.ogg | default('') %}
+
+        {% if fichier_mp3 != '' or fichier_ogg != '' %}
+        <div class="wrapper-audio mb-3">
+            <audio id="audio" preload="metadata">
+                {% if fichier_mp3 != '' %}
+                    <source src="{{ base_url_simple ~ '/user/data/flex-objects/ta-grand-mere/' ~ fichier_mp3 }}" type="audio/mpeg" />
+                {% endif %}
+                {% if fichier_ogg != '' %}
+                    <source src="{{ base_url_simple ~ '/user/data/flex-objects/ta-grand-mere/' ~ fichier_ogg }}" type="audio/ogg" />
+                {% endif %}
+            </audio>
+            
+            <button id="audioPlayPauseBtn" class="audio-control-btn" aria-label="Lecture/Pause">
+                <svg class="play-icon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                <svg class="pause-icon" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+            </button>
+            <span id="audioTime" class="audio-time-display">0:00 / 0:00</span>
+            <input type="range" id="audioProgress" min="0" max="100" value="0" step="0.1">
+            
+            <div class="audio-volume-zone">
+                <button id="audioMuteBtn" class="audio-control-btn" aria-label="Mute/Unmute">
+                    <svg class="sound-icon" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.8.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
+                </button>
+                <input type="range" id="audioVolumeSlider" min="0" max="1" step="0.05" value="1" aria-label="Volume">
+            </div>
+        </div>
+        {% endif %}
+
+        {# 2. Section Introduction - texte du haut #}
+        {% if donnees_page.spectacle.texte_intro is not empty %}
+            <div class="spectacle-texte-intro my-3">
+                {{ donnees_page.spectacle.texte_intro | markdown | raw }}
+            </div>
+        {% endif %}
+
+        {# 3. Section le bloc mixte fluide - lamp + texte central #}
+        <div class="columns my-3 align-items-center">
+            
+            {# A. La cellule de la lamp #}
+            {% set logo_lampe = donnees_page.spectacle.image_lampe | default('') %}
+            {% if logo_lampe != '' %}
+                <div class="column col-4 col-sm-12 text-center p-2">
+                    <img src="{{ base_url_simple ~ '/user/data/flex-objects/ta-grand-mere/' ~ logo_lampe }}" alt="Lampe et horloge, les contes occitans" class="img-responsive mx-auto forme-lampe" loading="lazy">
+                </div>
+            {% endif %}
+
+            {# B. La cellule du texte central du récit #}
+            {% if donnees_page.spectacle.texte_corps is not empty %}
+                <div class="column col-8 col-sm-12 p-2">
+                    {{ donnees_page.spectacle.texte_corps | markdown | raw }}
+                </div>
+            {% endif %}
+
+        </div>
+
+        {# 4. Section Les questions de l'interview #}
+        {% if donnees_page.spectacle.questions_interview is not empty %}
+            <ul class="jolie-ombres slide-list my-3">
+                {% for item in donnees_page.spectacle.questions_interview %}
+                    <li>{{ item.texte_question | raw }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+
+        {# 5. Section Les paragraphes de conclusion - texte du bas #}
+        {% if donnees_page.spectacle.texte_conclusion is not empty %}
+            <div class="spectacle-texte-conclusion mt-3">
+                {{ donnees_page.spectacle.texte_conclusion | markdown | shortcodes | raw }}
+            </div>
+        {% endif %}
+
+    </div>
+
+{% endif %}
+
+{% endblock %}

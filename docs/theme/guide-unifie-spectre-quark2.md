@@ -33,7 +33,7 @@ Pour que les composants natifs de Spectre (liens, boutons, textes, conteneurs) a
 body {
     font-family: var(--font-main);
     color: var(--color-brand-secondary);
-    background-color: var(--color-sacred-white);
+    background-color: var(--color-whitesmoke);
 }
 
 h1, .display-title {
@@ -103,14 +103,14 @@ Lorsque les grilles fluides de Spectre (`columns`) montrent leurs limites face �
 ### Classes utilitaires remplaçables par Spectre.css
 Une fois remplacées dans l'ensemble de vos templates Twig, ces classes pourront être supprimées de `_components.css` :
 
-| Besoin de mise en page | Ancienne classe métier | Équivalent natif Spectre.css | Impact visuel |
-| :--- | :--- | :--- | :--- |
-| Conteneur centré | Wrappers manuels | `<div class="container">` | Identique (`max-width` aligné) |
-| Ligne de grille | Flexbox basique | `<div class="columns">` | Identique |
-| Colonne pleine largeur | Bloc 100 % | `<div class="column col-12">` | Identique |
-| Centrage texte / image | `.p_centrer` (l. 116), `.img-centre` (l. 1292) | `text-center` | Strictement identique |
-| Graisse de texte | `.gras` (l. 122), `.tresgras` (l. 125) | `text-bold` | Strictement identique (`700`) |
-| Soulignement | `.souligne` (l. 143) | `<u>` | Identique |
+| Besoin de mise en page | Ancienne classe métier                         | Équivalent natif Spectre.css  | Impact visuel                  |
+| :---                   | :---                                           | :---                          | :---                           |
+| Conteneur centré       | Wrappers manuels                               | `<div class="container">`     | Identique (`max-width` aligné) |
+| Ligne de grille        | Flexbox basique                                | `<div class="columns">`       | Identique                      |
+| Colonne pleine largeur | Bloc 100 %                                     | `<div class="column col-12">` | Identique                      |
+| Centrage texte / image | `.p_centrer` (l. 116), `.img-centre` (l. 1292) | `text-center`                 | Strictement identique          |
+| Graisse de texte       | `.gras` (l. 122), `.tresgras` (l. 125)         | `text-bold`                   | Strictement identique (`700`)  |
+| Soulignement           | `.souligne` (l. 143)                           | `<u>`                         | Identique                      |
 
 ### Composants sur-mesure à conserver impérativement
 Spectre.css n'offre aucun équivalent pour ces classes qui constituent l'identité graphique du site :

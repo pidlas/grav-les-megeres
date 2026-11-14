@@ -15,8 +15,10 @@ use Grav\Console\Cli\CleanCommand;
 use Grav\Console\Cli\ClearCacheCommand;
 use Grav\Console\Cli\ComposerCommand;
 use Grav\Console\Cli\InstallCommand;
+use Grav\Console\Cli\LogRotateCommand;
 use Grav\Console\Cli\LogViewerCommand;
 use Grav\Console\Cli\NewProjectCommand;
+use Grav\Console\Cli\PageIdsCommand;
 use Grav\Console\Cli\PageSystemValidatorCommand;
 use Grav\Console\Cli\SandboxCommand;
 use Grav\Console\Cli\SchedulerCommand;
@@ -46,9 +48,11 @@ class GravApplication extends Application
             new SchedulerCommand(),
             new SecurityCommand(),
             new LogViewerCommand(),
+            new LogRotateCommand(),
             new YamlLinterCommand(),
             new ServerCommand(),
             new PageSystemValidatorCommand(),
+            new PageIdsCommand(),
         ]);
     }
 }

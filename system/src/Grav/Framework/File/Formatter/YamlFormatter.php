@@ -16,8 +16,10 @@ use RuntimeException;
 use Symfony\Component\Yaml\Exception\DumpException;
 use Symfony\Component\Yaml\Exception\ParseException;
 use Symfony\Component\Yaml\Yaml as YamlParser;
-use RocketTheme\Toolbox\Compat\Yaml\Yaml as FallbackYamlParser;
+use RocketTheme\Toolbox\Compat\Yaml\Parser as FallbackYamlParser;
+use function array_key_exists;
 use function function_exists;
+use function is_array;
 
 /**
  * Class YamlFormatter
@@ -83,6 +85,8 @@ class YamlFormatter extends AbstractFormatter
      */
     public function encode($data, $inline = null, $indent = null): string
     {
+        static::assertNoMergeKeys($data);
+
         try {
             return YamlParser::dump(
                 $data,
@@ -96,13 +100,61 @@ class YamlFormatter extends AbstractFormatter
     }
 
     /**
+     * Make sure that the data does not use `<<` as a key.
+     *
+     * Symfony YAML decoders read `<<` as the merge key, quoted or not, and move its value one level up:
+     * `['<<' => ['access' => ...]]` comes back as `['access' => ...]`. There is no way to write the key so that it
+     * is read back as it was, which means that data checked as an array (blueprint `security@` fields, privilege
+     * guards) would load differently. Call this before writing YAML with any other encoder.
+     *
+     * @param mixed $data
+     * @return void
+     * @throws RuntimeException
+     */
+    public static function assertNoMergeKeys($data): void
+    {
+        if (!is_array($data)) {
+            return;
+        }
+
+        if (array_key_exists('<<', $data)) {
+            throw new RuntimeException("Encoding YAML failed: '<<' cannot be used as a key");
+        }
+
+        foreach ($data as $value) {
+            static::assertNoMergeKeys($value);
+        }
+    }
+
+    /**
+     * Check whether the YAML has a plain `y`, `n`, `yes`, `no`, `on` or `off` key.
+     *
+     * The yaml extension follows YAML 1.1 and reads those keys as booleans, so `y: 630` comes back as `1 => 630`
+     * and the language strings under `YES:` and `NO:` are lost. Symfony follows YAML 1.2 and keeps them as text,
+     * which is also how the file loads on every host without the extension, so a file with one of these keys is
+     * parsed by Symfony. Quoted keys and false matches (such as `no:` inside a block of text) only cost the faster
+     * parser. Only files with such a key change parser, so a hand-written `enabled: no` in any other file still
+     * reads as `false` with the extension.
+     *
+     * @param string $data
+     * @return bool
+     */
+    public static function hasBooleanLikeKey(string $data): bool
+    {
+        return (bool) preg_match(
+            '/(?:^[ \t]*(?:-[ \t]+)*|[{,][ \t]*)(?:[yYnN]|yes|Yes|YES|no|No|NO|on|On|ON|off|Off|OFF)[ \t]*:(?:[ \t]|$)/m',
+            $data
+        );
+    }
+
+    /**
      * {@inheritdoc}
      * @see FileFormatterInterface::decode()
      */
     public function decode($data): array
     {
         // Try native PECL YAML PHP extension first if available.
-        if (function_exists('yaml_parse') && $this->useNativeDecoder()) {
+        if (function_exists('yaml_parse') && $this->useNativeDecoder() && !static::hasBooleanLikeKey((string) $data)) {
             // Safely decode YAML.
             $saved = @ini_get('yaml.decode_php');
             @ini_set('yaml.decode_php', '0');
@@ -120,7 +172,9 @@ class YamlFormatter extends AbstractFormatter
             return (array) YamlParser::parse($data);
         } catch (ParseException $e) {
             if ($this->useCompatibleDecoder()) {
-                return (array) FallbackYamlParser::parse($data);
+                // Call the parser itself: the static Compat\Yaml\Yaml::parse() treats a string without a
+                // line break as a file name and reads that file when it exists, but $data is always YAML.
+                return (array) (new FallbackYamlParser())->parse($data);
             }
 
             throw new RuntimeException('Decoding YAML failed: ' . $e->getMessage(), 0, $e);

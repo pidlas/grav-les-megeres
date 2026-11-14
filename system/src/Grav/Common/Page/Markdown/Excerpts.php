@@ -11,6 +11,8 @@ namespace Grav\Common\Page\Markdown;
 
 use Grav\Common\Grav;
 use Grav\Common\Media\Interfaces\ImageMediaInterface;
+use Grav\Common\Media\Interfaces\MediaLinkInterface;
+use Grav\Common\Media\Interfaces\MediaObjectInterface;
 use Grav\Common\Page\Interfaces\PageInterface;
 use Grav\Common\Page\Medium\Link;
 use Grav\Common\Page\Pages;
@@ -20,7 +22,6 @@ use Grav\Common\Utils;
 use RocketTheme\Toolbox\Event\Event;
 use RocketTheme\Toolbox\ResourceLocator\UniformResourceLocator;
 use function array_key_exists;
-use function call_user_func_array;
 use function count;
 use function dirname;
 use function in_array;
@@ -103,22 +104,15 @@ class Excerpts
         }
 
         $grav = Grav::instance();
-        $url = htmlspecialchars_decode(rawurldecode((string) $excerpt['element']['attributes']['href']));
-        $url_parts = $this->parseUrl($url);
+        $url_parts = $this->parseDestination((string) $excerpt['element']['attributes']['href']);
 
         // If there is a query, then parse it and build action calls.
         if (isset($url_parts['query'])) {
-            $actions = array_reduce(
-                explode('&', (string) $url_parts['query']),
-                static function ($carry, $item) {
-                    $parts = explode('=', $item, 2);
-                    $value = isset($parts[1]) ? rawurldecode($parts[1]) : true;
-                    $carry[$parts[0]] = $value;
-
-                    return $carry;
-                },
-                []
-            );
+            $actions = [];
+            foreach (explode('&', (string) $url_parts['query']) as $item) {
+                $parts = explode('=', $item, 2);
+                $actions[$parts[0]] = isset($parts[1]) ? rawurldecode($parts[1]) : true;
+            }
 
             // Valid attributes supported.
             $valid_attributes = $grav['config']->get('system.pages.markdown.valid_link_attributes') ?? [];
@@ -164,12 +158,14 @@ class Excerpts
             // Handle custom streams.
             /** @var UniformResourceLocator $locator */
             $locator = $grav['locator'];
-            if ($type === 'link' && $locator->isStream($url)) {
-                $path = $locator->findResource($url, false) ?: $locator->findResource($url, false, true);
+            $stream_url = $url_parts['scheme'] . '://' . $url_parts['path'];
+            if ($type === 'link' && $locator->isStream($stream_url)) {
+                $path = $locator->findResource($stream_url, false) ?: $locator->findResource($stream_url, false, true);
                 $url_parts['path'] = $grav['base_url_relative'] . '/' . $path;
                 unset($url_parts['stream'], $url_parts['scheme']);
             }
 
+            $url_parts['path'] = Uri::encodePath((string) $url_parts['path']);
             $excerpt['element']['attributes']['href'] = Uri::buildUrl($url_parts);
 
             return $excerpt;
@@ -177,6 +173,9 @@ class Excerpts
 
         // Handle paths and such.
         $url_parts = Uri::convertUrl($this->page, $url_parts, $type);
+        if (is_array($url_parts) && isset($url_parts['path'])) {
+            $url_parts['path'] = Uri::encodePath((string) $url_parts['path']);
+        }
 
         // Build the URL from the component parts and set it on the element.
         $excerpt['element']['attributes']['href'] = Uri::buildUrl($url_parts);
@@ -199,10 +198,12 @@ class Excerpts
             return $excerpt;
         }
 
-        // rawurldecode(), as for links: a '+' in a URL path is a literal plus
-        // (e.g. "a+b.png"), not an encoded space.
-        $url = htmlspecialchars_decode(rawurldecode((string) $excerpt['element']['attributes']['src']));
-        $url_parts = $this->parseUrl($url);
+        $url_parts = $this->parseDestination((string) $excerpt['element']['attributes']['src']);
+        // The query holds the media actions (`?resize=400,200`), which the link pass
+        // before this one wrote back encoded.
+        if (isset($url_parts['query'])) {
+            $url_parts['query'] = rawurldecode((string) $url_parts['query']);
+        }
 
         $media = null;
         $filename = null;
@@ -247,11 +248,13 @@ class Excerpts
         }
 
         // If there is a media file that matches the path referenced..
-        if ($media && $filename && isset($media[$filename])) {
+        // A stream URI can name a file that is not media (no medium for it).
+        $found = $media && $filename && isset($media[$filename]) ? $media[$filename] : null;
+        if ($found) {
             // Work on a copy: the page's medium is shared by every embed of the
             // file, and actions like the querystring outlive reset().
             /** @var Medium $medium */
-            $medium = $media[$filename]->copy();
+            $medium = $found->copy();
 
             // Process operations
             $medium = $this->processMediaActions($medium, $url_parts);
@@ -265,6 +268,9 @@ class Excerpts
             $excerpt['element'] = $medium->parsedownElement($title, $alt, $class, $id, true);
         } else {
             // Not a current page media file, see if it needs converting to relative.
+            if (isset($url_parts['path']) && empty($url_parts['stream'])) {
+                $url_parts['path'] = Uri::encodePath((string) $url_parts['path']);
+            }
             $excerpt['element']['attributes']['src'] = Uri::buildUrl($url_parts);
         }
 
@@ -286,31 +292,11 @@ class Excerpts
 
         // if there is a query, then parse it and build action calls
         if (isset($url_parts['query'])) {
-            $actions = array_reduce(
-                explode('&', (string) $url_parts['query']),
-                static function ($carry, $item) {
-                    $parts = explode('=', $item, 2);
-                    $value = $parts[1] ?? null;
-                    $carry[] = ['method' => $parts[0], 'params' => $value];
-
-                    return $carry;
-                },
-                []
-            );
+            foreach (explode('&', (string) $url_parts['query']) as $item) {
+                $parts = explode('=', $item, 2);
+                $actions[] = ['method' => $parts[0], 'params' => $parts[1] ?? null];
+            }
         }
-
-        // Block any real, undocumented medium method from being invoked by an
-        // editor-authored image URL — only documented actions may be called.
-        // Names that aren't real methods are left alone so the medium's __call()
-        // URL-querystring passthrough (image filters, cache-busting params, …)
-        // keeps working; that path runs no code. Operator-defined
-        // images.defaults below are server config (trusted) and not filtered.
-        // GHSA-ffmg-hfvg-jhg9.
-        $actions = array_values(array_filter(
-            $actions,
-            static fn($action) => !method_exists($medium, (string) $action['method'])
-                || Medium::isAllowedAction((string) $action['method'])
-        ));
 
         // `system.images.defaults` is image configuration, so it must only be
         // applied to image media. Applying it to audio, video or a document
@@ -337,6 +323,7 @@ class Excerpts
                     $actions[] = [
                         'method' => $method,
                         'params' => $params,
+                        'trusted' => true,
                     ];
                 }
             }
@@ -344,6 +331,12 @@ class Excerpts
 
         // loop through actions for the image and call them
         foreach ($actions as $action) {
+            $method = (string) $action['method'];
+            $hasMethod = $medium instanceof Link ? $medium->hasMethod($method) : method_exists($medium, $method);
+            if (empty($action['trusted']) && $hasMethod && !Medium::isAllowedAction($method)) {
+                continue;
+            }
+
             $matches = [];
 
             if (preg_match('/\[(.*)\]/', (string) $action['params'], $matches)) {
@@ -352,7 +345,11 @@ class Excerpts
                 $args = explode(',', (string) $action['params']);
             }
 
-            $medium = call_user_func_array([$medium, $action['method']], $args);
+            // Only media and link results replace the current medium.
+            $result = $medium->{$method}(...$args);
+            if ($result instanceof MediaObjectInterface || $result instanceof MediaLinkInterface) {
+                $medium = $result;
+            }
         }
 
         if (isset($url_parts['fragment'])) {
@@ -360,6 +357,27 @@ class Excerpts
         }
 
         return $medium;
+    }
+
+    /**
+     * Split a link or image destination into its parts, then decode the path.
+     *
+     * The path is decoded only after the split, so an encoded `%23`, `%3F` or `%25`
+     * in a file name (`Invoice%20%2312.pdf`) stays part of the name instead of turning
+     * into a fragment, a query or the start of another escape. rawurldecode(), so a
+     * `+` in a path stays a literal plus (e.g. "a+b.png"), not an encoded space.
+     *
+     * @param string $destination
+     * @return array
+     */
+    protected function parseDestination(string $destination): array
+    {
+        $url_parts = $this->parseUrl(htmlspecialchars_decode($destination));
+        if (isset($url_parts['path'])) {
+            $url_parts['path'] = rawurldecode((string) $url_parts['path']);
+        }
+
+        return $url_parts;
     }
 
     /**

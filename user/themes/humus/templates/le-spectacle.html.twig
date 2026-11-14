@@ -1,0 +1,59 @@
+{% extends 'main-layout.html.twig' %}
+
+{# 1. Récupération globale de la collection et transmission SEO #}
+{% set collection = grav.flex.directory('le-spectacle').getCollection() %}
+{% set opression_flex = collection.first() %}
+{% set flex_seo = opression_flex %}
+
+{% block content %}
+<div class="container mt-2">
+
+    {# 2. Le sous-titre de l'en-tête #}
+    {% if opression_flex.sous_titre %}
+        <h2 class="coco sous-titre-page text-center my-1">{{ opression_flex.sous_titre }}</h2>
+    {% endif %}
+
+    {# 3. Les deux photos d'illustration supérieures #}
+    <div class="img-centre my-2">
+        {% if opression_flex.spectacle.photo_top1 %}
+            <img src="{{ base_url_simple ~ '/user/data/flex-objects/le-spectacle/' ~ opression_flex.spectacle.photo_top1 }}" class="photo-stages-ateliers mx-1" alt="Illustration 1" loading="lazy">
+        {% endif %}
+        {% if opression_flex.spectacle.photo_top2 %}
+            <img src="{{ base_url_simple ~ '/user/data/flex-objects/le-spectacle/' ~ opression_flex.spectacle.photo_top2 }}" class="photo-stages-ateliers mx-1" alt="Illustration 2" loading="lazy">
+        {% endif %}
+    </div>
+
+    {# 4. Bandeau de navigation, deux images rondes avec morph et liens #}
+    <div class="img-centre my-2">
+        {% if opression_flex.spectacle.nav_scolaires %}
+            <a class="images-spectacle morph mx-2" href="{{ url('/theatre-forum/le-spectacle/les-scolaires') }}">
+                <img src="{{ base_url_simple ~ '/user/data/flex-objects/le-spectacle/' ~ opression_flex.spectacle.nav_scolaires }}" class="image-ronde" alt="vers les scolaires" loading="lazy">
+            </a>
+        {% endif %}
+        {% if opression_flex.spectacle.nav_tout_public %}
+            <a class="images-spectacle morph mx-2" href="{{ url('/theatre-forum/le-spectacle/le-tout-public') }}">
+                <img src="{{ base_url_simple ~ '/user/data/flex-objects/le-spectacle/' ~ opression_flex.spectacle.nav_tout_public }}" class="image-ronde" alt="vers le tout public" loading="lazy">
+            </a>
+        {% endif %}
+    </div>
+
+    {# 5. Le corps éditorial dynamique #}
+    {% if opression_flex.spectacle.presentation_blocs %}
+        <div class="columns">
+            <div class="column col-12">
+                <div class="opression-corps">
+                    {% for bloc in opression_flex.spectacle.presentation_blocs %}
+                        {% if bloc.titre_bloc %}
+                            <h2 class="display-title {% if loop.first %}marge-haute{% endif %}">{{ bloc.titre_bloc }}</h2>
+                        {% endif %}
+                        {% if bloc.texte_bloc %}
+                            <div>{{ bloc.texte_bloc | markdown | shortcodes | raw }}</div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+</div>
+{% endblock %}

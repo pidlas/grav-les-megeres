@@ -96,11 +96,17 @@ class Backups
         /** @var Inflector $inflector */
         $inflector = $grav['inflector'];
 
-        $status = $grav['config']->get('scheduler.status');
+        foreach ((array) static::getBackupProfiles() as $id => $profile) {
+            // A profile added in the admin and saved without a name has no job id to go by, and
+            // the missing key broke every scheduler listing and run on the web
+            // (grav-plugin-scheduler-webhook#10). A profile with no schedule would run every
+            // minute. Leave either out of the schedule.
+            $name = is_array($profile) ? $inflector::hyphenize(trim((string) ($profile['name'] ?? ''))) : '';
+            $at = is_array($profile) ? trim((string) ($profile['schedule_at'] ?? '')) : '';
+            if ($name === '' || $at === '') {
+                continue;
+            }
 
-        foreach (static::getBackupProfiles() as $id => $profile) {
-            $at = $profile['schedule_at'];
-            $name = $inflector::hyphenize($profile['name']);
             $logs = 'log://backup-' . $name . '.out';
             $environment = $profile['schedule_environment'] ?? null;
             /** @var Job $job */
@@ -109,13 +115,13 @@ class Backups
             $job->output($logs);
             $job->backlink('/tools/backups');
 
-            // Always register the job so it stays visible in the scheduler. The
-            // profile `schedule` flag seeds the default enabled state (out of
-            // rotation when false), while an explicit scheduler `status` entry
-            // set via the Enabled/Disabled toggle always wins.
-            if (!isset($status[$name])) {
-                $job->setEnabled((bool)($profile['schedule'] ?? false));
-            }
+            // Always register the job so it stays visible in the scheduler, but let the
+            // profile's Scheduled Backup switch alone decide whether it runs. A
+            // `scheduler.status` entry for the job is not consulted: classic admin wrote one
+            // for every job whenever its Scheduler page was saved (`disabled` from 1.9.18 to
+            // 1.10.49.3, `enabled` since), so a leftover entry overrode the switch and the
+            // backup stopped with it on, or ran with it off (grav#4397).
+            $job->setEnabled((bool) ($profile['schedule'] ?? false));
         }
     }
 

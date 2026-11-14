@@ -11,7 +11,7 @@ username_regex: '^[a-z0-9_-]{3,16}$'             # Only lowercase chars, digits,
 pwd_regex: '(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}' # At least one number, one uppercase and lowercase letter, and be at least 8+ chars
 intl_enabled: true                               # Special logic for PHP International Extension (mod_intl)
 http_x_forwarded:                                # Each header is opt-in: only enable when the site is genuinely behind a proxy that sets and overwrites that header. Defaults are off in Grav 2.0 to prevent client-supplied spoofing of client IP, host, port, or protocol.
-  protocol: false                                #   X-Forwarded-Proto
+  protocol: false                                #   X-Forwarded-Proto / CloudFront-Forwarded-Proto
   host: false                                    #   X-Forwarded-Host
   port: false                                    #   X-Forwarded-Port
   ip: false                                      #   X-Forwarded-For / X-Forwarded / Forwarded-For / Forwarded
@@ -53,6 +53,7 @@ pages:
     short: 'jS M Y'                              # Short date format
     long: 'F jS \a\t g:ia'                       # Long date format
   publish_dates: true                            # automatically publish/unpublish based on dates
+  cascade_unpublish: false                       # When a page is unpublished (published: false, or by its dates), unpublish every page below it too. A page's `cascade_unpublish` header overrides this
   media_route_urls: false                        # Link page media through the page route instead of its path on disk, so plugins can apply the page's `access` rules to it. Half of a two-part change, and deliberately not exposed in the admin panel: set this BEFORE uncommenting the `user/pages` deny rule in .htaccess (or your webserver-configs equivalent), because enabling that rule on its own turns every media URL on the site into a 403
   process:
     markdown: true                               # Process Markdown
@@ -119,6 +120,7 @@ pages:
   ignore_files: [.DS_Store]                      # Files to ignore in Pages
   ignore_folders: [.git, .idea]                  # Folders to ignore in Pages
   ignore_hidden: true                            # Ignore all Hidden files and folders
+  uuid: false                                    # Give each page folder a hidden .page-id file holding a permanent id (UUID) when the page is saved, so plugins can follow a page through renames and moves. Plugins that need ids turn this on themselves
   hide_empty_folders: false                      # If folder has no .md file, should it be hidden
   url_taxonomy_filters: true                     # Enable auto-magic URL-based taxonomy filters for page collections
   frontmatter:
@@ -184,6 +186,11 @@ log:
   syslog:
     facility: local6                            # Syslog facilities output
     tag: grav                                   # Syslog tag. Default: "grav".
+  rotate:
+    enabled: true                               # Rotate log files in logs/ when they reach max_size
+    max_size: 10M                               # Size at which a log is rotated (K, M or G)
+    max_files: 5                                # Rotated files to keep per log (grav.log.1, grav.log.2.gz, ...)
+    compress: true                              # Gzip rotated files from .2 onwards
 
 debugger:
   enabled: false                                 # Enable Grav debugger and following settings
@@ -239,7 +246,7 @@ session:
   httponly: true                                 # Set session HTTP only. If true, indicates that cookies should be used only over HTTP, and JavaScript modification is not allowed.
   samesite: Lax                                  # Set session SameSite. Possible values are Lax, Strict and None. See https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie/SameSite
   split: true                                    # Sessions should be independent between site and plugins (such as admin)
-  domain:                                        # Domain used by sessions.
+  domain:                                        # Domain of the session cookie. Leave empty to keep the cookie on the host that set it; a domain (`example.com`) also sends it to every host below that domain
   path:                                          # Path used by sessions.
 
 gpm:
@@ -258,6 +265,12 @@ http:
   concurrent_connections: 5                      # Concurrent HTTP connections when multiplexing
   verify_peer: true                              # Enable/Disable SSL verification of peer certificates
   verify_host: true                              # Enable/Disable SSL verification of host certificates
+
+request:
+  json:                                          # Limits for JSON sent with a request (an application/json body, a form's _json fields). A body over them is answered with 413
+    max_bytes: 16777216                          # Largest JSON body in bytes (16 MiB). 0 disables
+    max_members: 10000                           # Most members one JSON object may have; all objects of a body together may cost no more than one object of this size. Bounds the CPU a body with colliding keys can take. 0 disables
+    max_depth: 512                               # Deepest nesting allowed (PHP's json_decode default)
 
 accounts:
   type: regular                                  # EXPERIMENTAL: Account type: regular or flex

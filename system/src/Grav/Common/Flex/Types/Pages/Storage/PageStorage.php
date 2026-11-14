@@ -16,6 +16,7 @@ use Grav\Common\Debugger;
 use Grav\Common\Flex\Types\Pages\PageIndex;
 use Grav\Common\Grav;
 use Grav\Common\Language\Language;
+use Grav\Common\Page\PageIdentity;
 use Grav\Common\Utils;
 use Grav\Framework\Filesystem\Filesystem;
 use Grav\Framework\Flex\Storage\FolderStorage;
@@ -84,6 +85,7 @@ class PageStorage extends FolderStorage
             $params = '';
         }
         $key = ltrim($key, '/');
+        $this->assertValidStorageKey($key, $params);
 
         $keys = parent::parseKey($key, false) + ['params' => $params];
 
@@ -257,6 +259,8 @@ class PageStorage extends FolderStorage
             'params' => null,
             'parent_key' => $parentKey,
             'order' => is_numeric($order) ? (int)$order : null,
+            // Keep the prefix width of the existing folder (`005.blog`) across saves.
+            'order_digits' => $keyMeta['order_digits'] ?? null,
             'folder' => $folder,
             'template' => $template,
             'lang' => $lang
@@ -372,6 +376,7 @@ class PageStorage extends FolderStorage
     {
         // Initialize all key-related variables.
         $newKeys = $this->extractKeysFromRow($row);
+        $this->assertValidPageKeys($newKeys);
         $newKey = $this->buildStorageKey($newKeys);
         $newFolder = $this->buildFolder($newKeys);
         $newFilename = $this->buildFilename($newKeys);
@@ -393,8 +398,21 @@ class PageStorage extends FolderStorage
             if (is_string($oldKey)) {
                 // Initialize all old key-related variables.
                 $oldKeys = $this->extractKeysFromRow(['__META' => $row['__META']], false);
+                // The page lives in the folder named by its storage key. A folder rebuilt from order and
+                // slug may differ from it (`1.blog`, `00.blog`), which would skip the move below.
+                $oldKeys['key'] = $this->extractKeysFromStorageKey($oldKey)['key'];
+                // The old key becomes a path as well: validate it like the new one, including the storage key path
+                // which the old folder is now built from.
+                $this->assertValidPageKeys($oldKeys);
+                $this->assertValidStorageKey($oldKeys['key']);
                 $oldFolder = $this->buildFolder($oldKeys);
                 $oldFilename = $this->buildFilename($oldKeys);
+
+                // A new filename has to be free: it can belong to another translation (or template) of the page, which
+                // has permissions of its own and is only edited by loading it. Fail before anything has been moved.
+                if ($oldFilename !== $newFilename && $this->getFile("{$oldFolder}/{$newFilename}")->exists()) {
+                    throw new RuntimeException(sprintf('Page file %s already exists', $newFilename));
+                }
 
                 // Check if folder has changed.
                 if ($oldFolder !== $newFolder && file_exists($oldFolder)) {
@@ -405,6 +423,10 @@ class PageStorage extends FolderStorage
                         }
 
                         $this->copyRow($oldKey, $newKey);
+                        // A copy never keeps the original's id.
+                        /** @var UniformResourceLocator $locator */
+                        $locator = $grav['locator'];
+                        PageIdentity::onCopied($locator->isStream($newFolder) ? $locator->findResource($newFolder) : $newFolder);
                         $debugger->addMessage("Page copied: {$oldFolder} => {$newFolder}", 'debug');
                     } else {
                         if (str_starts_with($newFolder, $oldFolder . '/')) {
@@ -438,6 +460,10 @@ class PageStorage extends FolderStorage
                         $debugger->addMessage("Page template created: {$newFilename}", 'debug');
                     }
                 }
+            } elseif (!empty($this->getObjectMeta($newKeys['key'], true)['markdown'])) {
+                // A new page cannot take over the folder of an existing page, just like a page cannot be moved or
+                // copied over another. A folder with only media or child pages in it can still become a page.
+                throw new RuntimeException(sprintf('Page /%s already exists', $newKey));
             }
 
             // Clean up the data to be saved.
@@ -477,6 +503,72 @@ class PageStorage extends FolderStorage
         $row['__META'] = $this->getObjectMeta($newKey, true);
 
         return $row;
+    }
+
+    /**
+     * The folder, template and language become parts of the page file's path,
+     * so each has to be a plain name: no separator, no null byte and no leading
+     * dot (which also rules out `.` and `..`). The parent key is the path of an
+     * existing page, so only its segments are checked. `|` ends the folder path
+     * in a storage key, so neither the folder nor a parent segment can have it.
+     * `.` separates the template from the language in a file name, so a template
+     * cannot have one either: `default.fr` would be the `fr` translation of the page.
+     *
+     * @param array $keys
+     * @return void
+     * @throws RuntimeException
+     */
+    protected function assertValidPageKeys(array $keys): void
+    {
+        $parentKey = (string)($keys['parent_key'] ?? '');
+        foreach ($parentKey !== '' ? explode('/', $parentKey) : [] as $segment) {
+            if ($segment === '' || $segment === '.' || $segment === '..' || str_contains($segment, "\0") || str_contains($segment, '\\') || str_contains($segment, '|')) {
+                throw new RuntimeException('Invalid page parent');
+            }
+        }
+
+        foreach (['folder', 'template'] as $name) {
+            $value = (string)($keys[$name] ?? '');
+            if ($value !== '' && ($value[0] === '.' || strpbrk($value, "/\\\0") !== false)) {
+                throw new RuntimeException("Invalid page {$name}");
+            }
+        }
+
+        if (str_contains((string)($keys['folder'] ?? ''), '|')) {
+            throw new RuntimeException('Invalid page folder');
+        }
+
+        if (str_contains((string)($keys['template'] ?? ''), '.')) {
+            throw new RuntimeException('Invalid page template');
+        }
+
+        if (!preg_match('/^[\w-]*$/u', (string)($keys['lang'] ?? ''))) {
+            throw new RuntimeException('Invalid page language');
+        }
+    }
+
+    /**
+     * The storage key is the path of the page folder (which is also its media
+     * folder) and the parameters are the name of the page file. Every path of an
+     * existing page is built from them, so the key cannot have a dot segment and
+     * the parameters cannot have a separator.
+     *
+     * @param string $key
+     * @param string $params
+     * @return void
+     * @throws RuntimeException
+     */
+    protected function assertValidStorageKey(string $key, string $params = ''): void
+    {
+        foreach (explode('/', $key) as $segment) {
+            if ($segment === '.' || $segment === '..' || strpbrk($segment, "\\\0") !== false) {
+                throw new RuntimeException('Invalid page storage key');
+            }
+        }
+
+        if (strpbrk($params, "/\\\0") !== false) {
+            throw new RuntimeException('Invalid page storage key');
+        }
     }
 
     /**
@@ -558,6 +650,9 @@ class PageStorage extends FolderStorage
             $modified = 0;
             $markdown = [];
             $children = [];
+            // With page ids on, the folder's id is read while the folder is listed.
+            $uuidIndex = PageIdentity::enabled();
+            $uuid = null;
 
             if (is_string($path) && is_dir($path)) {
                 $modified = filemtime($path);
@@ -565,6 +660,14 @@ class PageStorage extends FolderStorage
 
                 /** @var SplFileInfo $info */
                 foreach ($iterator as $k => $info) {
+                    // The page id file is never a page file or media.
+                    if ($k === PageIdentity::FILE) {
+                        if ($uuidIndex && $info->isFile()) {
+                            $uuid = PageIdentity::read($path);
+                        }
+                        continue;
+                    }
+
                     // Ignore all hidden files if set.
                     if ($k === '' || ($this->ignore_hidden && $k[0] === '.')) {
                         continue;
@@ -573,6 +676,12 @@ class PageStorage extends FolderStorage
                     if ($info->isDir()) {
                         // Ignore all folders in ignore list.
                         if ($this->ignore_folders && in_array($k, $this->ignore_folders, true)) {
+                            continue;
+                        }
+
+                        // `|` ends the folder path in a storage key and a backslash is refused in one,
+                        // so no storage key can address a folder whose name has either of them.
+                        if (strpbrk($k, '|\\') !== false) {
                             continue;
                         }
 
@@ -633,6 +742,9 @@ class PageStorage extends FolderStorage
             if ($children) {
                 $meta['children'] = $children;
             }
+            if ($uuidIndex) {
+                $meta['uuid'] = $uuid;
+            }
             $meta['checksum'] = md5(json_encode($meta) ?: '');
 
             // Cache meta as copy.
@@ -644,7 +756,7 @@ class PageStorage extends FolderStorage
         $params = $keys['params'];
         if ($params) {
             $language = $keys['lang'];
-            $template = $keys['template'] ?: array_key_first($meta['markdown'][$language]) ?? $meta['template'];
+            $template = $keys['template'] ?: array_key_first($meta['markdown'][$language] ?? []) ?? $meta['template'];
             $meta['exists'] = ($template && !empty($meta['children'])) || isset($meta['markdown'][$language][$template]);
             $meta['storage_key'] .= '|' . $params;
             $meta['template'] = $template;

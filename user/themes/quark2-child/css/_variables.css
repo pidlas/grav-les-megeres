@@ -110,3 +110,47 @@
     --shadow-neon-inner: inset 0.3125rem 0.3125rem 0.625rem var(--color-neon-dark), 
         inset -0.3125rem -0.3125rem 0.625rem var(--color-neon-light);
 }
+/* 3. Pont vers spectre.min.css - Alignement des classes natives du framework */
+
+body {
+    font-family: var(--font-main);
+    color: var(--color-brand-secondary);
+    background-color: var(--color-whitesmoke);
+}
+
+h1, .display-title {
+    font-family: var(--font-display);
+}
+
+a {
+    color: var(--color-brand-active);
+}
+a:hover, a:focus, a:active {
+    color: var(--color-brand-primary);
+}
+
+.btn {
+    border-color: var(--color-brand-primary);
+    color: var(--color-brand-active);
+    border-radius: var(--radius-standard);
+}
+.btn:hover, .btn:focus {
+    background-color: var(--color-whitesmoke);
+    border-color: var(--color-brand-active);
+    color: var(--color-brand-active);
+}
+
+.btn.btn-primary {
+    background-color: var(--color-brand-primary);
+    border-color: var(--color-brand-primary);
+    color: var(--color-white);
+}
+.btn.btn-primary:hover, .btn.btn-primary:focus {
+    background-color: var(--color-brand-active);
+    border-color: var(--color-brand-active);
+    color: var(--color-white);
+}
+
+.container {
+    max-width: var(--content-max-desktop);
+}

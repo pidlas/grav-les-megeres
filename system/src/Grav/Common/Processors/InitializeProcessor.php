@@ -14,9 +14,11 @@ use Grav\Common\Config\Config;
 use Grav\Common\Debugger;
 use Grav\Common\Errors\Errors;
 use Grav\Common\Grav;
+use Grav\Common\Helpers\JsonBody;
 use Grav\Common\Page\Pages;
 use Grav\Common\Plugins;
 use Grav\Common\Session;
+use Grav\Common\Service\RequestServiceProvider;
 use Grav\Common\Uri;
 use Grav\Common\Utils;
 use Grav\Framework\File\Formatter\YamlFormatter;
@@ -71,34 +73,55 @@ class InitializeProcessor extends ProcessorBase
     {
         $this->startTimer('_init', 'Initialize');
 
-        // Load configuration.
-        $config = $this->initializeConfig();
+        // Keep GPM from swapping a plugin folder while this request reads the plugins'
+        // configuration and loads them, so it never runs with one missing (a missing Login
+        // would leave access-restricted pages open).
+        $lock = Plugins::lockFolders();
+        try {
+            // Load configuration.
+            $config = $this->initializeConfig();
+            $request = RequestServiceProvider::applyForwardedProtocol($request, (bool)$config->get('system.http_x_forwarded.protocol'));
+            // A JSON body is decoded here, once, within the configured limits.
+            $request = JsonBody::parseRequest($request, JsonBody::limits($config));
+            unset($this->container['request']);
+            $this->container['request'] = $request;
 
-        // Initialize logger.
-        $this->initializeLogger($config);
+            // Initialize logger.
+            $this->initializeLogger($config);
 
-        // Initialize error handlers.
-        $this->initializeErrors();
+            // Initialize error handlers.
+            $this->initializeErrors();
 
-        // Initialize debugger.
-        $debugger = $this->initializeDebugger();
+            // Initialize debugger.
+            $debugger = $this->initializeDebugger();
 
-        // Debugger can return response right away.
-        $response = $this->handleDebuggerRequest($debugger, $request);
-        if ($response) {
-            $this->stopTimer('_init');
+            // A JSON body over the limits is refused before plugins and pages load.
+            $response = JsonBody::rejection($request);
+            if ($response) {
+                $this->stopTimer('_init');
 
-            return $response;
+                return $response;
+            }
+
+            // Debugger can return response right away.
+            $response = $this->handleDebuggerRequest($debugger, $request);
+            if ($response) {
+                $this->stopTimer('_init');
+
+                return $response;
+            }
+
+            // Initialize output buffering.
+            $this->initializeOutputBuffering($config);
+
+            // Set timezone, locale.
+            $this->initializeLocale($config);
+
+            // Load plugins.
+            $this->initializePlugins();
+        } finally {
+            Plugins::unlockFolders($lock);
         }
-
-        // Initialize output buffering.
-        $this->initializeOutputBuffering($config);
-
-        // Set timezone, locale.
-        $this->initializeLocale($config);
-
-        // Load plugins.
-        $this->initializePlugins();
 
         // Load pages.
         $this->initializePages($config);
@@ -554,11 +577,23 @@ class InitializeProcessor extends ProcessorBase
 
             try {
                 $session->init();
-            } catch (SessionException) {
-                $session->init();
-                $message = 'Session corruption detected, restarting session...';
-                $this->addMessage($message);
-                $this->container['messages']->add($message, 'error');
+            } catch (SessionException $e) {
+                // init() only runs once per request, so retry with start(). An unusable session
+                // (bad user object, obsolete id) has been destroyed by now and a fresh one starts;
+                // if PHP itself can't start sessions (e.g. session.save_path is missing), the retry
+                // fails the same way and the site carries on without a session.
+                try {
+                    $session->start((bool) $config->get('system.session.read_and_close', false));
+
+                    $this->container['log']->warning('Session could not be resumed, started a new one: ' . $e->getMessage());
+                    $message = 'Session corruption detected, restarting session...';
+                    $this->addMessage($message);
+                    $this->container['messages']->add($message, 'error');
+                } catch (SessionException $e) {
+                    // Nothing a visitor can do about this, so it goes to the log, not the page.
+                    $this->container['log']->error('PHP sessions are not working, check session.save_path: ' . $e->getMessage());
+                    $this->addMessage('Session could not be started: ' . $e->getMessage(), 'error');
+                }
             }
 
             $this->stopTimer('_init_session');
