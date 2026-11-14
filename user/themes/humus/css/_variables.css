@@ -191,6 +191,15 @@ main a:active {
 .navbar {
     width: 100%;
 }
+/* Neutralise le display: flex de .card dans Spectre.css pour vos cartes de spectacles */
+/* Rétablit l'alignement vertical en bas des cartes (au repos ET sélectionnée) */
+.button-container .card,
+.button-container input:checked + label.card {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-end;
+    border: 0;
+}
 /* Empêche Spectre (.navbar { flex-wrap: wrap; }) de renvoyer vos menus à la ligne */
 @media (min-width: 960px) {
     nav.navbar {
