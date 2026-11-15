@@ -1,8 +1,14 @@
 <a href="#main-content-custom" class="skip-link">Aller au contenu principal</a>
+
+{% set accueil_flex = grav['flex'].collection('accueil')|first %}
+{% set logo_site = accueil_flex.logo_seo | default('logo.png') %}
+
+
+
 <header>
     <div class="morph logo">
         <a href="{{ home_url }}">
-            <img src="{{ url('image://logo.png') }}" width="230" height="230" alt="Le logo des Mégères de l'Humus réalisé par Noam"/>
+            <img src="{{ base_url_simple ~ '/user/data/flex-objects/accueil/' ~ logo_site }}" width="230" height="230" alt="Le logo des Mégères de l'Humus réalisé par Noam"/>
         </a>
     </div>
     <div class="e_titre">

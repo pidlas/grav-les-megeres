@@ -1,6 +1,11 @@
 <!DOCTYPE html>
 <html lang="fr">
 
+{% set accueil_flex = grav['flex'].collection('accueil')|first %}
+{% set logo_seo = accueil_flex.logo_seo | default('logo.png') %}
+{% set img_champignons = accueil_flex.deco_champignons | default('i_champignons.svg') %}
+{% set img_feuilles = accueil_flex.deco_feuilles | default('i_feuilles.svg') %}
+
 <head>
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -30,7 +35,7 @@
     <meta property="og:title" content="{{ seo_titre_complet|e }}" />
     <meta property="og:description" content="{{ seo_description|e('html_attr') }}" />
     <meta property="og:url" content="{{ page.url(true, true)|e }}" />
-    <meta property="og:image" content="{{ uri.rootUrl(true) ~ url('theme://images/logohumous-notext-blue.png', false) }}" />
+    <meta property="og:image" content="{{ uri.rootUrl(true) ~ base_url_simple ~ '/user/data/flex-objects/accueil/' ~ logo_seo }}" />
     <meta property="og:image:alt" content="Logo de la compagnie {{ site.title|e }}" />
     {% endblock %}
 
@@ -63,7 +68,7 @@
           "@id": "{{ absolute_root }}/#organization",
           "name": "{{ site.title|e }}",
           "url": "{{ absolute_root }}",
-          "logo": "{{ absolute_root }}{{ url('theme://images/logohumous-notext-blue.png', false) }}",
+          "logo": "{{ absolute_root }}{{ base_url_simple }}/user/data/flex-objects/accueil/{{ logo_seo }}",
           "email": "compagnie@lesmegeresdelhumus.fr",
           "sameAs": [ "https://facebook.com", "https://instagram.com" ],
           "address": {
@@ -102,7 +107,7 @@
             <section class="{{ page.slug }}">
 
                 <div class="conteneur-champignons">
-                    <img src="{{ url('theme://images/i_champignons.svg') }}" class="champignons" alt="" loading="lazy">
+                    <img src="{{ base_url_simple ~ '/user/data/flex-objects/accueil/' ~ img_champignons }}" class="champignons" alt="" loading="lazy">
                             
                     {% set vraie_page_url = page.find(uri.path) %}
 
@@ -125,7 +130,7 @@
 
                 {% block decor_feuilles %}
                     <div class="conteneur-feuilles">
-                        <img src="{{ url('theme://images/i_feuilles.svg') }}" class="feuilles" alt="" loading="lazy">
+                        <img src="{{ base_url_simple ~ '/user/data/flex-objects/accueil/' ~ img_feuilles }}" class="feuilles" alt="" loading="lazy">
                     </div>
                 {% endblock %}
             </section>

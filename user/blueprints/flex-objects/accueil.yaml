@@ -48,6 +48,33 @@ form:
               label: Titre dans le menu du site
               default: "Accueil"
 
+            section_decors:
+              type: section
+              title: "Illustrations décoratives globales"
+              underline: true
+            deco_champignons:
+              type: filepicker
+              label: "Illustration Champignons (SVG)"
+              folder: 'user-data://flex-objects/accueil'
+              preview_images: true
+              accept:
+                - .svg
+            deco_feuilles:
+              type: filepicker
+              label: "Illustration Feuilles (SVG)"
+              folder: 'user-data://flex-objects/accueil'
+              preview_images: true
+              accept:
+                - .svg
+            logo_seo:
+              type: filepicker
+              label: "Logo officiel (OpenGraph & Schema.org)"
+              folder: 'user-data://flex-objects/accueil'
+              preview_images: true
+              accept:
+                - .png
+                - .webp
+                - .avif
             section_diaporama:
               type: section
               title: "1. Diaporama Accordéon (Slides)"
