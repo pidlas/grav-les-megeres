@@ -49,23 +49,18 @@
         {% endif %}
 
         {# 3. Section le bloc mixte fluide - lamp + texte central #}
-        <div class="columns my-3 align-items-center">
+        <div class="my-3 clearfix">
             
-            {# A. La cellule de la lamp #}
+            {# A. L'IMAGE DE LA LAMPE EN HABILLAGE DROIT (.forme-lampe) #}
             {% set logo_lampe = donnees_page.spectacle.image_lampe | default('') %}
             {% if logo_lampe != '' %}
-                <div class="column col-4 col-sm-12 text-center p-2">
-                    <img src="{{ base_url_simple ~ '/user/data/flex-objects/ta-grand-mere/' ~ logo_lampe }}" alt="Lampe et horloge, les contes occitans" class="img-responsive mx-auto forme-lampe" loading="lazy">
-                </div>
+                <img src="{{ base_url_simple ~ '/user/data/flex-objects/ta-grand-mere/' ~ logo_lampe }}" alt="Lampe et horloge, les contes occitans" class="forme-lampe" loading="lazy">
             {% endif %}
 
-            {# B. La cellule du texte central du récit #}
+            {# B. LE TEXTE CENTRAL DU RÉCIT QUI ÉPOUSE LA FORME #}
             {% if donnees_page.spectacle.texte_corps is not empty %}
-                <div class="column col-8 col-sm-12 p-2">
-                    {{ donnees_page.spectacle.texte_corps | markdown | raw }}
-                </div>
+                {{ donnees_page.spectacle.texte_corps | markdown | raw }}
             {% endif %}
-
         </div>
 
         {# 4. Section Les questions de l'interview #}

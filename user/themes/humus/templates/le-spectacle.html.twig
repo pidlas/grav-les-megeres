@@ -14,7 +14,7 @@
     {% endif %}
 
     {# 3. Les deux photos d'illustration supérieures #}
-    <div class="img-centre my-2">
+    <div class="img-centre">
         {% if opression_flex.spectacle.photo_top1 %}
             <img src="{{ base_url_simple ~ '/user/data/flex-objects/le-spectacle/' ~ opression_flex.spectacle.photo_top1 }}" class="photo-stages-ateliers mx-1" alt="Illustration 1" loading="lazy">
         {% endif %}
@@ -24,7 +24,7 @@
     </div>
 
     {# 4. Bandeau de navigation, deux images rondes avec morph et liens #}
-    <div class="img-centre my-2">
+    <div class="img-centre">
         {% if opression_flex.spectacle.nav_scolaires %}
             <a class="images-spectacle morph mx-2" href="{{ url('/theatre-forum/le-spectacle/les-scolaires') }}">
                 <img src="{{ base_url_simple ~ '/user/data/flex-objects/le-spectacle/' ~ opression_flex.spectacle.nav_scolaires }}" class="image-ronde" alt="vers les scolaires" loading="lazy">

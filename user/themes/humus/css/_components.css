@@ -1169,7 +1169,6 @@ footer p {
     align-items: center;
     background-color: var(--color-brand-primary);
     border-radius: 1rem;
-    margin-top: 1rem;
     padding: 0 0.625rem;
     flex-direction: row;
     gap: 0.5rem;
