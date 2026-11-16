@@ -23,58 +23,14 @@ Votre thème enfant **`user/themes/quark2-child/`** surcharge ce socle en **100 
 
 ## 2. Le Pont CSS vers Spectre.css (`_variables.css`)
 
-Pour que les composants natifs de Spectre (liens, boutons, textes, conteneurs) adoptent automatiquement votre charte graphique sans recourir à `!important`, ajoutez ce bloc à la fin de `user/themes/quark2-child/css/_variables.css` :
+Pour que les composants natifs de Spectre (liens, boutons, textes, conteneurs) adoptent automatiquement votre charte graphique sans recourir à `!important`, ajoutez un bloc à la fin de `user/themes/quark2-child/css/_variables.css` :
 
-```css
+```
+css
 /* ==========================================================================
    3. PONT VERS SPECTRE.CSS (Alignement des classes natives du framework)
    ========================================================================== */
-
-body {
-    font-family: var(--font-main);
-    color: var(--color-brand-secondary);
-    background-color: var(--color-whitesmoke);
-}
-
-h1, .display-title {
-    font-family: var(--font-display);
-}
-
-a {
-    color: var(--color-brand-active);
-}
-a:hover, a:focus, a:active {
-    color: var(--color-brand-primary);
-}
-
-.btn {
-    border-color: var(--color-brand-primary);
-    color: var(--color-brand-active);
-    border-radius: var(--radius-standard);
-}
-.btn:hover, .btn:focus {
-    background-color: var(--color-whitesmoke);
-    border-color: var(--color-brand-active);
-    color: var(--color-brand-active);
-}
-
-.btn.btn-primary {
-    background-color: var(--color-brand-primary);
-    border-color: var(--color-brand-primary);
-    color: var(--color-white);
-}
-.btn.btn-primary:hover, .btn.btn-primary:focus {
-    background-color: var(--color-brand-active);
-    border-color: var(--color-brand-active);
-    color: var(--color-white);
-}
-
-.container {
-    max-width: var(--content-max-desktop);
-}
 ```
-
----
 
 ## 3. Règles de Cohabitation et Points de Vigilance
 
