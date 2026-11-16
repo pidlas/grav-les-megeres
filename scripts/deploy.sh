@@ -38,9 +38,7 @@ tmp_file=""
 DEPLOY_INCLUDE_PATHS=("${DEPLOY_INCLUDE_PATHS[@]:-user}")
 
 RSYNC_EXCLUDES=(
-  # ==========================================================================
   # 1. SÉCURITÉ SERVEUR & CLOISONNEMENT YUNOHOST (LDAP Sanctuarisé)
-  # ==========================================================================
   "/config/plugins/login-ldap"        # Protège le dossier complet du plugin LDAP (YunoHost)
   "/config/plugins/login-ldap.yaml"   # Protège le fichier de configuration du plugin
   "/config/scheduler.yaml"            # Configuration locale du planificateur de tâches
@@ -49,9 +47,7 @@ RSYNC_EXCLUDES=(
   "api-private.php"                  # Fichiers d'accès aux API privées
   ".htaccess"                        # Règles de routage spécifiques à l'hôte distant
 
-  # ==========================================================================
   # 2. SANCTUARISATION DES DONNÉES DE PRODUCTION (Générées en ligne)
-  # ==========================================================================
   "accounts"                         # Dossier complet des comptes utilisateurs
   "data/scheduler"                   # États et journaux d'exécution du planificateur
   "data/sessions"                    # Sessions actives des utilisateurs connectés
@@ -59,16 +55,11 @@ RSYNC_EXCLUDES=(
   "data/feed"                        # Flux RSS et caches de syndication
   "data/notifications"               # Alertes et notifications système internes
 
-  # ==========================================================================
   # 3. PROTECTION ASYMÉTRIQUE DES MÉDIAS FLEX-OBJECTS
-  # ==========================================================================
 
-
-  # ==========================================================================
   # 4. CACHES, IMAGES MUTÉES ET FICHIERS TEMPORAIRES DE RENDU
-  # ==========================================================================
   "cache"                            # Cache principal compilé de Grav
-  "images"                           # Cache de traitement et d'optimisation des images
+  #"images"                            Cache de traitement et d'optimisation des images
   "media"                            # Médias mis en cache par le moteur de page Grav
   "tmp"                              # Fichiers temporaires système
   "logs"                             # Journaux d'activité de Grav
@@ -76,9 +67,7 @@ RSYNC_EXCLUDES=(
   "**/*.log"                         # Fichiers d'erreurs applicatifs
   "backup"                           # Sauvegardes du site générées en ligne
 
-  # ==========================================================================
   # 5. PROTECTION DES THÈMES CORES & CONFIGURATIONS D'ENVIRONNEMENT
-  # ==========================================================================
   "plugins"                          # Plugins installés (gestion exclusive par le serveur)
   "plugins/**"                       # 
   "themes/quark2"                    # Thème parent d'origine (non modifié)
@@ -86,7 +75,6 @@ RSYNC_EXCLUDES=(
   "config/themes/quark2.yaml"        # Configuration du thème parent
   "config/versions.yaml"             # Index de version des paquets Grav
 
-  # ==========================================================================
   # 6. NETTOYAGE DES SCRATCHPADS & FICHIERS HISTORIQUES DU DÉVELOPPEUR
   # ==========================================================================
   "*.old"                            # Fichiers renommés obsolètes
@@ -96,12 +84,8 @@ RSYNC_EXCLUDES=(
   "*.bak"                            # Fichiers de sauvegarde d'éditeurs
   "*.bak.*"                          # Fichiers de backup secondaires
   "*~"                               # Fichiers temporaires Linux/Emacs
-  "*.sans-twig"                      # Sauvegardes de gabarits HTML bruts
-  "*.a.tester"                       # Scripts de tests unitaires locaux
 
-  # ==========================================================================
   # 7. POLLUTION VISUELLE DES SYSTÈMES D'EXPLOITATION (OS)
-  # ==========================================================================
   ".DS_Store"                        # Fichier d'indexation macOS
   "**/.DS_Store"                     # Pollution macOS dans les sous-dossiers
   ".._*"                             # Fichiers de métadonnées de partition macOS
