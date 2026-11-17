@@ -1038,7 +1038,8 @@ figure.bio {
     justify-content: center;
     margin-top: var(--space-l);
 }
-.image-wrapper {
+.image-wrapper,
+.images-spectacle {
     display: inline-block;
     position: relative;
 }
