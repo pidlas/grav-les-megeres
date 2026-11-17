@@ -1020,9 +1020,10 @@ figure.bio {
 .p_theatre-d-ombres {
     display:flex;
     position:relative;
-    align-items: flex-end;
+    align-items: center;
     justify-content: center;
     margin-top: var(--space-l);
+    gap:40px;
 }
 .sigean-sieste-contee{
     display:block;
@@ -1056,16 +1057,16 @@ figure.bio {
     filter: grayscale(0) blur(0);
     height: auto;
     object-fit: cover;
-    transition: all 0.5s ease;
+    transform: rotate(0deg) scale(1);
+    transition: transform 0.8s cubic-bezier(0.22, 1, 0.36, 1);
     width: 10rem;
+    will-change: transform;
 }
 .image-wrapper.morph:hover img,
 .images-spectacle.morph:hover img{
-    aspect-ratio: 1/1;
-    border-radius: 50%;
-    height: auto;
-    transform: rotate(1turn);
-    width: 12.5rem;
+    position: relative;
+    transform: rotate(1turn) scale(1.25);
+    z-index: 10;
 }
 .image-wrapper:after {
     bottom: 0.625rem;
@@ -1473,6 +1474,7 @@ th.sep {
     }
     .versions-spectacle {
         flex-direction:row;
+        gap:40px;
     }
     .versions-spectacle + p {
         margin-top:0;
