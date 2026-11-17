@@ -1040,8 +1040,10 @@ figure.bio {
 }
 .image-wrapper,
 .images-spectacle {
+    position:relative;
     display: inline-block;
-    position: relative;
+    line-height: 0;
+    text-decoration: none;
 }
 .image-wrapper:before {
     background: hsla(0, 0%, 100%, 0.5);
