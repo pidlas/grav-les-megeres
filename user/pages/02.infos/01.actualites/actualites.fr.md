@@ -1,5 +1,5 @@
 ---
-title: "Actualités | Les actualités de la Compagnie Les Mégères de l'Humus"
+title: "Actualités | Les actualités événementielles de la Compagnie Les Mégères de l'Humus"
 metadata:
     description: "Dates, annonces et temps forts des Mégères de l'Humus à Moussoulens et autour de Carcassonne: spectacles, ateliers et théâtre forum."
 menu: Actualités

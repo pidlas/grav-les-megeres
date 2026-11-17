@@ -31,7 +31,7 @@ site_host: http://grav.localhost
 ### 3. Contenu du fichier Production (`user/env/production/plugins/login.yaml`)
 Fige l'hôte pour votre serveur de production YunoHost (avec le sous-dossier `/grav`) :
 ```yaml
-site_host: https://lesmegeresdelhumus.fr
+site_host: https://grav.lesmegeresdelhumus.fr/grav
 ```
 
 > **Note :** Vous pouvez ajouter d'autres fichiers dans ces dossiers plus tard (par exemple un fichier `system.yaml` pour activer le débugger uniquement dans le dossier `local`).

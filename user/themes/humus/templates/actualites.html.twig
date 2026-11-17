@@ -43,7 +43,7 @@
                             {% if bloc.miniature is not empty %}
                                 {# 🌟 EXTRACTION INTERNE SÉCURISÉE : Fonctionne au cœur de la sous-liste #}
                                 {% set path_mini = bloc.miniature|keys|first %}
-                                <img src="{{ base_url_simple ~ '/' ~ path_mini }}" width="80" height="80" alt="{{ bloc.miniature_alt }}" style="object-fit: cover;" loading="lazy">
+                                <img src="{{ base_url_simple ~ '/' ~ path_mini }}" width="80" height="80" alt="{{ bloc.miniature_alt }}" loading="lazy">
                                 
                                 <div class="actu-wrapper">
                             {% endif %}
