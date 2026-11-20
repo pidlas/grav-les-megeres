@@ -2,9 +2,10 @@
 
 body,
 html {
-    height: 100vh;
+    height: auto;/*100vh;*/
+    min-height:100vh;/*new*/
     scroll-behavior: smooth;
-    overflow-x: hidden;
+    overflow-x: clip; /*hidden;*/
 }
 
 /* Grille Maîtresse de l'application */
@@ -16,7 +17,7 @@ html {
     min-height: 100vh;
     margin: 0;
     width: 100%;
-    overflow-x: hidden;
+    overflow-x: clip;/*hidden;*/
 }
 
 header {

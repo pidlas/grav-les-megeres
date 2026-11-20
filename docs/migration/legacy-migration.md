@@ -8,8 +8,8 @@ Ce document résume les étapes de migration initiale du site PHP vers Grav et l
 
 - Les actifs statiques ont été répartis dans les dossiers de contenu adaptés à Grav.
 - Les pages ont été migrées sous [user/pages](user/pages) avec une structure hiérarchique propre.
+- Les données sont gérées par blueprints/flex-objects et stockées dans user/data.
 - Les routes internes ont été adaptées pour fonctionner avec l’arborescence Grav.
-- Les images et médias de contenu sont désormais gérés via le système de médias de Grav lorsque possible.
 
 ## Structure de base du contenu
 

@@ -151,6 +151,7 @@
     {# Vos scripts JS #}
     {% do assets.addJs('jquery', 101) %}
     {{ assets.js() | raw }}
+    {# Pas besoin de app.js dans GRAV #}
     <script src="{{ url('theme://js/navigation.js') }}"></script>
     <script src="{{ url('theme://js/audio.js') }}"></script>
     <script src="{{ url('theme://js/video.js') }}"></script>

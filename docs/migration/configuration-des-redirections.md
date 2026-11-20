@@ -40,7 +40,6 @@ map $request_uri $redirect_uri {
     /tagrand-mere.php               /tagrand-mere;
 
     # --- Théâtre Forum ---
-    /presentation.php               /presentation;
     /le-spectacle.php               /le-spectacle;
     /le-laboratoire.php             /le-laboratoire;
 
@@ -50,6 +49,13 @@ map $request_uri $redirect_uri {
     /ateliers.php                   /ateliers;
     /sabine.php                     /equipe/sabine;
     /suzie.php                      /equipe/suzie;
+    /delphine.php
+    /marie.php
+    /juliette.php
+    /philippe.php
+    /muriel.php
+    /anne.php
+    
 
     # --- Pages Légales & Administratives ---
     /contact.php                    /contact;

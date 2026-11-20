@@ -25,9 +25,28 @@
             <div class="ligne"></div>
         </div>
     </button>
+
+    <a href="{{ home_url }}" class="mobile-brand-sticky" aria-label="Accueil - Les Mégères de l'Humus">
+        <img src="{{ base_url_simple ~ '/user/data/flex-objects/accueil/' ~ logo_site }}"
+             alt=""
+             width="32"
+             height="32"
+             loading="eager">
+        <span class="tan">Les Mégères de l'Humus</span>
+    </a>
+
 </header>
 
 <nav id="nav-principal" class="navbar" role="navigation">
+    <a href="{{ home_url }}" class="nav-brand-sticky" aria-label="Accueil - Les Mégères de l'Humus">
+        <img src="{{ base_url_simple ~ '/user/data/flex-objects/accueil/' ~ logo_site }}"
+             alt=""
+             width="38"
+             height="38"
+             loading="eager">
+        <span class="tan">Les Mégères de l'Humus</span>
+    </a>
+
     {% include 'partials/navigation.html.twig' %}
 </nav>
 

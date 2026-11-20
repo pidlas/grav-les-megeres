@@ -177,4 +177,19 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.slide-list').forEach(list => {
         scrollObserver.observe(list);
     });
+    // === BARRE DE NAVIGATION COLLANTE AVEC MINI-LOGO AU SCROLL ===
+    const siteHeader = document.querySelector('header');
+    if (siteHeader && navBar) {
+        const headerObserver = new IntersectionObserver(
+            ([entry]) => {
+                navBar.classList.toggle('is-stuck', !entry.isIntersecting);
+            },
+            {
+                root: null,
+                threshold: 0.1
+            }
+        );
+
+        headerObserver.observe(siteHeader);
+    }
 });

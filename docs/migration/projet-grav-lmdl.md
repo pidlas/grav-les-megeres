@@ -67,70 +67,13 @@ media:
 
 ## 3. Architecture des Templates et Logique d'Affichage
 
-Le thème enfant utilisé est `quark2-child`. Les templates ont été rendus étanches pour dissocier la structure globale du contenu pur.
+Le thème utilisé est `humus`. Les templates ont été rendus étanches pour dissocier la structure globale du contenu pur.
 
 ### Fichier Racine : `templates/main-layout.html.twig`
-Ce fichier pilote l'ordre d'affichage global en gérant une exception structurelle pour la page d'accueil (détectée via la présence de `page.header.slides`) :
-
-```twig
-{# 1. En-tête global #}
-{% include 'partials/header.html.twig' %}
-
-{# 2. Cas spécifique de l'Accueil (Condition Slides) #}
-{% if page.header.slides %}
-    <main>
-        <section class="section-haut">
-            <div class="conteneur-champignons">
-                <img src="{{ url('image://i_champignons.svg') }}" class="champignons" alt="" loading="lazy">
-                <h1>{{ page.title }}</h1>
-            </div>
-        </section>
-    </main>
-
-    {# Le Diaporama est isolé pour occuper 100% de la largeur de l'écran #}
-    {% include 'partials/diaporama.html.twig' %}
-
-    <main>
-        <section class="section-bas">
-            <div class="page-content">
-                {# Le texte HTML dur de l'accueil est injecté ici #}
-                {{ page.content | raw }}
-            </div>
-        </section>
-    </main>
-
-{# 3. Cas général des pages internes #}
-{% else %}
-    {% block content %}{% endblock %}
-{% endif %}
-
-{# 4. Éléments de fermeture constants (Feuilles + Footer) #}
-<div class="conteneur-feuilles">
-    <img src="{{ url('image://i_feuilles.svg') }}" class="feuilles" alt="" loading="lazy">
-</div>
-{% include 'partials/footer.html.twig' %}
-```
+Ce fichier pilote l'ordre d'affichage global.
 
 ### Template Standard : `templates/default.html.twig`
-Utilisé automatiquement par toutes les sous-pages du site (fichiers `default.fr.md`). Il applique de manière uniforme le design de l'association :
-```twig
-{% block content %}
-<main>
-    <section>
-        <div class="conteneur-champignons">
-            <img src="{{ url('image://i_champignons.svg') }}" class="champignons" alt="" loading="lazy">
-            <h1>{{ page.title }}</h1>
-        </div>
-
-        <div class="page-content">
-            {{ page.content | raw }}
-        </div>
-    </section>
-</main>
-{% endblock %}
-```
-
----
+Très peu utilisé.
 
 ## 4. Maillage Interne et Gestion des Médias
 
@@ -141,10 +84,10 @@ Le menu supérieur génère automatiquement une structure à deux niveaux à par
 *   Le titre cliquable de retour à l'accueil est sécurisé avec la variable `{{ base_url_relative }}`.
 
 ### Gestion Locale des Actifs (Assets)
-*   **Logo global** : Stocké dans `user/images/logo.png` et appelé via le flux racine `url('image://logo.png')`.
-*   **Images décoratives** : (`i_champignons.svg` et `i_feuilles.svg`) stockées dans `user/images/` et appelées via `url('image://...')`.
-*   **Images du Diaporama** : Stockées exclusivement dans le dossier de la page d'accueil (`user/pages/01.home/`). Elles sont lues dynamiquement par le template via `page.media[slide.image].url`.
-*   **Polices et Icônes (FontAwesome)** : Hébergées localement dans les répertoires `css/all.min.css` et `webfonts/` du thème enfant pour garantir l'autonomie du serveur YunoHost vis-à-vis des CDN externes.
+*   **Logo global** : Stocké dans `user/blueprints/flex-objects/accueil/logo.png`.
+*   **Images décoratives** : (`i_champignons.svg` et `i_feuilles.svg`) stockées dans `user/blueprints/flex-objects/accueil`.
+*   **Images du Diaporama** : Stockées dans `user/blueprints/flex-objects/accueil`.
+*   **Polices et Icônes (FontAwesome)** : Hébergées localement dans les répertoires `css/all.min.css` et `webfonts/` du thème pour garantir l'autonomie du serveur YunoHost vis-à-vis des CDN externes.
 
 ### Liens internes dans le contenu
 Pour assurer la portabilité du site (local vers production), tous les liens internes codés en dur dans le texte de l'accueil utilisent la variable de racine relative et intègrent l'arborescence des catégories :
