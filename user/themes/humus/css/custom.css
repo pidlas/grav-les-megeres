@@ -158,7 +158,7 @@ main .actu-resume p{
    MODERNISATION NAVIGATION MOBILE (< 960px / 60em)
    ========================================================================== */
 @media screen and (max-width: 959px) {
-    /* 1. Tiroir latéral toujours monté mais hors-écran pour permettre la transition */
+    /* 1. Tiroir latéral ralenti et amorti à l'ouverture comme à la fermeture */
     #nav-principal.navbar {
         align-items: stretch;
         background: hsla(15, 69%, 65%, 0.97);
@@ -176,52 +176,65 @@ main .actu-resume p{
         pointer-events: none;
         position: fixed;
         transform: translateX(-100%);
+        /* Fermeture douce et amortie (0.48s) : visibility attend la fin du mouvement */
         transition:
-            transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
-            opacity 0.25s ease,
-            box-shadow 0.35s ease,
-            visibility 0.35s ease;
+            transform 0.48s cubic-bezier(0.25, 1, 0.5, 1),
+            opacity 0.4s ease,
+            box-shadow 0.48s ease,
+            visibility 0s linear 0.48s;
         visibility: hidden;
         width: var(--menu-panel-width);
         z-index: 4500;
     }
 
-    /* Ouverture fluide du tiroir latéral */
+    /* Ouverture fluide et amortie (0.55s) */
     #nav-principal.navbar.responsive {
         box-shadow: 0 0 0 100vmax var(--color-overlay-bg);
         opacity: 1;
         pointer-events: auto;
         transform: translateX(0);
+        transition:
+            transform 0.55s cubic-bezier(0.16, 1, 0.3, 1),
+            opacity 0.38s ease,
+            box-shadow 0.55s ease,
+            visibility 0s;
         visibility: visible;
     }
 
-    /* 2. Chevron pivotant sur les rubriques avec sous-menu */
+    /* 2. Vrai chevron vectoriel net et bien visible sur les rubriques avec sous-menu */
     #nav-principal.navbar .menu-trigger {
         align-items: center;
         display: inline-flex;
-        gap: 0.5rem;
+        gap: 0.65rem;
     }
 
     #nav-principal.navbar .menu-trigger::after {
-        content: "▾";
+        border-bottom: 2.5px solid currentColor;
+        border-right: 2.5px solid currentColor;
+        content: "";
         display: inline-block;
-        font-size: 0.9em;
-        transition: transform 0.28s ease;
+        flex-shrink: 0;
+        height: 0.52em;
+        margin-top: -0.2em;
+        transform: rotate(45deg);
+        transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), margin-top 0.35s ease;
+        width: 0.52em;
     }
 
     #nav-principal.navbar .menu-trigger[aria-expanded="true"]::after {
-        transform: rotate(180deg);
+        margin-top: 0.2em;
+        transform: rotate(225deg);
     }
 
     /* Animation douce d'apparition des liens du sous-menu ouvert */
     #nav-principal.navbar.responsive .menu.is-open .niv1 {
-        animation: mobileSubmenuSlide 0.28s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        animation: mobileSubmenuSlide 0.36s cubic-bezier(0.22, 1, 0.36, 1) forwards;
     }
 
     @keyframes mobileSubmenuSlide {
         from {
             opacity: 0;
-            transform: translateY(-8px);
+            transform: translateY(-10px);
         }
         to {
             opacity: 1;
@@ -229,10 +242,10 @@ main .actu-resume p{
         }
     }
 
-    /* 3. Mini-logo + titre fixe en haut à gauche sur mobile au défilement */
+    /* 3. Mini-logo + titre fixe en haut à DROITE sur mobile (amorti à 0.45s) */
     .mobile-brand-sticky {
         align-items: center;
-        background-color: rgba(253, 251, 247, 0.92);
+        background-color: rgba(253, 251, 247, 0.94);
         backdrop-filter: blur(8px);
         border: 1px solid var(--color-border-divider, rgba(0, 0, 0, 0.1));
         border-radius: var(--radius-standard);
@@ -241,19 +254,19 @@ main .actu-resume p{
         display: inline-flex;
         font-size: 0.85rem;
         gap: 0.45rem;
-        left:auto;
-        right: 0.65rem;
-        max-width: calc(100vw - 4.8rem); /* Laisse la place au bouton burger à droite */
+        left: auto;
+        max-width: calc(100vw - 4.8rem);
         opacity: 0;
         padding: 0.28rem 0.7rem 0.28rem 0.35rem;
         pointer-events: none;
         position: fixed;
+        right: 0.65rem;
         text-decoration: none;
         top: 0.65rem;
-        transform: translateY(-14px);
+        transform: translateY(-16px);
         transition:
-            opacity 0.3s ease,
-            transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+            opacity 0.42s ease,
+            transform 0.48s cubic-bezier(0.22, 1, 0.36, 1);
         white-space: nowrap;
         z-index: 4000;
     }
@@ -272,7 +285,6 @@ main .actu-resume p{
         width: 1.85rem;
     }
 
-    /* S'affiche dès que #nav-principal a la classe .is-stuck (via le sélecteur frère ~) */
     header:has(+ #nav-principal.is-stuck) .mobile-brand-sticky {
         opacity: 1;
         pointer-events: auto;
