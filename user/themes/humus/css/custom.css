@@ -158,30 +158,8 @@ main .actu-resume p{
    NAVIGATION & EN-TÊTE MOBILE (< 960px) : LOGO À GAUCHE, BURGER & MENU À DROITE
    ========================================================================== */
 @media screen and (max-width: 959px) {
-    /* 1. En-tête mobile : logo à gauche + titre à sa droite, marge droite pour le burger */
-    header {
-        align-items: center;
-        flex-direction: row;
-        gap: 0.75rem;
-        justify-content: flex-start;
-        padding: 0.75rem 4.25rem 0.75rem 0.875rem;
-        text-align: left;
-    }
 
-    header .morph.logo {
-        flex-shrink: 0;
-    }
-
-    header .morph.logo img {
-        width: clamp(4.2rem, 17vw, 5.8rem);
-    }
-
-    header .e_titre {
-        align-items: flex-start;
-        min-width: 0;
-    }
-
-    /* 2. Bouton #hamburger positionné en haut à DROITE (surcharge _components.css l.298) */
+    /* Bouton #hamburger positionné en haut à DROITE (surcharge _components.css l.298) */
     #hamburger,
     #hamburger.menu-petit-ecran {
         left: auto;
@@ -189,7 +167,7 @@ main .actu-resume p{
         top: clamp(0.875rem, 5vw, 1.25rem);
     }
 
-    /* 3. Tiroir latéral monté à DROITE et glissant de droite à gauche */
+    /* Tiroir latéral monté à DROITE et glissant de droite à gauche */
     #nav-principal.navbar {
         align-items: stretch;
         background: hsla(15, 69%, 65%, 0.97);
@@ -231,7 +209,7 @@ main .actu-resume p{
         visibility: visible;
     }
 
-    /* 4. Chevron vectoriel net et pivotant sur les rubriques avec sous-menu */
+    /* Chevron vectoriel net et pivotant sur les rubriques avec sous-menu */
     #nav-principal.navbar .menu-trigger {
         align-items: center;
         display: inline-flex;
@@ -271,7 +249,7 @@ main .actu-resume p{
         }
     }
 
-    /* 5. Mini-logo + titre fixe en haut à GAUCHE au défilement (face au burger à droite) */
+    /* Mini-logo + titre fixe en haut à GAUCHE au défilement (face au burger à droite) */
     .mobile-brand-sticky {
         align-items: center;
         background-color: rgba(253, 251, 247, 0.94);
