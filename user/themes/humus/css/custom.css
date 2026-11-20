@@ -155,28 +155,59 @@ main .actu-resume p{
 }
 
 /* ==========================================================================
-   MODERNISATION NAVIGATION MOBILE (< 960px / 60em)
+   NAVIGATION & EN-TÊTE MOBILE (< 960px) : LOGO À GAUCHE, BURGER & MENU À DROITE
    ========================================================================== */
 @media screen and (max-width: 959px) {
-    /* 1. Tiroir latéral ralenti et amorti à l'ouverture comme à la fermeture */
+    /* 1. En-tête mobile : logo à gauche + titre à sa droite, marge droite pour le burger */
+    header {
+        align-items: center;
+        flex-direction: row;
+        gap: 0.75rem;
+        justify-content: flex-start;
+        padding: 0.75rem 4.25rem 0.75rem 0.875rem;
+        text-align: left;
+    }
+
+    header .morph.logo {
+        flex-shrink: 0;
+    }
+
+    header .morph.logo img {
+        width: clamp(4.2rem, 17vw, 5.8rem);
+    }
+
+    header .e_titre {
+        align-items: flex-start;
+        min-width: 0;
+    }
+
+    /* 2. Bouton #hamburger positionné en haut à DROITE (surcharge _components.css l.298) */
+    #hamburger,
+    #hamburger.menu-petit-ecran {
+        left: auto;
+        right: clamp(0.875rem, 5vw, 1.25rem);
+        top: clamp(0.875rem, 5vw, 1.25rem);
+    }
+
+    /* 3. Tiroir latéral monté à DROITE et glissant de droite à gauche */
     #nav-principal.navbar {
         align-items: stretch;
         background: hsla(15, 69%, 65%, 0.97);
         backdrop-filter: blur(8px);
-        border-right: 1px solid hsla(264, 28%, 23%, 0.2);
+        border-left: 1px solid hsla(264, 28%, 23%, 0.2);
+        border-right: 0;
         box-shadow: 0 0 0 100vmax rgba(0, 0, 0, 0);
         display: flex;
         flex-direction: column;
         gap: var(--menu-panel-gap);
         height: 100dvh;
-        inset: 0 auto 0 0;
+        inset: 0 0 0 auto;
         opacity: 0;
         overflow-y: auto;
         padding: var(--padding-menu-mobile-top);
         pointer-events: none;
         position: fixed;
-        transform: translateX(-100%);
-        /* Fermeture douce et amortie (0.48s) : visibility attend la fin du mouvement */
+        transform: translateX(100%);
         transition:
             transform 0.48s cubic-bezier(0.25, 1, 0.5, 1),
             opacity 0.4s ease,
@@ -187,7 +218,6 @@ main .actu-resume p{
         z-index: 4500;
     }
 
-    /* Ouverture fluide et amortie (0.55s) */
     #nav-principal.navbar.responsive {
         box-shadow: 0 0 0 100vmax var(--color-overlay-bg);
         opacity: 1;
@@ -201,7 +231,7 @@ main .actu-resume p{
         visibility: visible;
     }
 
-    /* 2. Vrai chevron vectoriel net et bien visible sur les rubriques avec sous-menu */
+    /* 4. Chevron vectoriel net et pivotant sur les rubriques avec sous-menu */
     #nav-principal.navbar .menu-trigger {
         align-items: center;
         display: inline-flex;
@@ -226,7 +256,6 @@ main .actu-resume p{
         transform: rotate(225deg);
     }
 
-    /* Animation douce d'apparition des liens du sous-menu ouvert */
     #nav-principal.navbar.responsive .menu.is-open .niv1 {
         animation: mobileSubmenuSlide 0.36s cubic-bezier(0.22, 1, 0.36, 1) forwards;
     }
@@ -242,7 +271,7 @@ main .actu-resume p{
         }
     }
 
-    /* 3. Mini-logo + titre fixe en haut à DROITE sur mobile (amorti à 0.45s) */
+    /* 5. Mini-logo + titre fixe en haut à GAUCHE au défilement (face au burger à droite) */
     .mobile-brand-sticky {
         align-items: center;
         background-color: rgba(253, 251, 247, 0.94);
@@ -254,15 +283,15 @@ main .actu-resume p{
         display: inline-flex;
         font-size: 0.85rem;
         gap: 0.45rem;
-        left: auto;
-        max-width: calc(100vw - 4.8rem);
+        left: clamp(0.875rem, 5vw, 1.25rem);
+        max-width: calc(100vw - 5.2rem);
         opacity: 0;
         padding: 0.28rem 0.7rem 0.28rem 0.35rem;
         pointer-events: none;
         position: fixed;
-        right: 0.65rem;
+        right: auto;
         text-decoration: none;
-        top: 0.65rem;
+        top: clamp(0.875rem, 5vw, 1.25rem);
         transform: translateY(-16px);
         transition:
             opacity 0.42s ease,
@@ -289,6 +318,15 @@ main .actu-resume p{
         opacity: 1;
         pointer-events: auto;
         transform: translateY(0);
+    }
+}
+
+@media (hover: none) and (pointer: coarse) and (max-width: 959px) {
+    #hamburger,
+    #hamburger.menu-petit-ecran {
+        left: auto;
+        right: max(clamp(0.875rem, 5vw, 1.25rem), env(safe-area-inset-right));
+        top: max(clamp(0.875rem, 5vw, 1.25rem), env(safe-area-inset-top));
     }
 }
 
