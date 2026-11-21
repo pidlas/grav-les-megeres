@@ -21,10 +21,10 @@ main .actu-resume p{
 .btn-mailto {
     display:inline-flex;
     align-items:center;
-    gap:8px;
+    gap:2px;
     background-color:var(--color-brand-primary);
-    color:var(--color-black);
-    padding:8px 18px;
+    color:var(--color-brand-secondary);
+    padding:8px;
     font-weight:600;
     text-decoration:none;
     border-radius:var(--radius-standard);
@@ -78,7 +78,6 @@ main .actu-resume p{
         /*border-left: 0;*/
         border-top-left-radius: var(--radius-standard);
     }
-
     /* 2. Barre collante flottante : garde sa transparence entre les blocs et son design arrondi */
     #nav-principal.navbar {
         align-self: start;
@@ -88,7 +87,6 @@ main .actu-resume p{
         top: 0.6rem;
         z-index: 2000;
     }
-
     /* 3. Bloc mini-logo + titre assorti à la hauteur et aux arrondis de la barre */
     .nav-brand-sticky {
         align-items: center;
@@ -119,7 +117,6 @@ main .actu-resume p{
             margin-right 0.45s ease;
         white-space: nowrap;
     }
-
     .nav-brand-sticky img {
         aspect-ratio: 1/1;
         border-radius: 50%;
@@ -128,7 +125,6 @@ main .actu-resume p{
         object-fit: cover;
         width: calc(var(--navbar-height) - 0.6rem);
     }
-
     /* Apparition fluide de la pilule logo+titre à gauche du menu orange */
     #nav-principal.navbar.is-stuck .nav-brand-sticky {
         margin-right: 0.75rem;
@@ -139,11 +135,41 @@ main .actu-resume p{
         pointer-events: auto;
         transform: translateX(0);
     }
-
     /* Ombre portée douce sous l'ensemble du bloc de menu orange au défilement */
     #nav-principal.navbar.is-stuck > .menu,
     #nav-principal.navbar.is-stuck > .rs {
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    }
+    
+     /* Supprimer les pseudo-éléments inutiles */
+    #nav-principal.navbar > .menu::after,
+    #nav-principal.navbar > div.rs::after {
+        content: none;
+    }
+
+    /* Le dégradé radial s'affiche directement dans le fond du bouton survolé, SOUS le texte */
+    #nav-principal.navbar > .menu:hover .menu-trigger,
+    #nav-principal.navbar > .menu:hover > a,
+    #nav-principal.navbar > .menu.is-hovered .menu-trigger {
+        background:
+            radial-gradient(
+                110px circle at var(--mx, 50%) var(--my, 50%),
+                hsla(260, 20%, 60%, 0.45),
+                transparent 50%
+            ),
+            var(--color-hover-light);
+        border-radius: var(--radius-standard);
+        color: var(--color-brand-active);
+    }
+
+    #nav-principal.navbar > div.rs:hover {
+        background:
+            radial-gradient(
+                90px circle at var(--mx, 50%) var(--my, 50%),
+                hsla(260, 20%, 60%, 0.45),
+                transparent 50%
+            ),
+            var(--color-hover-light);
     }
 }
 

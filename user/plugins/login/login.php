@@ -94,6 +94,8 @@ class LoginPlugin extends Plugin
             'onTask.login.logout'       => ['loginController', 0],
             'onTask.login.reset'        => ['loginController', 0],
             'onTask.login.regenerate2FASecret' => ['loginController', 0],
+            'onTask.login.twofaEnable'  => ['loginController', 0],
+            'onTask.login.twofaDisable' => ['loginController', 0],
             'onTask.login.resendEmailChange' => ['loginController', 0],
             'onTask.login.cancelEmailChange' => ['loginController', 0],
             'onTask.login.passkey'      => ['passkeyController', 0],
@@ -641,7 +643,9 @@ class LoginPlugin extends Plugin
         $username = $uri->param('username');
 
         $token = $uri->param('token');
-        $user = $users->load($username);
+        // A NUL byte (`%00` in the link) opens the empty account, which has no
+        // activation token: PHP 8.6 file functions throw on one.
+        $user = $users->load(is_string($username) && strpos($username, "\0") !== false ? '' : $username);
         if (is_callable([$user, 'refresh'])) {
             $user->refresh(true);
         }
@@ -768,7 +772,8 @@ class LoginPlugin extends Plugin
         // Same throttle as activation: an unauthenticated endpoint that
         // compares a secret token (GHSA-x239-6jqx-5hjh).
         $rateLimiter = $this->login->getRateLimiter('token_attempts');
-        if ($username === '' || $rateLimiter->isRateLimited($username)) {
+        // A NUL byte (`%00` in the link) is refused here: PHP 8.6 file functions throw on one.
+        if ($username === '' || strpos($username, "\0") !== false || $rateLimiter->isRateLimited($username)) {
             $messages->add($language->translate('PLUGIN_LOGIN.INVALID_REQUEST'), 'error');
             $this->grav->redirectLangSafe($redirect_route);
 
@@ -927,7 +932,8 @@ class LoginPlugin extends Plugin
 
         $username = (string)$uri->param('username');
         $token = (string)$uri->param('token');
-        if ($username === '' || $token === '') {
+        // A NUL byte (`%00` in the link) is refused here: PHP 8.6 file functions throw on one.
+        if ($username === '' || $token === '' || strpos($username, "\0") !== false) {
             $this->grav->redirectLangSafe($magicRequestRoute);
             return;
         }
@@ -1068,10 +1074,11 @@ class LoginPlugin extends Plugin
                 break;
 
             case 'regenerate2FASecret':
-                // CSRF hardening (GHSA-4px8): this task was previously reachable
-                // with no nonce and via a top-level GET (SameSite=Lax). Require
-                // POST to kill the Lax GET vector, and verify the `login-form`
-                // nonce that the 2FA setup field now sends.
+            case 'twofaEnable':
+            case 'twofaDisable':
+                // CSRF hardening (GHSA-4px8): the profile page's 2FA panel tasks
+                // change the account, so they take a POST (no SameSite=Lax GET
+                // vector) and the `login-form` nonce the panel sends.
                 if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'POST'
                     || !isset($post['login-form-nonce'])
                     || !Utils::verifyNonce($post['login-form-nonce'], 'login-form')) {
@@ -1486,6 +1493,11 @@ class LoginPlugin extends Plugin
         }
 
         $twig->twig_vars['passkeys_enabled'] = $this->login->passkeys() !== null;
+        // For profile forms: `condition: twofa_enabled`. Grav 2's Twig sandbox
+        // keeps `config.plugins` out of form conditions (plugin settings hold
+        // secrets), so `config.plugins.login.twofa_enabled` can't be read
+        // there, and a condition it refuses counts as true.
+        $twig->twig_vars['twofa_enabled'] = (bool)$this->config->get('plugins.login.twofa_enabled');
 
         // add CSS for frontend if required
         if (!$this->isAdmin() && $this->config->get('plugins.login.built_in_css')) {
@@ -1590,6 +1602,16 @@ class LoginPlugin extends Plugin
 
         // Check for existing username
         $username = $form_data->get('username');
+        // A form without the username pattern can let a NUL byte through, and PHP 8.6
+        // file functions throw on one.
+        if (is_string($username) && strpos($username, "\0") !== false) {
+            $this->grav->fireEvent('onFormValidationError', new Event([
+                'form'    => $form,
+                'message' => $language->translate('PLUGIN_LOGIN.USERNAME_NOT_VALID')
+            ]));
+            $event->stopPropagation();
+            return;
+        }
         $existing_username = $users->find($username, ['username']);
         if ($existing_username->exists()) {
             $this->grav->fireEvent('onFormValidationError', new Event([
@@ -1920,38 +1942,11 @@ class LoginPlugin extends Plugin
             }
         }
 
-        // The secret shown on the profile page is only stored by Regenerate, so
-        // switching two-factor on without one would save an account that reads
-        // as protected but is never asked for a code.
-        if (!empty($data['twofa_enabled']) && !$user->get('twofa_secret')) {
-            $this->grav->fireEvent('onFormValidationError', new Event([
-                'form'    => $form,
-                'message' => $language->translate('PLUGIN_LOGIN.2FA_SECRET_NOT_SAVED')
-            ]));
-            $event->stopPropagation();
-            return false;
-        }
-
-        // A `twofa_enabled` that came through empty is no change, not a request
-        // to switch 2FA off.
-        if (array_key_exists('twofa_enabled', $data) && $data['twofa_enabled'] === null) {
-            unset($data['twofa_enabled']);
-        }
-
-        // Turning off an active second factor takes a current code, so a
-        // signed-in session alone can't remove it.
-        if (array_key_exists('twofa_enabled', $data) && empty($data['twofa_enabled'])
-            && $this->login->hasActiveTwoFactor($user)) {
-            $twofaError = $this->login->twoFactorCodeError($user, $form->getData('twofa_code'));
-            if ($twofaError !== null) {
-                $this->grav->fireEvent('onFormValidationError', new Event([
-                    'form'    => $form,
-                    'message' => $twofaError
-                ]));
-                $event->stopPropagation();
-                return false;
-            }
-        }
+        // 2-Factor Authentication changes only through the 2FA panel's own
+        // tasks (login.regenerate2FASecret, login.twofaEnable, login.twofaDisable),
+        // each checking a code from the app. A profile form drawn before that
+        // (one with the old Yes/No toggle) still posts these: they are no change.
+        unset($data['twofa_enabled'], $data['twofa_secret'], $data['twofa_code']);
 
         // A new password needs the current one (unless the account has none yet,
         // such as one created by a sign-in service) and, when the form asks for
@@ -2248,7 +2243,9 @@ class LoginPlugin extends Plugin
 
     public function userLoginAuthenticateByEmail(UserLoginEvent $event): void
     {
-        if (($username = $event->getCredential('username')) && !$event->getUser()->exists()) {
+        $username = $event->getCredential('username');
+        // Skip a name with a NUL byte: PHP 8.6 file functions throw on one, and no account has it.
+        if ($username && strpos((string)$username, "\0") === false && !$event->getUser()->exists()) {
             /** @var UserCollectionInterface $users */
             $users = $this->grav['accounts'];
 
@@ -2746,7 +2743,8 @@ class LoginPlugin extends Plugin
     protected function rowActionTarget(Event $event, string $superOnly): ?UserInterface
     {
         $username = $event['username'] ?? '';
-        if (!is_string($username) || $username === '') {
+        // No account has a NUL byte in its name, and PHP 8.6 file functions throw on one.
+        if (!is_string($username) || $username === '' || strpos($username, "\0") !== false) {
             return null;
         }
 

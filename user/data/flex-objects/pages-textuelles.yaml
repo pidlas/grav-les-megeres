@@ -105,7 +105,7 @@ b365e6d9f242aa7f93fb749d80ab02c8:
   title: 'Politique de Sécurité'
   menu: 'Politique de sécurité'
   meta_description: 'Modalités de signalement des vulnérabilités et engagement de traitement de la sécurité du site.'
-  page_intro: 'Merci de signaler toute vulnérabilité de sécurité à l''adresse [a url="mailto:security&#64;lesmegeresdelhumus.fr?subject=Message du site, page Politique de Sécurité"]security&#64;lesmegeresdelhumus.fr[/a]. Nous vous remercions de ne pas publier publiquement la vulnérabilité avant que nous ayons eu le temps d''y répondre.'
+  page_intro: 'Merci de signaler toute vulnérabilité de sécurité à l''adresse [a url="mailto:security&#64;lesmegeresdelhumus.fr?subject=Message du site, page Politique de Sécurité"]sec&#64;lesmegeresdelhumus.fr[/a]. Nous vous remercions de ne pas publier publiquement la vulnérabilité avant que nous ayons eu le temps d''y répondre.'
   page_sections:
     -
       titre_section: 'Ce que nous demandons'

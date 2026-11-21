@@ -192,4 +192,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
         headerObserver.observe(siteHeader);
     }
+    // === HALO LUMINEUX QUI SUIT LA SOURIS SUR CHAQUE CASE DU MENU ===
+    if (navBar) {
+        const navItems = navBar.querySelectorAll(':scope > .menu, :scope > div.rs');
+        navItems.forEach((item) => {
+            item.addEventListener('mousemove', (e) => {
+                const rect = item.getBoundingClientRect();
+                item.style.setProperty('--mx', `${e.clientX - rect.left}px`);
+                item.style.setProperty('--my', `${e.clientY - rect.top}px`);
+            });
+        });
+    }
+
 });
