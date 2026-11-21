@@ -192,16 +192,31 @@ document.addEventListener('DOMContentLoaded', () => {
 
         headerObserver.observe(siteHeader);
     }
-    // === HALO LUMINEUX QUI SUIT LA SOURIS SUR CHAQUE CASE DU MENU ===
+    // === HALO LUMINEUX QUI SUIT LA SOURIS SUR LA BARRE ET LES SOUS-MENUS ===
+    // Justification : Calcul des coordonnées relatives sur les onglets principaux
+    // (--mx, --my) et sur les liens des sous-menus (--smx, --smy) pour alimenter
+    // le gradient radial et le liseré lumineux de custom.css.
     if (navBar) {
         const navItems = navBar.querySelectorAll(':scope > .menu, :scope > div.rs');
         navItems.forEach((item) => {
-            item.addEventListener('mousemove', (e) => {
+            item.addEventListener('pointermove', (e) => {
                 const rect = item.getBoundingClientRect();
                 item.style.setProperty('--mx', `${e.clientX - rect.left}px`);
                 item.style.setProperty('--my', `${e.clientY - rect.top}px`);
             });
+            item.addEventListener('pointerleave', () => {
+                item.style.removeProperty('--mx');
+                item.style.removeProperty('--my');
+            });
+        });
+
+        const subLinks = navBar.querySelectorAll('.niv1 > a');
+        subLinks.forEach((link) => {
+            link.addEventListener('pointermove', (e) => {
+                const rect = link.getBoundingClientRect();
+                link.style.setProperty('--smx', `${e.clientX - rect.left}px`);
+                link.style.setProperty('--smy', `${e.clientY - rect.top}px`);
+            });
         });
     }
-
 });
