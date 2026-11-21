@@ -198,11 +198,71 @@ main .actu-resume p{
             var(--color-hover-light);
         box-shadow: inset 0 0 14px hsla(40, 100%, 95%, 0.35);
     }
+    /* ==========================================================================
+   1. BORDURE LUMINEUSE PERMANENTE & ROTATIVE UNIQUEMENT SUR .menu-contact
+   Inspiration FreeFrontend ("Neon Glow Border Button" / @property conic-gradient)
+   Justification : Palette réchauffée vers le rouge-orangé (rouge alizarine,
+   terre de Sienne brûlée et corail ardent) pour remplacer les teintes jaunes.
+   ========================================================================== */
+@property --contact-glow-angle {
+    syntax: "<angle>";
+    initial-value: 0deg;
+    inherits: false;
+}
+
+@keyframes contactBorderGlowSpin {
+    to {
+        --contact-glow-angle: 360deg;
+    }
+}
+
+@media screen and (min-width: 960px) {
 
     /* ======================================================================
-       B. BORDURE LUMINEUSE PERMANENTE UNIQUEMENT SUR .menu-contact
-       Justification : Isoler l'anneau lumineux rotatif continu sur l'onglet
-       Contact pour le mettre en valeur en permanence, sans le couper.
+       A. DÉGRADÉ RADIAL ROUGE-ORANGÉ AU SURVOL SUR TOUS LES MENUS & .rs
+       Justification : Remplacer le centre jaune-crème par un cœur corail/vermillon
+       lumineux et une aura rouge alizarine pour un rendu plus chaud et visible.
+       ====================================================================== */
+    #nav-principal.navbar > .menu::after,
+    #nav-principal.navbar > div.rs::after {
+        content: none;
+    }
+
+    #nav-principal.navbar > .menu:hover .menu-trigger,
+    #nav-principal.navbar > .menu:hover > a,
+    #nav-principal.navbar > .menu.is-hovered .menu-trigger {
+        background:
+            radial-gradient(
+                140px circle at var(--mx, 50%) var(--my, 50%),
+                hsla(14, 100%, 72%, 0.72) 0%,
+                hsla(6, 78%, 54%, 0.58) 42%,
+                hsla(15, 71%, 26%, 0.22) 72%,
+                transparent 100%
+            ),
+            var(--color-hover-light);
+        border-radius: var(--radius-standard);
+        box-shadow: inset 0 0 14px hsla(8, 85%, 60%, 0.45);
+        color: var(--color-brand-secondary);
+        text-shadow: 0 0 10px hsla(16, 100%, 88%, 0.75);
+    }
+
+    #nav-principal.navbar > div.rs:hover {
+        background:
+            radial-gradient(
+                110px circle at var(--mx, 50%) var(--my, 50%),
+                hsla(14, 100%, 72%, 0.72) 0%,
+                hsla(6, 78%, 54%, 0.58) 42%,
+                hsla(15, 71%, 26%, 0.22) 72%,
+                transparent 100%
+            ),
+            var(--color-hover-light);
+        box-shadow: inset 0 0 14px hsla(8, 85%, 60%, 0.45);
+    }
+    /* ======================================================================
+       B. BORDURE LUMINEUSE PERMANENTE ROUGE-ORANGÉ SUR .menu-contact
+       Justification : Utiliser le rouge alizarine (--color-border-alizarine),
+       la terre de Sienne (--color-skip-link) et un éclat corail-vermillon pour
+       créer un anneau incandescent rouge-orangé autour de Contact.
        ====================================================================== */
     #nav-principal.navbar > .menu-contact {
         isolation: isolate;
@@ -210,16 +270,16 @@ main .actu-resume p{
         position: relative;
     }
 
-    /* Anneau net : dégradé conique rotatif masqué pour ne garder que le contour de 2px */
+    /* Anneau net : dégradé conique rotatif rouge-orangé masqué sur 2px */
     #nav-principal.navbar > .menu-contact::before {
         animation: contactBorderGlowSpin 4.5s linear infinite;
         background: conic-gradient(
             from var(--contact-glow-angle),
-            var(--color-brand-primary) 0%,
-            var(--color-brand-accent) 25%,
-            var(--color-sacred-white) 50%,
-            var(--color-brand-accent) 75%,
-            var(--color-brand-primary) 100%
+            var(--color-skip-link) 0%,
+            var(--color-border-alizarine) 25%,
+            hsla(14, 100%, 74%, 1) 50%,
+            var(--color-border-alizarine) 75%,
+            var(--color-skip-link) 100%
         );
         border-radius: var(--radius-standard) 0 0 var(--radius-standard);
         content: "";
@@ -239,22 +299,22 @@ main .actu-resume p{
         z-index: 3;
     }
 
-    /* Halo externe diffus permanent (effet néon doux autour de Contact) */
+    /* Halo externe diffus permanent aux tons braise / rouge-orangé */
     #nav-principal.navbar > .menu-contact::after {
         animation: contactBorderGlowSpin 4.5s linear infinite;
         background: conic-gradient(
             from var(--contact-glow-angle),
             transparent 0%,
-            hsla(33, 91%, 65%, 0.55) 35%,
-            hsla(40, 100%, 98%, 0.85) 50%,
-            hsla(33, 91%, 65%, 0.55) 65%,
+            hsla(6, 78%, 54%, 0.65) 35%,
+            hsla(14, 100%, 68%, 0.9) 50%,
+            hsla(6, 78%, 54%, 0.65) 65%,
             transparent 100%
         );
         border-radius: var(--radius-standard) 0 0 var(--radius-standard);
         content: "";
         filter: blur(8px);
         inset: -3px;
-        opacity: 0.75;
+        opacity: 0.85;
         pointer-events: none;
         position: absolute;
         z-index: -1;
@@ -264,6 +324,14 @@ main .actu-resume p{
     #nav-principal.navbar > .menu-contact:hover > a {
         border-bottom-right-radius: 0;
         border-top-right-radius: 0;
+    }
+}
+
+/* Respect des préférences système d'accessibilité (réduction des animations) */
+@media (prefers-reduced-motion: reduce) {
+    #nav-principal.navbar > .menu-contact::before,
+    #nav-principal.navbar > .menu-contact::after {
+        animation: none;
     }
 }
 
