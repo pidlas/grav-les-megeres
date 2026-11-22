@@ -71,8 +71,20 @@ main .actu-resume p{
     margin:0;
     text-align:center;
 }
-/* 1. Rétablir l'arrondi gauche du menu "Infos" (devenu 2e enfant après .nav-brand-sticky) */
+@property --contact-glow-angle {
+    syntax: "<angle>";
+    initial-value: 0deg;
+    inherits: false;
+}
+    
+@keyframes contactBorderGlowSpin {
+    to {
+        --contact-glow-angle: 360deg;
+    }
+}
+
 @media screen and (min-width: 960px) {
+    /* 1. Rétablir l'arrondi gauche du menu "Infos" (devenu 2e enfant après .nav-brand-sticky) */
     #nav-principal.navbar > .nav-brand-sticky + .menu {
         border-bottom-left-radius: var(--radius-standard);
         /*border-left: 0;*/
@@ -140,94 +152,11 @@ main .actu-resume p{
     #nav-principal.navbar.is-stuck > .rs {
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
     }
-    /* ==========================================================================
-   1. BORDURE LUMINEUSE PERMANENTE & ROTATIVE UNIQUEMENT SUR .menu-contact
-   Inspiration FreeFrontend ("Neon Glow Border Button" / @property conic-gradient)
-   Justification : Permet d'animer fluidement l'angle d'un dégradé conique sur
-   GPU sans dépendre du déplacement de la souris.
-   ========================================================================== */
-@property --contact-glow-angle {
-    syntax: "<angle>";
-    initial-value: 0deg;
-    inherits: false;
-}
-
-@keyframes contactBorderGlowSpin {
-    to {
-        --contact-glow-angle: 360deg;
-    }
-}
-
-@media screen and (min-width: 960px) {
-
-    /* ======================================================================
-       A. DÉGRADÉ RADIAL LUMINEUX AU SURVOL SUR TOUS LES MENUS & RÉSEAUX SOCIAUX
-       Justification : Rendre le halo radial haute visibilité actif sur chaque
-       onglet de la barre de navigation au passage de la souris.
-       ====================================================================== */
+    /* A. Dégradé radial rouge-orange au survol sur tous les menus & .rs */
     #nav-principal.navbar > .menu::after,
     #nav-principal.navbar > div.rs::after {
         content: none;
     }
-
-    #nav-principal.navbar > .menu:hover .menu-trigger,
-    #nav-principal.navbar > .menu:hover > a,
-    #nav-principal.navbar > .menu.is-hovered .menu-trigger {
-        background:
-            radial-gradient(
-                135px circle at var(--mx, 50%) var(--my, 50%),
-                hsla(40, 100%, 96%, 0.65) 0%,
-                hsla(33, 91%, 65%, 0.52) 45%,
-                transparent 78%
-            ),
-            var(--color-hover-light);
-        border-radius: var(--radius-standard);
-        box-shadow: inset 0 0 14px hsla(40, 100%, 95%, 0.35);
-        color: var(--color-brand-secondary);
-        text-shadow: 0 0 10px hsla(0, 0%, 100%, 0.65);
-    }
-
-    #nav-principal.navbar > div.rs:hover {
-        background:
-            radial-gradient(
-                105px circle at var(--mx, 50%) var(--my, 50%),
-                hsla(40, 100%, 96%, 0.65) 0%,
-                hsla(33, 91%, 65%, 0.52) 45%,
-                transparent 78%
-            ),
-            var(--color-hover-light);
-        box-shadow: inset 0 0 14px hsla(40, 100%, 95%, 0.35);
-    }
-    /* ==========================================================================
-   1. BORDURE LUMINEUSE PERMANENTE & ROTATIVE UNIQUEMENT SUR .menu-contact
-   Inspiration FreeFrontend ("Neon Glow Border Button" / @property conic-gradient)
-   Justification : Palette réchauffée vers le rouge-orangé (rouge alizarine,
-   terre de Sienne brûlée et corail ardent) pour remplacer les teintes jaunes.
-   ========================================================================== */
-@property --contact-glow-angle {
-    syntax: "<angle>";
-    initial-value: 0deg;
-    inherits: false;
-}
-
-@keyframes contactBorderGlowSpin {
-    to {
-        --contact-glow-angle: 360deg;
-    }
-}
-
-@media screen and (min-width: 960px) {
-
-    /* ======================================================================
-       A. DÉGRADÉ RADIAL ROUGE-ORANGÉ AU SURVOL SUR TOUS LES MENUS & .rs
-       Justification : Remplacer le centre jaune-crème par un cœur corail/vermillon
-       lumineux et une aura rouge alizarine pour un rendu plus chaud et visible.
-       ====================================================================== */
-    #nav-principal.navbar > .menu::after,
-    #nav-principal.navbar > div.rs::after {
-        content: none;
-    }
-
     #nav-principal.navbar > .menu:hover .menu-trigger,
     #nav-principal.navbar > .menu:hover > a,
     #nav-principal.navbar > .menu.is-hovered .menu-trigger {
@@ -245,12 +174,11 @@ main .actu-resume p{
         color: var(--color-brand-secondary);
         text-shadow: 0 0 10px hsla(16, 100%, 88%, 0.75);
     }
-
     #nav-principal.navbar > div.rs:hover {
         background:
             radial-gradient(
                 110px circle at var(--mx, 50%) var(--my, 50%),
-                hsla(14, 100%, 72%, 0.72) 0%,
+                /*hsla(14, 100%, 72%, 0.72) 0%,*/
                 hsla(6, 78%, 54%, 0.58) 42%,
                 hsla(15, 71%, 26%, 0.22) 72%,
                 transparent 100%
@@ -258,18 +186,12 @@ main .actu-resume p{
             var(--color-hover-light);
         box-shadow: inset 0 0 14px hsla(8, 85%, 60%, 0.45);
     }
-    /* ======================================================================
-       B. BORDURE LUMINEUSE PERMANENTE ROUGE-ORANGÉ SUR .menu-contact
-       Justification : Utiliser le rouge alizarine (--color-border-alizarine),
-       la terre de Sienne (--color-skip-link) et un éclat corail-vermillon pour
-       créer un anneau incandescent rouge-orangé autour de Contact.
-       ====================================================================== */
+    /* B. Bordure lumineuse permanente rouge-orange sur .menu-contact */
     #nav-principal.navbar > .menu-contact {
         isolation: isolate;
         overflow: visible;
         position: relative;
     }
-
     /* Anneau net : dégradé conique rotatif rouge-orangé masqué sur 2px */
     #nav-principal.navbar > .menu-contact::before {
         animation: contactBorderGlowSpin 4.5s linear infinite;
@@ -283,7 +205,7 @@ main .actu-resume p{
         );
         border-radius: var(--radius-standard) 0 0 var(--radius-standard);
         content: "";
-        inset: -2px;
+        inset:0;/*-2px;*/
         -webkit-mask:
             linear-gradient(#000 0 0) content-box,
             linear-gradient(#000 0 0);
@@ -313,7 +235,7 @@ main .actu-resume p{
         border-radius: var(--radius-standard) 0 0 var(--radius-standard);
         content: "";
         filter: blur(8px);
-        inset: -3px;
+        inset: 0;/*-3px;*/
         opacity: 0.85;
         pointer-events: none;
         position: absolute;
@@ -324,14 +246,6 @@ main .actu-resume p{
     #nav-principal.navbar > .menu-contact:hover > a {
         border-bottom-right-radius: 0;
         border-top-right-radius: 0;
-    }
-}
-
-/* Respect des préférences système d'accessibilité (réduction des animations) */
-@media (prefers-reduced-motion: reduce) {
-    #nav-principal.navbar > .menu-contact::before,
-    #nav-principal.navbar > .menu-contact::after {
-        animation: none;
     }
 }
 
